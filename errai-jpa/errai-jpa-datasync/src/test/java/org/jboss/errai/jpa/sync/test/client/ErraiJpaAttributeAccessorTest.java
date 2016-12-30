@@ -27,7 +27,6 @@ import javax.persistence.metamodel.EntityType;
 
 import org.jboss.errai.ioc.client.Container;
 import org.jboss.errai.ioc.client.container.IOC;
-import org.jboss.errai.ioc.client.container.IOCBeanManagerLifecycle;
 import org.jboss.errai.jpa.sync.client.local.ErraiAttributeAccessor;
 import org.jboss.errai.jpa.sync.client.shared.JpaAttributeAccessor;
 import org.jboss.errai.jpa.sync.test.client.entity.MethodAccessedZentity;
@@ -55,8 +54,6 @@ public class ErraiJpaAttributeAccessorTest extends GWTTestCase {
   protected void gwtSetUp() throws Exception {
     super.gwtSetUp();
 
-    new IOCBeanManagerLifecycle().resetBeanManager();
-
     // We need to bootstrap the IoC container manually because GWTTestCase
     // doesn't call onModuleLoad() for us.
     new Container().bootstrapContainer();
@@ -77,7 +74,7 @@ public class ErraiJpaAttributeAccessorTest extends GWTTestCase {
   }
 
   public void testReadBoxedTypesFieldAccess() throws Exception {
-    Zentity zentity = new Zentity();
+    final Zentity zentity = new Zentity();
     zentity.setBoxedBool(true);
     zentity.setBoxedByte((byte) 4);
     zentity.setBoxedByteArray(new Byte[] { 1, null, 3, 4 });
@@ -89,9 +86,9 @@ public class ErraiJpaAttributeAccessorTest extends GWTTestCase {
     zentity.setBoxedLong(99999999999999L);
     zentity.setBoxedShort((short) -42);
 
-    JpaAttributeAccessor a = getAttributeAccessor();
-    EntityManager em = getEntityManager();
-    EntityType<Zentity> metaZentity = em.getMetamodel().entity(Zentity.class);
+    final JpaAttributeAccessor a = getAttributeAccessor();
+    final EntityManager em = getEntityManager();
+    final EntityType<Zentity> metaZentity = em.getMetamodel().entity(Zentity.class);
 
     assertEquals(true, a.get(metaZentity.getAttribute("boxedBool"), zentity));
     assertEquals((byte) 4, a.get(metaZentity.getAttribute("boxedByte"), zentity));
@@ -110,7 +107,7 @@ public class ErraiJpaAttributeAccessorTest extends GWTTestCase {
   }
 
   public void testReadBoxedTypesMethodAccess() throws Exception {
-    MethodAccessedZentity zentity = new MethodAccessedZentity();
+    final MethodAccessedZentity zentity = new MethodAccessedZentity();
     zentity.setBoxedBool(true);
     zentity.setBoxedByte((byte) 4);
     zentity.setBoxedByteArray(new Byte[] { 1, null, 3, 4 });
@@ -122,9 +119,9 @@ public class ErraiJpaAttributeAccessorTest extends GWTTestCase {
     zentity.setBoxedLong(99999999999999L);
     zentity.setBoxedShort((short) -42);
 
-    JpaAttributeAccessor a = getAttributeAccessor();
-    EntityManager em = getEntityManager();
-    EntityType<MethodAccessedZentity> metaZentity = em.getMetamodel().entity(MethodAccessedZentity.class);
+    final JpaAttributeAccessor a = getAttributeAccessor();
+    final EntityManager em = getEntityManager();
+    final EntityType<MethodAccessedZentity> metaZentity = em.getMetamodel().entity(MethodAccessedZentity.class);
 
     assertEquals(true, a.get(metaZentity.getAttribute("boxedBool"), zentity));
     assertEquals((byte) 4, a.get(metaZentity.getAttribute("boxedByte"), zentity));
@@ -143,11 +140,11 @@ public class ErraiJpaAttributeAccessorTest extends GWTTestCase {
   }
 
   public void testWriteBoxedTypesFieldAccess() throws Exception {
-    JpaAttributeAccessor a = getAttributeAccessor();
-    EntityManager em = getEntityManager();
-    EntityType<Zentity> metaZentity = em.getMetamodel().entity(Zentity.class);
+    final JpaAttributeAccessor a = getAttributeAccessor();
+    final EntityManager em = getEntityManager();
+    final EntityType<Zentity> metaZentity = em.getMetamodel().entity(Zentity.class);
 
-    Zentity zentity = new Zentity();
+    final Zentity zentity = new Zentity();
     a.set(metaZentity.getSingularAttribute("boxedBool", Boolean.class), zentity, true);
     a.set(metaZentity.getSingularAttribute("boxedByte", Byte.class), zentity, (byte) 4);
     a.set(metaZentity.getSingularAttribute("boxedByteArray", Byte[].class), zentity, new Byte[] { 1, null, 3, 4 });
@@ -176,11 +173,11 @@ public class ErraiJpaAttributeAccessorTest extends GWTTestCase {
   }
 
   public void testWriteBoxedTypesMethodAccess() throws Exception {
-    JpaAttributeAccessor a = getAttributeAccessor();
-    EntityManager em = getEntityManager();
-    EntityType<MethodAccessedZentity> metaZentity = em.getMetamodel().entity(MethodAccessedZentity.class);
+    final JpaAttributeAccessor a = getAttributeAccessor();
+    final EntityManager em = getEntityManager();
+    final EntityType<MethodAccessedZentity> metaZentity = em.getMetamodel().entity(MethodAccessedZentity.class);
 
-    MethodAccessedZentity zentity = new MethodAccessedZentity();
+    final MethodAccessedZentity zentity = new MethodAccessedZentity();
     a.set(metaZentity.getSingularAttribute("boxedBool", Boolean.class), zentity, true);
     a.set(metaZentity.getSingularAttribute("boxedByte", Byte.class), zentity, (byte) 4);
     a.set(metaZentity.getSingularAttribute("boxedByteArray", Byte[].class), zentity, new Byte[] { 1, null, 3, 4 });
@@ -209,11 +206,11 @@ public class ErraiJpaAttributeAccessorTest extends GWTTestCase {
   }
 
   public void testReadNullBoxedTypesFieldAccess() throws Exception {
-    Zentity zentity = new Zentity();
+    final Zentity zentity = new Zentity();
 
-    JpaAttributeAccessor a = getAttributeAccessor();
-    EntityManager em = getEntityManager();
-    EntityType<Zentity> metaZentity = em.getMetamodel().entity(Zentity.class);
+    final JpaAttributeAccessor a = getAttributeAccessor();
+    final EntityManager em = getEntityManager();
+    final EntityType<Zentity> metaZentity = em.getMetamodel().entity(Zentity.class);
 
     assertEquals(null, a.get(metaZentity.getAttribute("boxedBool"), zentity));
     assertEquals(null, a.get(metaZentity.getAttribute("boxedByte"), zentity));
@@ -228,11 +225,11 @@ public class ErraiJpaAttributeAccessorTest extends GWTTestCase {
   }
 
   public void testReadNullBoxedTypesMethodAccess() throws Exception {
-    MethodAccessedZentity zentity = new MethodAccessedZentity();
+    final MethodAccessedZentity zentity = new MethodAccessedZentity();
 
-    JpaAttributeAccessor a = getAttributeAccessor();
-    EntityManager em = getEntityManager();
-    EntityType<MethodAccessedZentity> metaZentity = em.getMetamodel().entity(MethodAccessedZentity.class);
+    final JpaAttributeAccessor a = getAttributeAccessor();
+    final EntityManager em = getEntityManager();
+    final EntityType<MethodAccessedZentity> metaZentity = em.getMetamodel().entity(MethodAccessedZentity.class);
 
     assertEquals(null, a.get(metaZentity.getAttribute("boxedBool"), zentity));
     assertEquals(null, a.get(metaZentity.getAttribute("boxedByte"), zentity));
@@ -247,7 +244,7 @@ public class ErraiJpaAttributeAccessorTest extends GWTTestCase {
   }
 
   public void testReadPrimitiveTypesFieldAccess() throws Exception {
-    Zentity zentity = new Zentity();
+    final Zentity zentity = new Zentity();
     zentity.setPrimitiveBool(true);
     zentity.setPrimitiveByte((byte) 4);
     zentity.setPrimitiveByteArray(new byte[] { 1, 2, 3, 4 });
@@ -259,9 +256,9 @@ public class ErraiJpaAttributeAccessorTest extends GWTTestCase {
     zentity.setPrimitiveLong(99999999999999L);
     zentity.setPrimitiveShort((short) -42);
 
-    JpaAttributeAccessor a = getAttributeAccessor();
-    EntityManager em = getEntityManager();
-    EntityType<Zentity> metaZentity = em.getMetamodel().entity(Zentity.class);
+    final JpaAttributeAccessor a = getAttributeAccessor();
+    final EntityManager em = getEntityManager();
+    final EntityType<Zentity> metaZentity = em.getMetamodel().entity(Zentity.class);
 
     assertEquals(true, a.get(metaZentity.getAttribute("primitiveBool"), zentity));
     assertEquals((byte) 4, a.get(metaZentity.getAttribute("primitiveByte"), zentity));
@@ -280,7 +277,7 @@ public class ErraiJpaAttributeAccessorTest extends GWTTestCase {
   }
 
   public void testReadPrimitiveTypesMethodAccess() throws Exception {
-    MethodAccessedZentity zentity = new MethodAccessedZentity();
+    final MethodAccessedZentity zentity = new MethodAccessedZentity();
     zentity.setPrimitiveBool(true);
     zentity.setPrimitiveByte((byte) 4);
     zentity.setPrimitiveByteArray(new byte[] { 1, 2, 3, 4 });
@@ -292,9 +289,9 @@ public class ErraiJpaAttributeAccessorTest extends GWTTestCase {
     zentity.setPrimitiveLong(99999999999999L);
     zentity.setPrimitiveShort((short) -42);
 
-    JpaAttributeAccessor a = getAttributeAccessor();
-    EntityManager em = getEntityManager();
-    EntityType<MethodAccessedZentity> metaZentity = em.getMetamodel().entity(MethodAccessedZentity.class);
+    final JpaAttributeAccessor a = getAttributeAccessor();
+    final EntityManager em = getEntityManager();
+    final EntityType<MethodAccessedZentity> metaZentity = em.getMetamodel().entity(MethodAccessedZentity.class);
 
     assertEquals(true, a.get(metaZentity.getAttribute("primitiveBool"), zentity));
     assertEquals((byte) 4, a.get(metaZentity.getAttribute("primitiveByte"), zentity));
@@ -313,11 +310,11 @@ public class ErraiJpaAttributeAccessorTest extends GWTTestCase {
   }
 
   public void testWritePrimitiveTypesFieldAccess() throws Exception {
-    JpaAttributeAccessor a = getAttributeAccessor();
-    EntityManager em = getEntityManager();
-    EntityType<Zentity> metaZentity = em.getMetamodel().entity(Zentity.class);
+    final JpaAttributeAccessor a = getAttributeAccessor();
+    final EntityManager em = getEntityManager();
+    final EntityType<Zentity> metaZentity = em.getMetamodel().entity(Zentity.class);
 
-    Zentity zentity = new Zentity();
+    final Zentity zentity = new Zentity();
     a.set(metaZentity.getSingularAttribute("primitiveBool", boolean.class), zentity, true);
     a.set(metaZentity.getSingularAttribute("primitiveByte", byte.class), zentity, (byte) 4);
     a.set(metaZentity.getSingularAttribute("primitiveByteArray", byte[].class), zentity, new byte[] { 1, 2, 3, 4 });
@@ -346,11 +343,11 @@ public class ErraiJpaAttributeAccessorTest extends GWTTestCase {
   }
 
   public void testWritePrimitiveTypesMethodAccess() throws Exception {
-    JpaAttributeAccessor a = getAttributeAccessor();
-    EntityManager em = getEntityManager();
-    EntityType<MethodAccessedZentity> metaZentity = em.getMetamodel().entity(MethodAccessedZentity.class);
+    final JpaAttributeAccessor a = getAttributeAccessor();
+    final EntityManager em = getEntityManager();
+    final EntityType<MethodAccessedZentity> metaZentity = em.getMetamodel().entity(MethodAccessedZentity.class);
 
-    MethodAccessedZentity zentity = new MethodAccessedZentity();
+    final MethodAccessedZentity zentity = new MethodAccessedZentity();
     a.set(metaZentity.getSingularAttribute("primitiveBool", boolean.class), zentity, true);
     a.set(metaZentity.getSingularAttribute("primitiveByte", byte.class), zentity, (byte) 4);
     a.set(metaZentity.getSingularAttribute("primitiveByteArray", byte[].class), zentity, new byte[] { 1, 2, 3, 4 });
@@ -379,16 +376,16 @@ public class ErraiJpaAttributeAccessorTest extends GWTTestCase {
   }
 
   public void testReadObjectTypesFieldAccess() throws Exception {
-    Zentity zentity = new Zentity();
+    final Zentity zentity = new Zentity();
     zentity.setBigDecimal(new BigDecimal("1231231223847628347692834.5762305986471348576298346753"));
     zentity.setBigInteger(new BigInteger("23874502938475023985763457692384756918324572345"));
     zentity.setDate(new Date(12345678L));
     zentity.setEnumeration(PersistenceContextType.EXTENDED);
     zentity.setString("this is \u3833 a string");
 
-    JpaAttributeAccessor a = getAttributeAccessor();
-    EntityManager em = getEntityManager();
-    EntityType<Zentity> metaZentity = em.getMetamodel().entity(Zentity.class);
+    final JpaAttributeAccessor a = getAttributeAccessor();
+    final EntityManager em = getEntityManager();
+    final EntityType<Zentity> metaZentity = em.getMetamodel().entity(Zentity.class);
 
     assertEquals(new BigDecimal("1231231223847628347692834.5762305986471348576298346753"), a.get(metaZentity.getAttribute("bigDecimal"), zentity));
     assertEquals(new BigInteger("23874502938475023985763457692384756918324572345"), a.get(metaZentity.getAttribute("bigInteger"), zentity));
@@ -398,16 +395,16 @@ public class ErraiJpaAttributeAccessorTest extends GWTTestCase {
   }
 
   public void testReadObjectTypesMethodAccess() throws Exception {
-    MethodAccessedZentity zentity = new MethodAccessedZentity();
+    final MethodAccessedZentity zentity = new MethodAccessedZentity();
     zentity.setBigDecimal(new BigDecimal("1231231223847628347692834.5762305986471348576298346753"));
     zentity.setBigInteger(new BigInteger("23874502938475023985763457692384756918324572345"));
     zentity.setDate(new Date(12345678L));
     zentity.setEnumeration(PersistenceContextType.EXTENDED);
     zentity.setString("this is \u3833 a string");
 
-    JpaAttributeAccessor a = getAttributeAccessor();
-    EntityManager em = getEntityManager();
-    EntityType<MethodAccessedZentity> metaZentity = em.getMetamodel().entity(MethodAccessedZentity.class);
+    final JpaAttributeAccessor a = getAttributeAccessor();
+    final EntityManager em = getEntityManager();
+    final EntityType<MethodAccessedZentity> metaZentity = em.getMetamodel().entity(MethodAccessedZentity.class);
 
     assertEquals(new BigDecimal("1231231223847628347692834.5762305986471348576298346753"), a.get(metaZentity.getAttribute("bigDecimal"), zentity));
     assertEquals(new BigInteger("23874502938475023985763457692384756918324572345"), a.get(metaZentity.getAttribute("bigInteger"), zentity));

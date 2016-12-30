@@ -20,7 +20,7 @@ import javax.enterprise.context.spi.CreationalContext;
 
 /**
  * Contract for injectable client-side instances for run-time bean management.
- * 
+ *
  * @author Mike Brock
  * @author Max Barkley <mbarkley@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
@@ -85,9 +85,4 @@ public interface ClientBeanManager {
    *         {@link CreationalContext} and <tt>false</tt> if not.
    */
   boolean addDestructionCallback(Object beanInstance, DestructionCallback<?> destructionCallback);
-
-  /**
-   * Destroy all beans currently managed by the bean manager. Don't do this.
-   */
-  void destroyAllBeans();
 }

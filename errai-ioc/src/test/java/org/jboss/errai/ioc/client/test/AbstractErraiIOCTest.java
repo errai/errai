@@ -24,7 +24,6 @@ import org.jboss.errai.common.client.logging.LoggingHandlerConfigurator;
 import org.jboss.errai.common.client.logging.handlers.ErraiSystemLogHandler;
 import org.jboss.errai.ioc.client.Container;
 import org.jboss.errai.ioc.client.container.IOC;
-import org.jboss.errai.ioc.client.container.IOCBeanManagerLifecycle;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.junit.client.GWTTestCase;
@@ -52,7 +51,6 @@ public abstract class AbstractErraiIOCTest extends GWTTestCase {
       }
     }
 
-    new IOCBeanManagerLifecycle().resetBeanManager();
     new Container().bootstrapContainer();
   }
 

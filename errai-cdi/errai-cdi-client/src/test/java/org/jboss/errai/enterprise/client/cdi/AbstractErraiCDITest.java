@@ -28,7 +28,6 @@ import org.jboss.errai.ioc.client.Container;
 import org.jboss.errai.ioc.client.QualifierUtil;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.SyncBeanDef;
-import org.jboss.errai.ioc.client.container.IOCBeanManagerLifecycle;
 
 import com.google.gwt.junit.client.GWTTestCase;
 import com.google.gwt.user.client.Timer;
@@ -52,7 +51,6 @@ public abstract class AbstractErraiCDITest extends GWTTestCase {
 
     // Unfortunately, GWTTestCase does not call our inherited module's onModuleLoad() methods
     // http://code.google.com/p/google-web-toolkit/issues/detail?id=3791
-    new IOCBeanManagerLifecycle().resetBeanManager();
     new CDI().__resetSubsystem();
     new Container().onModuleLoad();
     new CDIClientBootstrap().onModuleLoad();
@@ -75,10 +73,10 @@ public abstract class AbstractErraiCDITest extends GWTTestCase {
                                              final Class<? extends Annotation>... annos) {
 
     final Set<Class<? extends Annotation>> annoClassCompareFrom
-        = new HashSet<Class<? extends Annotation>>(Arrays.asList(annos));
+        = new HashSet<>(Arrays.asList(annos));
 
     final Set<Class<? extends Annotation>> annoClassCompareTo
-        = new HashSet<Class<? extends Annotation>>();
+        = new HashSet<>();
 
     for (final Annotation a : annotations) {
       annoClassCompareTo.add(a.annotationType());

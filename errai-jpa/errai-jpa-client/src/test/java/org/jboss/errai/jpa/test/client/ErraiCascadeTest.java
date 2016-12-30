@@ -24,7 +24,6 @@ import javax.persistence.EntityManager;
 import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.ioc.client.Container;
 import org.jboss.errai.ioc.client.container.IOC;
-import org.jboss.errai.ioc.client.container.IOCBeanManagerLifecycle;
 import org.jboss.errai.jpa.client.local.ErraiEntityManager;
 import org.jboss.errai.jpa.rebind.ErraiEntityManagerGenerator;
 import org.jboss.errai.jpa.test.client.res.JpaClientTestCase;
@@ -49,7 +48,7 @@ public class ErraiCascadeTest extends JpaClientTestCase {
   }
 
   protected EntityManager getEntityManagerAndClearStorageBackend() {
-    JpaTestClient testClient = JpaTestClient.INSTANCE;
+    final JpaTestClient testClient = JpaTestClient.INSTANCE;
     assertNotNull(testClient);
     assertNotNull(testClient.entityManager);
     ((ErraiEntityManager) testClient.entityManager).removeAll();
@@ -59,8 +58,6 @@ public class ErraiCascadeTest extends JpaClientTestCase {
   @Override
   protected void gwtSetUp() throws Exception {
     super.gwtSetUp();
-
-    new IOCBeanManagerLifecycle().resetBeanManager();
 
     // We need to bootstrap the IoC container manually because GWTTestCase
     // doesn't call onModuleLoad() for us.
@@ -83,8 +80,8 @@ public class ErraiCascadeTest extends JpaClientTestCase {
    * @return a newly-created CascadeFrom, persistent and managed by em, with all
    *         related CascadeTo attributes likewise persisted and managed by em.
    */
-  private static CascadeFrom createFullyPersistedObject(EntityManager em) {
-    CascadeFrom from = new CascadeFrom();
+  private static CascadeFrom createFullyPersistedObject(final EntityManager em) {
+    final CascadeFrom from = new CascadeFrom();
     from.setAll(new CascadeTo());
     from.setDetach(new CascadeTo());
     from.setMerge(new CascadeTo());
@@ -127,9 +124,9 @@ public class ErraiCascadeTest extends JpaClientTestCase {
   }
 
   public void testCascadePersist() throws Exception {
-    EntityManager em = getEntityManagerAndClearStorageBackend();
+    final EntityManager em = getEntityManagerAndClearStorageBackend();
 
-    CascadeFrom from = new CascadeFrom();
+    final CascadeFrom from = new CascadeFrom();
     from.setAll(new CascadeTo());
     from.setPersist(new CascadeTo());
     em.persist(from);
@@ -140,26 +137,26 @@ public class ErraiCascadeTest extends JpaClientTestCase {
   }
 
   public void testCascadePersistCollection() throws Exception {
-    EntityManager em = getEntityManagerAndClearStorageBackend();
+    final EntityManager em = getEntityManagerAndClearStorageBackend();
 
-    CascadeFrom from = new CascadeFrom();
+    final CascadeFrom from = new CascadeFrom();
     from.setAllCollection(listOfCascadeTo(3));
     from.setPersistCollection(listOfCascadeTo(3));
     em.persist(from);
     em.flush();
     assertTrue(em.contains(from));
-    for (CascadeTo child : from.getAllCollection()) {
+    for (final CascadeTo child : from.getAllCollection()) {
       assertTrue(em.contains(child));
     }
-    for (CascadeTo child : from.getPersistCollection()) {
+    for (final CascadeTo child : from.getPersistCollection()) {
       assertTrue(em.contains(child));
     }
   }
 
   public void testCascadePersistFailsWithNonCascadedNewEntity() throws Exception {
-    EntityManager em = getEntityManagerAndClearStorageBackend();
+    final EntityManager em = getEntityManagerAndClearStorageBackend();
 
-    CascadeFrom from = new CascadeFrom();
+    final CascadeFrom from = new CascadeFrom();
     from.setAll(new CascadeTo());
     from.setPersist(new CascadeTo());
     from.setNone(new CascadeTo()); // this should lead to an error
@@ -169,7 +166,7 @@ public class ErraiCascadeTest extends JpaClientTestCase {
       em.flush();
       fail("Expected IllegalStateException");
     }
-    catch (IllegalStateException ex) {
+    catch (final IllegalStateException ex) {
       // check for name of offending relationship
       assertTrue("Exception message doesn't mention bad relationship: " + ex.getMessage(),
               ex.getMessage().contains("none"));
@@ -177,9 +174,9 @@ public class ErraiCascadeTest extends JpaClientTestCase {
   }
 
   public void testCascadePersistFailsWithNonCascadedNewEntityInCollection() throws Exception {
-    EntityManager em = getEntityManagerAndClearStorageBackend();
+    final EntityManager em = getEntityManagerAndClearStorageBackend();
 
-    CascadeFrom from = new CascadeFrom();
+    final CascadeFrom from = new CascadeFrom();
     from.setAllCollection(listOfCascadeTo(3));
     from.setPersistCollection(listOfCascadeTo(3));
     from.setNoneCollection(listOfCascadeTo(3)); // this should lead to an error
@@ -189,7 +186,7 @@ public class ErraiCascadeTest extends JpaClientTestCase {
       em.flush();
       fail("Expected IllegalStateException");
     }
-    catch (IllegalStateException ex) {
+    catch (final IllegalStateException ex) {
       // this is what Errai throws. We check for the name of the offending relationship
       // with Hibernate, we're not picky about the exact message :)
       assertTrue("Exception message doesn't mention bad relationship: " + ex.getMessage(),
@@ -200,9 +197,9 @@ public class ErraiCascadeTest extends JpaClientTestCase {
   // It's not 100% clear from the spec that this should fail in the same way
   // as persist, but this test is consistent with the behaviour of Hibernate.
   public void testCascadeMergeFailsWithNonCascadedNewEntity() throws Exception {
-    EntityManager em = getEntityManagerAndClearStorageBackend();
+    final EntityManager em = getEntityManagerAndClearStorageBackend();
 
-    CascadeFrom from = new CascadeFrom();
+    final CascadeFrom from = new CascadeFrom();
     from.setAll(new CascadeTo());
     from.setMerge(new CascadeTo());
     from.setNone(new CascadeTo()); // this should lead to an error
@@ -212,7 +209,7 @@ public class ErraiCascadeTest extends JpaClientTestCase {
       em.flush();
       fail("Expected IllegalStateException");
     }
-    catch (IllegalStateException ex) {
+    catch (final IllegalStateException ex) {
       // check for name of offending relationship
       assertTrue("Exception message doesn't mention bad relationship: " + ex.getMessage(),
               ex.getMessage().contains("none"));
@@ -220,9 +217,9 @@ public class ErraiCascadeTest extends JpaClientTestCase {
   }
 
   public void testCascadeMergeFailsWithNonCascadedNewEntityInCollection() throws Exception {
-    EntityManager em = getEntityManagerAndClearStorageBackend();
+    final EntityManager em = getEntityManagerAndClearStorageBackend();
 
-    CascadeFrom from = new CascadeFrom();
+    final CascadeFrom from = new CascadeFrom();
     from.setAllCollection(listOfCascadeTo(3));
     from.setMergeCollection(listOfCascadeTo(3));
     from.setNoneCollection(listOfCascadeTo(3)); // this should lead to an error
@@ -232,7 +229,7 @@ public class ErraiCascadeTest extends JpaClientTestCase {
       em.flush();
       fail("Expected IllegalStateException");
     }
-    catch (IllegalStateException ex) {
+    catch (final IllegalStateException ex) {
       // this is what Errai throws. We check for the name of the offending relationship
       // with hibernate, we're not picky about the exact message :)
       assertTrue("Exception message doesn't mention bad relationship: " + ex.getMessage(),
@@ -248,17 +245,17 @@ public class ErraiCascadeTest extends JpaClientTestCase {
    * </blockquote>
    */
   public void testCascadeMergeRule1WhenPreExistingManagedEntityIsInPersistenceContext() throws Exception {
-    EntityManager em = getEntityManagerAndClearStorageBackend();
+    final EntityManager em = getEntityManagerAndClearStorageBackend();
 
-    CascadeFrom preExistingEntity = new CascadeFrom();
+    final CascadeFrom preExistingEntity = new CascadeFrom();
     em.persist(preExistingEntity);
     em.flush();
 
     assertTrue(em.contains(preExistingEntity));
 
-    CascadeFrom x = new CascadeFrom();
+    final CascadeFrom x = new CascadeFrom();
     x.setId(preExistingEntity.getId());
-    CascadeFrom xPrime = em.merge(x);
+    final CascadeFrom xPrime = em.merge(x);
     em.flush();
 
     assertSame(preExistingEntity, xPrime);
@@ -276,18 +273,18 @@ public class ErraiCascadeTest extends JpaClientTestCase {
    * </blockquote>
    */
   public void testCascadeMergeRule1WhenPreExistingManagedEntityIsNotInPersistenceContext() throws Exception {
-    EntityManager em = getEntityManagerAndClearStorageBackend();
+    final EntityManager em = getEntityManagerAndClearStorageBackend();
 
-    CascadeFrom preExistingEntity = new CascadeFrom();
+    final CascadeFrom preExistingEntity = new CascadeFrom();
     em.persist(preExistingEntity);
     em.flush();
     em.clear();
 
     assertFalse(em.contains(preExistingEntity));
 
-    CascadeFrom x = new CascadeFrom();
+    final CascadeFrom x = new CascadeFrom();
     x.setId(preExistingEntity.getId());
-    CascadeFrom xPrime = em.merge(x);
+    final CascadeFrom xPrime = em.merge(x);
     em.flush();
 
     assertNotSame(preExistingEntity, xPrime);
@@ -306,10 +303,10 @@ public class ErraiCascadeTest extends JpaClientTestCase {
    * </blockquote>
    */
   public void testCascadeMergeRule2() throws Exception {
-    EntityManager em = getEntityManagerAndClearStorageBackend();
+    final EntityManager em = getEntityManagerAndClearStorageBackend();
 
-    CascadeFrom x = new CascadeFrom();
-    CascadeFrom xPrime = em.merge(x);
+    final CascadeFrom x = new CascadeFrom();
+    final CascadeFrom xPrime = em.merge(x);
     em.flush();
 
     assertNotSame(x, xPrime);
@@ -325,9 +322,9 @@ public class ErraiCascadeTest extends JpaClientTestCase {
    * </blockquote>
    */
   public void testCascadeMergeRule3() throws Exception {
-    EntityManager em = getEntityManagerAndClearStorageBackend();
+    final EntityManager em = getEntityManagerAndClearStorageBackend();
 
-    CascadeFrom x = new CascadeFrom();
+    final CascadeFrom x = new CascadeFrom();
     em.persist(x);
     em.flush();
     em.remove(x);
@@ -336,7 +333,7 @@ public class ErraiCascadeTest extends JpaClientTestCase {
       em.merge(x);
       em.flush();
       fail("Expected IllegalArgumentException");
-    } catch (IllegalArgumentException e) {
+    } catch (final IllegalArgumentException e) {
       // expected
     }
   }
@@ -351,9 +348,9 @@ public class ErraiCascadeTest extends JpaClientTestCase {
    * </blockquote>
    */
   public void testCascadeMergeRule4WithSingularAssociations() throws Exception {
-    EntityManager em = getEntityManagerAndClearStorageBackend();
+    final EntityManager em = getEntityManagerAndClearStorageBackend();
 
-    CascadeFrom x = new CascadeFrom();
+    final CascadeFrom x = new CascadeFrom();
     em.persist(x);
     em.flush();
 
@@ -372,13 +369,13 @@ public class ErraiCascadeTest extends JpaClientTestCase {
     em.persist(x.getRemove());
     em.persist(x.getPersist());
 
-    CascadeFrom xPrime = em.merge(x);
+    final CascadeFrom xPrime = em.merge(x);
     em.flush();
 
     assertSame(x, xPrime);
 
     em.clear();
-    CascadeFrom xFetched = em.find(CascadeFrom.class, x.getId());
+    final CascadeFrom xFetched = em.find(CascadeFrom.class, x.getId());
     assertNotSame(x.getAll(), xFetched.getAll());
     assertNotSame(x.getDetach(), xFetched.getDetach());
     assertNotSame(x.getMerge(), xFetched.getMerge());
@@ -406,9 +403,9 @@ public class ErraiCascadeTest extends JpaClientTestCase {
    * </blockquote>
    */
   public void testCascadeMergeRule4WithPluralAssociations() throws Exception {
-    EntityManager em = getEntityManagerAndClearStorageBackend();
+    final EntityManager em = getEntityManagerAndClearStorageBackend();
 
-    CascadeFrom x = new CascadeFrom();
+    final CascadeFrom x = new CascadeFrom();
     em.persist(x);
     em.flush();
 
@@ -429,13 +426,13 @@ public class ErraiCascadeTest extends JpaClientTestCase {
       em.persist(x.getPersistCollection().get(i));
     }
 
-    CascadeFrom xPrime = em.merge(x);
+    final CascadeFrom xPrime = em.merge(x);
     em.flush();
 
     assertSame(x, xPrime);
 
     em.clear();
-    CascadeFrom xFetched = em.find(CascadeFrom.class, x.getId());
+    final CascadeFrom xFetched = em.find(CascadeFrom.class, x.getId());
     for (int i = 0; i < 3; i++) {
       assertNotSame(x.getAllCollection().get(i), xFetched.getAllCollection().get(i));
       assertNotSame(x.getDetachCollection().get(i), xFetched.getDetachCollection().get(i));
@@ -478,9 +475,9 @@ public class ErraiCascadeTest extends JpaClientTestCase {
    * from rule 5. We're going with "do what Hibernate does."
    */
   public void testCascadeMergeRules5And6() throws Exception {
-    EntityManager em = getEntityManagerAndClearStorageBackend();
+    final EntityManager em = getEntityManagerAndClearStorageBackend();
 
-    CascadeFrom x = new CascadeFrom();
+    final CascadeFrom x = new CascadeFrom();
 
     x.setAll(new CascadeTo());
     x.setDetach(new CascadeTo());
@@ -497,7 +494,7 @@ public class ErraiCascadeTest extends JpaClientTestCase {
     em.persist(x.getRemove());
     em.persist(x.getPersist());
 
-    CascadeFrom xPrime = em.merge(x);
+    final CascadeFrom xPrime = em.merge(x);
     em.flush();
 
     // x, x.all, and x.merge were not in managed state (they were new) so the merged copies should be different instances
@@ -517,7 +514,7 @@ public class ErraiCascadeTest extends JpaClientTestCase {
 
     // ensure they were actually saved to the database
     em.clear();
-    CascadeFrom xFetched = em.find(CascadeFrom.class, xPrime.getId());
+    final CascadeFrom xFetched = em.find(CascadeFrom.class, xPrime.getId());
     assertNotSame(x.getAll(), xFetched.getAll());
     assertNotSame(x.getDetach(), xFetched.getDetach());
     assertNotSame(x.getMerge(), xFetched.getMerge());
@@ -550,9 +547,9 @@ public class ErraiCascadeTest extends JpaClientTestCase {
    * from rule 5. We're going with "do what Hibernate does."
    */
   public void testCascadeMergeRules5And6WithCollections() throws Exception {
-    EntityManager em = getEntityManagerAndClearStorageBackend();
+    final EntityManager em = getEntityManagerAndClearStorageBackend();
 
-    CascadeFrom x = new CascadeFrom();
+    final CascadeFrom x = new CascadeFrom();
 
     x.setAllCollection(listOfCascadeTo(3));
     x.setDetachCollection(listOfCascadeTo(3));
@@ -571,7 +568,7 @@ public class ErraiCascadeTest extends JpaClientTestCase {
       em.persist(x.getPersistCollection().get(i));
     }
 
-    CascadeFrom xPrime = em.merge(x);
+    final CascadeFrom xPrime = em.merge(x);
     em.flush();
 
     assertNotSame(x, xPrime);
@@ -594,9 +591,9 @@ public class ErraiCascadeTest extends JpaClientTestCase {
   }
 
   public void testCascadedMergeCopiesEntityState() {
-    EntityManager em = getEntityManagerAndClearStorageBackend();
+    final EntityManager em = getEntityManagerAndClearStorageBackend();
 
-    CascadeFrom x = new CascadeFrom();
+    final CascadeFrom x = new CascadeFrom();
 
     x.setAll(new CascadeTo());
     x.setMerge(new CascadeTo());
@@ -609,11 +606,11 @@ public class ErraiCascadeTest extends JpaClientTestCase {
 
     x.getAll().setString("updated string");
     x.getMerge().setString("updated merge");
-    CascadeThirdGeneration cascadeAgain = new CascadeThirdGeneration();
+    final CascadeThirdGeneration cascadeAgain = new CascadeThirdGeneration();
     cascadeAgain.setString("3rd gen");
     x.getMerge().setCascadeAgain(cascadeAgain);
     x.getPersist().setString("updated persist");
-    CascadeFrom xPrime = em.merge(x);
+    final CascadeFrom xPrime = em.merge(x);
     em.flush();
 
     assertNotSame(x, xPrime);
@@ -633,15 +630,15 @@ public class ErraiCascadeTest extends JpaClientTestCase {
   }
 
   public void testCascadedMergeCopiesEntityStateInCollections() {
-    EntityManager em = getEntityManagerAndClearStorageBackend();
+    final EntityManager em = getEntityManagerAndClearStorageBackend();
 
-    CascadeFrom x = new CascadeFrom();
+    final CascadeFrom x = new CascadeFrom();
 
     x.setAllCollection(listOfCascadeTo(3));
     x.setMergeCollection(listOfCascadeTo(3));
     x.setPersistCollection(listOfCascadeTo(3));
 
-    for (CascadeTo child : x.getMergeCollection()) {
+    for (final CascadeTo child : x.getMergeCollection()) {
       em.persist(child);
     }
     em.persist(x);
@@ -651,12 +648,12 @@ public class ErraiCascadeTest extends JpaClientTestCase {
     for (int i = 0; i < 3; i++) {
       x.getAllCollection().get(i).setString("updated string " + i);
       x.getMergeCollection().get(i).setString("updated merge " + i);
-      CascadeThirdGeneration cascadeAgain = new CascadeThirdGeneration();
+      final CascadeThirdGeneration cascadeAgain = new CascadeThirdGeneration();
       cascadeAgain.setString("3rd gen " + i);
       x.getMergeCollection().get(i).setCascadeAgain(cascadeAgain);
       x.getPersistCollection().get(i).setString("updated persist " + i);
     }
-    CascadeFrom xPrime = em.merge(x);
+    final CascadeFrom xPrime = em.merge(x);
     em.flush();
 
     assertNotSame(x, xPrime);
@@ -678,9 +675,9 @@ public class ErraiCascadeTest extends JpaClientTestCase {
   }
 
   public void testCascadeRemove() throws Exception {
-    EntityManager em = getEntityManagerAndClearStorageBackend();
+    final EntityManager em = getEntityManagerAndClearStorageBackend();
 
-    CascadeFrom from = createFullyPersistedObject(em);
+    final CascadeFrom from = createFullyPersistedObject(em);
 
     em.remove(from);
 
@@ -695,9 +692,9 @@ public class ErraiCascadeTest extends JpaClientTestCase {
   }
 
   public void testCascadeDetach() throws Exception {
-    EntityManager em = getEntityManagerAndClearStorageBackend();
+    final EntityManager em = getEntityManagerAndClearStorageBackend();
 
-    CascadeFrom from = createFullyPersistedObject(em);
+    final CascadeFrom from = createFullyPersistedObject(em);
 
     em.detach(from);
 
@@ -715,9 +712,9 @@ public class ErraiCascadeTest extends JpaClientTestCase {
    * Regression test for ERRAI-629.
    */
   public void testCascadeMergeBindableProxyIntoItsOwnTarget() throws Exception {
-    EntityManager em = getEntityManagerAndClearStorageBackend();
+    final EntityManager em = getEntityManagerAndClearStorageBackend();
 
-    CascadeFrom from = new CascadeFrom();
+    final CascadeFrom from = new CascadeFrom();
     em.persist(from);
 
     final DataBinder<CascadeFrom> dataBinder = DataBinder.forModel(from);
@@ -730,7 +727,7 @@ public class ErraiCascadeTest extends JpaClientTestCase {
     em.flush();
     em.clear();
 
-    CascadeFrom xFetched = em.find(CascadeFrom.class, from.getId());
+    final CascadeFrom xFetched = em.find(CascadeFrom.class, from.getId());
     assertNotNull(xFetched.getMergeCollection());
     assertEquals(3, xFetched.getMergeCollection().size());
     assertFalse(xFetched.getMergeCollection().get(0).getId() == 0);
@@ -742,10 +739,10 @@ public class ErraiCascadeTest extends JpaClientTestCase {
    *
    * @param size The number of objects that should be in the returned list. Must be 0 or more.
    */
-  private static List<CascadeTo> listOfCascadeTo(int size) {
-    List<CascadeTo> l = new ArrayList<CascadeTo>(size);
+  private static List<CascadeTo> listOfCascadeTo(final int size) {
+    final List<CascadeTo> l = new ArrayList<>(size);
     for (int i = 0; i < size; i++) {
-      CascadeTo cascadeTo = new CascadeTo();
+      final CascadeTo cascadeTo = new CascadeTo();
       cascadeTo.setString("string " + i);
       l.add(cascadeTo);
     }

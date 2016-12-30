@@ -38,7 +38,6 @@ import org.jboss.errai.ioc.client.IOCClientTestCase;
 import org.jboss.errai.ioc.client.QualifierEqualityFactory;
 import org.jboss.errai.ioc.client.QualifierEqualityFactoryProvider;
 import org.jboss.errai.ioc.client.QualifierUtil;
-import org.jboss.errai.ioc.client.container.IOCBeanManagerLifecycle;
 import org.junit.runner.Description;
 import org.junit.runner.Result;
 import org.junit.runner.Runner;
@@ -57,7 +56,7 @@ import junit.framework.TestResult;
 public class IOCSimulatedTestRunner extends ParentRunner<Runner> {
   public static boolean SIMULATED = Boolean.getBoolean("errai.ioc.debug.simulated_client");
 
-  List<Runner> runners = new ArrayList<Runner>();
+  List<Runner> runners = new ArrayList<>();
   private Object instance;
 
   public IOCSimulatedTestRunner(final Class<? extends TestCase> toRun) throws Throwable {
@@ -97,14 +96,14 @@ public class IOCSimulatedTestRunner extends ParentRunner<Runner> {
                 JUnitShell.runTest(iocClientTestCase, result);
               }
             }
-            catch (GenerationException e) {
+            catch (final GenerationException e) {
               notifier.fireTestFailure(new Failure(description, e));
             }
-            catch (InvocationTargetException e) {
+            catch (final InvocationTargetException e) {
               notifier.fireTestFailure(new Failure(description, e.getTargetException()));
               return;
             }
-            catch (Throwable e) {
+            catch (final Throwable e) {
               notifier.fireTestFailure(new Failure(description, e));
               return;
             }
@@ -137,13 +136,13 @@ public class IOCSimulatedTestRunner extends ParentRunner<Runner> {
       try {
         instance = getTestClass().getJavaClass().newInstance();
       }
-      catch (InstantiationException e) {
+      catch (final InstantiationException e) {
         throw new RuntimeException("Could not intantiate test class: " + getTestClass().getJavaClass().getName(), e);
       }
-      catch (IllegalAccessException e) {
+      catch (final IllegalAccessException e) {
         throw new RuntimeException("Could not intantiate test class: " + getTestClass().getJavaClass().getName(), e);
       }
-      catch (Exception e) {
+      catch (final Exception e) {
         throw new RuntimeException("could not bootstrap", e);
       }
     }
@@ -267,7 +266,7 @@ public class IOCSimulatedTestRunner extends ParentRunner<Runner> {
           public void bootstrap() {
             try {
               final String rootPackage = iocClientTestCase.getModulePackage();
-              final Set<String> packages = new HashSet<String>();
+              final Set<String> packages = new HashSet<>();
               for (final Package p : Package.getPackages()) {
                 final String packageName = p.getName();
                 if (packageName.startsWith(rootPackage)) {
@@ -283,15 +282,14 @@ public class IOCSimulatedTestRunner extends ParentRunner<Runner> {
               final Bootstrapper bs = cls.newInstance();
 
               final long tm = System.currentTimeMillis();
-              new IOCBeanManagerLifecycle().resetBeanManager();
               bs.bootstrapContainer();
 
               System.out.println("bootstrapped simulated container in " + (System.currentTimeMillis() - tm) + "ms");
             }
-            catch (GenerationException e) {
+            catch (final GenerationException e) {
               throw e;
             }
-            catch (Exception e) {
+            catch (final Exception e) {
               throw new RuntimeException("failed to run in emulated mode", e);
             }
           }

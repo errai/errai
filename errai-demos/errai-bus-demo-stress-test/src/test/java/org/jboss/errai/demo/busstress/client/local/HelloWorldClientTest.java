@@ -20,7 +20,6 @@ import org.jboss.errai.bus.common.AbstractErraiTest;
 import org.jboss.errai.ioc.client.Container;
 
 import com.google.gwt.user.client.Timer;
-import org.jboss.errai.ioc.client.container.IOCBeanManagerLifecycle;
 
 public class HelloWorldClientTest extends AbstractErraiTest {
 
@@ -32,8 +31,6 @@ public class HelloWorldClientTest extends AbstractErraiTest {
     @Override
     protected void gwtSetUp() throws Exception {
         super.gwtSetUp();
-
-        new IOCBeanManagerLifecycle().resetBeanManager();
 
         // We need to bootstrap the IoC container manually because GWTTestCase
         // doesn't call onModuleLoad() for us.
@@ -58,7 +55,7 @@ public class HelloWorldClientTest extends AbstractErraiTest {
                     @Override
                     public void run() {
                         client.stopIfRunning();
-                        StatsPanel statsPanel = (StatsPanel) client.resultsPanel.getWidget(0);
+                        final StatsPanel statsPanel = (StatsPanel) client.resultsPanel.getWidget(0);
                         assertNotNull("Stats panel should have been added to results panel", statsPanel);
 
                         assertTrue("Expected at least one message received; got " + statsPanel.messageRecvCount,

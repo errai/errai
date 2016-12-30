@@ -27,7 +27,6 @@ import org.jboss.errai.enterprise.jaxrs.client.shared.UserNotFoundException;
 import org.jboss.errai.enterprise.jaxrs.client.shared.entity.Entity;
 import org.jboss.errai.ioc.client.Container;
 import org.jboss.errai.ioc.client.container.IOC;
-import org.jboss.errai.ioc.client.container.IOCBeanManagerLifecycle;
 import org.junit.Test;
 
 import com.google.gwt.http.client.Request;
@@ -48,7 +47,6 @@ public class CallerInjectionIntegrationTest extends AbstractErraiJaxrsTest {
   @Override
   protected void gwtSetUp() throws Exception {
     super.gwtSetUp();
-    new IOCBeanManagerLifecycle().resetBeanManager();
     new Container().bootstrapContainer();
   }
 
@@ -62,13 +60,13 @@ public class CallerInjectionIntegrationTest extends AbstractErraiJaxrsTest {
   @Test
   public void testInjectedPlainMethodService() {
     TestModule.getInstance().getPlainMethodTestService()
-        .call(new SimpleAssertionCallback<String>("@GET failed", "get")).get();
+        .call(new SimpleAssertionCallback<>("@GET failed", "get")).get();
   }
 
   @Test
   public void testInjectedCustomTypeMethodService() {
     TestModule.getInstance().getCustomTypeTestService()
-        .call(new SimpleAssertionCallback<Entity>("@GET using custom type failed", new Entity(1, "entity1"))).getEntity();
+        .call(new SimpleAssertionCallback<>("@GET using custom type failed", new Entity(1, "entity1"))).getEntity();
   }
 
   @Test
@@ -77,21 +75,21 @@ public class CallerInjectionIntegrationTest extends AbstractErraiJaxrsTest {
     TestModule.getInstance().getClientExceptionMappingTestService()
         .call(new RemoteCallback<String>() {
           @Override
-          public void callback(String response) {
+          public void callback(final String response) {
             fail("Callback should not be invoked");
           }
         }, new RestErrorCallback() {
           @Override
-          public boolean error(Request message, Throwable throwable) {
+          public boolean error(final Request message, final Throwable throwable) {
             assertEquals(UserNotFoundException.class, throwable.getClass());
             try {
               throw throwable;
             }
-            catch (UserNotFoundException unfe) {
+            catch (final UserNotFoundException unfe) {
               assertEquals("User not found: -1", unfe.getMessage());
               finishTest();
             }
-            catch (Throwable t) {
+            catch (final Throwable t) {
               fail("Unexpected exception: " + t.getMessage());
             }
             return false;
@@ -106,21 +104,21 @@ public class CallerInjectionIntegrationTest extends AbstractErraiJaxrsTest {
         .call(
             new ResponseCallback() {
               @Override
-              public void callback(Response response) {
+              public void callback(final Response response) {
                 fail("Callback should not be invoked");
               }
             },
             new ErrorCallback<Void>() {
               @Override
-              public boolean error(Void message, Throwable throwable) {
+              public boolean error(final Void message, final Throwable throwable) {
                 try {
                   throw throwable;
                 }
-                catch (ResponseException e) {
+                catch (final ResponseException e) {
                   assertEquals("Wrong status code received", Response.SC_NOT_FOUND, e.getResponse().getStatusCode());
                   finishTest();
                 }
-                catch (Throwable t) {
+                catch (final Throwable t) {
                   fail("Expected ResponseException");
                 }
                 return false;

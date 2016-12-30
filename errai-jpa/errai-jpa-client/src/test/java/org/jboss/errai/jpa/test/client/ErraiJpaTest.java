@@ -42,7 +42,6 @@ import org.jboss.errai.databinding.client.api.handler.property.PropertyChangeEve
 import org.jboss.errai.databinding.client.api.handler.property.PropertyChangeHandler;
 import org.jboss.errai.ioc.client.Container;
 import org.jboss.errai.ioc.client.container.IOC;
-import org.jboss.errai.ioc.client.container.IOCBeanManagerLifecycle;
 import org.jboss.errai.jpa.client.local.ErraiEntityManager;
 import org.jboss.errai.jpa.client.local.ErraiMetamodel;
 import org.jboss.errai.jpa.client.local.Key;
@@ -80,7 +79,7 @@ public class ErraiJpaTest extends JpaClientTestCase {
   }
 
   protected EntityManager getEntityManager() {
-    JpaTestClient testClient = JpaTestClient.INSTANCE;
+    final JpaTestClient testClient = JpaTestClient.INSTANCE;
     assertNotNull(testClient);
     assertNotNull(testClient.entityManager);
     ((ErraiEntityManager) testClient.entityManager).removeAll();
@@ -92,8 +91,6 @@ public class ErraiJpaTest extends JpaClientTestCase {
     super.gwtSetUp();
 
     Album.CALLBACK_LOG.clear();
-
-    new IOCBeanManagerLifecycle().resetBeanManager();
 
     // We need to bootstrap the IoC container manually because GWTTestCase
     // doesn't call onModuleLoad() for us.
@@ -122,10 +119,10 @@ public class ErraiJpaTest extends JpaClientTestCase {
    */
   public void testPersistNonEntity() {
     try {
-      EntityManager em = getEntityManager();
+      final EntityManager em = getEntityManager();
       em.persist("this is a string, not an entity");
       fail();
-    } catch (IllegalArgumentException ex) {
+    } catch (final IllegalArgumentException ex) {
       // this is the behaviour we are testing for
     }
   }
@@ -140,7 +137,7 @@ public class ErraiJpaTest extends JpaClientTestCase {
                                                                    + ".NonClientEntity");
       // it's actually more likely that the whole code generation thing fails
       fail("NonClientEntity was included");
-    } catch (IllegalArgumentException ex) {
+    } catch (final IllegalArgumentException ex) {
       // this is the behaviour we are testing for
     }
   }
@@ -151,20 +148,20 @@ public class ErraiJpaTest extends JpaClientTestCase {
   public void testPersistOneAlbum() {
 
     // make it
-    Album album = new Album();
+    final Album album = new Album();
     album.setArtist(null);
     album.setName("Abbey Road");
     album.setReleaseDate(new Date(-8366400000L));
 
     // store it
-    EntityManager em = getEntityManager();
+    final EntityManager em = getEntityManager();
     em.persist(album);
     em.flush();
     em.detach(album);
     assertNotNull(album.getId());
 
     // fetch it
-    Album fetchedAlbum = em.find(Album.class, album.getId());
+    final Album fetchedAlbum = em.find(Album.class, album.getId());
     assertNotSame(album, fetchedAlbum);
     assertEquals(album.toString(), fetchedAlbum.toString());
   }
@@ -175,18 +172,18 @@ public class ErraiJpaTest extends JpaClientTestCase {
   public void testPersistOneAlbumAndOneArtist() {
 
     // make Album (not attached to Artist)
-    Album album = new Album();
+    final Album album = new Album();
     album.setArtist(null);
     album.setName("Let It Be");
     album.setReleaseDate(new Date(11012400000L));
 
     // store them
-    EntityManager em = getEntityManager();
+    final EntityManager em = getEntityManager();
     em.persist(album);
     em.flush();
 
     // make Artist (completely unrelated to Album, but has same numeric ID)
-    Artist artist = new Artist();
+    final Artist artist = new Artist();
     artist.setId(album.getId()); // to verify proper separation by entity type
     artist.setName("The Beatles");
 
@@ -197,8 +194,8 @@ public class ErraiJpaTest extends JpaClientTestCase {
     em.detach(artist);
 
     // fetch them
-    Album fetchedAlbum = em.find(Album.class, album.getId());
-    Artist fetchedArtist = em.find(Artist.class, artist.getId());
+    final Album fetchedAlbum = em.find(Album.class, album.getId());
+    final Artist fetchedArtist = em.find(Artist.class, artist.getId());
     assertNotSame(album, fetchedAlbum);
     assertNotSame(artist, fetchedArtist);
 
@@ -215,13 +212,13 @@ public class ErraiJpaTest extends JpaClientTestCase {
    */
   public void testRetrievePersistedEntity() throws Exception {
     // make it
-    Album album = new Album();
+    final Album album = new Album();
     album.setArtist(null);
     album.setName("Abbey Road");
     album.setReleaseDate(new Date(-8366400000L));
 
     // store it
-    EntityManager em = getEntityManager();
+    final EntityManager em = getEntityManager();
     em.persist(album);
 
     // should come directly from the persistence unit cache at this point
@@ -242,13 +239,13 @@ public class ErraiJpaTest extends JpaClientTestCase {
    */
   public void testRetrieveEntityTwice() throws Exception {
     // make it
-    Album album = new Album();
+    final Album album = new Album();
     album.setArtist(null);
     album.setName("Abbey Road");
     album.setReleaseDate(new Date(-8366400000L));
 
     // store it
-    EntityManager em = getEntityManager();
+    final EntityManager em = getEntityManager();
     em.persist(album);
 
     // ensure it's stored in the database
@@ -258,8 +255,8 @@ public class ErraiJpaTest extends JpaClientTestCase {
     em.detach(album);
 
     // multiple fetches should come directly from the persistence unit cache at this point
-    Album fetchedAlbum = em.find(Album.class, album.getId());
-    Album fetchedAlbum2 = em.find(Album.class, album.getId());
+    final Album fetchedAlbum = em.find(Album.class, album.getId());
+    final Album fetchedAlbum2 = em.find(Album.class, album.getId());
     assertSame(fetchedAlbum, fetchedAlbum2);
 
     // ensure it's not the original instance we persisted and detached
@@ -272,18 +269,18 @@ public class ErraiJpaTest extends JpaClientTestCase {
   public void testClearDetachesAll() {
 
     // make Album
-    Album album = new Album();
+    final Album album = new Album();
     album.setArtist(null);
     album.setName("Let It Be");
     album.setReleaseDate(new Date(11012400000L));
 
     // make artist
-    Artist artist = new Artist();
+    final Artist artist = new Artist();
     artist.setId(123L);
     artist.setName("The Beatles");
 
     // store them
-    EntityManager em = getEntityManager();
+    final EntityManager em = getEntityManager();
     em.persist(album);
     em.persist(artist);
     em.flush();
@@ -295,8 +292,8 @@ public class ErraiJpaTest extends JpaClientTestCase {
     em.clear();
 
     // make sure they were detached
-    Album fetchedAlbum = em.find(Album.class, album.getId());
-    Artist fetchedArtist = em.find(Artist.class, artist.getId());
+    final Album fetchedAlbum = em.find(Album.class, album.getId());
+    final Artist fetchedArtist = em.find(Artist.class, artist.getId());
     assertNotNull(fetchedAlbum);
     assertNotNull(fetchedArtist);
     assertNotSame(album, fetchedAlbum);
@@ -306,13 +303,13 @@ public class ErraiJpaTest extends JpaClientTestCase {
   public void testRemoveOneEntity() {
 
     // make Album
-    Album album = new Album();
+    final Album album = new Album();
     album.setArtist(null);
     album.setName("Let It Be");
     album.setReleaseDate(new Date(11012400000L));
 
     // store it
-    EntityManager em = getEntityManager();
+    final EntityManager em = getEntityManager();
     em.persist(album);
     em.flush();
 
@@ -331,13 +328,13 @@ public class ErraiJpaTest extends JpaClientTestCase {
   public void testUpdateEntity() throws Exception {
 
     // make it
-    Album album = new Album();
+    final Album album = new Album();
     album.setArtist(null);
     album.setName("Abbey Road");
     album.setReleaseDate(new Date(-8366400000L));
 
     // store it
-    EntityManager em = getEntityManager();
+    final EntityManager em = getEntityManager();
     em.persist(album);
     em.flush();
 
@@ -347,7 +344,7 @@ public class ErraiJpaTest extends JpaClientTestCase {
 
     // fetch and compare
     em.clear();
-    Album fetchedAlbum = em.find(Album.class, album.getId());
+    final Album fetchedAlbum = em.find(Album.class, album.getId());
     assertNotNull(fetchedAlbum);
     assertNotSame(album, fetchedAlbum);
     assertEquals(album.toString(), fetchedAlbum.toString());
@@ -356,13 +353,13 @@ public class ErraiJpaTest extends JpaClientTestCase {
   public void testIdUpdateIsRejected() throws Exception {
 
     // make it
-    Album album = new Album();
+    final Album album = new Album();
     album.setArtist(null);
     album.setName("Abbey Road");
     album.setReleaseDate(new Date(-8366400000L));
 
     // store it
-    EntityManager em = getEntityManager();
+    final EntityManager em = getEntityManager();
     em.persist(album);
     em.flush();
 
@@ -371,7 +368,7 @@ public class ErraiJpaTest extends JpaClientTestCase {
       album.setId(1234L);
       em.flush();
       fail("ID change was not detected");
-    } catch (PersistenceException e) {
+    } catch (final PersistenceException e) {
       assertTrue(
               e.getMessage().contains("Actual ID: 1234") || // errai message
               e.getMessage().contains("to 1234")); // hibernate message
@@ -380,11 +377,11 @@ public class ErraiJpaTest extends JpaClientTestCase {
 
   public void testPersistRelatedCollection() {
     // make them
-    Artist artist = new Artist();
+    final Artist artist = new Artist();
     artist.setId(9L); // Artist uses user-assigned/non-generated IDs
     artist.setName("The Beatles");
 
-    Album album = new Album();
+    final Album album = new Album();
     album.setName("Abbey Road");
     album.setReleaseDate(new Date(-8366400000L));
 
@@ -392,7 +389,7 @@ public class ErraiJpaTest extends JpaClientTestCase {
     artist.addAlbum(album);
 
     // store it
-    EntityManager em = getEntityManager();
+    final EntityManager em = getEntityManager();
     em.persist(artist); // should cascade onto album, which is in the collection relation
     em.flush();
 
@@ -405,11 +402,11 @@ public class ErraiJpaTest extends JpaClientTestCase {
     em.clear();
 
     // ensure both are retrieved (TBD: should Errai always/ever fetch related entities?)
-    Artist fetchedArtist = em.find(Artist.class, artist.getId());
+    final Artist fetchedArtist = em.find(Artist.class, artist.getId());
     assertNotNull(fetchedArtist);
 
     assertEquals(1, fetchedArtist.getAlbums().size());
-    Album cascadeFetchedAlbum = fetchedArtist.getAlbums().iterator().next();
+    final Album cascadeFetchedAlbum = fetchedArtist.getAlbums().iterator().next();
     assertNotNull(cascadeFetchedAlbum);
 
     assertNotSame(artist, fetchedArtist);
@@ -427,18 +424,18 @@ public class ErraiJpaTest extends JpaClientTestCase {
 
   public void testPersistNullOneToMany() {
     // artist is the container
-    Artist artist = new Artist();
+    final Artist artist = new Artist();
     artist.setId(98L); // Artist uses user-assigned/non-generated IDs
     artist.setName("The Beatles");
 
     // this one has the null artist
-    Album album = new Album();
+    final Album album = new Album();
     album.setName("Mystery Album");
     album.setArtist(null);
     album.setReleaseDate(new Date(-9366400000L));
 
     // store it
-    EntityManager em = getEntityManager();
+    final EntityManager em = getEntityManager();
     em.persist(artist);
     em.persist(album);
     em.flush();
@@ -452,21 +449,21 @@ public class ErraiJpaTest extends JpaClientTestCase {
 
     em.clear();
 
-    Album fetchedAlbum2 = em.find(Album.class, album.getId());
+    final Album fetchedAlbum2 = em.find(Album.class, album.getId());
     assertNull(fetchedAlbum2.getArtist());
   }
 
   public void testFetchAssociatedEntityAlreadyInPersistenceContext() {
     // make them
-    Artist artist = new Artist();
+    final Artist artist = new Artist();
     artist.setId(99L); // Artist uses user-assigned/non-generated IDs
     artist.setName("The Beatles");
 
-    Genre rock = new Genre("Rock");
+    final Genre rock = new Genre("Rock");
     artist.addGenre(rock);
 
     // store it
-    EntityManager em = getEntityManager();
+    final EntityManager em = getEntityManager();
     em.persist(artist); // should cascade onto Rock genre, which is in the collection relation
     em.flush();
 
@@ -479,30 +476,30 @@ public class ErraiJpaTest extends JpaClientTestCase {
     em.clear();
 
     // prefetch the genre to get it into the persistence context
-    Genre fetchedRock = em.find(Genre.class, rock.getId());
+    final Genre fetchedRock = em.find(Genre.class, rock.getId());
     assertNotNull(fetchedRock);
 
-    Artist fetchedArtist = em.find(Artist.class, artist.getId());
+    final Artist fetchedArtist = em.find(Artist.class, artist.getId());
     assertNotNull(fetchedArtist);
 
     assertEquals(1, fetchedArtist.getGenres().size());
-    Genre cascadeFetchedGenre = fetchedArtist.getGenres().iterator().next();
+    final Genre cascadeFetchedGenre = fetchedArtist.getGenres().iterator().next();
     assertSame(fetchedRock, cascadeFetchedGenre);
   }
 
   public void testPersistNewEntityLifecycle() throws Exception {
 
     // make it
-    Album album = new Album();
+    final Album album = new Album();
     album.setArtist(null);
     album.setName("Abbey Road");
     album.setReleaseDate(new Date(-8366400000L));
 
-    List<CallbackLogEntry> expectedLifecycle = new ArrayList<CallbackLogEntry>();
+    final List<CallbackLogEntry> expectedLifecycle = new ArrayList<>();
     assertEquals(expectedLifecycle, Album.CALLBACK_LOG);
 
     // store it
-    EntityManager em = getEntityManager();
+    final EntityManager em = getEntityManager();
     em.persist(album);
 
     // the standalone listener is always notified before the entity itself (JPA2 section 3.5.4)
@@ -524,18 +521,18 @@ public class ErraiJpaTest extends JpaClientTestCase {
   public void testFetchEntityLifecycle() throws Exception {
 
     // make it
-    Album album = new Album();
+    final Album album = new Album();
     album.setArtist(null);
     album.setName("Abbey Road");
     album.setReleaseDate(new Date(-8366400000L));
 
     // store it
-    EntityManager em = getEntityManager();
+    final EntityManager em = getEntityManager();
     em.persist(album);
     em.flush();
     em.detach(album);
 
-    List<CallbackLogEntry> expectedLifecycle = new ArrayList<CallbackLogEntry>();
+    final List<CallbackLogEntry> expectedLifecycle = new ArrayList<>();
     expectedLifecycle.add(new CallbackLogEntry(StandaloneLifecycleListener.instanceFor(album), PrePersist.class));
     expectedLifecycle.add(new CallbackLogEntry(album, PrePersist.class));
     expectedLifecycle.add(new CallbackLogEntry(StandaloneLifecycleListener.instanceFor(album), PostPersist.class));
@@ -543,13 +540,13 @@ public class ErraiJpaTest extends JpaClientTestCase {
     assertEquals(expectedLifecycle, Album.CALLBACK_LOG);
 
     // fetch a fresh copy
-    Album fetchedAlbum = em.find(Album.class, album.getId());
+    final Album fetchedAlbum = em.find(Album.class, album.getId());
     expectedLifecycle.add(new CallbackLogEntry(StandaloneLifecycleListener.instanceFor(fetchedAlbum), PostLoad.class));
     expectedLifecycle.add(new CallbackLogEntry(fetchedAlbum, PostLoad.class));
     assertEquals(expectedLifecycle, Album.CALLBACK_LOG);
 
     // fetch again; expect no more PostLoad notifications
-    Album fetchedAlbum2 = em.find(Album.class, album.getId());
+    final Album fetchedAlbum2 = em.find(Album.class, album.getId());
     assertSame(fetchedAlbum, fetchedAlbum2);
     assertEquals(expectedLifecycle, Album.CALLBACK_LOG);
   }
@@ -557,18 +554,18 @@ public class ErraiJpaTest extends JpaClientTestCase {
   public void testRemoveEntityLifecycle() throws Exception {
 
     // make it
-    Album album = new Album();
+    final Album album = new Album();
     album.setArtist(null);
     album.setName("Abbey Road");
     album.setReleaseDate(new Date(-8366400000L));
 
     // store it
-    EntityManager em = getEntityManager();
+    final EntityManager em = getEntityManager();
     em.persist(album);
     em.flush();
     em.detach(album);
 
-    List<CallbackLogEntry> expectedLifecycle = new ArrayList<CallbackLogEntry>();
+    final List<CallbackLogEntry> expectedLifecycle = new ArrayList<>();
     expectedLifecycle.add(new CallbackLogEntry(StandaloneLifecycleListener.instanceFor(album), PrePersist.class));
     expectedLifecycle.add(new CallbackLogEntry(album, PrePersist.class));
     expectedLifecycle.add(new CallbackLogEntry(StandaloneLifecycleListener.instanceFor(album), PostPersist.class));
@@ -576,7 +573,7 @@ public class ErraiJpaTest extends JpaClientTestCase {
     assertEquals(expectedLifecycle, Album.CALLBACK_LOG);
 
     // fetch a fresh copy
-    Album fetchedAlbum = em.find(Album.class, album.getId());
+    final Album fetchedAlbum = em.find(Album.class, album.getId());
     expectedLifecycle.add(new CallbackLogEntry(StandaloneLifecycleListener.instanceFor(fetchedAlbum), PostLoad.class));
     expectedLifecycle.add(new CallbackLogEntry(fetchedAlbum, PostLoad.class));
     assertEquals(expectedLifecycle, Album.CALLBACK_LOG);
@@ -595,17 +592,17 @@ public class ErraiJpaTest extends JpaClientTestCase {
   public void testUpdateEntityLifecycle() throws Exception {
 
     // make it
-    Album album = new Album();
+    final Album album = new Album();
     album.setArtist(null);
     album.setName("Abbey Road");
     album.setReleaseDate(new Date(-8366400000L));
 
     // store it
-    EntityManager em = getEntityManager();
+    final EntityManager em = getEntityManager();
     em.persist(album);
     em.flush();
 
-    List<CallbackLogEntry> expectedLifecycle = new ArrayList<CallbackLogEntry>();
+    final List<CallbackLogEntry> expectedLifecycle = new ArrayList<>();
 
     expectedLifecycle.add(new CallbackLogEntry(StandaloneLifecycleListener.instanceFor(album), PrePersist.class));
     expectedLifecycle.add(new CallbackLogEntry(album, PrePersist.class));
@@ -627,17 +624,17 @@ public class ErraiJpaTest extends JpaClientTestCase {
   public void testMergeIntoManagedEntityLifecycle() throws Exception {
 
     // make it
-    Album album = new Album();
+    final Album album = new Album();
     album.setArtist(null);
     album.setName("Abbey Road");
     album.setReleaseDate(new Date(-8366400000L));
 
     // store it
-    EntityManager em = getEntityManager();
+    final EntityManager em = getEntityManager();
     em.persist(album);
     em.flush();
 
-    List<CallbackLogEntry> expectedLifecycle = new ArrayList<CallbackLogEntry>();
+    final List<CallbackLogEntry> expectedLifecycle = new ArrayList<>();
 
     expectedLifecycle.add(new CallbackLogEntry(StandaloneLifecycleListener.instanceFor(album), PrePersist.class));
     expectedLifecycle.add(new CallbackLogEntry(album, PrePersist.class));
@@ -646,7 +643,7 @@ public class ErraiJpaTest extends JpaClientTestCase {
     assertEquals(expectedLifecycle, Album.CALLBACK_LOG);
 
     // create a detached version of the same album, and merge the change
-    Album mergeMe = new Album();
+    final Album mergeMe = new Album();
     mergeMe.setId(album.getId());  // same ID
     mergeMe.setArtist(null);
     mergeMe.setName("Cowabunga");  // new name
@@ -665,18 +662,18 @@ public class ErraiJpaTest extends JpaClientTestCase {
   public void testMergeDetachedEntityLifecycle() throws Exception {
 
     // make it
-    Album album = new Album();
+    final Album album = new Album();
     album.setArtist(null);
     album.setName("Abbey Road");
     album.setReleaseDate(new Date(-8366400000L));
 
     // store & detach it
-    EntityManager em = getEntityManager();
+    final EntityManager em = getEntityManager();
     em.persist(album);
     em.flush();
     em.clear();
 
-    List<CallbackLogEntry> expectedLifecycle = new ArrayList<CallbackLogEntry>();
+    final List<CallbackLogEntry> expectedLifecycle = new ArrayList<>();
 
     expectedLifecycle.add(new CallbackLogEntry(StandaloneLifecycleListener.instanceFor(album), PrePersist.class));
     expectedLifecycle.add(new CallbackLogEntry(album, PrePersist.class));
@@ -691,7 +688,7 @@ public class ErraiJpaTest extends JpaClientTestCase {
 
     // events should be delivered to the merge target (the newly loaded managed instance) -- NOT album, which remains
     // detached
-    Album mergeTarget = em.find(Album.class, album.getId());
+    final Album mergeTarget = em.find(Album.class, album.getId());
     expectedLifecycle.add(new CallbackLogEntry(StandaloneLifecycleListener.instanceFor(mergeTarget), PostLoad.class));
     expectedLifecycle.add(new CallbackLogEntry(mergeTarget, PostLoad.class));
     expectedLifecycle.add(new CallbackLogEntry(StandaloneLifecycleListener.instanceFor(mergeTarget), PreUpdate.class));
@@ -704,17 +701,17 @@ public class ErraiJpaTest extends JpaClientTestCase {
   public void testMergeNewEntityLifecycle() throws Exception {
 
     // make it
-    Album album = new Album();
+    final Album album = new Album();
     album.setArtist(null);
     album.setName("Abbey Road");
     album.setReleaseDate(new Date(-8366400000L));
 
     // merge it right away (state=NEW -> state=MANAGED)
-    EntityManager em = getEntityManager();
-    Album mergeTarget = em.merge(album);
+    final EntityManager em = getEntityManager();
+    final Album mergeTarget = em.merge(album);
     em.flush();
 
-    List<CallbackLogEntry> expectedLifecycle = new ArrayList<CallbackLogEntry>();
+    final List<CallbackLogEntry> expectedLifecycle = new ArrayList<>();
 
     expectedLifecycle.add(new CallbackLogEntry(StandaloneLifecycleListener.instanceFor(mergeTarget), PrePersist.class));
     expectedLifecycle.add(new CallbackLogEntry(mergeTarget, PrePersist.class));
@@ -724,10 +721,10 @@ public class ErraiJpaTest extends JpaClientTestCase {
   }
 
   public void testStoreAndFetchOneWithEverythingUsingFieldAccess() throws Exception {
-    Timestamp timestamp = new Timestamp(1234L);
+    final Timestamp timestamp = new Timestamp(1234L);
     timestamp.setNanos(4321);
 
-    Zentity original = new Zentity(
+    final Zentity original = new Zentity(
             true, Boolean.FALSE,
             (byte) -10, Byte.valueOf((byte) -10), new byte[] { -128, 0, 127, 126, 125, 124 }, new Byte[] { -128, 0, 127, -3 },
             'a', 'a', new char[] {'\u1234', '\u0000', 'a' }, new Character[] {'\u1234', '\u0000', 'a' },
@@ -742,7 +739,7 @@ public class ErraiJpaTest extends JpaClientTestCase {
             PersistenceContextType.TRANSACTION);
 
     // store it
-    EntityManager em = getEntityManager();
+    final EntityManager em = getEntityManager();
     em.persist(original);
     em.flush();
 
@@ -750,16 +747,16 @@ public class ErraiJpaTest extends JpaClientTestCase {
 
     em.clear();
 
-    Zentity fetched = em.find(Zentity.class, original.getId());
+    final Zentity fetched = em.find(Zentity.class, original.getId());
     assertNotSame(original, fetched);
     assertEquals(original.toString(), fetched.toString());
   }
 
   public void testStoreAndFetchOneWithEverythingUsingMethodAccess() throws Exception {
-    Timestamp timestamp = new Timestamp(1234L);
+    final Timestamp timestamp = new Timestamp(1234L);
     timestamp.setNanos(4321);
 
-    MethodAccessedZentity original = new MethodAccessedZentity(
+    final MethodAccessedZentity original = new MethodAccessedZentity(
             true, Boolean.FALSE,
             (byte) -10, Byte.valueOf((byte) -10), new byte[] { -128, 0, 127, 126, 125, 124 }, new Byte[] { -128, 0, 127, -3 },
             'a', 'a', new char[] {'\u1234', '\u0000', 'a' }, new Character[] {'\u1234', '\u0000', 'a' },
@@ -774,7 +771,7 @@ public class ErraiJpaTest extends JpaClientTestCase {
             PersistenceContextType.TRANSACTION);
 
     // store it
-    EntityManager em = getEntityManager();
+    final EntityManager em = getEntityManager();
     em.persist(original);
     em.flush();
 
@@ -782,7 +779,7 @@ public class ErraiJpaTest extends JpaClientTestCase {
 
     em.clear();
 
-    MethodAccessedZentity fetched = em.find(MethodAccessedZentity.class, original.getId());
+    final MethodAccessedZentity fetched = em.find(MethodAccessedZentity.class, original.getId());
     assertNotSame(original, fetched);
     assertEquals(original.toString(), fetched.toString());
   }
@@ -791,10 +788,10 @@ public class ErraiJpaTest extends JpaClientTestCase {
    * This is to ensure that the null value of all nullable types can be marshalled and demarshalled without incident.
    */
   public void testStoreAndFetchOneWithEverythingDefaultValues() throws Exception {
-    Zentity original = new Zentity();
+    final Zentity original = new Zentity();
 
     // store it
-    EntityManager em = getEntityManager();
+    final EntityManager em = getEntityManager();
     em.persist(original);
     em.flush();
 
@@ -802,7 +799,7 @@ public class ErraiJpaTest extends JpaClientTestCase {
 
     em.clear();
 
-    Zentity fetched = em.find(Zentity.class, original.getId());
+    final Zentity fetched = em.find(Zentity.class, original.getId());
     assertNotSame(original, fetched);
     assertEquals(original.toString(), fetched.toString());
   }
@@ -815,8 +812,8 @@ public class ErraiJpaTest extends JpaClientTestCase {
    * generated code tried to assign <tt>null</tt> to the field.
    */
   public void testAddPrimitiveFieldToPreviouslyPersistedEntity() {
-    Zentity original = new Zentity();
-    EntityManager em = getEntityManager();
+    final Zentity original = new Zentity();
+    final EntityManager em = getEntityManager();
     em.persist(original);
     em.flush();
     assertNotNull(original.getId());
@@ -824,9 +821,9 @@ public class ErraiJpaTest extends JpaClientTestCase {
 
     // now we pull the JSON out of local storage and yank out the primitiveInt.
     // the idea is to simulate having stored a version of Zentity that didn't have the primitiveInt attribute
-    Key<Zentity, Long> key = Key.get((ErraiEntityManager) em, Zentity.class, original.getId());
-    String originalZentityJson = LocalStorage.get(key.toJson());
-    JSONObject jsonEntity = JSONParser.parseStrict(originalZentityJson).isObject();
+    final Key<Zentity, Long> key = Key.get((ErraiEntityManager) em, Zentity.class, original.getId());
+    final String originalZentityJson = LocalStorage.get(key.toJson());
+    final JSONObject jsonEntity = JSONParser.parseStrict(originalZentityJson).isObject();
     assertTrue("Sanity check failed: didn't find primitiveInt stored in backend entry: " + originalZentityJson,
                 jsonEntity.containsKey("primitiveInt"));
 
@@ -837,7 +834,7 @@ public class ErraiJpaTest extends JpaClientTestCase {
     LocalStorage.put(key.toJson(), jsonEntity.toString());
 
     // now try and retrieve this "old version" of Zentity
-    Zentity fetched = em.find(Zentity.class, original.getId());  // <-- this line used to blow up with NPE
+    final Zentity fetched = em.find(Zentity.class, original.getId());  // <-- this line used to blow up with NPE
     assertNotSame(original, fetched);
     assertEquals(original.toString(), fetched.toString());
   }
@@ -855,7 +852,7 @@ public class ErraiJpaTest extends JpaClientTestCase {
 
       private final Album wrapped;
 
-      AlbumProxy(Album wrapme) {
+      AlbumProxy(final Album wrapme) {
         wrapped = wrapme;
       }
 
@@ -870,7 +867,7 @@ public class ErraiJpaTest extends JpaClientTestCase {
       }
 
       @Override
-      public void setId(Long id) {
+      public void setId(final Long id) {
         wrapped.setId(id);
       }
 
@@ -890,17 +887,17 @@ public class ErraiJpaTest extends JpaClientTestCase {
       }
 
       @Override
-      public void setName(String name) {
+      public void setName(final String name) {
         wrapped.setName(name);
       }
 
       @Override
-      public void setArtist(Artist artist) {
+      public void setArtist(final Artist artist) {
         wrapped.setArtist(artist);
       }
 
       @Override
-      public void setReleaseDate(Date releaseDate) {
+      public void setReleaseDate(final Date releaseDate) {
         wrapped.setReleaseDate(releaseDate);
       }
 
@@ -910,7 +907,7 @@ public class ErraiJpaTest extends JpaClientTestCase {
       }
 
       @Override
-      public void setFormat(Format format) {
+      public void setFormat(final Format format) {
         wrapped.setFormat(format);
       }
 
@@ -930,7 +927,7 @@ public class ErraiJpaTest extends JpaClientTestCase {
       }
 
       @Override
-      public boolean equals(Object obj) {
+      public boolean equals(final Object obj) {
         return wrapped.equals(obj);
       }
     }
@@ -938,14 +935,14 @@ public class ErraiJpaTest extends JpaClientTestCase {
     album = new AlbumProxy(album);
 
     // store it
-    EntityManager em = getEntityManager();
+    final EntityManager em = getEntityManager();
     em.persist(album);
     em.flush();
     em.detach(album);
     assertNotNull(album.getId());
 
     // fetch it
-    Album fetchedAlbum = em.find(Album.class, album.getId());
+    final Album fetchedAlbum = em.find(Album.class, album.getId());
     assertNotSame(album, fetchedAlbum);
     assertEquals(album.toString(), fetchedAlbum.toString());
   }
@@ -958,14 +955,14 @@ public class ErraiJpaTest extends JpaClientTestCase {
 
     // make it
     Album album = new Album();
-    TextBox box = new TextBox();
+    final TextBox box = new TextBox();
 
-    DataBinder<Album> binder = DataBinder.forModel(album);
+    final DataBinder<Album> binder = DataBinder.forModel(album);
     album = binder.bind(box, "id").getModel();
     assertEquals("", box.getText());
 
     // store it
-    EntityManager em = getEntityManager();
+    final EntityManager em = getEntityManager();
     em.persist(album);
     em.flush();
     em.detach(album);
@@ -974,15 +971,15 @@ public class ErraiJpaTest extends JpaClientTestCase {
   }
 
   public void testEnsurePropertyChangeEventIsFiredAfterIdGeneration() {
-    DataBinder<Album> binder = DataBinder.forType(Album.class);
-    Album album = binder.getModel();
+    final DataBinder<Album> binder = DataBinder.forType(Album.class);
+    final Album album = binder.getModel();
     assertNull(album.getId());
 
     final Album eventAlbum = new Album();
     assertNull(eventAlbum.getId());
     binder.addPropertyChangeHandler(new PropertyChangeHandler<Long>() {
       @Override
-      public void onPropertyChange(PropertyChangeEvent<Long> event) {
+      public void onPropertyChange(final PropertyChangeEvent<Long> event) {
         if (event.getPropertyName().equals("id")) {
           eventAlbum.setId(event.getNewValue());
         }
@@ -993,7 +990,7 @@ public class ErraiJpaTest extends JpaClientTestCase {
     });
 
     // store it
-    EntityManager em = getEntityManager();
+    final EntityManager em = getEntityManager();
     em.persist(album);
     em.flush();
     em.detach(album);
@@ -1003,31 +1000,31 @@ public class ErraiJpaTest extends JpaClientTestCase {
   }
 
   public void testNullCollectionInEntity() throws Exception {
-    Artist artist = new Artist();
+    final Artist artist = new Artist();
     artist.setId(4433443L);
     artist.setGenres(null);
     // store it
-    EntityManager em = getEntityManager();
+    final EntityManager em = getEntityManager();
     em.persist(artist);
     em.flush();
     em.detach(artist);
 
-    Artist fetchedArtist = em.find(Artist.class, artist.getId());
+    final Artist fetchedArtist = em.find(Artist.class, artist.getId());
     assertNotNull(fetchedArtist.getGenres());
     assertEquals(0, fetchedArtist.getGenres().size());
   }
 
   public void testNullSingularReferenceInEntity() throws Exception {
-    CascadeFrom from = new CascadeFrom();
+    final CascadeFrom from = new CascadeFrom();
     from.setAll(null);
 
     // store it
-    EntityManager em = getEntityManager();
+    final EntityManager em = getEntityManager();
     em.persist(from);
     em.flush();
     em.detach(from);
 
-    CascadeFrom fetchedFrom = em.find(CascadeFrom.class, Long.valueOf(from.getId()));
+    final CascadeFrom fetchedFrom = em.find(CascadeFrom.class, Long.valueOf(from.getId()));
     assertNull(fetchedFrom.getAll());
   }
 
