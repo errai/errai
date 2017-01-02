@@ -14,5 +14,9 @@
    <replace-with class="org.jboss.errai.ui.nav.client.local.DefaultNavigatingContainer">
      <when-type-is class="org.jboss.errai.ui.nav.client.local.NavigatingContainer"/>
    </replace-with>
+   
+   <replace-with class="org.jboss.errai.ui.nav.client.local.pushstate.PathProviderImpl">
+     <when-type-is class="org.jboss.errai.ui.nav.client.local.pushstate.PathProvider" />
+   </replace-with>
 
 </module>
