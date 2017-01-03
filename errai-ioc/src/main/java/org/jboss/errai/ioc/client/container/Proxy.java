@@ -51,12 +51,12 @@ public interface Proxy<T> extends WrappedPortable {
    *
    * @param context The context associated with the {@link Factory} that created this proxy.
    */
-  void setContext(Context context);
+  void setProxyContext( Context context );
 
   /**
-   * @return The context set by {@link #setContext(Context)}.
+   * @return The context set by {@link #setProxyContext(Context)}.
    */
-  Context getContext();
+  Context getProxyContext();
 
   /**
    * Called once after {@link #setInstance(Object)} is called.

@@ -162,7 +162,7 @@ public abstract class AbstractBodyGenerator implements FactoryBodyGenerator {
               .append(declareFinalVariable("proxyImpl",
                       parameterizedAs(Proxy.class, typeParametersOf(injectable.getInjectedType())),
                       proxyInstanceStmt))
-              .append(loadVariable("proxyImpl").invoke("setContext", loadVariable("context")))
+              .append(loadVariable("proxyImpl").invoke("setProxyContext", loadVariable("context")))
               .append(loadVariable("proxyImpl").returnValue()).finish();
     }
   }
@@ -498,16 +498,16 @@ public abstract class AbstractBodyGenerator implements FactoryBodyGenerator {
   }
 
   private void implementSetContext(final ClassStructureBuilder<?> proxyImpl, final Injectable injectable) {
-    proxyImpl.publicMethod(void.class, "setContext", finalOf(Context.class, "context"))
+    proxyImpl.publicMethod(void.class, "setProxyContext", finalOf(Context.class, "context"))
              .body()
-             .append(loadVariable("proxyHelper").invoke("setContext", loadVariable("context")))
+             .append(loadVariable("proxyHelper").invoke("setProxyContext", loadVariable("context")))
              .finish();
   }
 
   private void implementGetContext(final ClassStructureBuilder<?> proxyImpl, final Injectable injectable) {
-    proxyImpl.publicMethod(Context.class, "getContext")
+    proxyImpl.publicMethod(Context.class, "getProxyContext")
              .body()
-             .append(loadVariable("proxyHelper").invoke("getContext").returnValue())
+             .append(loadVariable("proxyHelper").invoke("getProxyContext").returnValue())
              .finish();
   }
 

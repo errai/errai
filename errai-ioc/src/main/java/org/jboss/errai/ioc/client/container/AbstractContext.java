@@ -228,7 +228,7 @@ public abstract class AbstractContext implements Context {
 
   @Override
   public boolean isManaged(final Object ref) {
-    return (ref instanceof Proxy && ((Proxy<?>) ref).getContext() == this)
+    return (ref instanceof Proxy && ((Proxy<?>) ref).getProxyContext() == this)
             || factoriesByCreatedInstances.containsKey(ref);
   }
 
