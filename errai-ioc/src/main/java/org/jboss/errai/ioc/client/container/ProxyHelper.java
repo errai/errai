@@ -50,10 +50,10 @@ public interface ProxyHelper<T> {
    *
    * @param context The context associated with the containing {@link Proxy}.
    */
-  void setContext(Context context);
+  void setProxyContext( Context context );
 
   /**
-   * @return The {@link Context} previously set by {@link #setContext(Context)}.
+   * @return The {@link Context} previously set by {@link #setProxyContext(Context)}.
    */
-  Context getContext();
+  Context getProxyContext();
 }
