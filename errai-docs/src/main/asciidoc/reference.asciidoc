@@ -9642,7 +9642,7 @@ For those not using maven, here is the dependency tree of Errai project jars.
 *** dom4j:dom4j:jar:1.6.1:compile
 *** org.javassist:javassist:jar:3.15.0-GA:compile
 *** org.hibernate.common:hibernate-commons-annotations:jar:4.0.1.Final:compile
-** org.hibernate.javax.persistence:hibernate-jpa-2.0-api:jar:1.0.1.Final:compile
+** org.hibernate.javax.persistence:hibernate-jpa-2.1-api:jar:1.0.1.Final:compile
 ** org.jboss.errai:errai-ioc:jar:compile
 *** org.jboss.errai:errai-config:jar:compile
 *** org.jboss.errai:errai-codegen:jar:compile
@@ -9672,7 +9672,7 @@ For those not using maven, here is the dependency tree of Errai project jars.
 
 ==== Errai JPA Datasync
 * org.jboss.errai:errai-jpa-datasync:jar
-** org.hibernate.javax.persistence:hibernate-jpa-2.0-api:jar:1.0.1.Final:provided
+** org.hibernate.javax.persistence:hibernate-jpa-2.1-api:jar:1.0.1.Final:provided
 ** org.jboss.errai:errai-jpa-client:jar:compile
 *** org.hibernate:hibernate-entitymanager:jar:4.2.0.Final:compile
 **** org.jboss.logging:jboss-logging:jar:3.1.2.GA:compile

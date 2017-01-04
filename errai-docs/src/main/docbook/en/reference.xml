@@ -10906,7 +10906,7 @@ mvn cordova:emulator -Dplatform=ios</programlisting>
     </listitem>
   
     <listitem>
-      <simpara>org.hibernate.javax.persistence:hibernate-jpa-2.0-api:jar:1.0.1.Final:compile</simpara>
+      <simpara>org.hibernate.javax.persistence:hibernate-jpa-2.1-api:jar:1.0.1.Final:compile</simpara>
       
     </listitem>
   
@@ -11112,7 +11112,7 @@ mvn cordova:emulator -Dplatform=ios</programlisting>
 <itemizedlist>
   
     <listitem>
-      <simpara>org.hibernate.javax.persistence:hibernate-jpa-2.0-api:jar:1.0.1.Final:provided</simpara>
+      <simpara>org.hibernate.javax.persistence:hibernate-jpa-2.1-api:jar:1.0.1.Final:provided</simpara>
       
     </listitem>
   

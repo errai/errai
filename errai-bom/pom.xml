@@ -6,7 +6,7 @@
   <parent>
     <groupId>org.jboss.integration-platform</groupId>
     <artifactId>jboss-integration-platform-parent</artifactId>
-    <version>7.0.0.CR4</version>
+    <version>7.0.0.CR5</version>
     <relativePath/>
   </parent>
 
@@ -45,7 +45,7 @@
     <!-- TODO test with 2.x version in ip-bom -->
     <hsqldb.version>1.8.0.7</hsqldb.version>
     <javaee.api.version>7.0</javaee.api.version>
-    <jboss-integration-platform-bom.version>7.0.0.CR4</jboss-integration-platform-bom.version>
+    <jboss-integration-platform-bom.version>7.0.0.CR5</jboss-integration-platform-bom.version>
     <!-- ip-bom uses artifact with groupId org.jboss.remoting3 -->
     <jboss.remoting.version>4.0.0.Final</jboss.remoting.version>
     <jboss.vfs.version>3.0.1.GA</jboss.vfs.version>

@@ -115,7 +115,7 @@ public class TypedQueryFactoryGenerator {
       SessionImplementor hibernateSession = em.unwrap(SessionImplementor.class);
       ASTQueryTranslatorFactory translatorFactory = new ASTQueryTranslatorFactory();
       query = (QueryTranslatorImpl) translatorFactory.createQueryTranslator(
-              namedQuery.name(), jpaQuery, java.util.Collections.EMPTY_MAP, hibernateSession.getFactory());
+              namedQuery.name(), jpaQuery, java.util.Collections.EMPTY_MAP, hibernateSession.getFactory(), null);
 
       query.compile(Collections.EMPTY_MAP, false);
 
