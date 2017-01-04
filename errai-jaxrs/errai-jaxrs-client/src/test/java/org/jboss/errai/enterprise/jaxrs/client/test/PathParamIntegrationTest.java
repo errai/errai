@@ -25,8 +25,6 @@ import org.jboss.errai.enterprise.client.jaxrs.test.AbstractErraiJaxrsTest;
 import org.jboss.errai.enterprise.jaxrs.client.shared.PathParamTestService;
 import org.junit.Test;
 
-import com.google.gwt.http.client.Response;
-
 /**
  * Testing path parameters.
  *
@@ -42,25 +40,25 @@ public class PathParamIntegrationTest extends AbstractErraiJaxrsTest {
   @Test
   public void testGetWithPathParam() {
     call(PathParamTestService.class,
-        new SimpleAssertionCallback<Long>("@GET with @PathParam failed", 1l)).getWithPathParam(1l);
+        new SimpleAssertionCallback<>("@GET with @PathParam failed", 1l)).getWithPathParam(1l);
   }
 
   @Test
   public void testGetWithPathParamRegex() {
     call(PathParamTestService.class,
-        new SimpleAssertionCallback<Long>("@GET with @PathParam using regex failed", 2l)).getWithPathParamRegex(2l);
+        new SimpleAssertionCallback<>("@GET with @PathParam using regex failed", 2l)).getWithPathParamRegex(2l);
   }
 
   @Test
   public void testGetWithPathParamRegexAndCurlyBracesQuantifier() {
     call(PathParamTestService.class,
-        new SimpleAssertionCallback<Long>("@GET with @PathParam using regex failed", 2l)).getWithPathParamRegexAndCurlyBracesQuantifier(2l);
+        new SimpleAssertionCallback<>("@GET with @PathParam using regex failed", 2l)).getWithPathParamRegexAndCurlyBracesQuantifier(2l);
   }
 
   @Test
   public void testGetWithEncodedPathParam() {
     final String pathWithSpecialChars = "?<>!@#$%^\\&*()-+;:''\\/.,";
-    call(PathParamTestService.class, new SimpleAssertionCallback<String>("@GET w/ encoded @PathParam failed",
+    call(PathParamTestService.class, new SimpleAssertionCallback<>("@GET w/ encoded @PathParam failed",
         pathWithSpecialChars)).getWithStringPathParam(pathWithSpecialChars);
   }
 
@@ -74,7 +72,7 @@ public class PathParamIntegrationTest extends AbstractErraiJaxrsTest {
     assertNull(ps.getMatrixParameters().getFirst("path"));
 
     call(PathParamTestService.class,
-        new SimpleAssertionCallback<String>("@GET with @PathParam failed", "nameValue/authorValue"))
+        new SimpleAssertionCallback<>("@GET with @PathParam failed", "nameValue/authorValue"))
         .getWithPathSegmentPathParam(ps);
   }
   @Test
@@ -88,36 +86,36 @@ public class PathParamIntegrationTest extends AbstractErraiJaxrsTest {
   @Test
   public void testGetWithMultiplePathParams() {
     call(PathParamTestService.class,
-        new SimpleAssertionCallback<String>("@GET with @PathParams failed", "1/2")).getWithMultiplePathParams(1, 2);
+        new SimpleAssertionCallback<>("@GET with @PathParams failed", "1/2")).getWithMultiplePathParams(1, 2);
   }
 
   @Test
   public void testGetWithReusedPathParam() {
     call(PathParamTestService.class,
-        new SimpleAssertionCallback<String>("@GET with @PathParam failed", "1.0/2.0/1.0")).getWithReusedPathParam(1.0, 2.0);
+        new SimpleAssertionCallback<>("@GET with @PathParam failed", "1.0/2.0/1.0")).getWithReusedPathParam(1.0, 2.0);
   }
 
   @Test
   public void testPostWithPathParam() {
     call(PathParamTestService.class,
-        new SimpleAssertionCallback<Float>("@POST with @PathParam failed", 1f)).postWithPathParam("", 1f);
+        new SimpleAssertionCallback<>("@POST with @PathParam failed", 1f)).postWithPathParam("", 1f);
   }
 
   @Test
   public void testPutWithPathParam() {
     call(PathParamTestService.class,
-        new SimpleAssertionCallback<Long>("@PUT with @PathParam failed", 3l)).putWithPathParam(2l, 1l);
+        new SimpleAssertionCallback<>("@PUT with @PathParam failed", 3l)).putWithPathParam(2l, 1l);
   }
 
   @Test
   public void testDeleteWithPathParam() {
     call(PathParamTestService.class,
-        new SimpleAssertionCallback<Long>("@DELETE with @PathParam failed", 1l)).deleteWithPathParam(1l);
+        new SimpleAssertionCallback<>("@DELETE with @PathParam failed", 1l)).deleteWithPathParam(1l);
   }
 
   @Test
   public void testHeadWithPathParam() {
     call(PathParamTestService.class,
-        new AssertionResponseCallback("@HEAD with @PathParam failed", Response.SC_NO_CONTENT)).headWithPathParam(1l);
+        new SimpleAssertionCallback<>("@HEAD with @PathParam failed", null)).headWithPathParam(1l);
   }
 }

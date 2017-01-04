@@ -16,25 +16,23 @@
 
 package org.jboss.errai.enterprise.jaxrs.client.shared.interceptor;
 
-import org.jboss.errai.enterprise.client.jaxrs.api.ResponseCallback;
+import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.enterprise.client.jaxrs.api.interceptor.RestCallContext;
 import org.jboss.errai.enterprise.client.jaxrs.api.interceptor.RestClientInterceptor;
 
-import com.google.gwt.http.client.Response;
-
 /**
  * Rest client interceptor for testing purposes. Manipulates the result returned from the remote endpoint.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class RestCallInterceptorUsingResponseCallback implements RestClientInterceptor {
 
   @Override
   public void aroundInvoke(final RestCallContext context) {
-    context.proceed(new ResponseCallback() {
+    context.proceed(new RemoteCallback<String>() {
       @Override
-      public void callback(Response response) {
-        context.setResult(response.getText() + "_intercepted");
+      public void callback(final String response) {
+        context.setResult(response + "_intercepted");
       }
     });
   }

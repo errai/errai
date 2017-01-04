@@ -3876,15 +3876,16 @@ RemoteCallback<Long> callback = new RemoteCallback<Long>() {
 };
 ----
 
-A special case of this [code]+RemoteCallback+ is the [code]+ResponseCallback+ which can be used as an alternative. It provides access to the [code]+Response+ object representing the underlying HTTP response. This is useful when more details of the HTTP response are needed, such as headers and the status code. The [code]+ResponseCallback+ can also be used for JAX-RS interface methods that return a [code]+javax.ws.rs.core.Response+ type. In this case, the [code]+MarshallingWrapper+ class can be used to manually demarshall the response body to an entity of the desired type.
+One special use case for the [code]+RemoteCallback+ is for JAX-RS interface methods that return a [code]+javax.ws.rs.core.Response+ type. Errai does not provide a client implementation of the [code]+javax.ws.rs.core.Response+ class. Instead calls to methods returning a [code]+javax.ws.rs.core.Response+ should use a [code]+RemoteCallback<com.google.gwt.http.client.Response>+. The [code]+MarshallingWrapper+ class can be used to manually deserialize an entity from the body of a response.
 
 
 [source, java]
 ----
-ResponseCallback callback = new ResponseCallback() {
+RemoteCallback<Response> callback = new RemoteCallback<Response>() {
   public void callback(Response response) {
     Window.alert("HTTP status code: " + response.getStatusCode());
     Window.alert("HTTP response body: " + response.getText());
+    Window.alert("Demarshalled entity: " + MasrhallingWrapper.fromJSON(response.getText()));
   }
 };
 ----

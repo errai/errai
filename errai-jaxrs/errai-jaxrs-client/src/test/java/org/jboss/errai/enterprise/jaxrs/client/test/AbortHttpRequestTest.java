@@ -16,9 +16,9 @@
 
 package org.jboss.errai.enterprise.jaxrs.client.test;
 
+import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.enterprise.client.jaxrs.api.RequestCallback;
 import org.jboss.errai.enterprise.client.jaxrs.api.RequestHolder;
-import org.jboss.errai.enterprise.client.jaxrs.api.ResponseCallback;
 import org.jboss.errai.enterprise.client.jaxrs.api.RestErrorCallback;
 import org.jboss.errai.enterprise.client.jaxrs.test.AbstractErraiJaxrsTest;
 import org.jboss.errai.enterprise.jaxrs.client.shared.JaxrsResponseObjectTestService;
@@ -39,20 +39,20 @@ public class AbortHttpRequestTest extends AbstractErraiJaxrsTest {
 
   public void testRequestCallback() {
     delayTestFinish(5000);
-    call(JaxrsResponseObjectTestService.class, new ResponseCallback() {
+    call(JaxrsResponseObjectTestService.class, new RemoteCallback<Response>() {
       @Override
-      public void callback(Response response) {
+      public void callback(final Response response) {
         fail("Callback should not be invoked");
       }
     }, new RestErrorCallback() {
       @Override
-      public boolean error(Request message, Throwable throwable) {
+      public boolean error(final Request message, final Throwable throwable) {
         fail("ErrorCallback should not be invoked");
         return false;
       }
     }, new RequestCallback() {
       @Override
-      public void callback(Request request) {
+      public void callback(final Request request) {
         assertNotNull(request);
         assertTrue(request.isPending());
         request.cancel();
@@ -62,15 +62,15 @@ public class AbortHttpRequestTest extends AbstractErraiJaxrsTest {
   }
 
   public void testRequestHolder() {
-    RequestHolder requestHolder = new RequestHolder();
-    call(JaxrsResponseObjectTestService.class, new ResponseCallback() {
+    final RequestHolder requestHolder = new RequestHolder();
+    call(JaxrsResponseObjectTestService.class, new RemoteCallback<Response>() {
       @Override
-      public void callback(Response response) {
+      public void callback(final Response response) {
         fail("Callback should not be invoked");
       }
     }, new RestErrorCallback() {
       @Override
-      public boolean error(Request message, Throwable throwable) {
+      public boolean error(final Request message, final Throwable throwable) {
         fail("ErrorCallback should not be invoked");
         return false;
       }

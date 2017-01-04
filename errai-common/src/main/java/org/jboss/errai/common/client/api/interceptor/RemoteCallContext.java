@@ -21,7 +21,7 @@ import org.jboss.errai.common.client.api.RemoteCallback;
 
 /**
  * Represents the context of an intercepted remote call.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public abstract class RemoteCallContext extends CallContext {
@@ -29,7 +29,7 @@ public abstract class RemoteCallContext extends CallContext {
 
   /**
    * Returns the result of the intercepted remote call.
-   * 
+   *
    * @return intercepted method result, may be null.
    */
   public Object getResult() {
@@ -42,18 +42,18 @@ public abstract class RemoteCallContext extends CallContext {
    * instead cause the {@link RemoteCallback} specified in the previous
    * interceptor or at the actual remote call site to be invoked with the
    * provided result.
-   * 
+   *
    * @param result
    *          The result to return to the caller of the intercepted method.
    */
-  public void setResult(Object result) {
+  public void setResult(final Object result) {
     this.result = result;
   }
 
   /**
    * Proceeds to the next interceptor in the chain or with the execution of the
    * intercepted method if all interceptors have been executed.
-   * 
+   *
    * @param callback
    *          The remote callback that receives the return value from the call.
    *          This callback is guaranteed to be invoked before the callback
@@ -64,12 +64,12 @@ public abstract class RemoteCallContext extends CallContext {
   /**
    * Proceeds to the next interceptor in the chain or with the execution of the
    * intercepted method if all interceptors have been executed.
-   * 
+   *
    * @param callback
    *          The remote callback that receives the return value from the call.
    *          This callback is guaranteed to be invoked before the callback
    *          provided on the actual call site. Cannot be null.
-   * 
+   *
    * @param errorCallback
    *          The error callback that receives transmission errors and
    *          exceptions thrown by the remote service. This error callback is

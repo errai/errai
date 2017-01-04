@@ -16,42 +16,44 @@
 
 package org.jboss.errai.enterprise.jaxrs.server;
 
+import javax.ws.rs.core.Response;
+
 import org.jboss.errai.enterprise.jaxrs.client.shared.HeaderParamTestService;
 
 /**
  * Implementation of {@link HeaderParamTestService} returning test data.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class HeaderParamTestServiceImpl implements HeaderParamTestService {
 
   @Override
-  public String getWithHeaderParam(String id) {
+  public String getWithHeaderParam(final String id) {
     return id;
   }
 
   @Override
-  public String getWithMultipleHeaderParams(String id1, Float id2) {
+  public String getWithMultipleHeaderParams(final String id1, final Float id2) {
     return "" + id1 + "/" + id2;
-  } 
-  
+  }
+
   @Override
-  public String postWithHeaderParam(String entity, String id) {
+  public String postWithHeaderParam(final String entity, final String id) {
     return entity + "/" + id;
   }
 
   @Override
-  public String putWithHeaderParam(String id) {
+  public String putWithHeaderParam(final String id) {
     return id;
   }
 
   @Override
-  public String deleteWithHeaderParam(String id) {
+  public String deleteWithHeaderParam(final String id) {
     return id;
   }
 
   @Override
-  public void headWithHeaderParam(String header) {
-    
+  public Response headWithHeaderParam(final String header) {
+    return Response.noContent().build();
   }
 }

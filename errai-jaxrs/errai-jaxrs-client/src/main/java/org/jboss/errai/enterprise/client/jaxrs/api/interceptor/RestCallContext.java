@@ -17,16 +17,13 @@
 package org.jboss.errai.enterprise.client.jaxrs.api.interceptor;
 
 import org.jboss.errai.common.client.api.Assert;
-import org.jboss.errai.common.client.api.ErrorCallback;
 import org.jboss.errai.common.client.api.interceptor.RemoteCallContext;
-import org.jboss.errai.enterprise.client.jaxrs.api.ResponseCallback;
 
 import com.google.gwt.http.client.RequestBuilder;
-import com.google.gwt.http.client.Response;
 
 /**
  * Represents the context of an intercepted JAX-RS (REST) remote call.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public abstract class RestCallContext extends RemoteCallContext {
@@ -39,7 +36,7 @@ public abstract class RestCallContext extends RemoteCallContext {
    * Note that a call to {@link #setParameters(Object[])} will change this
    * context's {@link RequestBuilder} instance to reflect the parameter changes
    * (affecting the URL and HTTP headers).
-   * 
+   *
    * @return the {@link RequestBuilder} with the URL, HTTP method and HTTP
    *         headers set.
    */
@@ -50,39 +47,12 @@ public abstract class RestCallContext extends RemoteCallContext {
   /**
    * Changes the {@link RequestBuilder} instance used to execute the call to the
    * REST endpoint.
-   * 
+   *
    * @param requestBuilder
    *          the {@link RequestBuilder} instance to use when proceeding with
    *          the request. Must not be null.
    */
-  public void setRequestBuilder(RequestBuilder requestBuilder) {
+  public void setRequestBuilder(final RequestBuilder requestBuilder) {
     this.requestBuilder = Assert.notNull(requestBuilder);
   }
-
-  /**
-   * Proceeds to the next interceptor in the chain or with the execution of the
-   * intercepted method if all interceptors have been executed.
-   * 
-   * @param callback
-   *          The response callback that receives the {@link Response} of the
-   *          call. This callback is guaranteed to be invoked before the
-   *          callback provided on the actual call site. Cannot be null.
-   */
-  public abstract void proceed(ResponseCallback callback);
-
-  /**
-   * Proceeds to the next interceptor in the chain or with the execution of the
-   * intercepted method if all interceptors have been executed.
-   * 
-   * @param callback
-   *          The response callback that receives the {@link Response} of the
-   *          call. This callback is guaranteed to be invoked before the
-   *          callback provided on the actual call site. Cannot be null.
-   * 
-   * @param errorCallback
-   *          The error callback that receives transmission errors. This error
-   *          callback is guaranteed to be invoked before the error callback
-   *          provided on the actual call site. Cannot be null.
-   */
-  public abstract void proceed(ResponseCallback callback, ErrorCallback<?> errorCallback);
 }

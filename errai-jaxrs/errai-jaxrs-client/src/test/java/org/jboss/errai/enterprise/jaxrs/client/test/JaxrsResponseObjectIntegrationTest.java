@@ -16,7 +16,7 @@
 
 package org.jboss.errai.enterprise.jaxrs.client.test;
 
-import org.jboss.errai.enterprise.client.jaxrs.api.ResponseCallback;
+import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.enterprise.client.jaxrs.api.ResponseException;
 import org.jboss.errai.enterprise.client.jaxrs.api.RestErrorCallback;
 import org.jboss.errai.enterprise.client.jaxrs.test.AbstractErraiJaxrsTest;
@@ -30,7 +30,7 @@ import com.google.gwt.http.client.Response;
 
 /**
  * Testing the usage of {@link javax.ws.rs.core.Response} on the client.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class JaxrsResponseObjectIntegrationTest extends AbstractErraiJaxrsTest {
@@ -43,9 +43,9 @@ public class JaxrsResponseObjectIntegrationTest extends AbstractErraiJaxrsTest {
   @Test
   public void testGet() {
     call(JaxrsResponseObjectTestService.class,
-        new ResponseCallback() {
+        new RemoteCallback<Response>() {
           @Override
-          public void callback(Response response) {
+          public void callback(final Response response) {
             assertEquals(200, response.getStatusCode());
             assertEquals(new Entity(1l, "entity"), Marshalling.fromJSON(response.getText(), Entity.class));
             finishTest();
@@ -58,24 +58,24 @@ public class JaxrsResponseObjectIntegrationTest extends AbstractErraiJaxrsTest {
   @Test
   public void testGetWithError() {
     call(JaxrsResponseObjectTestService.class,
-        new ResponseCallback() {
+        new RemoteCallback<Response>() {
           @Override
-          public void callback(Response response) {
+          public void callback(final Response response) {
             fail("Callback should not be invoked");
           }
         },
         new RestErrorCallback() {
           @Override
-          public boolean error(Request request, Throwable throwable) {
+          public boolean error(final Request request, final Throwable throwable) {
             try {
               throw throwable;
             }
-            catch (ResponseException e) {
+            catch (final ResponseException e) {
               assertNotNull("Request object should not be null", request);
               assertEquals("Wrong status code received", Response.SC_NOT_FOUND, e.getResponse().getStatusCode());
               finishTest();
             }
-            catch (Throwable t) {
+            catch (final Throwable t) {
               fail("Expected ResponseException");
             }
             return false;
@@ -88,9 +88,9 @@ public class JaxrsResponseObjectIntegrationTest extends AbstractErraiJaxrsTest {
   @Test
   public void testPost() {
     call(JaxrsResponseObjectTestService.class,
-        new ResponseCallback() {
+        new RemoteCallback<Response>() {
           @Override
-          public void callback(Response response) {
+          public void callback(final Response response) {
             assertEquals(200, response.getStatusCode());
             assertEquals("test", response.getText());
             finishTest();

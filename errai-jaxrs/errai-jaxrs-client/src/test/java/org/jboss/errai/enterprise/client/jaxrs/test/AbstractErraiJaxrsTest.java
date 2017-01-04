@@ -21,7 +21,6 @@ import java.util.function.Function;
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.enterprise.client.jaxrs.JaxrsModule;
 import org.jboss.errai.enterprise.client.jaxrs.api.RequestCallback;
-import org.jboss.errai.enterprise.client.jaxrs.api.ResponseCallback;
 import org.jboss.errai.enterprise.client.jaxrs.api.RestClient;
 import org.jboss.errai.enterprise.client.jaxrs.api.RestErrorCallback;
 
@@ -100,7 +99,7 @@ public abstract class AbstractErraiJaxrsTest extends GWTTestCase {
     }
   }
 
-  protected class AssertionResponseCallback implements ResponseCallback {
+  protected class AssertionResponseCallback implements RemoteCallback<Response> {
     private final String msg;
     private final int statusCode;
     private String body;

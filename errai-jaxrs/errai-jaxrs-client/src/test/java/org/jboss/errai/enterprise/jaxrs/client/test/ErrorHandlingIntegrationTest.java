@@ -17,7 +17,6 @@
 package org.jboss.errai.enterprise.jaxrs.client.test;
 
 import org.jboss.errai.common.client.api.RemoteCallback;
-import org.jboss.errai.enterprise.client.jaxrs.api.ResponseCallback;
 import org.jboss.errai.enterprise.client.jaxrs.api.ResponseException;
 import org.jboss.errai.enterprise.client.jaxrs.api.RestClient;
 import org.jboss.errai.enterprise.client.jaxrs.api.RestErrorCallback;
@@ -31,7 +30,7 @@ import com.google.gwt.http.client.Response;
 
 /**
  * Testing error handling features.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class ErrorHandlingIntegrationTest extends AbstractErraiJaxrsTest {
@@ -46,22 +45,22 @@ public class ErrorHandlingIntegrationTest extends AbstractErraiJaxrsTest {
     call(ErrorHandlingTestService.class,
         new RemoteCallback<Long>() {
           @Override
-          public void callback(Long response) {
+          public void callback(final Long response) {
             fail("Callback should not be invoked");
           }
         },
         new RestErrorCallback() {
           @Override
-          public boolean error(Request request, Throwable throwable) {
+          public boolean error(final Request request, final Throwable throwable) {
             try {
               throw throwable;
             }
-            catch (ResponseException e) {
+            catch (final ResponseException e) {
               assertNotNull("Request object should not be null", request);
               assertEquals("Wrong status code received", Response.SC_NOT_FOUND, e.getResponse().getStatusCode());
               finishTest();
             }
-            catch (Throwable t) {
+            catch (final Throwable t) {
               fail("Expected ResponseException");
             }
             return false;
@@ -71,28 +70,28 @@ public class ErrorHandlingIntegrationTest extends AbstractErraiJaxrsTest {
 
     delayTestFinish(5000);
   }
-  
+
   @Test
   public void testErrorHandlingWithInvalidBaseUrl() {
     delayTestFinish(5000);
-    
+
     RestClient.create(PlainMethodTestService.class, "http://somewhere.zzz/invalidpath",
         new RemoteCallback<Long>() {
           @Override
-          public void callback(Long response) {
+          public void callback(final Long response) {
             fail("Callback should not be invoked");
           }
         },
         new RestErrorCallback() {
           @Override
-          public boolean error(Request request, Throwable throwable) {
+          public boolean error(final Request request, final Throwable throwable) {
             try {
               throw throwable;
             }
-            catch (ResponseException e) {
+            catch (final ResponseException e) {
               finishTest();
             }
-            catch (Throwable t) {
+            catch (final Throwable t) {
               fail("Expected ResponseException. Observed: " + t);
             }
             return false;
@@ -104,24 +103,24 @@ public class ErrorHandlingIntegrationTest extends AbstractErraiJaxrsTest {
   @Test
   public void testErrorHandlingUsingResponseCallback() {
     call(ErrorHandlingTestService.class,
-        new ResponseCallback() {
+        new RemoteCallback<Response>() {
           @Override
-          public void callback(Response response) {
+          public void callback(final Response response) {
             fail("Callback should not be invoked");
           }
         },
         new RestErrorCallback() {
           @Override
-          public boolean error(Request request, Throwable throwable) {
+          public boolean error(final Request request, final Throwable throwable) {
             try {
               throw throwable;
             }
-            catch (ResponseException e) {
+            catch (final ResponseException e) {
               assertNotNull("Request object should not be null", request);
               assertEquals("Wrong status code received", Response.SC_NOT_FOUND, e.getResponse().getStatusCode());
               finishTest();
             }
-            catch (Throwable t) {
+            catch (final Throwable t) {
               fail("Expected ResponseException");
             }
             return false;
@@ -133,41 +132,27 @@ public class ErrorHandlingIntegrationTest extends AbstractErraiJaxrsTest {
   }
 
   @Test
-  public void testErrorHandlingUsingResponseCallbackOnly() {
-    RestClient.create(ErrorHandlingTestService.class,
-        new ResponseCallback() {
-          @Override
-          public void callback(Response response) {
-            assertEquals("Wrong status code received", Response.SC_NOT_FOUND, response.getStatusCode());
-            finishTest();
-          }
-        }).error();
-
-    delayTestFinish(5000);
-  }
-  
-  @Test
   public void testErrorHandlingUsingSpecifiedSuccessCodes() {
     RestClient.create(PlainMethodTestService.class,
-        new ResponseCallback() {
+        new RemoteCallback<Response>() {
           @Override
-          public void callback(Response response) {
+          public void callback(final Response response) {
             fail("Callback should not be invoked");
           }
         },
         new RestErrorCallback() {
           @Override
-          public boolean error(Request request, Throwable throwable) {
+          public boolean error(final Request request, final Throwable throwable) {
             try {
               throw throwable;
             }
-            catch (ResponseException e) {
+            catch (final ResponseException e) {
               assertNotNull("Request object should not be null", request);
               // expected: Specified CREATED and NO_CONTENT as success codes but OK was returned
               assertEquals("Wrong status code received", Response.SC_OK, e.getResponse().getStatusCode());
               finishTest();
             }
-            catch (Throwable t) {
+            catch (final Throwable t) {
               fail("Expected ResponseException");
             }
             return false;

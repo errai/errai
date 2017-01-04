@@ -20,11 +20,9 @@ import org.jboss.errai.enterprise.client.jaxrs.test.AbstractErraiJaxrsTest;
 import org.jboss.errai.enterprise.jaxrs.client.shared.MatrixParamTestService;
 import org.junit.Test;
 
-import com.google.gwt.http.client.Response;
-
 /**
  * Testing matrix parameters.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class MatrixParamIntegrationTest extends AbstractErraiJaxrsTest {
@@ -37,38 +35,38 @@ public class MatrixParamIntegrationTest extends AbstractErraiJaxrsTest {
   @Test
   public void testGetWithSingleMatrixParam() {
     call(MatrixParamTestService.class,
-        new SimpleAssertionCallback<String>("@GET with single @MatrixParam failed", "path/1")).getWithSingleMatrixParam(
+        new SimpleAssertionCallback<>("@GET with single @MatrixParam failed", "path/1")).getWithSingleMatrixParam(
         "path", "1");
   }
 
   @Test
   public void testGetWithMatrixParams() {
     call(MatrixParamTestService.class,
-        new SimpleAssertionCallback<String>("@GET with @MatrixParams failed", "1/2")).getWithMatrixParams(1l, 2l);
+        new SimpleAssertionCallback<>("@GET with @MatrixParams failed", "1/2")).getWithMatrixParams(1l, 2l);
   }
 
   @Test
   public void testPostWithMatrixParams() {
     call(MatrixParamTestService.class,
-        new SimpleAssertionCallback<String>("@POST with @MatrixParams failed", "entity/1/2")).postWithMatrixParams("entity", "1", "2");
+        new SimpleAssertionCallback<>("@POST with @MatrixParams failed", "entity/1/2")).postWithMatrixParams("entity", "1", "2");
   }
 
   @Test
   public void testPutWithMatrixParams() {
     call(MatrixParamTestService.class,
-        new SimpleAssertionCallback<String>("@PUT with @MatrixParams failed", "1/2/3")).putWithMatrixParams("1", "2", "3");
+        new SimpleAssertionCallback<>("@PUT with @MatrixParams failed", "1/2/3")).putWithMatrixParams("1", "2", "3");
   }
 
   @Test
   public void testDeleteWithMatrixParams() {
     call(MatrixParamTestService.class,
-        new SimpleAssertionCallback<String>("@DELETE with @MatrixParam failed", "1/2")).deleteWithMatrixParams("1", "2");
+        new SimpleAssertionCallback<>("@DELETE with @MatrixParam failed", "1/2")).deleteWithMatrixParams("1", "2");
   }
 
   @Test
   public void testHeadWithMatrixParams() {
     call(MatrixParamTestService.class,
-        new AssertionResponseCallback("@HEAD with @MatrixParam failed", Response.SC_NO_CONTENT))
+        new SimpleAssertionCallback<>("@HEAD with @MatrixParam failed", null))
         .headWithMatrixParams("1", "2", "3");
   }
 }

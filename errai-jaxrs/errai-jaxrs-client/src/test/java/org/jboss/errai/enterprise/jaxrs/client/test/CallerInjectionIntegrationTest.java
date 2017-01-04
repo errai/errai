@@ -18,7 +18,6 @@ package org.jboss.errai.enterprise.jaxrs.client.test;
 
 import org.jboss.errai.common.client.api.ErrorCallback;
 import org.jboss.errai.common.client.api.RemoteCallback;
-import org.jboss.errai.enterprise.client.jaxrs.api.ResponseCallback;
 import org.jboss.errai.enterprise.client.jaxrs.api.ResponseException;
 import org.jboss.errai.enterprise.client.jaxrs.api.RestErrorCallback;
 import org.jboss.errai.enterprise.client.jaxrs.test.AbstractErraiJaxrsTest;
@@ -102,7 +101,7 @@ public class CallerInjectionIntegrationTest extends AbstractErraiJaxrsTest {
     delayTestFinish(5000);
     TestModule.getInstance().getErrorHandlingTestService()
         .call(
-            new ResponseCallback() {
+            new RemoteCallback<Response>() {
               @Override
               public void callback(final Response response) {
                 fail("Callback should not be invoked");

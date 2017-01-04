@@ -20,7 +20,7 @@ import org.jboss.errai.common.client.api.interceptor.RemoteCallInterceptor;
 
 /**
  * Represents a client-side interceptor for JAX-RS (REST) remote calls.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public interface RestClientInterceptor extends RemoteCallInterceptor<RestCallContext> {

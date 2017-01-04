@@ -20,11 +20,9 @@ import org.jboss.errai.enterprise.client.jaxrs.test.AbstractErraiJaxrsTest;
 import org.jboss.errai.enterprise.jaxrs.client.shared.PlainMethodTestService;
 import org.junit.Test;
 
-import com.google.gwt.http.client.Response;
-
 /**
  * Testing all supported HTTP methods.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class PlainMethodIntegrationTest extends AbstractErraiJaxrsTest {
@@ -36,19 +34,19 @@ public class PlainMethodIntegrationTest extends AbstractErraiJaxrsTest {
 
   @Test
   public void testGetWithRemoteCallback() {
-    call(PlainMethodTestService.class, new SimpleAssertionCallback<String>("@GET failed", "get")).get();
+    call(PlainMethodTestService.class, new SimpleAssertionCallback<>("@GET failed", "get")).get();
   }
 
   @Test
   public void testGetWithResponseCallback() {
     call(PlainMethodTestService.class,
-        new AssertionResponseCallback("@GET using a ResponseCallback failed", Response.SC_OK, "get")).get();
+        new SimpleAssertionCallback<>("@GET using a ResponseCallback failed", "get")).get();
   }
 
   @Test
   public void testGetWithSpecifiedBaseUrl() {
     call(PlainMethodTestService.class, "/",
-        new AssertionResponseCallback("@GET using an overridden root path failed", Response.SC_OK, "get")).get();
+        new SimpleAssertionCallback<>("@GET using an overridden root path failed", "get")).get();
   }
 
   @Test
@@ -59,55 +57,55 @@ public class PlainMethodIntegrationTest extends AbstractErraiJaxrsTest {
 
   @Test
   public void testGetWithPathWithoutSlash() {
-    call(PlainMethodTestService.class, "/", new SimpleAssertionCallback<String>("@GET with @Path without slash failed",
+    call(PlainMethodTestService.class, "/", new SimpleAssertionCallback<>("@GET with @Path without slash failed",
             "getWithPathWithoutSlash")).getWithPathWithoutSlash();
   }
 
   @Test
   public void testPostWithRemoteCallback() {
     call(PlainMethodTestService.class,
-        new SimpleAssertionCallback<String>("@POST without parameters failed", "post")).post();
+        new SimpleAssertionCallback<>("@POST without parameters failed", "post")).post();
   }
 
   @Test
   public void testPostReturningNull() {
     call(PlainMethodTestService.class,
-        new SimpleAssertionCallback<String>("@POST without parameters failed", null)).postReturningNull();
+        new SimpleAssertionCallback<>("@POST without parameters failed", null)).postReturningNull();
   }
 
   @Test
   public void testPostWithResponseCallback() {
     call(PlainMethodTestService.class,
-        new AssertionResponseCallback("@POST using a ResponseCallback failed", Response.SC_OK, "post")).post();
+        new SimpleAssertionCallback<>("@POST using a ResponseCallback failed", "post")).post();
   }
 
   @Test
   public void testPutWithRemoteCallback() {
     call(PlainMethodTestService.class,
-        new SimpleAssertionCallback<String>("@PUT without parameters failed", "put")).put();
+        new SimpleAssertionCallback<>("@PUT without parameters failed", "put")).put();
   }
 
   @Test
   public void testPutWithResponseCallback() {
     call(PlainMethodTestService.class,
-        new AssertionResponseCallback("@PUT using a ResponseCallback failed", Response.SC_OK, "put")).put();
+        new SimpleAssertionCallback<>("@PUT using a ResponseCallback failed", "put")).put();
   }
 
   @Test
   public void testDeleteWithRemoteCallback() {
     call(PlainMethodTestService.class,
-        new SimpleAssertionCallback<String>("@DELETE without parameters failed", "delete")).delete();
+        new SimpleAssertionCallback<>("@DELETE without parameters failed", "delete")).delete();
   }
 
   @Test
   public void testDeleteWithResponseCallback() {
     call(PlainMethodTestService.class,
-        new AssertionResponseCallback("@DELETE using a ResponseCallback failed", Response.SC_OK, "delete")).delete();
+        new SimpleAssertionCallback<>("@DELETE using a ResponseCallback failed", "delete")).delete();
   }
 
   @Test
   public void testHeadWithResponseCallback() {
     call(PlainMethodTestService.class,
-        new AssertionResponseCallback("@HEAD using a ResponseCallback failed", Response.SC_OK)).head();
+        new SimpleAssertionCallback<>("@HEAD using a ResponseCallback failed", "")).head();
   }
 }

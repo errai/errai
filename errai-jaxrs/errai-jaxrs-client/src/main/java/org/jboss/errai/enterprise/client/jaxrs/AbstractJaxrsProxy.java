@@ -16,21 +16,25 @@
 
 package org.jboss.errai.enterprise.client.jaxrs;
 
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.http.client.*;
+import java.lang.annotation.Annotation;
+import java.util.List;
+
 import org.jboss.errai.common.client.api.ErrorCallback;
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.common.client.framework.ClientCSRFTokenCache;
 import org.jboss.errai.common.client.framework.Constants;
 import org.jboss.errai.common.client.framework.RpcBatch;
 import org.jboss.errai.common.client.framework.RpcStub;
-import org.jboss.errai.enterprise.client.jaxrs.api.ResponseCallback;
 import org.jboss.errai.enterprise.client.jaxrs.api.ResponseException;
 import org.jboss.errai.enterprise.client.jaxrs.api.RestClient;
 import org.jboss.errai.enterprise.client.jaxrs.api.RestErrorCallback;
 
-import java.lang.annotation.Annotation;
-import java.util.List;
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.http.client.Request;
+import com.google.gwt.http.client.RequestBuilder;
+import com.google.gwt.http.client.RequestCallback;
+import com.google.gwt.http.client.RequestException;
+import com.google.gwt.http.client.Response;
 
 /**
  * JAX-RS proxies are {@link RpcStub}s managed by the shared {@see
@@ -81,7 +85,7 @@ public abstract class AbstractJaxrsProxy implements RpcStub {
    * @param baseUrl
    *          the base URL used to contact the remote service
    */
-  public void setBaseUrl(String baseUrl) {
+  public void setBaseUrl(final String baseUrl) {
     this.baseUrl = baseUrl;
   }
 
@@ -102,7 +106,7 @@ public abstract class AbstractJaxrsProxy implements RpcStub {
    * @param successCodes
    *          list of HTTP status codes
    */
-  public void setSuccessCodes(List<Integer> successCodes) {
+  public void setSuccessCodes(final List<Integer> successCodes) {
     this.successCodes = successCodes;
   }
 
@@ -125,7 +129,7 @@ public abstract class AbstractJaxrsProxy implements RpcStub {
       }
       final Request request = requestBuilder.sendRequest(requestBody, new RequestCallback() {
         @Override
-        public void onError(Request request, Throwable throwable) {
+        public void onError(final Request request, final Throwable throwable) {
           handleError(throwable, request, null);
         }
 
@@ -137,35 +141,17 @@ public abstract class AbstractJaxrsProxy implements RpcStub {
             sendRequest(requestBuilder, requestBody, demarshallingCallback, false);
           }
           else if ((successCodes == null || successCodes.contains(statusCode)) && (statusCode >= 200 && statusCode < 300)) {
-
-            if (remoteCallback instanceof ResponseCallback) {
-              ((ResponseCallback) getRemoteCallback()).callback(response);
+            final Object demarshalledValue;
+            try {
+              demarshalledValue = demarshallingCallback.demarshallResponse(response);
+            } catch (final Throwable t) {
+              throw new RuntimeException("An error occurred while demarshalling the body of the response. ", t);
             }
-            else if (response.getStatusCode() == 204) {
-              try {
-                remoteCallback.callback(null);
-              } catch (NullPointerException npe) {
-                throw new RuntimeException(
-                        "A NullPointerException occurred while invoking a remote callback. "
-                        + "If the callback is expecting a non-null value for all response, make sure it is an instance of "
-                        + ResponseCallback.class.getName(), npe);
-              }
-            }
-            else {
-              final Object demarshalledValue;
-              try {
-                demarshalledValue = demarshallingCallback.demarshallResponse(response.getText());
-              } catch (Throwable t) {
-                throw new RuntimeException("An error occurred while demarshalling the body of the response. "
-                        + "If your callback is expecting a Reponse object and not a marshalled value, make sure it is a "
-                        + ResponseCallback.class.getName(), t);
-              }
-              remoteCallback.callback(demarshalledValue);
-            }
+            remoteCallback.callback(demarshalledValue);
           }
           else {
             Throwable throwable = null;
-            ErrorCallback<?> errorCallback = getErrorCallback();
+            final ErrorCallback<?> errorCallback = getErrorCallback();
             if (errorCallback instanceof RestErrorCallback && hasExceptionMapper()) {
               throwable = unmarshallException(response);
             }
@@ -182,7 +168,7 @@ public abstract class AbstractJaxrsProxy implements RpcStub {
       if (requestCallback != null) {
         requestCallback.callback(request);
       }
-    } catch (RequestException throwable) {
+    } catch (final RequestException throwable) {
       handleError(throwable, null, null);
     }
   }
@@ -193,12 +179,12 @@ public abstract class AbstractJaxrsProxy implements RpcStub {
    *
    * @param response
    */
-  protected Throwable unmarshallException(Response response) {
+  protected Throwable unmarshallException(final Response response) {
     return getExceptionMapper().fromResponse(response);
   }
 
-  protected void handleError(Throwable throwable, Request request, Response response) {
-    ErrorCallback<?> errorCallback = getErrorCallback();
+  protected void handleError(final Throwable throwable, final Request request, final Response response) {
+    final ErrorCallback<?> errorCallback = getErrorCallback();
     if (errorCallback != null) {
       if (errorCallback instanceof RestErrorCallback) {
         ((RestErrorCallback) errorCallback).error(request, throwable);
@@ -207,25 +193,22 @@ public abstract class AbstractJaxrsProxy implements RpcStub {
         errorCallback.error(null, throwable);
       }
     }
-    else if ((getRemoteCallback() instanceof ResponseCallback) && (response != null)) {
-      ((ResponseCallback) getRemoteCallback()).callback(response);
-    }
     else {
       GWT.log(throwable.getMessage(), throwable);
     }
   }
 
   @Override
-  public void setQualifiers(Annotation[] annos) {
+  public void setQualifiers(final Annotation[] annos) {
     // do nothing (no use for qualifiers on injected JAX-RS proxies yet)
   }
 
   @Override
-  public void setBatch(@SuppressWarnings("rawtypes") RpcBatch batch) {
+  public void setBatch(@SuppressWarnings("rawtypes") final RpcBatch batch) {
     throw new UnsupportedOperationException("Batching of remote calls is not supported in errai jax-rs!");
   }
 
-  public void setRequestCallback(RemoteCallback<Request> requestCallback) {
+  public void setRequestCallback(final RemoteCallback<Request> requestCallback) {
     this.requestCallback = requestCallback;
   }
 
@@ -247,7 +230,7 @@ public abstract class AbstractJaxrsProxy implements RpcStub {
    * @param exceptionMapper
    *          the exceptionMapper to set
    */
-  public void setExceptionMapper(ClientExceptionMapper exceptionMapper) {
+  public void setExceptionMapper(final ClientExceptionMapper exceptionMapper) {
     this.exceptionMapper = exceptionMapper;
   }
 }

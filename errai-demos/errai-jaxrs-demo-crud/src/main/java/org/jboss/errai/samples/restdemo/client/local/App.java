@@ -26,7 +26,6 @@ import javax.inject.Inject;
 import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.enterprise.client.jaxrs.MarshallingWrapper;
-import org.jboss.errai.enterprise.client.jaxrs.api.ResponseCallback;
 import org.jboss.errai.enterprise.client.jaxrs.api.RestErrorCallback;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 import org.jboss.errai.samples.restdemo.client.shared.Customer;
@@ -48,15 +47,15 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 
 /**
  * Example code showing how to use Errai-JAXRS.
- *  
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 @EntryPoint
 public class App {
-  
+
   @Inject
   private Caller<CustomerService> customerService;
-  
+
   final private FlexTable customersTable = new FlexTable();
   final private TextBox custFirstName = new TextBox();
   final private TextBox custLastName = new TextBox();
@@ -64,31 +63,31 @@ public class App {
 
   final Map<Long, Integer> rows = new HashMap<Long, Integer>();
 
-  final ResponseCallback creationCallback = new ResponseCallback() {
+  final RemoteCallback<Response> creationCallback = new RemoteCallback<Response>() {
     @Override
-    public void callback(Response response) {
+    public void callback(final Response response) {
       if (response.getStatusCode() == 200) {
-        long id = MarshallingWrapper.fromJSON(response.getText(), Long.class);
+        final long id = MarshallingWrapper.fromJSON(response.getText(), Long.class);
         customerService.call(new RemoteCallback<Customer>() {
           @Override
-          public void callback(Customer customer) {
+          public void callback(final Customer customer) {
             addCustomerToTable(customer, customersTable.getRowCount() + 1);
           }
         }).retrieveCustomerById(id);
       }
     }
   };
-  
+
   final RemoteCallback<Customer> modificationCallback = new RemoteCallback<Customer>() {
     @Override
-    public void callback(Customer customer) {
+    public void callback(final Customer customer) {
       addCustomerToTable(customer, rows.get(customer.getId()));
     }
   };
 
-  final ResponseCallback deletionCallback = new ResponseCallback() {
+  final RemoteCallback<Response> deletionCallback = new RemoteCallback<Response>() {
     @Override
-    public void callback(Response response) {
+    public void callback(final Response response) {
       if (response.getStatusCode() == Response.SC_NO_CONTENT) {
         customersTable.removeAllRows();
         populateCustomersTable();
@@ -102,24 +101,24 @@ public class App {
   public void init() {
     final Button create = new Button("Create", new ClickHandler() {
       @Override
-      public void onClick(ClickEvent clickEvent) {
-        Customer customer = new Customer(custFirstName.getText(), custLastName.getText(), custPostalCode.getText());
+      public void onClick(final ClickEvent clickEvent) {
+        final Customer customer = new Customer(custFirstName.getText(), custLastName.getText(), custPostalCode.getText());
         customerService.call(creationCallback).createCustomer(customer);
       }
     });
 
-    Button get = new Button("Get (Simulate Error)", new ClickHandler() {
+    final Button get = new Button("Get (Simulate Error)", new ClickHandler() {
       @Override
-      public void onClick(ClickEvent clickEvent) {
+      public void onClick(final ClickEvent clickEvent) {
         customerService.call(new RemoteCallback<Customer>() {
           @Override
-          public void callback(Customer response) {
+          public void callback(final Customer response) {
             Window.alert("A customer was returned?  What the what?!");
           }
         }, new RestErrorCallback() {
           @Override
-          public boolean error(Request message, Throwable throwable) {
-            CustomerNotFoundException cnfe = (CustomerNotFoundException) throwable;
+          public boolean error(final Request message, final Throwable throwable) {
+            final CustomerNotFoundException cnfe = (CustomerNotFoundException) throwable;
             Window.alert("As expected, an error of type '"
                     + cnfe.getClass().getName() + "' was received for ID '"
                     + cnfe.getCustomerId() + "'.");
@@ -129,14 +128,14 @@ public class App {
       }
     });
 
-    FlexTable newCustomerTable = new FlexTable();
+    final FlexTable newCustomerTable = new FlexTable();
     newCustomerTable.setWidget(0, 1, custFirstName);
     newCustomerTable.setWidget(0, 2, custLastName);
     newCustomerTable.setWidget(0, 3, custPostalCode);
     newCustomerTable.setWidget(0, 4, create);
     newCustomerTable.setStyleName("new-customer-table");
 
-    VerticalPanel vPanel = new VerticalPanel();
+    final VerticalPanel vPanel = new VerticalPanel();
     vPanel.add(customersTable);
     vPanel.add(new HTML("<hr>"));
     vPanel.add(newCustomerTable);
@@ -157,7 +156,7 @@ public class App {
 
     final RemoteCallback<List<Customer>> listCallback = new RemoteCallback<List<Customer>>() {
       @Override
-      public void callback(List<Customer> customers) {
+      public void callback(final List<Customer> customers) {
         for (final Customer customer : customers) {
           addCustomerToTable(customer, customersTable.getRowCount() + 1);
         }
@@ -166,7 +165,7 @@ public class App {
     customerService.call(listCallback).listAllCustomers();
   }
 
-  private void addCustomerToTable(final Customer customer, int row) {
+  private void addCustomerToTable(final Customer customer, final int row) {
     final TextBox firstName = new TextBox();
     firstName.setText(customer.getFirstName());
 
@@ -178,7 +177,7 @@ public class App {
 
     final Button update = new Button("Update", new ClickHandler() {
       @Override
-      public void onClick(ClickEvent clickEvent) {
+      public void onClick(final ClickEvent clickEvent) {
         customer.setFirstName(firstName.getText());
         customer.setLastName(lastName.getText());
         customer.setPostalCode(postalCode.getText());
@@ -186,9 +185,9 @@ public class App {
       }
     });
 
-    Button delete = new Button("Delete", new ClickHandler() {
+    final Button delete = new Button("Delete", new ClickHandler() {
       @Override
-      public void onClick(ClickEvent clickEvent) {
+      public void onClick(final ClickEvent clickEvent) {
         customerService.call(deletionCallback).deleteCustomer(customer.getId());
       }
     });

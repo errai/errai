@@ -16,15 +16,17 @@
 
 package org.jboss.errai.enterprise.client.jaxrs;
 
+import com.google.gwt.http.client.Response;
+
 /**
  * A callback used by the generated JAX-RS proxies to demarshall the response of an HTTP request.
- * 
+ *
  * The reason proxies carry out marshalling and demarshalling directly is that the type and content-type information
  * can be inferred statically (at compile time). There is no need to defer the discussion on how to
  * demarshall a response to run time.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
- * 
+ *
  * @param <T>
  *          The type the response is demarshalled to.
  */
@@ -32,10 +34,10 @@ public interface ResponseDemarshallingCallback<T> {
 
   /**
    * Demarshalls the provided response into an object of type <T>.
-   * 
+   *
    * @param String
    *          representation of the response, must not be null.
    * @return the demarshalled object.
    */
-  public T demarshallResponse(String response);
+  public T demarshallResponse(Response response);
 }

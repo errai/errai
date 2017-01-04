@@ -23,10 +23,11 @@ import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
+import javax.ws.rs.core.Response;
 
 /**
  * This service is used to test support for header parameters (@HeaderParam).
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 @Path("test/headerparam")
@@ -36,9 +37,9 @@ public interface HeaderParamTestService {
   @Path("/1")
   public String getWithHeaderParam(@HeaderParam("header") String header);
 
-  @GET 
+  @GET
   @Path("/2")
-  public String getWithMultipleHeaderParams(@HeaderParam("header1") String header1, 
+  public String getWithMultipleHeaderParams(@HeaderParam("header1") String header1,
       @HeaderParam("header2") Float header2);
 
   @POST
@@ -49,7 +50,7 @@ public interface HeaderParamTestService {
 
   @DELETE
   public String deleteWithHeaderParam(@HeaderParam("header") String header);
-  
+
   @HEAD
-  public void headWithHeaderParam(@HeaderParam("header") String header);
+  public Response headWithHeaderParam(@HeaderParam("header") String header);
 }

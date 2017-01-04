@@ -27,7 +27,7 @@ import com.google.gwt.http.client.RequestBuilder;
 
 /**
  * Rest client interceptor for testing purposes. Manipulates the result returned from the remote endpoint.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class RestCallCustomTypeResultManipulatingInterceptor implements RestClientInterceptor {
@@ -36,17 +36,17 @@ public class RestCallCustomTypeResultManipulatingInterceptor implements RestClie
   public void aroundInvoke(final RestCallContext context) {
     final User user = new User(11l, "first", "last", 20, Gender.MALE,  null);
     final String userJackson = MarshallingWrapper.toJSON(user);
-    
-    String url = context.getRequestBuilder().getUrl();
-    RequestBuilder requestBuilder = new RequestBuilder(RequestBuilder.POST, url);
+
+    final String url = context.getRequestBuilder().getUrl();
+    final RequestBuilder requestBuilder = new RequestBuilder(RequestBuilder.POST, url);
     requestBuilder.setRequestData(userJackson);
     context.setRequestBuilder(requestBuilder);
-    
+
     context.proceed(new RemoteCallback<User>() {
       @Override
-      public void callback(User response) {
-        String userAsJackson = response.getJacksonRep();
-        User returnedUser = (User) MarshallingWrapper.fromJSON(userAsJackson, context.getReturnType());
+      public void callback(final User response) {
+        final String userAsJackson = response.getJacksonRep();
+        final User returnedUser = (User) MarshallingWrapper.fromJSON(userAsJackson, context.getReturnType());
         returnedUser.setFirstName("intercepted");
         context.setResult(returnedUser);
       }
