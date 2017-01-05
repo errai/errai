@@ -39,6 +39,11 @@
     </dependency>
 
     <dependency>
+      <groupId>com.google.jsinterop</groupId>
+      <artifactId>jsinterop-annotations</artifactId>
+    </dependency>
+
+    <dependency>
       <groupId>org.jboss.errai.reflections</groupId>
       <artifactId>reflections</artifactId>
       <exclusions>
