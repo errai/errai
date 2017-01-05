@@ -40,7 +40,7 @@
     <gmaven.mojo.version>1.5</gmaven.mojo.version>
     <guava.version>20.0</guava.version>
     <guice.version>3.0</guice.version>
-    <gwt.phonegap.version>3.5.0.1</gwt.phonegap.version>    
+    <gwt.phonegap.version>3.5.0.1</gwt.phonegap.version>
     <gwt.version>2.8.0</gwt.version>
     <!-- TODO test with 2.x version in ip-bom -->
     <hsqldb.version>1.8.0.7</hsqldb.version>
@@ -58,6 +58,7 @@
     <!-- TODO remove this when ip-bom version is greater (currently ip-bom is on 1.x) -->
     <quartz.version>2.1.6</quartz.version>
     <xml.apis.version>1.4.01</xml.apis.version>
+    <version.com.google.jsinterop>1.0.1</version.com.google.jsinterop> <!-- Remove after upgrading to IP BOM 7.0.0.CR7+ -->
     <!-- Hibernate Validator 4.3.x coming from IP BOM is not compatible with GWT 2.8-beta1 -->
     <version.org.hibernate.validator>4.1.0.Final</version.org.hibernate.validator>
     <version.org.wildfly.core>2.1.0.Final</version.org.wildfly.core>
@@ -280,6 +281,12 @@
         <groupId>com.googlecode.gwtphonegap</groupId>
         <artifactId>gwtphonegap</artifactId>
         <version>${gwt.phonegap.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.google.jsinterop</groupId>
+        <artifactId>jsinterop-annotations</artifactId>
+        <version>${version.com.google.jsinterop}</version>
       </dependency>
 
       <dependency>
