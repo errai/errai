@@ -61,7 +61,7 @@ public class RpcTestBean {
 
   @Inject
   private Caller<GenericService> genericService;
-
+  
   private static RpcTestBean instance;
 
   @PostConstruct
@@ -109,7 +109,7 @@ public class RpcTestBean {
   public void callParameterizedSubtypeRoundTrip(final RemoteCallback<ParameterizedSubtypePayload> callback, final ParameterizedSubtypePayload payload) {
     genericService.call(callback).parameterizedSubtypeRoundTrip(payload);
   }
-
+  
   public static RpcTestBean getInstance() {
     return instance;
   }

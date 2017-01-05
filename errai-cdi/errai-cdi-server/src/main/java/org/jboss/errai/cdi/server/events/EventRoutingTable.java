@@ -27,8 +27,6 @@ import org.jboss.errai.bus.client.api.QueueSession;
 import org.jboss.errai.bus.client.api.laundry.Laundry;
 import org.jboss.errai.bus.client.api.laundry.LaundryList;
 import org.jboss.errai.bus.client.api.laundry.LaundryListProviderFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * <a href="http://www.youtube.com/watch?v=qBXn9PptgN8">Architectural Overview</a>
@@ -107,7 +105,7 @@ public class EventRoutingTable {
       return false;
     }
     final Set<String> sessions = route.get(annotations);
-    boolean active = sessions != null && sessions.contains(queueSession.getSessionId());
+    final boolean active = sessions != null && sessions.contains(queueSession.getSessionId());
     return active;
   }
 

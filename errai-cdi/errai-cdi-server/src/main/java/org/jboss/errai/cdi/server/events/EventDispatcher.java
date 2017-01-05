@@ -38,8 +38,8 @@ import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.bus.client.api.messaging.MessageBus;
 import org.jboss.errai.bus.client.api.messaging.MessageCallback;
+import org.jboss.errai.bus.server.api.RpcContext;
 import org.jboss.errai.bus.server.util.LocalContext;
-import org.jboss.errai.cdi.server.CDIServerUtil;
 import org.jboss.errai.common.client.protocols.MessageParts;
 import org.jboss.errai.config.rebind.EnvUtil;
 import org.jboss.errai.enterprise.client.cdi.CDICommands;
@@ -115,10 +115,10 @@ public class EventDispatcher implements MessageCallback {
         }
 
         final Object o = message.get(Object.class, CDIProtocol.BeanReference);
-        EventConversationContext.activate(o, CDIServerUtil.getSession(message));
         try {
+          RpcContext.set(message);
           final Set<String> qualifierNames = message.get(Set.class, CDIProtocol.Qualifiers);
-          List<Annotation> qualifiers = new ArrayList<Annotation>();
+          final List<Annotation> qualifiers = new ArrayList<Annotation>();
 
           if (qualifierNames != null) {
             for (final String serializedQualifier : qualifierNames) {
@@ -129,16 +129,16 @@ public class EventDispatcher implements MessageCallback {
             }
           }
           // Fire event to all local observers
-          Annotation[] qualArray = qualifiers.toArray(new Annotation[qualifiers.size()]);
-          Set<ObserverMethod<? super Object>> observerMethods = beanManager.resolveObserverMethods(o, qualArray);
-          for (ObserverMethod<? super Object> observer : observerMethods) {
+          final Annotation[] qualArray = qualifiers.toArray(new Annotation[qualifiers.size()]);
+          final Set<ObserverMethod<? super Object>> observerMethods = beanManager.resolveObserverMethods(o, qualArray);
+          for (final ObserverMethod<? super Object> observer : observerMethods) {
             // Don't mirror the event back to the clients
             if (!(AnyEventObserver.class.equals(observer.getBeanClass()))) {
               observer.notify(o);
             }
           }
         } finally {
-          EventConversationContext.deactivate();
+          RpcContext.remove();
         }
 
         break;
@@ -159,7 +159,7 @@ public class EventDispatcher implements MessageCallback {
       default:
         throw new IllegalArgumentException("Unknown command type " + message.getCommandType());
       }
-    } catch (Exception e) {
+    } catch (final Exception e) {
       throw new RuntimeException("Failed to dispatch CDI Event", e);
     }
   }
@@ -182,7 +182,7 @@ public class EventDispatcher implements MessageCallback {
   }
 
   public void sendEventToClients(Object event, EventMetadata emd) {
-    for (ClientObserverMetadata clientObserver : clientObservers) {
+    for (final ClientObserverMetadata clientObserver : clientObservers) {
       if (clientObserver.matches(event, emd)) {
         sendEventToClient(event, clientObserver.getQualifiers());
       }
@@ -191,14 +191,7 @@ public class EventDispatcher implements MessageCallback {
 
   private void sendEventToClient(Object event, Set<String> qualifierTypes) {
     final Class<? extends Object> eventType = event.getClass();
-    final String sessionId;
-    final EventConversationContext.Context ctx = EventConversationContext.get();
-    if (eventType.isAnnotationPresent(Conversational.class) && ctx != null && ctx.getSessionId() != null) {
-      sessionId = ctx.getSessionId();
-    }
-    else {
-      sessionId = null;
-    }
+    final String sessionId = getConversationalSessionId(eventType);
 
     final Map<String, Object> messageParts = new HashMap<String, Object>(10);
     messageParts.put(MessageParts.ToSubject.name(), getSubjectNameByType(eventType.getName()));
@@ -219,5 +212,14 @@ public class EventDispatcher implements MessageCallback {
         messagebus.send(CommandMessage.createWithParts(new RoutingMap(messageParts, id)));
       }
     }
+  }
+  
+  static String getConversationalSessionId(Class<? extends Object> eventType) {
+    final QueueSession queueSession = RpcContext.getQueueSession();
+    if (eventType.isAnnotationPresent(Conversational.class) && queueSession != null && queueSession.getSessionId() != null) {
+      return queueSession.getSessionId();
+    }
+    
+    return null;
   }
 }

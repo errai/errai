@@ -24,4 +24,5 @@ import org.jboss.errai.bus.server.annotations.Remote;
 @Remote
 public interface MyRemote {
   public String call(String callString);
+
 }

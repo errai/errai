@@ -144,5 +144,5 @@ public class RpcIntegrationTest extends AbstractErraiCDITest {
 
     delayTestFinish(60000);
   }
-
+  
 }
