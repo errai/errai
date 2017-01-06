@@ -113,7 +113,7 @@ public class BusTestClient implements MessageBus {
       try {
         final List<Message> messages = MessageFactory.createCommandMessage(localSession,
             new ByteArrayInputStream(outputStream.toByteArray()));
-        logger.info("Decoded {} messages from queue session {}", messages.size(), localSession.getSessionId());
+        logger.debug("Decoded {} messages from queue session {}", messages.size(), localSession.getSessionId());
 
         for (final Message message : messages) {
           logger.debug("Sending message from queue session {}: {}", localSession.getSessionId(), message);
@@ -242,6 +242,7 @@ public class BusTestClient implements MessageBus {
       deferredDeliveryList.add(message);
     }
     else {
+      logger.debug("Sending remote message to server from queue session {}: {}", serverSession.getSessionId(), message);
       remoteBus.sendGlobal(message);
     }
   }
@@ -262,6 +263,7 @@ public class BusTestClient implements MessageBus {
 
         if (message.hasPart(MessageParts.PriorityProcessing)) {
           if (remotes.contains(message.getSubject())) {
+            logger.debug("Sending remote message to server from queue session {}: {}", serverSession.getSessionId(), message);
             remoteBus.sendGlobal(message);
           }
         }
@@ -272,6 +274,7 @@ public class BusTestClient implements MessageBus {
       deferredDeliveryList.clear();
 
       for (final Message message : deferred) {
+        logger.debug("Sending remote message to server from queue session {}: {}", serverSession.getSessionId(), message);
         remoteBus.sendGlobal(message);
       }
     }
