@@ -16,10 +16,9 @@
 
 package org.jboss.errai.bus.server.io.buffers;
 
-import org.jboss.errai.bus.server.io.ByteWriteAdapter;
-
 import java.io.IOException;
-import java.io.OutputStream;
+
+import org.jboss.errai.bus.server.io.ByteWriteAdapter;
 
 /**
  * A buffer filter is used for manipulating the data in the buffer as it is read from the buffer, before it's

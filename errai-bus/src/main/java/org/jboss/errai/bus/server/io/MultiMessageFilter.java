@@ -16,10 +16,9 @@
 
 package org.jboss.errai.bus.server.io;
 
-import org.jboss.errai.bus.server.io.buffers.BufferFilter;
-
 import java.io.IOException;
-import java.io.OutputStream;
+
+import org.jboss.errai.bus.server.io.buffers.BufferFilter;
 
 /**
  * This {@link BufferFilter} is used for re-writing the data in the buffer to permit properly formed

@@ -16,9 +16,6 @@
 
 package org.jboss.errai.bus.server.service.bootstrap;
 
-import org.jboss.errai.config.rebind.EnvUtil;
-import org.jboss.errai.config.util.ThreadUtil;
-
 /**
  * @author Mike Brock
  */

@@ -37,5 +37,4 @@ public interface BusMonitor {
 
   public void notifyInBusMessage(Message message);
 
-  public void notifyMessageDeliveryFailure(String queueId, Message mesage, Throwable error);
 }

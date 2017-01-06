@@ -16,12 +16,11 @@
 
 package org.jboss.errai.bus.server.io.buffers;
 
-import org.jboss.errai.bus.server.io.ByteWriteAdapter;
-
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.concurrent.TimeUnit;
+
+import org.jboss.errai.bus.server.io.ByteWriteAdapter;
 
 /**
  * @author Mike Brock

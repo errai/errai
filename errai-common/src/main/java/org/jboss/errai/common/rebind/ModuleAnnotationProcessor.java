@@ -58,7 +58,7 @@ public class ModuleAnnotationProcessor extends AbstractProcessor {
         writer.write(builder.toString());
         writer.close();
       }
-      catch (IOException e) {
+      catch (final IOException e) {
         e.printStackTrace();
       }
 
