@@ -68,13 +68,12 @@
       <groupId>org.jboss.errai</groupId>
       <artifactId>errai-jaxrs-client</artifactId>
     </dependency>
-
     <dependency>
       <groupId>org.glassfish</groupId>
       <artifactId>javax.el</artifactId>
       <scope>test</scope>
     </dependency>
-    
+
     <dependency>
       <groupId>org.hibernate.javax.persistence</groupId>
       <artifactId>hibernate-jpa-2.1-api</artifactId>
