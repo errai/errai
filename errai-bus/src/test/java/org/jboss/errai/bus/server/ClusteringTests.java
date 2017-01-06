@@ -132,6 +132,8 @@ public class ClusteringTests extends TestCase {
     clientB.connect();
 
     initLatch.await(5, TimeUnit.SECONDS);
+    assertEquals("Test timing error: nodeA subscription not yet registered.", 1, nodeA.getBus().getReceivers(localService).size());
+    assertEquals("Test timing error: nodeB subscription not yet registered.", 1, nodeB.getBus().getReceivers(localService).size());
 
     MessageBuilder.createMessage()
         .toSubject(localService)
@@ -186,6 +188,8 @@ public class ClusteringTests extends TestCase {
     clientB.connect();
 
     initLatch.await(5, TimeUnit.SECONDS);
+    assertEquals("Test timing error: serverA subscription not yet registered.", 1, serverA.getBus().getReceivers(localService).size());
+    assertEquals("Test timing error: serverB subscription not yet registered.", 1, serverB.getBus().getReceivers(localService).size());
 
     MessageBuilder.createMessage()
         .toSubject(localService)
