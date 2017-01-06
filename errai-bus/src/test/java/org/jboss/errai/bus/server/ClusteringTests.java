@@ -16,15 +16,6 @@
 
 package org.jboss.errai.bus.server;
 
-import junit.framework.TestCase;
-import org.jboss.errai.bus.client.api.QueueSession;
-import org.jboss.errai.bus.client.api.base.MessageBuilder;
-import org.jboss.errai.bus.client.api.messaging.Message;
-import org.jboss.errai.bus.client.api.messaging.MessageCallback;
-import org.jboss.errai.bus.server.service.ErraiService;
-import org.jboss.errai.common.client.protocols.MessageParts;
-import org.jboss.errai.marshalling.server.MappingContextSingleton;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -34,17 +25,34 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.jboss.errai.bus.client.api.QueueSession;
+import org.jboss.errai.bus.client.api.base.MessageBuilder;
+import org.jboss.errai.bus.client.api.messaging.Message;
+import org.jboss.errai.bus.client.api.messaging.MessageCallback;
+import org.jboss.errai.bus.server.service.ErraiService;
+import org.jboss.errai.common.client.protocols.MessageParts;
+import org.jboss.errai.marshalling.server.MappingContextSingleton;
+
+import junit.framework.TestCase;
+
 /**
  * @author Mike Brock
  */
 public class ClusteringTests extends TestCase {
-  private final List<ErraiService> startedInstances = new ArrayList<ErraiService>();
+  private final List<ErraiService<?>> startedInstances = new ArrayList<>();
+  private final List<BusTestClient> startedClients = new ArrayList<>();
   private final AtomicInteger counter = new AtomicInteger(0);
 
-  private ErraiService startInstance() {
-    final ErraiService newService = InVMBusUtil.startService(counter.incrementAndGet());
+  private ErraiService<?> startInstance() {
+    final ErraiService<?> newService = InVMBusUtil.startService(counter.incrementAndGet());
     startedInstances.add(newService);
     return newService;
+  }
+
+  private BusTestClient startClient(final ErraiService<?> svc) {
+    final BusTestClient client = BusTestClient.create(svc);
+    startedClients.add(client);
+    return client;
   }
 
   @Override
@@ -55,7 +63,7 @@ public class ClusteringTests extends TestCase {
   private static class LatchCounter implements Runnable {
     private final CountDownLatch latch;
 
-    private LatchCounter(CountDownLatch latch) {
+    private LatchCounter(final CountDownLatch latch) {
       this.latch = latch;
     }
 
@@ -69,19 +77,19 @@ public class ClusteringTests extends TestCase {
   protected void tearDown() throws Exception {
     super.tearDown();
 
-    for (final ErraiService svc : startedInstances) {
-      svc.stopService();
-    }
+    startedClients.forEach(client -> client.stop(true));
+    startedClients.clear();
 
+    startedInstances.forEach(svc -> svc.stopService());
     startedInstances.clear();
   }
 
   public void testGlobalMessageInCluster() throws Exception {
-    final ErraiService nodeA = startInstance();
-    final ErraiService nodeB = startInstance();
+    final ErraiService<?> nodeA = startInstance();
+    final ErraiService<?> nodeB = startInstance();
 
-    final BusTestClient clientA = BusTestClient.create(nodeA);
-    final BusTestClient clientB = BusTestClient.create(nodeB);
+    final BusTestClient clientA = startClient(nodeA);
+    final BusTestClient clientB = startClient(nodeB);
 
     final CountDownLatch initLatch = new CountDownLatch(2);
     clientA.addInitCallback(new LatchCounter(initLatch));
@@ -138,11 +146,11 @@ public class ClusteringTests extends TestCase {
 
   public void testPointToPointMessageAcrossClusterNodes() throws Exception {
 
-    final ErraiService serverA = startInstance();
-    final ErraiService serverB = startInstance();
+    final ErraiService<?> serverA = startInstance();
+    final ErraiService<?> serverB = startInstance();
 
-    final BusTestClient clientA = BusTestClient.create(serverA);
-    final BusTestClient clientB = BusTestClient.create(serverB);
+    final BusTestClient clientA = startClient(serverA);
+    final BusTestClient clientB = startClient(serverB);
 
     final CountDownLatch initLatch = new CountDownLatch(2);
     clientA.addInitCallback(new LatchCounter(initLatch));
@@ -201,11 +209,11 @@ public class ClusteringTests extends TestCase {
   }
 
   public void testSessionMovesAfterBeingCached() throws Exception {
-    final ErraiService serverA = startInstance();
-    final ErraiService serverB = startInstance();
-    final ErraiService serverC = startInstance();
+    final ErraiService<?> serverA = startInstance();
+    final ErraiService<?> serverB = startInstance();
+    final ErraiService<?> serverC = startInstance();
 
-    final BusTestClient clientB = BusTestClient.create(serverB);
+    final BusTestClient clientB = startClient(serverB);
 
     final CountDownLatch initLatch = new CountDownLatch(1);
     clientB.addInitCallback(new LatchCounter(initLatch));

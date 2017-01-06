@@ -16,8 +16,19 @@
 
 package org.jboss.errai.bus.server;
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+
 import org.jboss.errai.bus.client.api.BusMonitor;
 import org.jboss.errai.bus.client.api.QueueSession;
 import org.jboss.errai.bus.client.api.RoutingFlag;
@@ -38,18 +49,11 @@ import org.jboss.errai.common.client.api.ResourceProvider;
 import org.jboss.errai.common.client.protocols.MessageParts;
 import org.jboss.errai.common.client.protocols.Resources;
 import org.jboss.errai.marshalling.server.util.UnwrappedByteArrayOutputStream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 
 /**
  * This bus implementation is NOT thread-safe and is for testing purposes only.
@@ -64,18 +68,21 @@ public class BusTestClient implements MessageBus {
 
   private final Multimap<String, MessageCallback> services = HashMultimap.create();
   private final Multimap<String, MessageCallback> localServices = HashMultimap.create();
-  private final Set<String> remotes = new HashSet<String>();
+  private final Set<String> remotes = new HashSet<>();
 
-  private final List<SubscribeListener> subscribeListeners = new ArrayList<SubscribeListener>();
-  private final List<UnsubscribeListener> unsubscribeListeners = new ArrayList<UnsubscribeListener>();
+  private final List<SubscribeListener> subscribeListeners = new ArrayList<>();
+  private final List<UnsubscribeListener> unsubscribeListeners = new ArrayList<>();
 
-  private final List<Message> deferredDeliveryList = new ArrayList<Message>();
+  private final List<Message> deferredDeliveryList = new ArrayList<>();
 
-  private final List<Runnable> initCallbacks = new ArrayList<Runnable>();
+  private final List<Runnable> initCallbacks = new ArrayList<>();
 
   private boolean init = false;
 
   private final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
+  private ScheduledFuture<?> scheduledFuture;
+
+  private static final Logger logger = LoggerFactory.getLogger(BusTestClient.class);
 
   private BusTestClient(final ServerMessageBus remoteBus) {
     this.remoteBus = remoteBus;
@@ -83,13 +90,14 @@ public class BusTestClient implements MessageBus {
     subscribe("ClientBus", new BusControlProtocolCallback());
   }
 
-  public static BusTestClient create(final ErraiService service) {
+  public static BusTestClient create(final ErraiService<?> service) {
     return new BusTestClient(service.getBus());
   }
 
   private class PollingRunnable implements Runnable {
     @Override
     public void run() {
+      logger.trace("Polling queue session id {}", localSession.getSessionId());
       final UnwrappedByteArrayOutputStream outputStream = new UnwrappedByteArrayOutputStream();
       final OutputStreamWriteAdapter writeAdapter = new OutputStreamWriteAdapter(outputStream);
 
@@ -98,22 +106,24 @@ public class BusTestClient implements MessageBus {
           return;
         }
       }
-      catch (IOException e) {
+      catch (final IOException e) {
         throw new RuntimeException("failed to poll remote bus", e);
       }
 
       try {
         final List<Message> messages = MessageFactory.createCommandMessage(localSession,
             new ByteArrayInputStream(outputStream.toByteArray()));
+        logger.info("Decoded {} messages from queue session {}", messages.size(), localSession.getSessionId());
 
         for (final Message message : messages) {
+          logger.debug("Sending message from queue session {}: {}", localSession.getSessionId(), message);
           send(message);
         }
       }
-      catch (UnsupportedEncodingException e) {
+      catch (final UnsupportedEncodingException e) {
         e.printStackTrace();
       }
-      catch (IOException e) {
+      catch (final IOException e) {
         e.printStackTrace();
       }
     }
@@ -128,7 +138,13 @@ public class BusTestClient implements MessageBus {
         .setResource("Session", serverSession)
         .setFlag(RoutingFlag.FromRemote));
 
-    executorService.scheduleAtFixedRate(new PollingRunnable(), 0, 10, TimeUnit.MILLISECONDS);
+    scheduledFuture = executorService.scheduleAtFixedRate(new PollingRunnable(), 0, 10, TimeUnit.MILLISECONDS);
+  }
+
+  public void stop(final boolean interrupt) {
+    if (scheduledFuture != null) {
+      scheduledFuture.cancel(interrupt);
+    }
   }
 
   @Override
@@ -233,7 +249,7 @@ public class BusTestClient implements MessageBus {
   private void drainDeliveryList() {
     if (init) {
       // only send priority processing messages first.
-      final List<Message> deferred = new ArrayList<Message>();
+      final List<Message> deferred = new ArrayList<>();
       for (final Message message : deferredDeliveryList) {
         message.setResource("Session", serverSession);
         message.setFlag(RoutingFlag.FromRemote);
@@ -358,7 +374,7 @@ public class BusTestClient implements MessageBus {
     }
   }
 
-  public void changeBus(final ErraiService service) {
+  public void changeBus(final ErraiService<?> service) {
     remoteBus.closeQueue(serverSession.getSessionId());
     remoteBus = service.getBus();
 
