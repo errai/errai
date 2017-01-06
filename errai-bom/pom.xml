@@ -6,7 +6,7 @@
   <parent>
     <groupId>org.jboss.integration-platform</groupId>
     <artifactId>jboss-integration-platform-parent</artifactId>
-    <version>7.0.0.CR5</version>
+    <version>7.0.0.CR6</version>
     <relativePath/>
   </parent>
 
@@ -45,7 +45,7 @@
     <!-- TODO test with 2.x version in ip-bom -->
     <hsqldb.version>1.8.0.7</hsqldb.version>
     <javaee.api.version>7.0</javaee.api.version>
-    <jboss-integration-platform-bom.version>7.0.0.CR5</jboss-integration-platform-bom.version>
+    <jboss-integration-platform-bom.version>7.0.0.CR6</jboss-integration-platform-bom.version>
     <!-- ip-bom uses artifact with groupId org.jboss.remoting3 -->
     <jboss.remoting.version>4.0.0.Final</jboss.remoting.version>
     <jboss.vfs.version>3.0.1.GA</jboss.vfs.version>
@@ -57,14 +57,12 @@
     <picketlink.version>2.6.0.Final</picketlink.version>
     <!-- TODO remove this when ip-bom version is greater (currently ip-bom is on 1.x) -->
     <quartz.version>2.1.6</quartz.version>
-    <xml.apis.version>1.4.01</xml.apis.version>
     <version.com.google.jsinterop>1.0.1</version.com.google.jsinterop> <!-- Remove after upgrading to IP BOM 7.0.0.CR7+ -->
     <!-- Hibernate Validator 4.3.x coming from IP BOM is not compatible with GWT 2.8-beta1 -->
     <version.org.hibernate.validator>4.1.0.Final</version.org.hibernate.validator>
     <version.org.wildfly.core>2.1.0.Final</version.org.wildfly.core>
     <version.javax.validation>1.0.0.GA</version.javax.validation>
     <version.org.glassfish.javax.el>3.0.0</version.org.glassfish.javax.el>
-    <version.com.google.code.gson>2.6.2</version.com.google.code.gson>
     <version.org.lesscss>1.7.0.1.1</version.org.lesscss>
   </properties>
 
@@ -100,6 +98,8 @@
       </dependency>
       
       <!-- Third Party Dependencies -->
+      <!-- Important: this is _not_ a spec jar, but rather implementation jar! As such it should not be replaced by the
+           'jboss-el-api_3.0_spec' or any other spec jar! -->
       <dependency>
         <groupId>org.glassfish</groupId>
         <artifactId>javax.el</artifactId>
@@ -330,13 +330,6 @@
         <version>${guava.version}</version>
       </dependency>
 
-      <!-- XXX Remove this when gson version is updated in ip-bom -->
-      <dependency>
-        <groupId>com.google.code.gson</groupId>
-        <artifactId>gson</artifactId>
-        <version>${version.com.google.code.gson}</version>
-      </dependency>
-
       <!-- Guava and Reflections both depend on JSR 305 from the findbugs project, but they specify different versions. This pins to the newer of the two. -->
       <dependency>
         <groupId>com.google.code.findbugs</groupId>
@@ -362,12 +355,6 @@
         <version>${picketlink.version}</version>
       </dependency>      
 
-      <dependency>
-        <groupId>xml-apis</groupId>
-        <artifactId>xml-apis</artifactId>
-        <version>${xml.apis.version}</version>
-      </dependency>
-      
       <dependency>
         <groupId>org.lesscss</groupId>
         <artifactId>lesscss</artifactId>
