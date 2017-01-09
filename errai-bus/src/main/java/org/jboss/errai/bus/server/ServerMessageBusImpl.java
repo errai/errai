@@ -941,7 +941,8 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
   @Override
   public Collection<MessageCallback> getReceivers(final String subject) {
-    return Collections.unmodifiableCollection(subscriptions.get(subject).getDeliverTo());
+    final DeliveryPlan deliveryPlan = subscriptions.get(subject);
+    return (deliveryPlan != null ? Collections.unmodifiableCollection(deliveryPlan.getDeliverTo()) : Collections.emptyList());
   }
 
   private boolean isMonitor() {

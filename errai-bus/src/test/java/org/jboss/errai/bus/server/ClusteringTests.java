@@ -16,19 +16,26 @@
 
 package org.jboss.errai.bus.server;
 
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 
 import org.jboss.errai.bus.client.api.QueueSession;
+import org.jboss.errai.bus.client.api.RoutingFlag;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.api.messaging.Message;
-import org.jboss.errai.bus.client.api.messaging.MessageCallback;
+import org.jboss.errai.bus.client.framework.BuiltInServices;
+import org.jboss.errai.bus.client.protocols.BusCommand;
+import org.jboss.errai.bus.server.api.MessageQueue;
+import org.jboss.errai.bus.server.api.ServerMessageBus;
+import org.jboss.errai.bus.server.io.MessageDeliveryHandler;
 import org.jboss.errai.bus.server.service.ErraiService;
 import org.jboss.errai.common.client.protocols.MessageParts;
 import org.jboss.errai.marshalling.server.MappingContextSingleton;
@@ -40,7 +47,6 @@ import junit.framework.TestCase;
  */
 public class ClusteringTests extends TestCase {
   private final List<ErraiService<?>> startedInstances = new ArrayList<>();
-  private final List<BusTestClient> startedClients = new ArrayList<>();
   private final AtomicInteger counter = new AtomicInteger(0);
 
   private ErraiService<?> startInstance() {
@@ -49,36 +55,14 @@ public class ClusteringTests extends TestCase {
     return newService;
   }
 
-  private BusTestClient startClient(final ErraiService<?> svc) {
-    final BusTestClient client = BusTestClient.create(svc);
-    startedClients.add(client);
-    return client;
-  }
-
   @Override
   protected void setUp() throws Exception {
     MappingContextSingleton.get();
   }
 
-  private static class LatchCounter implements Runnable {
-    private final CountDownLatch latch;
-
-    private LatchCounter(final CountDownLatch latch) {
-      this.latch = latch;
-    }
-
-    @Override
-    public void run() {
-      latch.countDown();
-    }
-  }
-
   @Override
   protected void tearDown() throws Exception {
     super.tearDown();
-
-    startedClients.forEach(client -> client.stop(true));
-    startedClients.clear();
 
     startedInstances.forEach(svc -> svc.stopService());
     startedInstances.clear();
@@ -87,220 +71,252 @@ public class ClusteringTests extends TestCase {
   public void testGlobalMessageInCluster() throws Exception {
     final ErraiService<?> nodeA = startInstance();
     final ErraiService<?> nodeB = startInstance();
+    final QueueSession sessionA = MockQueueSessionFactory.newSession("client1");
+    final QueueSession sessionB = MockQueueSessionFactory.newSession("client2");
+    final QueueSession broadCastBlockingSession = MockQueueSessionFactory.newSession("dummy");
 
-    final BusTestClient clientA = startClient(nodeA);
-    final BusTestClient clientB = startClient(nodeB);
+    associateQueueSessionToBus(sessionA, nodeA.getBus());
+    associateQueueSessionToBus(sessionB, nodeB.getBus());
+    // Prevents broadcasting of messages so that they can be intercepted
+    associateQueueSessionToBus(broadCastBlockingSession, nodeA.getBus());
+    associateQueueSessionToBus(broadCastBlockingSession, nodeB.getBus());
 
-    final CountDownLatch initLatch = new CountDownLatch(2);
-    clientA.addInitCallback(new LatchCounter(initLatch));
-    clientB.addInitCallback(new LatchCounter(initLatch));
-
-    final CountDownLatch countDownLatch = new CountDownLatch(2);
-
-    final Set<String> resultsSet = Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
-
+    final Set<String> resultsSet = new HashSet<>();
     final String localService = "localTest";
+    final CountDownLatch latch = new CountDownLatch(2);
 
-    clientA.subscribe(localService, new MessageCallback() {
-      @Override
-      public void callback(final Message message) {
-        final String val = "Client 1:" + message.get(String.class, MessageParts.Value);
+    remoteSubscibeToTopic(sessionA, nodeA.getBus(), localService);
+    remoteSubscibeToTopic(sessionB, nodeB.getBus(), localService);
+
+    mockTransportWithAction(nodeA.getBus(), sessionA, msg -> {
+      if (localService.equals(msg.getSubject())) {
+        final String val = "Client 1:" + msg.get(String.class, MessageParts.Value);
         if (resultsSet.add(val)) {
-          countDownLatch.countDown();
+          latch.countDown();
         }
         else {
-          System.out.println("WARNING: Received dup!");
+          fail("Received duplicate message to Client 1.");
         }
       }
     });
 
-    clientB.subscribe(localService, new MessageCallback() {
-      @Override
-      public void callback(final Message message) {
-        final String val = "Client 2:" + message.get(String.class, MessageParts.Value);
+    mockTransportWithAction(nodeB.getBus(), sessionB, msg -> {
+      if (localService.equals(msg.getSubject())) {
+        final String val = "Client 2:" + msg.get(String.class, MessageParts.Value);
         if (resultsSet.add(val)) {
-          countDownLatch.countDown();
+          latch.countDown();
         }
         else {
-          System.out.println("WARNING: Received dup!");
+          fail("Received duplicate message to Client 2.");
         }
       }
     });
-
-    // connect only after all services are subscribed.
-    clientA.connect();
-    clientB.connect();
-
-    initLatch.await(5, TimeUnit.SECONDS);
-    assertEquals("Test timing error: nodeA subscription not yet registered.", 1, nodeA.getBus().getReceivers(localService).size());
-    assertEquals("Test timing error: nodeB subscription not yet registered.", 1, nodeB.getBus().getReceivers(localService).size());
 
     MessageBuilder.createMessage()
         .toSubject(localService)
         .signalling()
         .withValue("MSG")
-        .noErrorHandling().sendGlobalWith(nodeA.getBus());
+        .noErrorHandling()
+        .sendGlobalWith(nodeA.getBus());
 
-    assertTrue(countDownLatch.await(10, TimeUnit.SECONDS));
-    assertTrue(resultsSet.contains("Client 1:MSG"));
-    assertTrue(resultsSet.contains("Client 2:MSG"));
+    assertTrue("Timeout while waiting for messages from servers. Received: " + resultsSet, latch.await(30, TimeUnit.SECONDS));
+    assertEquals(new HashSet<>(Arrays.asList("Client 1:MSG", "Client 2:MSG")), resultsSet);
   }
 
-  public void testPointToPointMessageAcrossClusterNodes() throws Exception {
+  public void testPointToPointMessageInCluster() throws Exception {
+    final ErraiService<?> nodeA = startInstance();
+    final ErraiService<?> nodeB = startInstance();
+    final QueueSession sessionA = MockQueueSessionFactory.newSession("client1");
+    final QueueSession sessionB = MockQueueSessionFactory.newSession("client2");
+    final QueueSession broadCastBlockingSession = MockQueueSessionFactory.newSession("dummy");
 
-    final ErraiService<?> serverA = startInstance();
-    final ErraiService<?> serverB = startInstance();
+    associateQueueSessionToBus(sessionA, nodeA.getBus());
+    associateQueueSessionToBus(sessionB, nodeB.getBus());
+    // Prevents broadcasting of messages so that they can be intercepted
+    associateQueueSessionToBus(broadCastBlockingSession, nodeA.getBus());
+    associateQueueSessionToBus(broadCastBlockingSession, nodeB.getBus());
 
-    final BusTestClient clientA = startClient(serverA);
-    final BusTestClient clientB = startClient(serverB);
-
-    final CountDownLatch initLatch = new CountDownLatch(2);
-    clientA.addInitCallback(new LatchCounter(initLatch));
-    clientB.addInitCallback(new LatchCounter(initLatch));
-
-    final QueueSession clientASession = clientA.getServerSession();
-    final QueueSession clientBSession = clientB.getServerSession();
-
-    final Set<String> resultsSet = Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
-
-    final CountDownLatch countDownLatch = new CountDownLatch(2);
-
+    final Set<String> resultsSet = new HashSet<>();
     final String localService = "localTest";
+    final CountDownLatch latch = new CountDownLatch(2);
 
-    clientA.subscribe(localService, new MessageCallback() {
-      @Override
-      public void callback(final Message message) {
-        resultsSet.add("ClientA:" + message.getValue(String.class));
-        countDownLatch.countDown();
+    remoteSubscibeToTopic(sessionA, nodeA.getBus(), localService);
+    remoteSubscibeToTopic(sessionB, nodeB.getBus(), localService);
+
+    mockTransportWithAction(nodeA.getBus(), sessionA, msg -> {
+      if (localService.equals(msg.getSubject())) {
+        final String val = "Client 1:" + msg.get(String.class, MessageParts.Value);
+        if (resultsSet.add(val)) {
+          latch.countDown();
+        }
+        else {
+          fail("Received duplicate message to Client 1.");
+        }
       }
     });
 
-    clientB.subscribe(localService, new MessageCallback() {
-      @Override
-      public void callback(final Message message) {
-        resultsSet.add("ClientB:" + message.getValue(String.class));
-        countDownLatch.countDown();
+    mockTransportWithAction(nodeB.getBus(), sessionB, msg -> {
+      if (localService.equals(msg.getSubject())) {
+        final String val = "Client 2:" + msg.get(String.class, MessageParts.Value);
+        if (resultsSet.add(val)) {
+          latch.countDown();
+        }
+        else {
+          fail("Received duplicate message to Client 2.");
+        }
       }
     });
 
-    // connect only after all services are subscribed.
-    clientA.connect();
-    clientB.connect();
-
-    initLatch.await(5, TimeUnit.SECONDS);
-    assertEquals("Test timing error: serverA subscription not yet registered.", 1, serverA.getBus().getReceivers(localService).size());
-    assertEquals("Test timing error: serverB subscription not yet registered.", 1, serverB.getBus().getReceivers(localService).size());
+    MessageBuilder.createMessage()
+        .toSubject(localService)
+        .signalling()
+        .withValue("ServerA")
+        .with(MessageParts.SessionID, sessionB.getSessionId())
+        .noErrorHandling()
+        .sendNowWith(nodeA.getBus());
 
     MessageBuilder.createMessage()
         .toSubject(localService)
         .signalling()
         .withValue("ServerB")
-        .with(MessageParts.SessionID, clientASession.getSessionId())
+        .with(MessageParts.SessionID, sessionA.getSessionId())
         .noErrorHandling()
-        .sendNowWith(serverB.getBus());
+        .sendNowWith(nodeB.getBus());
 
-    MessageBuilder.createMessage()
-        .toSubject(localService)
-        .signalling()
-        .withValue("ServerA")
-        .with(MessageParts.SessionID, clientBSession.getSessionId())
-        .noErrorHandling()
-        .sendNowWith(serverA.getBus());
-
-    assertTrue("timed out waiting for results", countDownLatch.await(60, TimeUnit.SECONDS));
-    assertTrue("expected result missing", resultsSet.contains("ClientA:ServerB"));
-    assertTrue("expected result missing", resultsSet.contains("ClientB:ServerA"));
+    assertTrue("Timeout while waiting for messages from servers. Received: " + resultsSet, latch.await(30, TimeUnit.SECONDS));
+    assertEquals(new HashSet<>(Arrays.asList("Client 1:ServerB", "Client 2:ServerA")), resultsSet);
   }
 
-  public void testSessionMovesAfterBeingCached() throws Exception {
-    final ErraiService<?> serverA = startInstance();
-    final ErraiService<?> serverB = startInstance();
-    final ErraiService<?> serverC = startInstance();
+  public void testPointToPointMessageInClusterAfterClientChangesNodes() throws Exception {
+    final ErraiService<?> nodeA = startInstance();
+    final ErraiService<?> nodeB = startInstance();
+    final ErraiService<?> nodeC = startInstance();
+    final QueueSession session = MockQueueSessionFactory.newSession("client1");
+    final QueueSession controlSession = MockQueueSessionFactory.newSession("control");
+    final QueueSession broadCastBlockingSession = MockQueueSessionFactory.newSession("dummy");
 
-    final BusTestClient clientB = startClient(serverB);
+    associateQueueSessionToBus(session, nodeA.getBus());
+    // Listens for sent topic to control that it is not being broadcast
+    associateQueueSessionToBus(controlSession, nodeA.getBus());
+    associateQueueSessionToBus(controlSession, nodeB.getBus());
+    associateQueueSessionToBus(controlSession, nodeC.getBus());
+    // Prevents broadcasting of messages so that they can be intercepted
+    associateQueueSessionToBus(broadCastBlockingSession, nodeA.getBus());
+    associateQueueSessionToBus(broadCastBlockingSession, nodeB.getBus());
+    associateQueueSessionToBus(broadCastBlockingSession, nodeC.getBus());
 
-    final CountDownLatch initLatch = new CountDownLatch(1);
-    clientB.addInitCallback(new LatchCounter(initLatch));
-
-    final QueueSession clientBSession = clientB.getServerSession();
-
+    final List<String> results = new ArrayList<>();
     final String localService = "localTest";
+    final CountDownLatch latch1 = new CountDownLatch(1);
 
-    final Set<String> resultsSet = Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
+    remoteSubscibeToTopic(session, nodeA.getBus(), localService);
 
-    final CountDownLatch firstLatch = new CountDownLatch(1);
-
-    class StateHolder {
-      private String name;
-      private CountDownLatch latch;
-    }
-
-    final StateHolder holder = new StateHolder();
-    holder.name = "ClientB1";
-
-    // set the latch which will be used in the callback.
-    holder.latch = firstLatch;
-
-    final MessageCallback receiver = new MessageCallback() {
-      @Override
-      public void callback(final Message message) {
-        final String e = holder.name + ":" + message.getValue(String.class);
-        System.out.println("result:" + e);
-        resultsSet.add(e);
-        holder.latch.countDown();
-      }
-    };
-
-    clientB.subscribe(localService, receiver);
-
-    // connect only after all services are subscribed.
-    clientB.connect();
-
-    initLatch.await(5, TimeUnit.SECONDS);
-
-    MessageBuilder.createMessage()
-        .toSubject(localService)
-        .signalling()
-        .withValue("ServerA")
-        .with(MessageParts.SessionID, clientBSession.getSessionId())
-        .noErrorHandling()
-        .sendNowWith(serverA.getBus());
-
-    firstLatch.await(5, TimeUnit.SECONDS);
-
-    final CountDownLatch secondLatch = new CountDownLatch(1);
-    // replace the reference in the holder so the callback now uses this latch.
-    holder.latch = secondLatch;
-
-    clientB.clearInitCallbacks();
-
-    final CountDownLatch changeOverLatch = new CountDownLatch(1);
-
-    clientB.addInitCallback(new Runnable() {
-      @Override
-      public void run() {
-        changeOverLatch.countDown();
+    mockTransportWithAction(nodeA.getBus(), session, msg -> {
+      if (localService.equals(msg.getSubject())) {
+        final String val = "Client:" + msg.get(String.class, MessageParts.Value);
+        results.add(val);
+        latch1.countDown();
       }
     });
 
-    /**
-     * Move ClientB to ServerC.
-     */
-    clientB.changeBus(serverC);
-
-    changeOverLatch.await(5, TimeUnit.SECONDS);
-    holder.name = "ClientB2";
+    final Consumer<Message> failAction = msg -> {
+      if (localService.equals(msg.getSubject())) {
+        fail("Received message to wrong client session.");
+      }
+    };
+    mockTransportWithAction(nodeA.getBus(), controlSession, failAction);
+    mockTransportWithAction(nodeB.getBus(), controlSession, failAction);
+    mockTransportWithAction(nodeC.getBus(), controlSession, failAction);
 
     MessageBuilder.createMessage()
         .toSubject(localService)
         .signalling()
         .withValue("ServerA")
-        .with(MessageParts.SessionID, clientBSession.getSessionId())
+        .with(MessageParts.SessionID, session.getSessionId())
         .noErrorHandling()
-        .sendNowWith(serverA.getBus());
+        .sendNowWith(nodeC.getBus());
 
-    assertTrue("timed out waiting for results", secondLatch.await(5, TimeUnit.SECONDS));
-    assertTrue("expected result missing", resultsSet.contains("ClientB1:ServerA"));
-    assertTrue("expected result missing", resultsSet.contains("ClientB2:ServerA"));
+    assertTrue("Timeout while waiting for first message from servers. Received: " + results, latch1.await(30, TimeUnit.SECONDS));
+    assertEquals(Arrays.asList("Client:ServerA"), results);
+
+    final CountDownLatch latch2 = new CountDownLatch(1);
+    // Change bus and resubscribe to topic with new bus
+    associateToNewBus(session, nodeA.getBus(), nodeB.getBus());
+    remoteSubscibeToTopic(session, nodeB.getBus(), localService);
+    mockTransportWithAction(nodeB.getBus(), session, msg -> {
+      if (localService.equals(msg.getSubject())) {
+        final String val = "Client:" + msg.get(String.class, MessageParts.Value);
+        results.add(val);
+        latch2.countDown();
+      }
+    });
+
+    MessageBuilder.createMessage()
+        .toSubject(localService)
+        .signalling()
+        .withValue("ServerB")
+        .with(MessageParts.SessionID, session.getSessionId())
+        .noErrorHandling()
+        .sendNowWith(nodeC.getBus());
+
+    assertTrue("Timeout while waiting for messages from servers. Received: " + results, latch2.await(30, TimeUnit.SECONDS));
+    assertEquals(Arrays.asList("Client:ServerA", "Client:ServerB"), results);
+  }
+
+  private void associateToNewBus(final QueueSession session, final ServerMessageBus oldBus, final ServerMessageBus newBus) {
+    final Message disconnectMsg = MessageBuilder
+      .createMessage(BuiltInServices.ServerBus.name())
+      .command(BusCommand.Disconnect)
+      .noErrorHandling()
+      .getMessage()
+      .setResource("Session", session)
+      .setResource("SessionID", session.getSessionId())
+      .setFlag(RoutingFlag.FromRemote);
+
+    oldBus.sendGlobal(disconnectMsg);
+    associateQueueSessionToBus(session, newBus);
+  }
+
+  private void remoteSubscibeToTopic(final QueueSession session, final ServerMessageBus bus, final String subject) {
+    final Message msg = MessageBuilder
+      .createMessage(BuiltInServices.ServerBus.name())
+      .command(BusCommand.RemoteSubscribe)
+      .with(MessageParts.Subject, subject)
+      .noErrorHandling()
+      .getMessage()
+      .setResource("Session", session)
+      .setResource("SessionID", session.getSessionId())
+      .setFlag(RoutingFlag.FromRemote);
+
+    bus.sendGlobal(msg);
+  }
+
+  private void associateQueueSessionToBus(final QueueSession qs, final ServerMessageBus bus) {
+    final Message msg = MessageBuilder
+      .createMessage(BuiltInServices.ServerBus.name())
+      .command(BusCommand.Associate)
+      .with(MessageParts.RemoteServices, "ClientBus")
+      .with(MessageParts.PriorityProcessing, 1)
+      .noErrorHandling()
+      .getMessage()
+      .setResource("Session", qs)
+      .setResource("SessionID", qs.getSessionId())
+      .setFlag(RoutingFlag.FromRemote);
+
+    bus.sendGlobal(msg);
+  }
+
+  private void mockTransportWithAction(final ServerMessageBus bus, final QueueSession qs, final Consumer<Message> action) {
+    bus.getQueue(qs).setDeliveryHandler(new MessageDeliveryHandler() {
+
+      @Override
+      public void noop(final MessageQueue queue) throws IOException {}
+
+      @Override
+      public boolean deliver(final MessageQueue queue, final Message message) throws IOException {
+        action.accept(message);
+        return true;
+      }
+    });
   }
 }

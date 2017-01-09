@@ -29,9 +29,13 @@ import java.util.Map;
  */
 public abstract class MockQueueSessionFactory {
   public static QueueSession newSession() {
+    return newSession(SecureHashUtil.nextSecureHash());
+  }
+
+  public static QueueSession newSession(final String id) {
     return new QueueSession() {
-      final Map<String, Object> attributes = new HashMap<String, Object>();
-      final String sessionId = SecureHashUtil.nextSecureHash();
+      final Map<String, Object> attributes = new HashMap<>();
+      final String sessionId = id;
 
       @Override
       public String getSessionId() {
@@ -49,12 +53,12 @@ public abstract class MockQueueSessionFactory {
       }
 
       @Override
-      public void setAttribute(String attribute, Object value) {
+      public void setAttribute(final String attribute, final Object value) {
         attributes.put(attribute, value);
       }
 
       @Override
-      public <T> T getAttribute(Class<T> type, String attribute) {
+      public <T> T getAttribute(final Class<T> type, final String attribute) {
         return (T) attributes.get(attribute);
       }
 
@@ -64,17 +68,17 @@ public abstract class MockQueueSessionFactory {
       }
 
       @Override
-      public boolean hasAttribute(String attribute) {
+      public boolean hasAttribute(final String attribute) {
         return attributes.containsKey(attribute);
       }
 
       @Override
-      public Object removeAttribute(String attribute) {
+      public Object removeAttribute(final String attribute) {
         return attributes.remove(attribute);
       }
 
       @Override
-      public void addSessionEndListener(SessionEndListener listener) {
+      public void addSessionEndListener(final SessionEndListener listener) {
       }
 
       @Override
