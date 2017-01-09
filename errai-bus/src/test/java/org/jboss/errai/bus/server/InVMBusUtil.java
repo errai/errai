@@ -17,6 +17,7 @@
 package org.jboss.errai.bus.server;
 
 import org.jboss.errai.bus.server.cluster.jgroups.JGroupsClusteringProvider;
+import org.jboss.errai.bus.server.cluster.jgroups.JGroupsConfigAttribs;
 import org.jboss.errai.bus.server.service.ErraiConfigAttribs;
 import org.jboss.errai.bus.server.service.ErraiService;
 import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
@@ -31,6 +32,7 @@ public class InVMBusUtil {
   public static ErraiService startService(final int portOffset) {
     final ErraiServiceConfigurator configurator = new ErraiServiceConfiguratorImpl();
     final int port = ErraiConfigAttribs.CLUSTER_PORT.getInt(configurator) + portOffset;
+    JGroupsConfigAttribs.JGROUPS_PROTOCOL_STACK.set(configurator, "test-stack.xml");
     ErraiConfigAttribs.CLUSTER_PORT.set(configurator, String.valueOf(port));
     ErraiConfigAttribs.ENABLE_CLUSTERING.set(configurator, "true");
     ErraiConfigAttribs.CLUSTERING_PROVIDER.set(configurator, JGroupsClusteringProvider.class.getName());
