@@ -5,9 +5,13 @@
 
   <groupId>org.jboss.errai</groupId>
   <artifactId>wildfly-dist</artifactId>
-  <name>WildFly::Distribution</name>
+  <name>Errai::WildFly::Distribution</name>
   <packaging>jar</packaging>
   <version>10.0.0.Final</version>
+  
+  <description>
+    A modified WildFly Dist that does not process ServletContainerInitializers.
+  </description>
 
   <url>http://erraiframework.org</url>
 
