@@ -9,6 +9,28 @@
   <packaging>jar</packaging>
   <version>10.0.0.Final</version>
 
+  <url>http://erraiframework.org</url>
+
+  <developers>
+    <developer>
+      <name>JBoss Errai Team</name>
+    </developer>
+  </developers>
+  
+  <licenses>
+    <license>
+      <name>lgpl</name>
+      <url>http://repository.jboss.org/licenses/lgpl-2.1.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
+  <scm>
+    <connection>scm:git:git@github.com:errai/errai.git</connection>
+    <developerConnection>scm:git:git@github.com:errai/errai.git</developerConnection>
+    <url>scm:git:git@github.com:errai/errai.git</url>
+  </scm>
+
   <properties>
     <as.version>${project.version}</as.version>
   </properties>
@@ -60,6 +82,27 @@
               </artifactItems>
             </configuration>
           </execution>
+          <execution>
+            <id>unpack-src</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>unpack</goal>
+            </goals>
+            <configuration>
+              <artifactItems>
+                <!-- Unpacks Wildfly src without the ServletContainerInitializerDeploymentProcessor -->
+                <artifactItem>
+                  <groupId>org.wildfly</groupId>
+                  <artifactId>wildfly-dist</artifactId>
+                  <version>${as.version}</version>
+                  <classifier>src</classifier>
+                  <type>zip</type>
+                  <overWrite>false</overWrite>
+                  <outputDirectory>${project.build.directory}</outputDirectory>
+                </artifactItem>
+              </artifactItems>
+            </configuration>
+          </execution>
         </executions>
       </plugin>
       <!-- Builds replacement jar for wildfly-undertow that has replaced 
@@ -103,6 +146,23 @@
               <workDirectory>target/assembly/work</workDirectory>              
             </configuration>
           </execution>        
+          <execution>
+            <id>assemble-src</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+            <configuration>
+              <descriptors>
+                <descriptor>assembly-src.xml</descriptor>
+              </descriptors>
+              <finalName>wildfly-${as.version}</finalName>
+              <appendAssemblyId>true</appendAssemblyId>
+              <outputDirectory>${project.build.directory}</outputDirectory>
+              <workDirectory>${project.build.directory}/assembly-src/work</workDirectory>
+              <tarLongFileMode>gnu</tarLongFileMode>
+            </configuration>
+          </execution>
         </executions>
       </plugin>
     </plugins>
