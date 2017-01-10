@@ -263,6 +263,61 @@ public class ClusteringTests extends TestCase {
     assertEquals(Arrays.asList("Client:ServerA", "Client:ServerB"), results);
   }
 
+  /*
+   * When a client switches servers in a cluster, it must associate with the new bus. This tests that
+   * a message from an unassociated client is rejected with a QueueUnavailableException. Because
+   * all Errai servlets catch this exception and send a disconnect, this behaviour ensures that
+   * clients re-associate when a load-balancer switches them to a new server.
+   */
+  public void testBusThrowsQueueUnavailableExceptionForMessageFromClientThatHasNotAssociated() throws Exception {
+    final ErraiService<?> node = startInstance();
+    final QueueSession session = MockQueueSessionFactory.newSession("client1");
+
+    final List<Message> received = new ArrayList<>();
+    final String service = "service";
+    node.getBus().subscribe(service, msg -> received.add(msg));
+
+    final Message msg = MessageBuilder
+            .createMessage(service)
+            .signalling()
+            .noErrorHandling()
+            .getMessage()
+            .setFlag(RoutingFlag.FromRemote)
+            .setResource("Session", session)
+            .setResource("SessionID", session);
+
+    try {
+      node.getBus().sendGlobal(msg);
+      fail("No exception was thrown after message sent from unassociated bus!");
+    }
+    catch (final QueueUnavailableException ex) {
+      // success
+    }
+    catch (final AssertionError ae) {
+      throw ae;
+    }
+    catch (final Throwable t) {
+      throw new AssertionError("Unexpected error after sending message from unassociated client.", t);
+    }
+
+    assertTrue(received.isEmpty());
+    associateQueueSessionToBus(session, node.getBus());
+    try {
+      node.getBus().sendGlobal(msg);
+      assertEquals("received = " + received, 1, received.size());
+      assertSame(msg, received.get(0));
+    }
+    catch (final QueueUnavailableException ex) {
+      fail("QueueUnavailableException thrown after associating.");
+    }
+    catch (final AssertionError ae) {
+      throw ae;
+    }
+    catch (final Throwable t) {
+      throw new AssertionError("Unexpected error after sending message from associated client.", t);
+    }
+  }
+
   private void associateToNewBus(final QueueSession session, final ServerMessageBus oldBus, final ServerMessageBus newBus) {
     final Message disconnectMsg = MessageBuilder
       .createMessage(BuiltInServices.ServerBus.name())
