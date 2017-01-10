@@ -58,7 +58,7 @@ public class HistoryImplPushState implements HasValueChangeHandlers<String> {
     // initialize HistoryImpl with the current path
     updateHistoryToken(Window.Location.getPath() + Window.Location.getQueryString());
     // initialize the empty state with the current history token
-    nativeUpdate(token);
+    nativeUpdate(token, true);
     // initialize the popState handler
     initPopStateHandler();
 
@@ -66,14 +66,25 @@ public class HistoryImplPushState implements HasValueChangeHandlers<String> {
   }
   
   private void nativeUpdate(final String historyToken) {
+    nativeUpdate(historyToken, false);
+  }
+  
+  private void nativeUpdate(final String historyToken, boolean replace) {
     String newPushStateToken = CodeServerParameterHelper.append(encodeFragment(historyToken));
     if (!newPushStateToken.startsWith("/")) {
       newPushStateToken = "/" + newPushStateToken;
     }
-
-    pushState(newPushStateToken);
-    if (LogConfiguration.loggingIsEnabled()) {
-      LOG.fine("Pushed '" + newPushStateToken + "' (" + historyToken + ")");
+    
+    if(replace){
+      replaceState(newPushStateToken);
+      if (LogConfiguration.loggingIsEnabled()) {
+        LOG.fine("Replaced '" + newPushStateToken + "' (" + historyToken + ")");
+      }
+    }else{
+      pushState(newPushStateToken);
+      if (LogConfiguration.loggingIsEnabled()) {
+        LOG.fine("Pushed '" + newPushStateToken + "' (" + historyToken + ")");
+      }
     }
   }
 
@@ -136,6 +147,16 @@ public class HistoryImplPushState implements HasValueChangeHandlers<String> {
     $wnd.history.pushState(state, $doc.title, token);
   }-*/;
 
+  /**
+   * Replace the given token in the history using replaceState.
+   */
+  private static native void replaceState(final String token) /*-{
+    var state = {
+      historyToken : token
+    };
+    $wnd.history.replaceState(state, $doc.title, token);
+  }-*/;
+  
   private native String encodeFragment(String fragment) /*-{
     // encodeURI() does *not* encode the '#' character.
     return encodeURI(fragment).replace("#", "%23");
