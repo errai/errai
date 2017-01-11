@@ -423,7 +423,7 @@ public class NavigationTest extends AbstractErraiCDITest {
     delayTestFinish(5000);
   }
 
-  /*public void testNavigationControl() throws Exception {
+  public void testNavigationControl() throws Exception {
     final PageWithNavigationControl page = Factory.maybeUnwrapProxy(IOC.getBeanManager().lookupBean(PageWithNavigationControl.class)
             .getInstance());
 
@@ -451,7 +451,7 @@ public class NavigationTest extends AbstractErraiCDITest {
     navigation.goTo(PageA.class, ArrayListMultimap.<String, String> create());
     page.hideControl.redirect(PageB.class);
     assertEquals(PageB.class, navigation.getCurrentPage().contentType());
-  }*/
+  }
 
   /**
    * Give the bootstrapper time to attach the Navigation content panel to the RootPanel and then run a test.
