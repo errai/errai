@@ -266,7 +266,7 @@ public class Navigation {
   }
 
   /**
-   * Same as {@link #goTo(Class, com.google.common.collect.Multimap)} but then with the page name.
+   * Same as {@link #goTo(Class, Multimap)} but then with the page name.
    *
    * @param toPage
    *          the name of the page node to lookup and display.
@@ -454,26 +454,39 @@ public class Navigation {
           public void callback(final boolean success) {
             if (success) {
               locked = true;
-              try {
-                hideCurrentPage();
-                request.pageNode.pageShowing(component, request.state);
+              hideCurrentPage();
 
-                // Fire IOC lifecycle event to indicate that the state of the
-                // bean has changed.
-                // TODO make this smarter and only fire state change event when
-                // fields actually changed.
-                stateChangeEvent.fireAsync(component);
+              NavigationControl showControl = new NavigationControl(new Runnable() {
+                @Override
+                public void run() {
+                  try {
+                    request.pageNode.pageShowing(component, request.state);
 
-                setCurrentPage(request.pageNode);
-                currentWidget = componentWidget;
-                currentComponent = component;
-                navigatingContainer.setWidget(componentWidget);
-                request.pageNode.pageShown(component, request.state);
-              } finally {
-                locked = false;
-              }
+                    // Fire IOC lifecycle event to indicate that the state of the
+                    // bean has changed.
+                    // TODO make this smarter and only fire state change event when
+                    // fields actually changed.
+                    stateChangeEvent.fireAsync(component);
 
-              handleQueuedRequests(request, fireEvent);
+                    setCurrentPage(request.pageNode);
+                    currentWidget = componentWidget;
+                    currentComponent = component;
+                    navigatingContainer.setWidget(componentWidget);
+                    request.pageNode.pageShown(component, request.state);
+                  } finally {
+                    locked = false;
+                  }
+
+                  handleQueuedRequests(request, fireEvent);
+                }
+              }, new Runnable() {
+                @Override
+                public void run() {
+                  locked = false;
+                }
+              });
+
+              request.pageNode.pageAuthorize(component, showControl);
             }
             else {
               request.pageNode.destroy(component);

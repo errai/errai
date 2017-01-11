@@ -67,6 +67,17 @@ public interface PageNode<C> {
   public Class<C> contentType();
 
   /**
+   * Called by the framework when this page node requires authorization before display.
+   * <p>
+   * If this method throws an exception when called, framework behaviour is undefined.
+   *
+   * @param widget
+   *          the widget instance (which is currently in the navigation content panel) that was previously used in the
+   *          call to {@link #pageShowing(IsWidget, HistoryToken)}. Never null.
+   */
+  public void pageAuthorize(C widget, NavigationControl control);
+
+  /**
    * Called by the framework when this page node is about to be displayed in the navigation content panel.
    * <p>
    * If this method throws an exception when called, framework behaviour is undefined.
