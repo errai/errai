@@ -16,6 +16,7 @@
 
 package org.jboss.errai.databinding.rebind;
 
+import static java.util.stream.Collectors.toCollection;
 import static org.jboss.errai.codegen.util.Stmt.invokeStatic;
 
 import java.io.IOException;
@@ -29,6 +30,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
@@ -57,6 +59,7 @@ import org.jboss.errai.ioc.rebind.ioc.graph.api.Injectable;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.Decorable;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.Decorable.DecorableType;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.FactoryController;
+import org.jboss.errai.reflections.util.SimplePackageFilter;
 import org.jboss.errai.ui.shared.api.annotations.AutoBound;
 import org.jboss.errai.ui.shared.api.annotations.Model;
 import org.slf4j.Logger;
@@ -422,12 +425,29 @@ public class DataBindingUtil {
         final ResourceBundle props = new PropertyResourceBundle(inputStream);
         for (final String key : props.keySet()) {
           if (key.equals(EnvUtil.CONFIG_ERRAI_BINDABLE_TYPES)) {
+            final Set<String> patterns = new LinkedHashSet<>();
+
             for (final String s : props.getString(key).split(" ")) {
-              try {
-                bindableTypes.add(MetaClassFactory.get(s.trim()));
-              } catch (final Exception e) {
-                throw new RuntimeException("Could not find class defined in ErraiApp.properties as bindable type: " + s);
+              final String singleValue = s.trim();
+              if (singleValue.endsWith("*")) {
+                patterns.add(singleValue);
               }
+              else {
+                try {
+                  bindableTypes.add(MetaClassFactory.get(s.trim()));
+                } catch (final Exception e) {
+                  throw new RuntimeException("Could not find class defined in ErraiApp.properties as bindable type: " + s);
+                }
+              }
+            }
+
+            if (!patterns.isEmpty()) {
+              final SimplePackageFilter filter = new SimplePackageFilter(patterns);
+              MetaClassFactory
+                  .getAllCachedClasses()
+                  .stream()
+                  .filter(mc -> filter.apply(mc.getFullyQualifiedName()))
+                  .collect(toCollection(() -> bindableTypes));
             }
             break;
           }
