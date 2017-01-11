@@ -354,7 +354,7 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
                     Parameter.of(pageClass, "widget"),
                     Parameter.of(NavigationControl.class, "control")).body();
     final MetaMethod pageHidingMethod = checkMethodAndAddPrivateAccessors(pageImplBuilder, method, pageClass,
-            PageHiding.class, NavigationControl.class, "control");
+            PageHiding.class, Parameter.of(NavigationControl.class, "control"));
 
     /*
      * If the user did not provide a control parameter, we must proceed for them after the method is invoked.
@@ -380,7 +380,8 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
             void.class,
             createMethodNameFromAnnotation(PageHidden.class),
             Parameter.of(pageClass, "widget")).body();
-    checkMethodAndAddPrivateAccessors(pageImplBuilder, method, pageClass, PageHidden.class, HistoryToken.class, "state");
+    checkMethodAndAddPrivateAccessors(pageImplBuilder, method, pageClass, PageHidden.class,
+            Parameter.of(HistoryToken.class, "state"));
     method.finish();
   }
 
@@ -423,10 +424,8 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
    *          the class to search for annotated methods in
    * @param annotation
    *          the annotation to search for in pageClass
-   * @param optionalParamType
-   *          the type of the single method parameter or null if no parameter
-   * @param optionalParamName
-   *          the name of the variable of the optional parameter or null if no parameter.
+   * @param optionalParams
+   *          optional params in linear ordering
    * @return
    *          The meta-method for which code was generated
    * @throws UnsupportedOperationException
@@ -434,12 +433,12 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
    */
   private MetaMethod checkMethodAndAddPrivateAccessors(AnonymousClassStructureBuilder pageImplBuilder,
       BlockBuilder<?> methodToAppendTo, MetaClass pageClass, Class<? extends Annotation> annotation,
-      Class<?> optionalParamType, String optionalParamName) {
+      Parameter... optionalParams) {
     List<MetaMethod> annotatedMethods = pageClass.getMethodsAnnotatedWith(annotation);
     if (annotatedMethods.size() > 1) {
       throw new UnsupportedOperationException(
-                "A @Page can have at most 1 " + createAnnotionName(annotation) + " method, but " + pageClass + " has "
-                    + annotatedMethods.size());
+          "A @Page can have at most 1 " + createAnnotionName(annotation) + " method, but " + pageClass + " has "
+              + annotatedMethods.size());
     }
 
     for (MetaMethod metaMethod : annotatedMethods) {
@@ -450,33 +449,38 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
                   " returns " + metaMethod.getReturnType().getFullyQualifiedName());
       }
 
-      Object[] paramValues = new Object[metaMethod.getParameters().length + 1];
+      int realParamLength = metaMethod.getParameters().length;
+      Object[] paramValues = new Object[realParamLength + 1];
       paramValues[0] = Stmt.loadVariable("widget");
 
       // assemble parameters for private method invoker (first param is the widget instance)
       PrivateAccessUtil.addPrivateAccessStubs("jsni", pageImplBuilder, metaMethod, new Modifier[] {});
 
-      if (optionalParamType != null) {
-        for (int i = 1; i < paramValues.length; i++) {
-          MetaParameter paramSpec = metaMethod.getParameters()[i - 1];
-          if (paramSpec.getType().equals(MetaClassFactory.get(optionalParamType))) {
-            paramValues[i] = Stmt.loadVariable(optionalParamName);
-          }
-          else {
-            throw new UnsupportedOperationException(
-                     createAnnotionName(annotation) + " method " +
-                          metaMethod.getDeclaringClass().getFullyQualifiedName() + "." + metaMethod.getName() +
-                         " has an illegal parameter of type " + paramSpec.getType().getFullyQualifiedName());
-          }
-        }
+      if (optionalParams != null) {
+        if(realParamLength <= optionalParams.length) {
+          for (int i = 1; i < paramValues.length; i++) {
+            Parameter param = optionalParams[i - 1];
+            MetaParameter realParam = metaMethod.getParameters()[i - 1];
 
-      }
-      else {
-        if (metaMethod.getParameters().length != 0) {
+            if (realParam.getType().equals(MetaClassFactory.get(param.getType().asClass()))) {
+              paramValues[i] = Stmt.loadVariable(param.getName());
+            } else {
+              throw new UnsupportedOperationException(
+                createAnnotionName(annotation) + " method " + metaMethod.getDeclaringClass().getFullyQualifiedName() +
+                "." + metaMethod.getName() + " has an illegal parameter of type " + realParam.getType().getFullyQualifiedName());
+            }
+          }
+        } else {
           throw new UnsupportedOperationException(
-                  createAnnotionName(annotation) + " methods cannot take parameters, but " +
-                      metaMethod.getDeclaringClass().getFullyQualifiedName() + "." + metaMethod.getName() +
-                      " does.");
+              createAnnotionName(annotation) + " methods should only take "+optionalParams.length+" or less " +
+              "optional parameters, but " + metaMethod.getDeclaringClass().getFullyQualifiedName() + "." +
+              metaMethod.getName() + " is implementing "+realParamLength+".");
+        }
+      } else {
+        if (realParamLength != 0) {
+          throw new UnsupportedOperationException(
+              createAnnotionName(annotation) + " methods cannot take parameters, but " +
+              metaMethod.getDeclaringClass().getFullyQualifiedName() + "." + metaMethod.getName() + " does.");
         }
       }
 
@@ -497,19 +501,39 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
   }
 
   private void appendPageShowingMethod(AnonymousClassStructureBuilder pageImplBuilder, MetaClass pageClass) {
-    appendPageShowMethod(pageImplBuilder, pageClass, PageShowing.class, true);
+    BlockBuilder<?> method = pageImplBuilder.publicMethod(void.class, createMethodNameFromAnnotation(PageShowing.class),
+            Parameter.of(pageClass, "widget"),
+            Parameter.of(HistoryToken.class, "state"),
+            Parameter.of(NavigationControl.class, "control"))
+            .body();
+
+    MetaMethod pageShowMethod = appendPageShowMethod(method, pageImplBuilder, pageClass, PageShowing.class, true,
+        Parameter.of(HistoryToken.class, "state"), Parameter.of(NavigationControl.class, "control"));
+
+    /*
+     * If the user did not provide a control parameter, we must proceed for them after the method is invoked.
+     */
+    if (pageShowMethod == null || pageShowMethod.getParameters().length != 2) {
+      method.append(Stmt.loadVariable("control").invoke("proceed"));
+    }
+
+    method.finish();
   }
 
   private void appendPageShownMethod(AnonymousClassStructureBuilder pageImplBuilder, MetaClass pageClass) {
-    appendPageShowMethod(pageImplBuilder, pageClass, PageShown.class, false);
+    BlockBuilder<?> method = pageImplBuilder.publicMethod(void.class, createMethodNameFromAnnotation(PageShown.class),
+            Parameter.of(pageClass, "widget"),
+            Parameter.of(HistoryToken.class, "state"))
+            .body();
+
+    appendPageShowMethod(method, pageImplBuilder, pageClass, PageShown.class, false,
+        Parameter.of(HistoryToken.class, "state"));
+
+    method.finish();
   }
 
-  private void appendPageShowMethod(AnonymousClassStructureBuilder pageImplBuilder, MetaClass pageClass,
-      Class<? extends Annotation> annotation, boolean addPrivateAccessors) {
-    BlockBuilder<?> method = pageImplBuilder.publicMethod(void.class, createMethodNameFromAnnotation(annotation),
-              Parameter.of(pageClass, "widget"),
-              Parameter.of(HistoryToken.class, "state"))
-              .body();
+  private MetaMethod appendPageShowMethod(BlockBuilder<?> method, AnonymousClassStructureBuilder pageImplBuilder, MetaClass pageClass,
+      Class<? extends Annotation> annotation, boolean addPrivateAccessors, Parameter... optionalParams) {
 
     int idx = 0;
 
@@ -601,9 +625,7 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
       ));
     }
 
-    checkMethodAndAddPrivateAccessors(pageImplBuilder, method, pageClass, annotation, HistoryToken.class, "state");
-
-    method.finish();
+    return checkMethodAndAddPrivateAccessors(pageImplBuilder, method, pageClass, annotation, optionalParams);
   }
 
   /**

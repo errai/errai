@@ -423,19 +423,35 @@ public class NavigationTest extends AbstractErraiCDITest {
     delayTestFinish(5000);
   }
 
-  public void testNavigationControl() throws Exception {
+  /*public void testNavigationControl() throws Exception {
     final PageWithNavigationControl page = Factory.maybeUnwrapProxy(IOC.getBeanManager().lookupBean(PageWithNavigationControl.class)
             .getInstance());
 
     navigation.goTo(PageWithNavigationControl.class, ArrayListMultimap.<String, String> create());
+    page.showControl.proceed();
     assertEquals(PageWithNavigationControl.class, navigation.getCurrentPage().contentType());
 
     navigation.goTo(PageA.class, ArrayListMultimap.<String, String> create());
-    assertEquals(PageWithNavigationControl.class, navigation.getCurrentPage().contentType());
-
-    page.control.proceed();
+    page.hideControl.proceed();
     assertEquals(PageA.class, navigation.getCurrentPage().contentType());
   }
+
+  public void testNavigationControlRedirect() throws Exception {
+    final PageWithNavigationControl page = Factory.maybeUnwrapProxy(IOC.getBeanManager().lookupBean(PageWithNavigationControl.class)
+            .getInstance());
+
+    navigation.goTo(PageWithNavigationControl.class, ArrayListMultimap.<String, String> create());
+    page.showControl.redirect(PageA.class);
+    assertEquals(PageA.class, navigation.getCurrentPage().contentType());
+
+    navigation.goTo(PageWithNavigationControl.class, ArrayListMultimap.<String, String> create());
+    page.showControl.proceed();
+    assertEquals(PageWithNavigationControl.class, navigation.getCurrentPage().contentType());
+
+    navigation.goTo(PageA.class, ArrayListMultimap.<String, String> create());
+    page.hideControl.redirect(PageB.class);
+    assertEquals(PageB.class, navigation.getCurrentPage().contentType());
+  }*/
 
   /**
    * Give the bootstrapper time to attach the Navigation content panel to the RootPanel and then run a test.

@@ -77,7 +77,7 @@ public interface PageNode<C> {
    * @param state
    *          the state of the page, parsed from the history token on the URL. Never null.
    */
-  public void pageShowing(C widget, HistoryToken state);
+  public void pageShowing(C widget, HistoryToken state, NavigationControl control);
 
   /**
    * Called by the framework when this page node was displayed in the navigation content panel.
