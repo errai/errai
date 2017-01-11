@@ -444,24 +444,22 @@ public class Navigation {
       reg.removeHandler();
     }
 
-    final NavigationControl control = new NavigationControl(new Runnable() {
+    final NavigationControl control = new NavigationControl(Navigation.this, new Runnable() {
       @Override
       public void run() {
         final Access<C> accessEvent = new AccessImpl<>();
-        accessEvent.fireAsync(component, new LifecycleCallback() {
 
+        accessEvent.fireAsync(component, new LifecycleCallback() {
           @Override
           public void callback(final boolean success) {
             if (success) {
               locked = true;
               hideCurrentPage();
 
-              NavigationControl showControl = new NavigationControl(new Runnable() {
+              NavigationControl showControl = new NavigationControl(Navigation.this, new Runnable() {
                 @Override
                 public void run() {
                   try {
-                    request.pageNode.pageShowing(component, request.state);
-
                     // Fire IOC lifecycle event to indicate that the state of the
                     // bean has changed.
                     // TODO make this smarter and only fire state change event when
@@ -486,9 +484,8 @@ public class Navigation {
                 }
               });
 
-              request.pageNode.pageAuthorize(component, showControl);
-            }
-            else {
+              request.pageNode.pageShowing(component, request.state, showControl);
+            } else {
               request.pageNode.destroy(component);
             }
           }

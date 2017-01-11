@@ -30,7 +30,7 @@ import java.lang.annotation.*;
  * and then resuming at a later time (for example, to prompt the user to save their work before
  * transitioning to a new page).
  * <p>
- * Page loading can be interrupted by calling {@link NavigationControl#interrupt()}.
+ * Page loading can be interrupted by calling {@link NavigationControl#redirect()}.
  * This allows for page redirection rather than proceeding a pages navigation.
  * <p>
  * The target method's return type will must be {@code void}.

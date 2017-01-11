@@ -16,6 +16,8 @@
 
 package org.jboss.errai.ui.nav.client.local;
 
+import org.jboss.errai.ui.nav.client.local.api.NavigationControl;
+
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -41,6 +43,14 @@ import java.lang.annotation.Target;
  * not all history token key names are known at compile time, so
  * {@code @PageState} fields can't be declared to accept their values.
  * <p>
+ * The target method is permitted an optional parameter of type {@link NavigationControl}. If the
+ * parameter is present, the page navigation will not be carried out until
+ * {@link NavigationControl#proceed()} is invoked. This is useful for interrupting page navigation
+ * and then resuming at a later time (for example, to prompt the user to save their work before
+ * transitioning to a new page).
+ * <p>
+ * Page loading can be interrupted by calling {@link NavigationControl#redirect()}.
+ * This allows for page redirection rather than proceeding a pages navigation.
  * The target method's return type must be {@code void}.
  * <p>
  * The target method can have any access type: public, protected, default, or

@@ -69,7 +69,6 @@ import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
 import org.jboss.errai.ui.nav.client.local.DefaultPage;
 import org.jboss.errai.ui.nav.client.local.HistoryToken;
 import org.jboss.errai.ui.nav.client.local.Page;
-import org.jboss.errai.ui.nav.client.local.PageAuthorize;
 import org.jboss.errai.ui.nav.client.local.PageHidden;
 import org.jboss.errai.ui.nav.client.local.PageHiding;
 import org.jboss.errai.ui.nav.client.local.PageRole;
@@ -317,8 +316,6 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
                     .invoke("getInstance", Stmt.loadVariable("callback")))
                     .finish();
 
-    appendPageAuthorizeMethod(pageImplBuilder, pageClass);
-
     appendPageHidingMethod(pageImplBuilder, pageClass);
     appendPageHiddenMethod(pageImplBuilder, pageClass);
 
@@ -339,34 +336,6 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
     }
 
     return path;
-  }
-
-  /**
-   * Appends the method that calls the {@code @PageAuthorize} method of the widget.
-   *
-   * @param pageImplBuilder
-   *          The class builder for the implementation of PageNode we are adding the method to.
-   * @param pageClass
-   *          The "content type" (Widget subclass) of the page. This is the type the user annotated
-   *          with {@code @Page}.
-   */
-  private void appendPageAuthorizeMethod(AnonymousClassStructureBuilder pageImplBuilder, MetaClass pageClass) {
-    BlockBuilder<?> method = pageImplBuilder.publicMethod(
-            void.class,
-            createMethodNameFromAnnotation(PageAuthorize.class),
-            Parameter.of(pageClass, "widget"),
-            Parameter.of(NavigationControl.class, "control")).body();
-    final MetaMethod pageAuthMethod = checkMethodAndAddPrivateAccessors(pageImplBuilder, method, pageClass,
-            PageAuthorize.class, NavigationControl.class, "control");
-
-    /*
-     * If the user did not provide a control parameter, we must proceed for them after the method is invoked.
-     */
-    if (pageAuthMethod == null || pageAuthMethod.getParameters().length != 1) {
-      method.append(Stmt.loadVariable("control").invoke("proceed"));
-    }
-
-    method.finish();
   }
 
   /**
@@ -539,7 +508,8 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
       Class<? extends Annotation> annotation, boolean addPrivateAccessors) {
     BlockBuilder<?> method = pageImplBuilder.publicMethod(void.class, createMethodNameFromAnnotation(annotation),
               Parameter.of(pageClass, "widget"),
-              Parameter.of(HistoryToken.class, "state"))
+              Parameter.of(HistoryToken.class, "state"),
+              Parameter.of(NavigationControl.class, "control"))
               .body();
 
     int idx = 0;
@@ -632,7 +602,15 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
       ));
     }
 
-    checkMethodAndAddPrivateAccessors(pageImplBuilder, method, pageClass, annotation, HistoryToken.class, "state");
+    MetaMethod pageShowingMethod = checkMethodAndAddPrivateAccessors(pageImplBuilder, method, pageClass,
+            annotation, HistoryToken.class, "state");
+
+    /*
+     * If the user did not provide a control parameter, we must proceed for them after the method is invoked.
+     */
+    if (pageShowingMethod == null || pageShowingMethod.getParameters().length != 1) {
+      method.append(Stmt.loadVariable("control").invoke("proceed"));
+    }
 
     method.finish();
   }
