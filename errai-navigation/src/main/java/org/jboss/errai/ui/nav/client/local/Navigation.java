@@ -266,7 +266,7 @@ public class Navigation {
   }
 
   /**
-   * Same as {@link #goTo(Class, com.google.common.collect.Multimap)} but then with the page name.
+   * Same as {@link #goTo(Class, Multimap)} but then with the page name.
    *
    * @param toPage
    *          the name of the page node to lookup and display.
@@ -279,7 +279,7 @@ public class Navigation {
     } catch (final RedirectLoopException e) {
       throw e;
     } catch (final RuntimeException e) {
-       navigationErrorHandler.handleInvalidPageNameError(e, toPage);
+      navigationErrorHandler.handleInvalidPageNameError(e, toPage);
     }
   }
 
@@ -293,12 +293,12 @@ public class Navigation {
   public void goToWithRole(final Class<? extends UniquePageRole> role) {
     PageNode<?> toPageInstance = null;
     try {
-       toPageInstance = navGraph.getPageByRole(role);
+      toPageInstance = navGraph.getPageByRole(role);
       navigate(toPageInstance);
     } catch (final RedirectLoopException e) {
       throw e;
     } catch (final RuntimeException e) {
-        navigationErrorHandler.handleError(e, role);
+      navigationErrorHandler.handleError(e, role);
     }
   }
 
@@ -356,7 +356,6 @@ public class Navigation {
         navigate(queuedRequests.poll(), fireEvent);
       }
     }
-
   }
 
   /**
@@ -444,49 +443,68 @@ public class Navigation {
       reg.removeHandler();
     }
 
-    final NavigationControl control = new NavigationControl(new Runnable() {
+    final NavigationControl control = new NavigationControl(Navigation.this, new Runnable() {
       @Override
       public void run() {
         final Access<C> accessEvent = new AccessImpl<>();
-        accessEvent.fireAsync(component, new LifecycleCallback() {
 
+        accessEvent.fireAsync(component, new LifecycleCallback() {
           @Override
           public void callback(final boolean success) {
             if (success) {
-              locked = true;
+              NavigationControl showControl = new NavigationControl(Navigation.this, new Runnable() {
+                @Override
+                public void run() {
+                  try {
+                    // Fire IOC lifecycle event to indicate that the state of the
+                    // bean has changed.
+                    // TODO make this smarter and only fire state change event when
+                    // fields actually changed.
+                    stateChangeEvent.fireAsync(component);
+
+                    setCurrentPage(request.pageNode);
+                    currentWidget = componentWidget;
+                    currentComponent = component;
+                    navigatingContainer.setWidget(componentWidget);
+                    request.pageNode.pageShown(component, request.state);
+                  } finally {
+                    locked = false;
+                  }
+
+                  handleQueuedRequests(request, fireEvent);
+                }
+              }, new Runnable() {
+                @Override
+                public void run() {
+                  locked = false;
+                }
+              });
+
               try {
+                locked = true;
                 hideCurrentPage();
-                request.pageNode.pageShowing(component, request.state);
-
-                // Fire IOC lifecycle event to indicate that the state of the
-                // bean has changed.
-                // TODO make this smarter and only fire state change event when
-                // fields actually changed.
-                stateChangeEvent.fireAsync(component);
-
-                setCurrentPage(request.pageNode);
-                currentWidget = componentWidget;
-                currentComponent = component;
-                navigatingContainer.setWidget(componentWidget);
-                request.pageNode.pageShown(component, request.state);
-              } finally {
+                request.pageNode.pageShowing(component, request.state, showControl);
+              } catch (Exception ex) {
                 locked = false;
+                throw ex;
               }
-
-              handleQueuedRequests(request, fireEvent);
-            }
-            else {
+            } else {
               request.pageNode.destroy(component);
             }
           }
         });
       }
+    }, new Runnable() {
+      @Override
+      public void run() {
+        hideCurrentPage();
+        setCurrentPage(null);
+      }
     });
 
     if (currentPage != null && currentWidget != null && currentComponent != null && currentWidget.asWidget() == navigatingContainer.getWidget()) {
       currentPage.pageHiding(Factory.maybeUnwrapProxy(currentComponent), control);
-    }
-    else {
+    } else {
       control.proceed();
     }
   }
@@ -549,12 +567,12 @@ public class Navigation {
    * @param path The context path. Never null.
    */
   public static native void setAppContext(String path) /*-{
-    if (path == null) {
-      $wnd.erraiApplicationWebContext = undefined;
-    }
-    else {
-      $wnd.erraiApplicationWebContext = path;
-    }
+      if (path == null) {
+          $wnd.erraiApplicationWebContext = undefined;
+      }
+      else {
+          $wnd.erraiApplicationWebContext = path;
+      }
   }-*/;
 
   /**
@@ -584,12 +602,12 @@ public class Navigation {
   }
 
   private static native String getRawAppContextFromHostPage() /*-{
-   if ($wnd.erraiApplicationWebContext === undefined || $wnd.erraiApplicationWebContext.length === 0) {
-     return "";
-   }
-   else {
-     return $wnd.erraiApplicationWebContext;
-   }
+      if ($wnd.erraiApplicationWebContext === undefined || $wnd.erraiApplicationWebContext.length === 0) {
+          return "";
+      }
+      else {
+          return $wnd.erraiApplicationWebContext;
+      }
   }-*/;
 
   private void maybeConvertHistoryToken(String token) {
@@ -607,6 +625,6 @@ public class Navigation {
   }
 
   private native static IsWidget getCompositeWidget(Composite instance) /*-{
-    return instance.@com.google.gwt.user.client.ui.Composite::widget;
+      return instance.@com.google.gwt.user.client.ui.Composite::widget;
   }-*/;
 }

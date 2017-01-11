@@ -18,8 +18,10 @@ package org.jboss.errai.ui.nav.client.local.testpages;
 
 import javax.enterprise.context.ApplicationScoped;
 
+import org.jboss.errai.ui.nav.client.local.HistoryToken;
 import org.jboss.errai.ui.nav.client.local.Page;
 import org.jboss.errai.ui.nav.client.local.PageHiding;
+import org.jboss.errai.ui.nav.client.local.PageShowing;
 import org.jboss.errai.ui.nav.client.local.api.NavigationControl;
 
 import com.google.gwt.user.client.ui.SimplePanel;
@@ -27,12 +29,18 @@ import com.google.gwt.user.client.ui.SimplePanel;
 @Page
 @ApplicationScoped
 public class PageWithNavigationControl extends SimplePanel {
-  
-  public NavigationControl control;
+
+  public NavigationControl showControl;
+  public NavigationControl hideControl;
+
+  @PageShowing
+  private void confirm(final HistoryToken historyToken, final NavigationControl control) {
+    this.showControl = control;
+  }
   
   @PageHiding
   private void confirm(final NavigationControl control) {
-    this.control = control;
+    this.hideControl = control;
   }
 
 }

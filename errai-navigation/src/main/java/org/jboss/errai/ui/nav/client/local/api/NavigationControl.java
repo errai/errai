@@ -16,6 +16,9 @@
 
 package org.jboss.errai.ui.nav.client.local.api;
 
+import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.Multimap;
+import org.jboss.errai.ui.nav.client.local.Navigation;
 import org.jboss.errai.ui.nav.client.local.PageHiding;
 
 /**
@@ -27,12 +30,20 @@ import org.jboss.errai.ui.nav.client.local.PageHiding;
  */
 public class NavigationControl {
 
+  private final Navigation navigation;
   private final Runnable runnable;
+  private Runnable interrupt;
   
   private boolean hasRun;
 
-  public NavigationControl(final Runnable runnable) {
+  public NavigationControl(final Navigation navigation, final Runnable runnable) {
     this.runnable = runnable;
+    this.navigation = navigation;
+  }
+
+  public NavigationControl(final Navigation navigation, final Runnable runnable, Runnable interrupt) {
+    this(navigation, runnable);
+    this.interrupt = interrupt;
   }
 
   /**
@@ -44,7 +55,37 @@ public class NavigationControl {
       hasRun = true;
     }
     else {
-      throw new IllegalStateException("This method can only be called once.");
+      throw new IllegalStateException("proceed() method can only be called once.");
     }
+  }
+
+  /**
+   * Redirect to a given page safely.
+   *
+   * @param toPage Page class annotated with {@link org.jboss.errai.ui.nav.client.local.Page}.
+   */
+  public <C> void redirect(final Class<C> toPage) {
+    redirect(toPage, ImmutableMultimap.of());
+  }
+
+  /**
+   * Redirect to a given page safely.
+   *
+   * @param toPage page class annotated with {@link org.jboss.errai.ui.nav.client.local.Page}.
+   * @param state Pages state map.
+   */
+  public <C> void redirect(final Class<C> toPage, final Multimap<String, String> state) {
+    if(!hasRun) {
+      if(interrupt != null) {
+        interrupt.run();
+      }
+      navigation.goTo(toPage, state);
+    } else {
+      throw new IllegalStateException("redirect() method can only be called once.");
+    }
+  }
+
+  public boolean hasRun() {
+    return hasRun;
   }
 }
