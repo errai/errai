@@ -17,6 +17,8 @@
 package org.jboss.errai.ioc.rebind.ioc.graph.api;
 
 import java.lang.annotation.Annotation;
+import java.util.List;
+import java.util.function.Predicate;
 
 import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
@@ -31,6 +33,7 @@ import org.jboss.errai.codegen.meta.MetaParameter;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCExtensionConfigurator;
 import org.jboss.errai.ioc.rebind.ioc.extension.builtin.LoggerFactoryIOCExtension;
+import org.jboss.errai.ioc.rebind.ioc.graph.impl.InjectableHandle;
 import org.jboss.errai.ioc.rebind.ioc.graph.impl.ResolutionPriority;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableProvider;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
@@ -64,17 +67,21 @@ public interface DependencyGraphBuilder {
    *          The class of the injectable.
    * @param qualifier
    *          The {@link Qualifier} of the injectable.
+   * @param pathPredicate
+   *          Used to add restrictions on what dependencies are satisfied by the added injectable. This predicate is
+   *          called anytime the created injectable is a candidate for a dependency. The predicate argument is the
+   *          {@link InjectableHandle InjectableHandles} traversed in order to arrive at this injectable. If the
+   *          predicate returns false, the injectable does not satisfy a dependency.
    * @param literalScope
    *          The {@link Scope} of the injectable.
    * @param injectableType
    *          The kind of injectable (i.e. producer, provider, type, etc.).
    * @param wiringTypes
-   *          A collection of {@link WiringElementType wiring types} that this
-   *          injectable has.
+   *          A collection of {@link WiringElementType wiring types} that this injectable has.
    *
    * @return The newly added {@link Injectable}.
    */
-  Injectable addInjectable(MetaClass injectedType, Qualifier qualifier, Class<? extends Annotation> literalScope,
+  Injectable addInjectable(MetaClass injectedType, Qualifier qualifier, Predicate<List<InjectableHandle>> pathPredicate, Class<? extends Annotation> literalScope,
           InjectableType injectableType, WiringElementType... wiringTypes);
 
   /**
@@ -90,6 +97,11 @@ public interface DependencyGraphBuilder {
    *          The class of the injectable.
    * @param qualifier
    *          The {@link Qualifier} of the injectable.
+   * @param pathPredicate
+   *          Used to add restrictions on what dependencies are satisfied by the added injectable. This predicate is
+   *          called anytime the created injectable is a candidate for a dependency. The predicate argument is the
+   *          {@link InjectableHandle InjectableHandles} traversed in order to arrive at this injectable. If the
+   *          predicate returns false, the injectable does not satisfy a dependency.
    * @param literalScope
    *          The {@link Scope} of the injectable.
    * @param injectableType
@@ -100,7 +112,9 @@ public interface DependencyGraphBuilder {
    *
    * @return The newly added extension {@link Injectable}.
    */
-  Injectable addExtensionInjectable(MetaClass injectedType, Qualifier qualifier, InjectableProvider provider, WiringElementType... wiringTypes);
+  Injectable addExtensionInjectable(MetaClass injectedType, Qualifier qualifier,
+          Predicate<List<InjectableHandle>> pathPredicate, InjectableProvider provider,
+          WiringElementType... wiringTypes);
 
   /**
    * Create a dependency for a field injection point in a bean class.

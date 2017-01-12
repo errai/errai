@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Red Hat, Inc. and/or its affiliates.
+ * Copyright (C) 2017 Red Hat, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,24 +14,18 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ioc.rebind.ioc.injector.api;
+package org.jboss.errai.ioc.tests.wiring.client.res;
+
+import javax.enterprise.context.Dependent;
+import javax.enterprise.inject.Typed;
 
 /**
- * @author Mike Brock
+ *
+ * @author Max Barkley <mbarkley@redhat.com>
  */
-public enum WiringElementType {
-  Type,
-  Specialization,
-  NormalScopedBean,
-  PseudoScopedBean,
-  JsType,
-  SharedSingleton,
-  LoadAsync,
-  DependentBean,
-  Simpleton, // TODO review name
-  Provider,
-  InjectionPoint,
-  ProducerElement,
-  AlternativeBean,
-  NotSupported
+@Typed({ TypedTargetInterface.class, TypedType.class })
+@Dependent
+@QualForTypedBean
+public class TypedType extends TypedBaseType implements TypedTargetInterface {
+
 }

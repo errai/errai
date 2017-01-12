@@ -16,6 +16,7 @@
 
 package org.jboss.errai.ioc.tests.wiring.client;
 
+import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -31,6 +32,7 @@ import org.jboss.errai.ioc.client.container.IOCEnvironment;
 import org.jboss.errai.ioc.client.container.IOCResolutionException;
 import org.jboss.errai.ioc.client.container.Proxy;
 import org.jboss.errai.ioc.client.container.SyncBeanDef;
+import org.jboss.errai.ioc.client.container.SyncBeanManager;
 import org.jboss.errai.ioc.rebind.ioc.test.harness.IOCSimulatedTestRunner;
 import org.jboss.errai.ioc.tests.wiring.client.res.ActivatedBean;
 import org.jboss.errai.ioc.tests.wiring.client.res.ActivatedBeanInterface;
@@ -55,6 +57,8 @@ import org.jboss.errai.ioc.tests.wiring.client.res.ProxiableInjectableConstrThro
 import org.jboss.errai.ioc.tests.wiring.client.res.ProxiableNonPublicPostconstruct;
 import org.jboss.errai.ioc.tests.wiring.client.res.ProxiableProtectedConstr;
 import org.jboss.errai.ioc.tests.wiring.client.res.PublicInnerClassIface;
+import org.jboss.errai.ioc.tests.wiring.client.res.QualForProducedTypeBean;
+import org.jboss.errai.ioc.tests.wiring.client.res.QualForTypedBean;
 import org.jboss.errai.ioc.tests.wiring.client.res.QualInspector;
 import org.jboss.errai.ioc.tests.wiring.client.res.SetterInjectionBean;
 import org.jboss.errai.ioc.tests.wiring.client.res.SimpleBean;
@@ -68,6 +72,10 @@ import org.jboss.errai.ioc.tests.wiring.client.res.TestProviderDependentBean;
 import org.jboss.errai.ioc.tests.wiring.client.res.TestResultsSingleton;
 import org.jboss.errai.ioc.tests.wiring.client.res.TransverseDepService;
 import org.jboss.errai.ioc.tests.wiring.client.res.TypeWithJustAFieldProducer;
+import org.jboss.errai.ioc.tests.wiring.client.res.TypedBaseType;
+import org.jboss.errai.ioc.tests.wiring.client.res.TypedSuperInterface;
+import org.jboss.errai.ioc.tests.wiring.client.res.TypedTargetInterface;
+import org.jboss.errai.ioc.tests.wiring.client.res.TypedType;
 import org.junit.runner.RunWith;
 
 import com.google.gwt.core.shared.GWT;
@@ -428,5 +436,189 @@ public class BasicIOCTest extends IOCClientTestCase {
     final AppScopedWithPreDestroy instance3 = Factory.maybeUnwrapProxy(proxiedInstance2);
     assertEquals("New instance was not created by proxy lazy-loading mechanism",
             Arrays.asList(instance1, instance2, instance3), AppScopedWithPreDestroy.createdInstances);
+  }
+
+  public void testBeanWithTypedOnlyAvailableAsSpecifiedTypesAndObject() throws Exception {
+    final QualForTypedBean qual = new QualForTypedBean() {
+      @Override
+      public Class<? extends Annotation> annotationType() {
+        return QualForTypedBean.class;
+      }
+    };
+    final SyncBeanManager bm = IOC.getBeanManager();
+
+    final Collection<SyncBeanDef<TypedType>> typedTypeBeans = bm.lookupBeans(TypedType.class, qual);
+    assertEquals("Expected exactly one bean with type TypedType. Found: " + typedTypeBeans, 1, typedTypeBeans.size());
+    assertEquals(TypedType.class, typedTypeBeans.iterator().next().getBeanClass());
+
+    final Collection<SyncBeanDef<TypedTargetInterface>> targetIfaceBeans = bm.lookupBeans(TypedTargetInterface.class, qual);
+    assertEquals("Expected exactly one bean with type TypedType. Found: " + targetIfaceBeans, 1, targetIfaceBeans.size());
+    assertEquals(TypedType.class, targetIfaceBeans.iterator().next().getBeanClass());
+
+    final Collection<SyncBeanDef<Object>> objectBeans = bm.lookupBeans(Object.class, qual);
+    assertEquals("Expected exactly one bean with type Object and qualifier QualForTypedBean. Found: " + objectBeans, 1, objectBeans.size());
+    assertEquals(TypedType.class, objectBeans.iterator().next().getBeanClass());
+
+    final Collection<SyncBeanDef<TypedBaseType>> baseTypeBeans = bm.lookupBeans(TypedBaseType.class, qual);
+    assertTrue("There should be no beans of type TypedBaseType. Found : " + baseTypeBeans, baseTypeBeans.isEmpty());
+
+    final Collection<SyncBeanDef<TypedSuperInterface>> superIfaceBeans = bm.lookupBeans(TypedSuperInterface.class, qual);
+    assertTrue("There should be no beans of type TypedSuperInterface. Found : " + superIfaceBeans, superIfaceBeans.isEmpty());
+  }
+
+  public void testStaticMethodProducedBeanWithTypedOnlyAvailableAsSpecifiedTypesAndObject() throws Exception {
+    final QualForProducedTypeBean qual = new QualForProducedTypeBean() {
+      @Override
+      public Class<? extends Annotation> annotationType() {
+        return QualForProducedTypeBean.class;
+      }
+
+      @Override
+      public boolean isStatic() {
+        return true;
+      }
+
+      @Override
+      public ProducerType type() {
+        return ProducerType.METHOD;
+      }
+    };
+
+    final SyncBeanManager bm = IOC.getBeanManager();
+
+    final Collection<SyncBeanDef<TypedType>> typedTypeBeans = bm.lookupBeans(TypedType.class, qual);
+    assertEquals("Expected exactly one bean with type TypedType. Found: " + typedTypeBeans, 1, typedTypeBeans.size());
+    assertEquals(TypedType.class, typedTypeBeans.iterator().next().getBeanClass());
+
+    final Collection<SyncBeanDef<TypedTargetInterface>> targetIfaceBeans = bm.lookupBeans(TypedTargetInterface.class, qual);
+    assertEquals("Expected exactly one bean with type TypedType. Found: " + targetIfaceBeans, 1, targetIfaceBeans.size());
+    assertEquals(TypedType.class, targetIfaceBeans.iterator().next().getBeanClass());
+
+    final Collection<SyncBeanDef<Object>> objectBeans = bm.lookupBeans(Object.class, qual);
+    assertEquals("Expected exactly one bean with type Object and qualifier QualForTypedBean. Found: " + objectBeans, 1, objectBeans.size());
+    assertEquals(TypedType.class, objectBeans.iterator().next().getBeanClass());
+
+    final Collection<SyncBeanDef<TypedBaseType>> baseTypeBeans = bm.lookupBeans(TypedBaseType.class, qual);
+    assertTrue("There should be no beans of type TypedBaseType. Found : " + baseTypeBeans, baseTypeBeans.isEmpty());
+
+    final Collection<SyncBeanDef<TypedSuperInterface>> superIfaceBeans = bm.lookupBeans(TypedSuperInterface.class, qual);
+    assertTrue("There should be no beans of type TypedSuperInterface. Found : " + superIfaceBeans, superIfaceBeans.isEmpty());
+  }
+
+  public void testStaticFieldProducedBeanWithTypedOnlyAvailableAsSpecifiedTypesAndObject() throws Exception {
+    final QualForProducedTypeBean qual = new QualForProducedTypeBean() {
+      @Override
+      public Class<? extends Annotation> annotationType() {
+        return QualForProducedTypeBean.class;
+      }
+
+      @Override
+      public boolean isStatic() {
+        return true;
+      }
+
+      @Override
+      public ProducerType type() {
+        return ProducerType.FIELD;
+      }
+    };
+
+    final SyncBeanManager bm = IOC.getBeanManager();
+
+    final Collection<SyncBeanDef<TypedType>> typedTypeBeans = bm.lookupBeans(TypedType.class, qual);
+    assertEquals("Expected exactly one bean with type TypedType. Found: " + typedTypeBeans, 1, typedTypeBeans.size());
+    assertEquals(TypedType.class, typedTypeBeans.iterator().next().getBeanClass());
+
+    final Collection<SyncBeanDef<TypedTargetInterface>> targetIfaceBeans = bm.lookupBeans(TypedTargetInterface.class, qual);
+    assertEquals("Expected exactly one bean with type TypedType. Found: " + targetIfaceBeans, 1, targetIfaceBeans.size());
+    assertEquals(TypedType.class, targetIfaceBeans.iterator().next().getBeanClass());
+
+    final Collection<SyncBeanDef<Object>> objectBeans = bm.lookupBeans(Object.class, qual);
+    assertEquals("Expected exactly one bean with type Object and qualifier QualForTypedBean. Found: " + objectBeans, 1, objectBeans.size());
+    assertEquals(TypedType.class, objectBeans.iterator().next().getBeanClass());
+
+    final Collection<SyncBeanDef<TypedBaseType>> baseTypeBeans = bm.lookupBeans(TypedBaseType.class, qual);
+    assertTrue("There should be no beans of type TypedBaseType. Found : " + baseTypeBeans, baseTypeBeans.isEmpty());
+
+    final Collection<SyncBeanDef<TypedSuperInterface>> superIfaceBeans = bm.lookupBeans(TypedSuperInterface.class, qual);
+    assertTrue("There should be no beans of type TypedSuperInterface. Found : " + superIfaceBeans, superIfaceBeans.isEmpty());
+  }
+
+  public void testInstanceFieldProducedBeanWithTypedOnlyAvailableAsSpecifiedTypesAndObject() throws Exception {
+    final QualForProducedTypeBean qual = new QualForProducedTypeBean() {
+      @Override
+      public Class<? extends Annotation> annotationType() {
+        return QualForProducedTypeBean.class;
+      }
+
+      @Override
+      public boolean isStatic() {
+        return false;
+      }
+
+      @Override
+      public ProducerType type() {
+        return ProducerType.FIELD;
+      }
+    };
+
+    final SyncBeanManager bm = IOC.getBeanManager();
+
+    final Collection<SyncBeanDef<TypedType>> typedTypeBeans = bm.lookupBeans(TypedType.class, qual);
+    assertEquals("Expected exactly one bean with type TypedType. Found: " + typedTypeBeans, 1, typedTypeBeans.size());
+    assertEquals(TypedType.class, typedTypeBeans.iterator().next().getBeanClass());
+
+    final Collection<SyncBeanDef<TypedTargetInterface>> targetIfaceBeans = bm.lookupBeans(TypedTargetInterface.class, qual);
+    assertEquals("Expected exactly one bean with type TypedType. Found: " + targetIfaceBeans, 1, targetIfaceBeans.size());
+    assertEquals(TypedType.class, targetIfaceBeans.iterator().next().getBeanClass());
+
+    final Collection<SyncBeanDef<Object>> objectBeans = bm.lookupBeans(Object.class, qual);
+    assertEquals("Expected exactly one bean with type Object and qualifier QualForTypedBean. Found: " + objectBeans, 1, objectBeans.size());
+    assertEquals(TypedType.class, objectBeans.iterator().next().getBeanClass());
+
+    final Collection<SyncBeanDef<TypedBaseType>> baseTypeBeans = bm.lookupBeans(TypedBaseType.class, qual);
+    assertTrue("There should be no beans of type TypedBaseType. Found : " + baseTypeBeans, baseTypeBeans.isEmpty());
+
+    final Collection<SyncBeanDef<TypedSuperInterface>> superIfaceBeans = bm.lookupBeans(TypedSuperInterface.class, qual);
+    assertTrue("There should be no beans of type TypedSuperInterface. Found : " + superIfaceBeans, superIfaceBeans.isEmpty());
+  }
+
+  public void testInstanceMethodProducedBeanWithTypedOnlyAvailableAsSpecifiedTypesAndObject() throws Exception {
+    final QualForProducedTypeBean qual = new QualForProducedTypeBean() {
+      @Override
+      public Class<? extends Annotation> annotationType() {
+        return QualForProducedTypeBean.class;
+      }
+
+      @Override
+      public boolean isStatic() {
+        return false;
+      }
+
+      @Override
+      public ProducerType type() {
+        return ProducerType.METHOD;
+      }
+    };
+
+    final SyncBeanManager bm = IOC.getBeanManager();
+
+    final Collection<SyncBeanDef<TypedType>> typedTypeBeans = bm.lookupBeans(TypedType.class, qual);
+    assertEquals("Expected exactly one bean with type TypedType. Found: " + typedTypeBeans, 1, typedTypeBeans.size());
+    assertEquals(TypedType.class, typedTypeBeans.iterator().next().getBeanClass());
+
+    final Collection<SyncBeanDef<TypedTargetInterface>> targetIfaceBeans = bm.lookupBeans(TypedTargetInterface.class, qual);
+    assertEquals("Expected exactly one bean with type TypedType. Found: " + targetIfaceBeans, 1, targetIfaceBeans.size());
+    assertEquals(TypedType.class, targetIfaceBeans.iterator().next().getBeanClass());
+
+    final Collection<SyncBeanDef<Object>> objectBeans = bm.lookupBeans(Object.class, qual);
+    assertEquals("Expected exactly one bean with type Object and qualifier QualForTypedBean. Found: " + objectBeans, 1, objectBeans.size());
+    assertEquals(TypedType.class, objectBeans.iterator().next().getBeanClass());
+
+    final Collection<SyncBeanDef<TypedBaseType>> baseTypeBeans = bm.lookupBeans(TypedBaseType.class, qual);
+    assertTrue("There should be no beans of type TypedBaseType. Found : " + baseTypeBeans, baseTypeBeans.isEmpty());
+
+    final Collection<SyncBeanDef<TypedSuperInterface>> superIfaceBeans = bm.lookupBeans(TypedSuperInterface.class, qual);
+    assertTrue("There should be no beans of type TypedSuperInterface. Found : " + superIfaceBeans, superIfaceBeans.isEmpty());
   }
 }
