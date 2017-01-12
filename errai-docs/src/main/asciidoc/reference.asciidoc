@@ -7123,7 +7123,7 @@ public class ItemPage extends VerticalPanel {
 
 The [code]+@PageShowing+ and [code]+@PageShown+ methods are permitted one optional parameter of type [code]+HistoryToken+ -- more on this in the next section.
 
-The [code]+@PageHiding+ method is also permitted one optional parameter of type [code]+NavigationControl+. If the parameter is present, the page navigation will not be carried out until `NavigationControl.proceed()` is invoked. This is useful for interrupting page navigations and then resuming at a later time (for example, to prompt the user to save their work before transitioning to a new page).
+The [code]+@PageHiding+ and [code]+PageShowing+ methods are also permitted one optional parameter of type [code]+NavigationControl+. If the parameter is present, the page navigation will not be carried out until `NavigationControl.proceed()` is invoked, or `NavigationControl.redirect(Class)` may be called to redirect to another page with the given class. In [code]+PageHiding+ methods this is useful for interrupting page navigations and then resuming at a later time (for example, to prompt the user to save their work before transitioning to a new page). In [code]+PageShowing+ methods, this is useful for redirecting a user before a page is shown based on business logic.
 
 ===== Page Instance Lifespan
 
