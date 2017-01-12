@@ -135,11 +135,6 @@ public class Navigation {
   private boolean locked = false;
 
   /**
-   * Indicates that a navigation request is in hiding phase.
-   */
-  private boolean hiding = false;
-
-  /**
    * Queued navigation requests which could not handled immediately.
    */
   private final Queue<Request> queuedRequests = new LinkedList<>();
@@ -451,7 +446,6 @@ public class Navigation {
     final NavigationControl control = new NavigationControl(Navigation.this, new Runnable() {
       @Override
       public void run() {
-        hiding = false;
         final Access<C> accessEvent = new AccessImpl<>();
 
         accessEvent.fireAsync(component, new LifecycleCallback() {
@@ -490,8 +484,7 @@ public class Navigation {
                 locked = true;
                 hideCurrentPage();
                 request.pageNode.pageShowing(component, request.state, showControl);
-              }
-              catch (Exception ex) {
+              } catch (Exception ex) {
                 locked = false;
                 throw ex;
               }
@@ -501,17 +494,16 @@ public class Navigation {
           }
         });
       }
+    }, new Runnable() {
+      @Override
+      public void run() {
+        hideCurrentPage();
+        setCurrentPage(null);
+      }
     });
 
-    if (!hiding && currentPage != null && currentWidget != null && currentComponent != null && currentWidget.asWidget() == navigatingContainer.getWidget()) {
-      hiding = true;
-      try {
-        currentPage.pageHiding(Factory.maybeUnwrapProxy(currentComponent), control);
-      }
-      catch (Exception ex) {
-        hiding = false;
-        throw ex;
-      }
+    if (currentPage != null && currentWidget != null && currentComponent != null && currentWidget.asWidget() == navigatingContainer.getWidget()) {
+      currentPage.pageHiding(Factory.maybeUnwrapProxy(currentComponent), control);
     } else {
       control.proceed();
     }

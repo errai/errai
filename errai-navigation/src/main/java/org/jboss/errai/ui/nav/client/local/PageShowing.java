@@ -45,11 +45,11 @@ import java.lang.annotation.Target;
  * <p>
  * The target method is permitted an optional parameter of type {@link NavigationControl}. If the
  * parameter is present, the page navigation will not be carried out until
- * {@link NavigationControl#proceed()} is invoked. This is useful for interrupting page navigation
- * and then resuming at a later time (for example, to prompt the user to save their work before
- * transitioning to a new page).
+ * {@link NavigationControl#proceed()} is invoked. This is useful for redirecting navigation before
+ * a page has been displayed, based on asynchronous logic (for example, to redirect to another page
+ * based on the result of an Errai RPC).
  * <p>
- * Page loading can be interrupted by calling {@link NavigationControl#redirect()}.
+ * Page loading can be interrupted by calling {@link NavigationControl#redirect(Class)}.
  * This allows for page redirection rather than proceeding a pages navigation.
  * The target method's return type must be {@code void}.
  * <p>
