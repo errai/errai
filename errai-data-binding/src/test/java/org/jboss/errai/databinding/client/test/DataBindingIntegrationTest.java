@@ -57,6 +57,10 @@ import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.databinding.client.api.StateSync;
 import org.jboss.errai.databinding.client.api.handler.property.PropertyChangeEvent;
 import org.jboss.errai.databinding.client.api.handler.property.PropertyChangeHandler;
+import org.jboss.errai.databinding.client.scan.TestModelBindable;
+import org.jboss.errai.databinding.client.scan.TestModelWithoutBindableA;
+import org.jboss.errai.databinding.client.scan.TestModelWithoutBindableB;
+import org.jboss.errai.databinding.client.scan.TestModelWithoutBindableC;
 import org.jboss.errai.ioc.client.container.Factory;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.test.AbstractErraiIOCTest;
@@ -139,7 +143,6 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
 
     model.setAge(null);
     assertEquals("Widget not properly updated", "", integerBox.getText());
-
   }
 
   @Test
@@ -161,13 +164,72 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
   public void testBasicBindingOfNonAnnotatedType() {
     final TextBox textBox = new TextBox();
     final TestModelWithoutBindableAnnotation model =
-        DataBinder.forType(TestModelWithoutBindableAnnotation.class).bind(textBox, "value").getModel();
+            DataBinder.forType(TestModelWithoutBindableAnnotation.class).bind(textBox, "value").getModel();
 
     textBox.setValue("UI change", true);
     assertEquals("Model not properly updated", "UI change", model.getValue());
 
     model.setValue("model change");
     assertEquals("Widget not properly updated", "model change", textBox.getText());
+  }
+
+  @Test
+  public void testScanBindingOfNonAnnotatedTypes() {
+    ////////////// A /////////////////
+    {
+      final TextBox textBoxA = new TextBox();
+
+      final TestModelWithoutBindableA modelA =
+              DataBinder.forType(TestModelWithoutBindableA.class).bind(textBoxA, "value").getModel();
+
+      textBoxA.setValue("UI change", true);
+      assertEquals("Model not properly updated", "UI change", modelA.getValue());
+
+      modelA.setValue("model change");
+      assertEquals("Widget not properly updated", "model change", textBoxA.getText());
+    }
+
+    ////////////// B /////////////////
+    {
+      final TextBox textBoxB = new TextBox();
+
+      final TestModelWithoutBindableB modelB =
+              DataBinder.forType(TestModelWithoutBindableB.class).bind(textBoxB, "value").getModel();
+
+      textBoxB.setValue("UI change", true);
+      assertEquals("Model not properly updated", "UI change", modelB.getValue());
+
+      modelB.setValue("model change");
+      assertEquals("Widget not properly updated", "model change", textBoxB.getText());
+    }
+
+    ////////////// C /////////////////
+    {
+      final TextBox textBoxC = new TextBox();
+
+      final TestModelWithoutBindableC modelC =
+              DataBinder.forType(TestModelWithoutBindableC.class).bind(textBoxC, "value").getModel();
+
+      textBoxC.setValue("UI change", true);
+      assertEquals("Model not properly updated", "UI change", modelC.getValue());
+
+      modelC.setValue("model change");
+      assertEquals("Widget not properly updated", "model change", textBoxC.getText());
+    }
+
+    ////////////// D /////////////////
+    {
+      final TextBox textBoxD = new TextBox();
+
+      final TestModelBindable modelD =
+              DataBinder.forType(TestModelBindable.class).bind(textBoxD, "value").getModel();
+
+      textBoxD.setValue("UI change", true);
+      assertEquals("Model not properly updated", "UI change", modelD.getValue());
+
+      modelD.setValue("model change");
+      assertEquals("Widget not properly updated", "model change", textBoxD.getText());
+    }
   }
 
   @Test
