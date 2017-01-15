@@ -91,7 +91,7 @@ public class TestModelWithoutBindableC {
 
   @Override
   public String toString() {
-    return "TestModelWithoutBindableA [value=" + value + ", child=" + child + "]";
+    return "TestModelWithoutBindableC [value=" + value + ", child=" + child + "]";
   }
 
 }
