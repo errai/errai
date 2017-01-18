@@ -18,12 +18,10 @@ package org.jboss.errai.ioc.rebind.ioc.graph.api;
 
 import java.lang.annotation.Annotation;
 import java.util.Collection;
-import java.util.Optional;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Named;
 
-import org.jboss.errai.codegen.meta.HasAnnotations;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.client.api.ContextualTypeProvider;
 import org.jboss.errai.ioc.client.api.LoadAsync;
@@ -45,11 +43,6 @@ public interface Injectable extends HasInjectableHandle {
    *         should return {@link Dependent}.
    */
   Class<? extends Annotation> getScope();
-
-  /**
-   * @return If available, the annotated object that is the source of this injectable.
-   */
-  Optional<HasAnnotations> getAnnotatedObject();
 
   /**
    * @return The name of this injectable if {@link Named} annotation was

@@ -21,7 +21,6 @@ import java.util.Collection;
 
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.FactoryBodyGenerator;
-import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessor;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.CustomFactoryInjectable;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraphBuilder.InjectableType;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.Qualifier;
@@ -37,7 +36,7 @@ public class DefaultCustomFactoryInjectable extends InjectableImpl implements Cu
   public DefaultCustomFactoryInjectable(final MetaClass type, final Qualifier qualifier, final String factoryName,
           final Class<? extends Annotation> literalScope, final Collection<WiringElementType> wiringTypes,
           final FactoryBodyGenerator generator) {
-    super(type, qualifier, IOCProcessor.ANY, factoryName, literalScope, InjectableType.ExtensionProvided, wiringTypes);
+    super(type, qualifier, factoryName, literalScope, InjectableType.ExtensionProvided, wiringTypes);
     this.generator = generator;
   }
 

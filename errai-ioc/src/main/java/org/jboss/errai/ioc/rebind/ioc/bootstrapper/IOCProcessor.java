@@ -26,7 +26,6 @@ import static org.jboss.errai.codegen.util.Stmt.declareVariable;
 import static org.jboss.errai.codegen.util.Stmt.invokeStatic;
 import static org.jboss.errai.codegen.util.Stmt.loadLiteral;
 import static org.jboss.errai.codegen.util.Stmt.loadVariable;
-import static org.jboss.errai.codegen.util.Stmt.newArray;
 import static org.jboss.errai.ioc.rebind.ioc.bootstrapper.AbstractBodyGenerator.getAnnotationArrayStmt;
 import static org.jboss.errai.ioc.rebind.ioc.bootstrapper.AbstractBodyGenerator.getAssignableTypesArrayStmt;
 
@@ -53,7 +52,6 @@ import javax.enterprise.inject.Alternative;
 import javax.enterprise.inject.Disposes;
 import javax.enterprise.inject.Specializes;
 import javax.enterprise.inject.Stereotype;
-import javax.enterprise.inject.Typed;
 import javax.inject.Named;
 import javax.inject.Provider;
 import javax.inject.Scope;
@@ -68,7 +66,6 @@ import org.jboss.errai.codegen.builder.AnonymousClassStructureBuilder;
 import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.ContextualStatementBuilder;
-import org.jboss.errai.codegen.builder.impl.AbstractStatementBuilder;
 import org.jboss.errai.codegen.builder.impl.ArithmeticExpressionBuilder;
 import org.jboss.errai.codegen.builder.impl.ClassBuilder;
 import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
@@ -145,9 +142,6 @@ public class IOCProcessor {
 
   private static final Logger log = LoggerFactory.getLogger(IOCProcessor.class);
 
-  public static final Predicate<List<InjectableHandle>> ANY = handle -> true;
-  public static final Predicate<List<InjectableHandle>> EXACT_TYPE = IOCProcessor::exactTypePredicate;
-
   public static final String REACHABILITY_PROPERTY = "errai.ioc.reachability";
   public static final String PLUGIN_PROPERTY = "errai.ioc.jsinterop.support";
 
@@ -170,7 +164,6 @@ public class IOCProcessor {
     nonSimpletonTypeAnnotations.add(Specializes.class);
     nonSimpletonTypeAnnotations.add(LoadAsync.class);
     nonSimpletonTypeAnnotations.add(EnabledByProperty.class);
-    nonSimpletonTypeAnnotations.add(Typed.class);
     nonSimpletonTypeAnnotations.addAll(injectionContext.getAnnotationsForElementType(WiringElementType.DependentBean));
     nonSimpletonTypeAnnotations.addAll(injectionContext.getAnnotationsForElementType(WiringElementType.PseudoScopedBean));
     nonSimpletonTypeAnnotations.addAll(injectionContext.getAnnotationsForElementType(WiringElementType.NormalScopedBean));
@@ -285,10 +278,11 @@ public class IOCProcessor {
 
   private void addAllInjectableProviders(final DependencyGraphBuilder graphBuilder) {
     for (final Entry<InjectableHandle, InjectableProvider> entry : injectionContext.getInjectableProviders().entries()) {
-      graphBuilder.addExtensionInjectable(entry.getKey().getType(), entry.getKey().getQualifier(), ANY, entry.getValue());
+      graphBuilder.addExtensionInjectable(entry.getKey().getType(), entry.getKey().getQualifier(), entry.getValue());
     }
     for (final Entry<InjectableHandle, InjectableProvider> entry : injectionContext.getExactTypeInjectableProviders().entries()) {
-      graphBuilder.addExtensionInjectable(entry.getKey().getType(), entry.getKey().getQualifier(), EXACT_TYPE, entry.getValue());
+      graphBuilder.addExtensionInjectable(entry.getKey().getType(), entry.getKey().getQualifier(), entry.getValue(),
+              WiringElementType.ExactTypeMatching);
     }
   }
 
@@ -420,24 +414,7 @@ public class IOCProcessor {
                                          loadLiteral(injectable.getBeanName()),
                                          loadLiteral(!injectable.isContextual()))));
 
-    final AbstractStatementBuilder assignableTypesArrayStmt =
-            injectable.getAnnotatedObject()
-            .map(annotated -> annotated.getAnnotation(Typed.class))
-            .map(typedAnno -> typedAnno.value())
-            .map(beanTypes -> {
-              if (Arrays.stream(beanTypes).anyMatch(type -> Object.class.equals(type))) {
-                return (Object[]) beanTypes;
-              }
-              else {
-                final Class<?>[] copyWithObject = Arrays.copyOf(beanTypes, beanTypes.length+1);
-                copyWithObject[beanTypes.length] = Object.class;
-                return (Object[]) copyWithObject;
-              }
-            })
-            .map(beanTypes -> newArray(Class.class).initialize(beanTypes))
-            .orElseGet(() -> getAssignableTypesArrayStmt(injectable.getInjectedType()));
-
-    curMethod.append(loadVariable(handleVarName).invoke("setAssignableTypes", assignableTypesArrayStmt));
+    curMethod.append(loadVariable(handleVarName).invoke("setAssignableTypes", getAssignableTypesArrayStmt(injectable.getInjectedType())));
 
     if (!injectable.getQualifier().isDefaultQualifier()) {
       curMethod.append(loadVariable(handleVarName).invoke("setQualifiers", getAnnotationArrayStmt(injectable.getQualifier())));
@@ -646,13 +623,13 @@ public class IOCProcessor {
         if (type.isConcrete()) {
           final boolean enabled;
           if (isSimpleton(type)) {
-            builder.addInjectable(type, qualFactory.forSource(type), ANY, Dependent.class, InjectableType.Type,
+            builder.addInjectable(type, qualFactory.forSource(type), Dependent.class, InjectableType.Type,
                     WiringElementType.DependentBean, WiringElementType.Simpleton);
             maybeProcessAsStaticOnlyProducer(builder, type);
           }
           else if ((enabled = isEnabled(type)) && isConstructable(type, problems)) {
             final Class<? extends Annotation> directScope = getScope(type);
-            final Injectable typeInjectable = builder.addInjectable(type, qualFactory.forSource(type), getPathPredicate(type),
+            final Injectable typeInjectable = builder.addInjectable(type, qualFactory.forSource(type),
                     directScope, InjectableType.Type, getWiringTypes(type, directScope));
             processInjectionPoints(typeInjectable, builder, problems);
             maybeProcessAsProducer(builder, type, typeInjectable, true);
@@ -660,8 +637,8 @@ public class IOCProcessor {
           }
           else if (!enabled) {
             final Class<? extends Annotation> directScope = getScope(type);
-            final Injectable typeInjectable = builder.addInjectable(type, qualFactory.forSource(type), getPathPredicate(type),
-                    directScope, InjectableType.Disabled, getWiringTypes(type, directScope));
+            final Injectable typeInjectable = builder.addInjectable(type, qualFactory.forSource(type), directScope,
+                    InjectableType.Disabled, getWiringTypes(type, directScope));
             maybeProcessAsProducer(builder, type, typeInjectable, false);
             maybeProcessAsProvider(typeInjectable, builder, false);
           }
@@ -675,22 +652,11 @@ public class IOCProcessor {
         if (isPublishableJsType(type)) {
           final WiringElementType scopeWiringType = (type.isAnnotationPresent(SharedSingleton.class)
                   ? WiringElementType.SharedSingleton : WiringElementType.DependentBean);
-          builder.addInjectable(type, qualFactory.forUniversallyQualified(), ANY, Dependent.class, InjectableType.JsType, scopeWiringType);
+          builder.addInjectable(type, qualFactory.forUniversallyQualified(), Dependent.class, InjectableType.JsType, scopeWiringType);
         }
       }
     } catch (final Throwable t) {
       throw new RuntimeException("A fatal error occurred while processing " + type.getFullyQualifiedName(), t);
-    }
-  }
-
-  private Predicate<List<InjectableHandle>> getPathPredicate(final HasAnnotations annotated) {
-    if (annotated.isAnnotationPresent(Typed.class)) {
-      final Class<?>[] beanTypes = annotated.getAnnotation(Typed.class).value();
-      return path -> Object.class.getName().equals(path.get(0)) || Arrays.stream(beanTypes)
-              .anyMatch(beanType -> path.get(0).getType().getFullyQualifiedName().equals(beanType.getName()));
-    }
-    else {
-      return ANY;
     }
   }
 
@@ -710,6 +676,7 @@ public class IOCProcessor {
 
   /**
    * @param typeInjectable If null, only static members will be processed.
+   * @param b
    */
   private void maybeProcessAsProducer(final DependencyGraphBuilder builder, final MetaClass producerType,
           final Injectable typeInjectable, final boolean enabled) {
@@ -836,8 +803,8 @@ public class IOCProcessor {
     final MetaClass providedType = providerMethod.getReturnType();
     final InjectableType injectableType = (enabled ? InjectableType.ContextualProvider : InjectableType.Disabled);
     final Injectable providedInjectable = builder.addInjectable(providedType,
-            qualFactory.forUniversallyQualified(), EXACT_TYPE, Dependent.class, injectableType,
-            WiringElementType.Provider, WiringElementType.DependentBean);
+            qualFactory.forUniversallyQualified(), Dependent.class, injectableType,
+            WiringElementType.Provider, WiringElementType.DependentBean, WiringElementType.ExactTypeMatching);
     builder.addProducerMemberDependency(providedInjectable, providerImpl, providerInjectable.getQualifier(), providerMethod);
   }
 
@@ -848,7 +815,7 @@ public class IOCProcessor {
     final MetaClass providedType = providerMethod.getReturnType();
     final InjectableType injectableType = (enabled ? InjectableType.Provider : InjectableType.Disabled);
     final Injectable providedInjectable = builder.addInjectable(providedType, qualFactory.forSource(providerMethod),
-            EXACT_TYPE, Dependent.class, injectableType, WiringElementType.Provider, WiringElementType.DependentBean);
+            Dependent.class, injectableType, WiringElementType.Provider, WiringElementType.DependentBean, WiringElementType.ExactTypeMatching);
     builder.addProducerMemberDependency(providedInjectable, providerImplInjectable.getInjectedType(), providerImplInjectable.getQualifier(), providerMethod);
   }
 
@@ -924,7 +891,7 @@ public class IOCProcessor {
     final WiringElementType[] wiringTypes = getWiringTypeForProducer(producerType, method, directScope);
     final InjectableType injectableType = (enabled ? InjectableType.Producer : InjectableType.Disabled);
     final Injectable producedInjectable = builder.addInjectable(method.getReturnType(),
-            qualFactory.forSource(method), getPathPredicate(method), directScope, injectableType, wiringTypes);
+            qualFactory.forSource(method), directScope, injectableType, wiringTypes);
     if (method.isStatic()) {
       builder.addProducerMemberDependency(producedInjectable, producerType, method);
     }
@@ -1059,8 +1026,9 @@ public class IOCProcessor {
           final boolean enabled) {
     final Class<? extends Annotation> scopeAnno = getScope(field);
     final InjectableType injectableType = (enabled ? InjectableType.Producer : InjectableType.Disabled);
-    final Injectable producedInjectable = builder.addInjectable(field.getType(), qualFactory.forSource(field), getPathPredicate(field),
-            scopeAnno, injectableType, getWiringTypeForProducer(producerType, field, scopeAnno));
+    final Injectable producedInjectable = builder.addInjectable(field.getType(),
+            qualFactory.forSource(field), scopeAnno, injectableType,
+            getWiringTypeForProducer(producerType, field, scopeAnno));
 
     if (field.isStatic()) {
       builder.addProducerMemberDependency(producedInjectable, producerType, field);
@@ -1273,11 +1241,6 @@ public class IOCProcessor {
 
   private boolean hasEnablingProperty(final MetaClass type) {
     return type.isAnnotationPresent(EnabledByProperty.class);
-  }
-
-  private static boolean exactTypePredicate(final List<InjectableHandle> path) {
-    final int pathLength = path.size() - 1;
-    return pathLength == 0 || path.get(0).getType().getFullyQualifiedName().equals(path.get(pathLength).getType().getFullyQualifiedName());
   }
 
 }
