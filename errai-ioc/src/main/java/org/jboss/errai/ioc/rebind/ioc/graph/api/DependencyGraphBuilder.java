@@ -231,7 +231,7 @@ public interface DependencyGraphBuilder {
    * @author Max Barkley <mbarkley@redhat.com>
    */
   public static enum InjectableType {
-    Type, JsType, Producer, Provider, ContextualProvider, Reference, Extension, ExtensionProvided, Static, Disabled
+    Type, JsType, Producer, Provider, ContextualProvider, Extension, ExtensionProvided, Static, Disabled
   }
 
   /**

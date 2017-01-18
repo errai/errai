@@ -93,7 +93,6 @@ class InjectableImpl extends InjectableBase implements Injectable {
   @Override
   public boolean requiresProxy() {
     switch (injectableType) {
-    case Reference:
     case ContextualProvider:
     case Provider:
       return false;
@@ -144,5 +143,44 @@ class InjectableImpl extends InjectableBase implements Injectable {
     }
 
     return hashContent;
+  }
+
+  @Override
+  public String toString() {
+    final String injectableDescriptor;
+    switch (injectableType) {
+    case ContextualProvider:
+      injectableDescriptor = "ContextualProvider";
+      break;
+    case Disabled:
+      injectableDescriptor = "Disabled";
+      break;
+    case Extension:
+      injectableDescriptor = "Extension";
+      break;
+    case ExtensionProvided:
+      injectableDescriptor = "ExtensionProvided";
+      break;
+    case JsType:
+      injectableDescriptor = "@JsType";
+      break;
+    case Producer:
+      injectableDescriptor = "@Produces";
+      break;
+    case Provider:
+      injectableDescriptor = "Provider";
+      break;
+    case Static:
+      injectableDescriptor = "@Produces";
+      break;
+    case Type:
+      injectableDescriptor = "Class";
+      break;
+    default:
+      injectableDescriptor = "";
+      break;
+    }
+
+    return String.format("%s %s %s", injectableDescriptor, getQualifier(), getInjectedType().getFullyQualifiedNameWithTypeParms());
   }
 }
