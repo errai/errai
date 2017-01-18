@@ -51,7 +51,7 @@ public class InjectableHandle {
   }
 
   @Override
-  public boolean equals(Object obj) {
+  public boolean equals(final Object obj) {
     if (!(obj instanceof InjectableHandle))
       return false;
 
@@ -66,6 +66,6 @@ public class InjectableHandle {
 
   @Override
   public String toString() {
-    return "[AbstractInjectableHandle:" + type.getName() + "$" + qualifier.toString() + "]";
+    return String.format("%s %s", getQualifier(), getType().getFullyQualifiedNameWithTypeParms());
   }
 }

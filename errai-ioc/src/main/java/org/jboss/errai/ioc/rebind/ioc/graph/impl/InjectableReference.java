@@ -20,7 +20,6 @@ import java.util.Collection;
 import java.util.HashSet;
 
 import org.jboss.errai.codegen.meta.MetaClass;
-import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraphBuilder.InjectableType;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.HasInjectableHandle;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.Injectable;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.Qualifier;
@@ -34,7 +33,7 @@ import org.jboss.errai.ioc.rebind.ioc.graph.api.Qualifier;
 class InjectableReference extends InjectableBase implements HasInjectableHandle {
   // TODO needs to be renamed and not be an Injectable
 
-  final Collection<InjectableBase> linked = new HashSet<InjectableBase>();
+  final Collection<InjectableBase> linked = new HashSet<>();
   Injectable resolution;
 
   InjectableReference(final MetaClass type, final Qualifier qualifier) {
@@ -42,8 +41,8 @@ class InjectableReference extends InjectableBase implements HasInjectableHandle 
   }
 
   @Override
-  public InjectableType getInjectableType() {
-    return InjectableType.Reference;
+  public String toString() {
+    return String.format("%s %s", getQualifier(), getInjectedType().getFullyQualifiedNameWithTypeParms());
   }
 
 }

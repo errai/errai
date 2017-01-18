@@ -18,7 +18,6 @@ package org.jboss.errai.ioc.rebind.ioc.graph.impl;
 
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.Qualifier;
-import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraphBuilder.InjectableType;
 
 /**
  * Common base class for {@link InjectableImpl} and
@@ -44,14 +43,6 @@ abstract class InjectableBase {
   public MetaClass getInjectedType() {
     return type;
   }
-
-  @Override
-  public String toString() {
-    return "[class=" + getInjectedType() + ", injectorType=" + getInjectableType() + ", qualifier="
-            + getQualifier().toString() + "]";
-  }
-
-  public abstract InjectableType getInjectableType();
 
   public Qualifier getQualifier() {
     return qualifier;
