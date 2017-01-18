@@ -108,7 +108,7 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
 
   @Override
   public MetaClass getErased() {
-    if (getEnclosedMetaObject().getTypeParameters().length == 0) {
+    if (parameterizedType == null) {
       return this;
     }
     return new JavaReflectionClass(getEnclosedMetaObject(), true);
@@ -144,7 +144,7 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
   }
 
   private MetaMethod[] fromMethodArray(final Method[] methods) {
-    final List<MetaMethod> methodList = new ArrayList<MetaMethod>();
+    final List<MetaMethod> methodList = new ArrayList<>();
 
     for (final Method m : methods) {
       // hack to exclude jacoco instrumented methods.
@@ -164,14 +164,14 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
       return _methodCache;
     }
 
-    final Set<MetaMethod> meths = new LinkedHashSet<MetaMethod>();
+    final Set<MetaMethod> meths = new LinkedHashSet<>();
 
     Class<?> type = getEnclosedMetaObject();
     if (type == null) {
       return null;
     }
 
-    final Set<String> processedMethods = new HashSet<String>();
+    final Set<String> processedMethods = new HashSet<>();
     do {
       for (final Method method : type.getDeclaredMethods()) {
         final JavaReflectionMethod metaMethod = new JavaReflectionMethod(this, method);
@@ -332,7 +332,7 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
       return _interfacesCache;
     }
 
-    final List<MetaClass> metaClassList = new ArrayList<MetaClass>();
+    final List<MetaClass> metaClassList = new ArrayList<>();
     final Type[] genIface = getEnclosedMetaObject().getGenericInterfaces();
 
     int i = 0;
@@ -455,7 +455,7 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
     return getEnclosedMetaObject().isAnonymousClass();
   }
 
-  private final Map<Integer, MetaClass> _arrayTypeCache = new HashMap<Integer, MetaClass>();
+  private final Map<Integer, MetaClass> _arrayTypeCache = new HashMap<>();
 
   @Override
   public MetaClass asArrayOf(final int dimensions) {
