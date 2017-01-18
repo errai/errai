@@ -55,7 +55,7 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
 
   private final String className;
   private MetaClass superClass;
-  private List<MetaClass> interfaces = new ArrayList<MetaClass>();
+  private List<MetaClass> interfaces = new ArrayList<>();
 
   private Scope scope;
 
@@ -70,13 +70,13 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
   private final BlockStatement staticInitializer = new BlockStatement();
   private final BlockStatement instanceInitializer = new BlockStatement();
 
-  private List<Annotation> annotations = new ArrayList<Annotation>();
-  private List<InnerClass> innerClasses = new ArrayList<InnerClass>();
+  private List<Annotation> annotations = new ArrayList<>();
+  private List<InnerClass> innerClasses = new ArrayList<>();
 
-  private List<BuildMetaMethod> methods = new ArrayList<BuildMetaMethod>();
-  private List<BuildMetaField> fields = new ArrayList<BuildMetaField>();
-  private List<BuildMetaConstructor> constructors = new ArrayList<BuildMetaConstructor>();
-  private List<MetaTypeVariable> typeVariables = new ArrayList<MetaTypeVariable>();
+  private List<BuildMetaMethod> methods = new ArrayList<>();
+  private List<BuildMetaField> fields = new ArrayList<>();
+  private List<BuildMetaConstructor> constructors = new ArrayList<>();
+  private List<MetaTypeVariable> typeVariables = new ArrayList<>();
   private MetaClass reifiedFormOf;
 
   private String classComment;
@@ -122,6 +122,10 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
   @Override
   public MetaClass getErased() {
     if (_erasedCache != null) {
+      return _erasedCache;
+    }
+    else if (typeVariables == null || typeVariables.isEmpty()) {
+      _erasedCache = this;
       return _erasedCache;
     }
     else {
@@ -190,7 +194,7 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
     final MetaMethod[] outputMethods;
 
     if (superClass != null) {
-      final List<MetaMethod> methodList = new ArrayList<MetaMethod>();
+      final List<MetaMethod> methodList = new ArrayList<>();
       for (final MetaMethod m : superClass.getMethods()) {
         if (_getMethod(methodArray, m.getName(), GenUtil.fromParameters(m.getParameters())) == null) {
           methodList.add(m);
@@ -607,7 +611,7 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
       buf.append(" class ").append(getName());
     }
 
-    final List<MetaClass> interfacesToRender = new ArrayList<MetaClass>(interfaces.size() + 1);
+    final List<MetaClass> interfacesToRender = new ArrayList<>(interfaces.size() + 1);
     interfacesToRender.addAll(interfaces);
 
     if (getSuperClass() != null) {
@@ -686,7 +690,7 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
   private List<Builder> diffList(final List<? extends Builder> original,
                                  final List<? extends Builder> against) {
 
-    final List<Builder> copyList = new ArrayList<Builder>(original);
+    final List<Builder> copyList = new ArrayList<>(original);
     copyList.removeAll(against);
     return copyList;
   }
@@ -734,8 +738,8 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
   }
 
   private StringBuilder renderFieldBuffer() {
-    List<Builder> toBuild = new ArrayList<Builder>(fields);
-    final List<Builder> toIterate = new ArrayList<Builder>(toBuild);
+    List<Builder> toBuild = new ArrayList<>(fields);
+    final List<Builder> toIterate = new ArrayList<>(toBuild);
 
     int initialFieldSize;
 
@@ -766,7 +770,7 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
       }
 
       toIterate.addAll(0, diffList(fields, toBuild));
-      toBuild = new ArrayList<Builder>(fields);
+      toBuild = new ArrayList<>(fields);
     }
     while (initialFieldSize < fields.size());
 
