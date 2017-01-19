@@ -36,14 +36,17 @@ import static org.jboss.errai.codegen.util.Stmt.try_;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.Map.Entry;
 
 import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Default;
+import javax.enterprise.inject.Typed;
 import javax.inject.Named;
 import javax.inject.Qualifier;
 
@@ -712,9 +715,7 @@ public abstract class AbstractBodyGenerator implements FactoryBodyGenerator {
     final Statement newObject = generateFactoryHandleStatement(injectable);
     final ConstructorBlockBuilder<?> con = bodyBlockBuilder.publicConstructor();
     con.callSuper(newObject);
-
-    final AbstractStatementBuilder assignableTypeArrayStmt = getAssignableTypesArrayStmt(injectable.getInjectedType());
-    con.append(loadVariable("handle").invoke("setAssignableTypes", assignableTypeArrayStmt));
+    con.append(loadVariable("handle").invoke("setAssignableTypes", getAssignableTypesArrayStmt(injectable)));
 
     final org.jboss.errai.ioc.rebind.ioc.graph.api.Qualifier qualifier = injectable.getQualifier();
     if (!qualifier.isDefaultQualifier()) {
@@ -725,13 +726,25 @@ public abstract class AbstractBodyGenerator implements FactoryBodyGenerator {
     con.finish();
   }
 
-  public static AbstractStatementBuilder getAssignableTypesArrayStmt(final MetaClass type) {
-    final Object[] publicAssignableTypes = getAllAssignableTypes(type)
-      .stream()
-      .filter(MetaClass::isPublic)
-      .toArray();
-    final AbstractStatementBuilder assignableTypeArrayStmt = newArray(Class.class).initialize(publicAssignableTypes);
-    return assignableTypeArrayStmt;
+  public static AbstractStatementBuilder getAssignableTypesArrayStmt(final Injectable injectable) {
+    final Object[] assignableTypes =
+            injectable.getAnnotatedObject()
+            .flatMap(annotated -> Optional.ofNullable(annotated.getAnnotation(Typed.class)))
+            .map(typedAnno -> typedAnno.value())
+            // Ensure that Object is an assignable type
+            .map(beanTypes -> {
+              if (Arrays.stream(beanTypes).anyMatch(type -> Object.class.equals(type))) {
+                return (Object[]) beanTypes;
+              }
+              else {
+                final Class<?>[] copyWithObject = Arrays.copyOf(beanTypes, beanTypes.length+1);
+                copyWithObject[beanTypes.length] = Object.class;
+                return (Object[]) copyWithObject;
+              }
+            })
+            .orElseGet(() -> getAllAssignableTypes(injectable.getInjectedType()).stream().filter(MetaClass::isPublic).toArray());
+
+    return newArray(Class.class).initialize(assignableTypes);
   }
 
   public static AbstractStatementBuilder getAnnotationArrayStmt(final org.jboss.errai.ioc.rebind.ioc.graph.api.Qualifier qualifier) {

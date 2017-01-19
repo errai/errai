@@ -181,7 +181,7 @@ public class ManagedInstanceProvider implements ContextualTypeProvider<ManagedIn
 
     @Override
     public Iterator<T> iterator() {
-      return new ManagedInstanceImplIterator<S, T>(getBeanManager().lookupBeans(key.type, qualifierArray()), key, dependentInstances);
+      return new ManagedInstanceImplIterator<>(getBeanManager().lookupBeans(key.type, qualifierArray()), key, dependentInstances);
     }
 
     @Override

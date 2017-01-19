@@ -7,15 +7,19 @@ import static org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType.Norm
 import static org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType.ProducerElement;
 import static org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType.Provider;
 import static org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType.PseudoScopedBean;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Dependent;
@@ -41,7 +45,13 @@ import org.jboss.errai.ioc.rebind.ioc.graph.api.QualifierFactory;
 import org.jboss.errai.ioc.rebind.ioc.graph.impl.DefaultQualifierFactory;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
+import org.jboss.errai.ioc.tests.wiring.client.res.TypedBaseType;
+import org.jboss.errai.ioc.tests.wiring.client.res.TypedProducer;
+import org.jboss.errai.ioc.tests.wiring.client.res.TypedSuperInterface;
+import org.jboss.errai.ioc.tests.wiring.client.res.TypedTargetInterface;
+import org.jboss.errai.ioc.tests.wiring.client.res.TypedType;
 import org.jboss.errai.ioc.unit.res.BeanWithAlternativeDependency;
+import org.jboss.errai.ioc.unit.res.ClassWithBadTypedAnnotation;
 import org.jboss.errai.ioc.unit.res.DepCycleA;
 import org.jboss.errai.ioc.unit.res.DepCycleB;
 import org.jboss.errai.ioc.unit.res.DependencyIface;
@@ -50,8 +60,16 @@ import org.jboss.errai.ioc.unit.res.DisabledAlternativeContextualProvider;
 import org.jboss.errai.ioc.unit.res.DisabledAlternativeProducerField;
 import org.jboss.errai.ioc.unit.res.DisabledAlternativeProducerMethod;
 import org.jboss.errai.ioc.unit.res.DisabledAlternativeProvider;
+import org.jboss.errai.ioc.unit.res.InjectsBeanByWrongTypes;
+import org.jboss.errai.ioc.unit.res.InjectsInstanceFieldProducedBeanByWrongTypes;
+import org.jboss.errai.ioc.unit.res.InjectsInstanceMethodProducedBeanByWrongTypes;
+import org.jboss.errai.ioc.unit.res.InjectsStaticFieldProducedBeanByWrongTypes;
+import org.jboss.errai.ioc.unit.res.InjectsStaticMethodProducedBeanByWrongTypes;
+import org.jboss.errai.ioc.unit.res.ParameterizedIface;
 import org.jboss.errai.ioc.unit.res.PseudoCycleA;
 import org.jboss.errai.ioc.unit.res.PseudoCycleB;
+import org.jboss.errai.ioc.unit.res.TypeParameterControlModule;
+import org.jboss.errai.ioc.unit.res.TypeParameterTestModule;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -213,7 +231,7 @@ public class IOCProcessorErrorTest {
     try {
       processor.process(procContext);
       fail("Did not produce error for @Depenent scope cycle.");
-    } catch (RuntimeException e) {
+    } catch (final RuntimeException e) {
       final String message = e.getMessage();
       assertTrue(
               "Message did not reference types in dependent scoped cycle.\n\tMessage: " + message,
@@ -231,11 +249,234 @@ public class IOCProcessorErrorTest {
     try {
       processor.process(procContext);
       fail("Did not produce error for pseudo scope cycle.");
-    } catch (RuntimeException e) {
+    } catch (final RuntimeException e) {
       final String message = e.getMessage();
       assertTrue(
               "Message did not reference types in pseudo scoped cycle.\n\tMessage: " + message,
               message.contains(PseudoCycleA.class.getSimpleName()) && message.contains(PseudoCycleB.class.getSimpleName()));
+    }
+  }
+
+  @Test
+  public void typedAnnotationOnBeanPreventsResolutionViaSuperType() throws Exception {
+    addToMetaClassCache(
+            Object.class,
+            TypedType.class,
+            TypedBaseType.class,
+            TypedSuperInterface.class,
+            TypedTargetInterface.class,
+            InjectsBeanByWrongTypes.class);
+
+    try {
+      processor.process(procContext);
+      fail("Did not produce error processing context with unsatisfied dependencies.");
+    } catch (final AssertionError ae) {
+      throw ae;
+    } catch (final Throwable t) {
+      final String message = t.getMessage();
+      assertTrue("Message did not reference unsatisfied dependency for " + TypedSuperInterface.class.getName()
+              + ".\n\tMessage: " + message, message.contains(TypedSuperInterface.class.getName()));
+      assertTrue("Message did not reference unsatisfied dependency for " + TypedBaseType.class.getName()
+              + ".\n\tMessage: " + message, message.contains(TypedBaseType.class.getName()));
+      assertFalse("Message should not reference satisfied dependency " + TypedType.class.getName() + "\n\tMessage: "
+              + message, message.contains(TypedType.class.getName()));
+      assertFalse("Message should not reference satisfied dependency " + TypedTargetInterface.class.getName() + "\n\tMessage: "
+              + message, message.contains(TypedTargetInterface.class.getName()));
+    }
+  }
+
+  @Test
+  public void typedAnnotationOnStaticProducerMethodPreventsResolutionViaSuperType() throws Exception {
+    addToMetaClassCache(
+            Object.class,
+            TypedType.class,
+            TypedBaseType.class,
+            TypedSuperInterface.class,
+            TypedTargetInterface.class,
+            TypedProducer.class,
+            InjectsStaticMethodProducedBeanByWrongTypes.class);
+
+    try {
+      processor.process(procContext);
+      fail("Did not produce error processing context with unsatisfied dependencies.");
+    } catch (final AssertionError ae) {
+      throw ae;
+    } catch (final Throwable t) {
+      final String message = t.getMessage();
+      assertTrue("Message did not reference unsatisfied dependency for " + TypedSuperInterface.class.getName()
+              + ".\n\tMessage: " + message, message.contains(TypedSuperInterface.class.getName()));
+      assertTrue("Message did not reference unsatisfied dependency for " + TypedBaseType.class.getName()
+              + ".\n\tMessage: " + message, message.contains(TypedBaseType.class.getName()));
+      assertFalse("Message should not reference satisfied dependency " + TypedType.class.getName() + "\n\tMessage: "
+              + message, message.contains(TypedType.class.getName()));
+      assertFalse("Message should not reference satisfied dependency " + TypedTargetInterface.class.getName() + "\n\tMessage: "
+              + message, message.contains(TypedTargetInterface.class.getName()));
+    }
+  }
+
+  @Test
+  public void typedAnnotationOnStaticProducerFieldPreventsResolutionViaSuperType() throws Exception {
+    addToMetaClassCache(
+            Object.class,
+            TypedType.class,
+            TypedBaseType.class,
+            TypedSuperInterface.class,
+            TypedTargetInterface.class,
+            TypedProducer.class,
+            InjectsStaticFieldProducedBeanByWrongTypes.class);
+
+    try {
+      processor.process(procContext);
+      fail("Did not produce error processing context with unsatisfied dependencies.");
+    } catch (final AssertionError ae) {
+      throw ae;
+    } catch (final Throwable t) {
+      final String message = t.getMessage();
+      assertTrue("Message did not reference unsatisfied dependency for " + TypedSuperInterface.class.getName()
+              + ".\n\tMessage: " + message, message.contains(TypedSuperInterface.class.getName()));
+      assertTrue("Message did not reference unsatisfied dependency for " + TypedBaseType.class.getName()
+              + ".\n\tMessage: " + message, message.contains(TypedBaseType.class.getName()));
+      assertFalse("Message should not reference satisfied dependency " + TypedType.class.getName() + "\n\tMessage: "
+              + message, message.contains(TypedType.class.getName()));
+      assertFalse("Message should not reference satisfied dependency " + TypedTargetInterface.class.getName() + "\n\tMessage: "
+              + message, message.contains(TypedTargetInterface.class.getName()));
+    }
+  }
+
+  @Test
+  public void typedAnnotationOnInstanceProducerFieldPreventsResolutionViaSuperType() throws Exception {
+    addToMetaClassCache(
+            Object.class,
+            TypedType.class,
+            TypedBaseType.class,
+            TypedSuperInterface.class,
+            TypedTargetInterface.class,
+            TypedProducer.class,
+            InjectsInstanceFieldProducedBeanByWrongTypes.class);
+
+    try {
+      processor.process(procContext);
+      fail("Did not produce error processing context with unsatisfied dependencies.");
+    } catch (final AssertionError ae) {
+      throw ae;
+    } catch (final Throwable t) {
+      final String message = t.getMessage();
+      assertTrue("Message did not reference unsatisfied dependency for " + TypedSuperInterface.class.getName()
+              + ".\n\tMessage: " + message, message.contains(TypedSuperInterface.class.getName()));
+      assertTrue("Message did not reference unsatisfied dependency for " + TypedBaseType.class.getName()
+              + ".\n\tMessage: " + message, message.contains(TypedBaseType.class.getName()));
+      assertFalse("Message should not reference satisfied dependency " + TypedType.class.getName() + "\n\tMessage: "
+              + message, message.contains(TypedType.class.getName()));
+      assertFalse("Message should not reference satisfied dependency " + TypedTargetInterface.class.getName() + "\n\tMessage: "
+              + message, message.contains(TypedTargetInterface.class.getName()));
+    }
+  }
+
+  @Test
+  public void typedAnnotationOnInstanceProducerMethodPreventsResolutionViaSuperType() throws Exception {
+    addToMetaClassCache(
+            Object.class,
+            TypedType.class,
+            TypedBaseType.class,
+            TypedSuperInterface.class,
+            TypedTargetInterface.class,
+            TypedProducer.class,
+            InjectsInstanceMethodProducedBeanByWrongTypes.class);
+
+    try {
+      processor.process(procContext);
+      fail("Did not produce error processing context with unsatisfied dependencies.");
+    } catch (final AssertionError ae) {
+      throw ae;
+    } catch (final Throwable t) {
+      final String message = t.getMessage();
+      assertTrue("Message did not reference unsatisfied dependency for " + TypedSuperInterface.class.getName()
+              + ".\n\tMessage: " + message, message.contains(TypedSuperInterface.class.getName()));
+      assertTrue("Message did not reference unsatisfied dependency for " + TypedBaseType.class.getName()
+              + ".\n\tMessage: " + message, message.contains(TypedBaseType.class.getName()));
+      assertFalse("Message should not reference satisfied dependency " + TypedType.class.getName() + "\n\tMessage: "
+              + message, message.contains(TypedType.class.getName()));
+      assertFalse("Message should not reference satisfied dependency " + TypedTargetInterface.class.getName() + "\n\tMessage: "
+              + message, message.contains(TypedTargetInterface.class.getName()));
+    }
+  }
+
+  @Test
+  public void errorWhenTypedAnnotationContainsNonAssignableTypes() throws Exception {
+    addToMetaClassCache(
+            Object.class,
+            List.class,
+            ClassWithBadTypedAnnotation.class
+            );
+
+    try {
+      processor.process(procContext);
+      fail("Did not produce error processing @Typed annotation with unassignable values.");
+    } catch (final AssertionError ae) {
+      throw ae;
+    } catch (final RuntimeException ex) {
+      assertTrue("Error does not mention the type with the invalid @Typed declaration.",
+              ex.getMessage().contains(ClassWithBadTypedAnnotation.class.getName()));
+      assertTrue("Error does not mention the unassignable type.", ex.getMessage().contains("java.util.List"));
+    }
+  }
+
+  @Test
+  public void injectionSiteWithRawTypeDoesNotCauseInfiniteLoopOrBadResolution() throws Exception {
+    long elapsed;
+    final long start = System.currentTimeMillis();
+    try {
+      addToMetaClassCache(
+              Object.class,
+              ParameterizedIface.class,
+              TypeParameterControlModule.class);
+      processor.process(procContext);
+      fail("Control passed, but should fail from unsatisfied dependency.");
+    } catch (final AssertionError ae) {
+      throw ae;
+    } catch (final RuntimeException ex) {
+      if (!ex.getMessage().contains("Unsatisfied")) {
+        throw new AssertionError("Error was not from an unsatisfied dependency.", ex);
+      }
+      if (!ex.getMessage().contains("ParameterizedIface<java.lang.Integer>")) {
+        throw new AssertionError("Did not report the type of the unsatisfied dependency.", ex);
+      }
+    }
+    elapsed = System.currentTimeMillis() - start;
+
+    setup();
+    addToMetaClassCache(
+            Object.class,
+            ParameterizedIface.class,
+            TypeParameterTestModule.class);
+    final ExecutorService execService = Executors.newFixedThreadPool(1);
+    final Future<Optional<Throwable>> testFuture = execService.submit(() -> {
+      try {
+        processor.process(procContext);
+      } catch (final Throwable t) {
+        return Optional.of(t);
+      }
+      return Optional.empty();
+    });
+
+    try {
+      final Optional<Throwable> res = testFuture.get(elapsed * 10, TimeUnit.MILLISECONDS);
+      assertTrue("Resolution should have failed from an unsatisfied dependency.", res.isPresent());
+      final Throwable t = res.get();
+      if (!t.getMessage().contains("Unsatisfied")) {
+        throw new AssertionError("Error was not from an unsatisfied dependency.", t);
+      }
+      if (!t.getMessage().contains("ParameterizedIface<java.lang.Integer>")) {
+        throw new AssertionError("Did not report the type of the unsatisfied dependency.", t);
+      }
+    } catch (final TimeoutException ex) {
+      testFuture.cancel(true);
+      throw new AssertionError(
+              "Dependency resolution took over 10 times the duration of the control. Most likely there is an infinite loop.",
+              ex);
+    }
+    finally {
+      execService.shutdown();
     }
   }
 
@@ -244,9 +485,9 @@ public class IOCProcessorErrorTest {
     try {
       processor.process(procContext);
       fail("Calling process should have caused an error from an unsatisfied dependency.");
-    } catch (NullPointerException npe) {
+    } catch (final NullPointerException npe) {
       throw npe;
-    } catch (RuntimeException ex) {
+    } catch (final RuntimeException ex) {
       // rethrow exception if preconditions not met
       try {
         assertNotNull("Message of " + ex.getClass().getSimpleName() + " should not have been null.", ex.getMessage());
@@ -255,7 +496,7 @@ public class IOCProcessorErrorTest {
                 ex.getMessage().contains(typeWithDepName));
         assertTrue("IOC error contains two unsatisfied dependencies. Should only containe one.",
                 ex.getMessage().indexOf("Unsatisfied") == ex.getMessage().lastIndexOf("Unsatisfied"));
-      } catch (AssertionError ae) {
+      } catch (final AssertionError ae) {
         throw new AssertionError(ae.getMessage(), ex);
       }
 
