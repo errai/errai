@@ -20,10 +20,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.commons.lang3.Validate;
 import org.jboss.errai.codegen.meta.MetaClass;
-import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameterizedType;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraphBuilder.Dependency;
@@ -207,12 +207,12 @@ final class GraphUtil {
 
   static boolean hasAssignableTypeParameters(final MetaClass fromType, final MetaClass toType) {
     final MetaParameterizedType toParamType = toType.getParameterizedType();
-    final MetaParameterizedType fromParamType = GraphUtil.getFromTypeParams(fromType, toType);
+    final Optional<MetaParameterizedType> fromParamType = GraphUtil.getFromTypeParams(fromType, toType);
 
-    return toParamType == null || toParamType.isAssignableFrom(fromParamType);
+    return toParamType == null || fromParamType.map(type -> toParamType.isAssignableFrom(type)).orElse(true);
   }
 
-  static MetaParameterizedType getFromTypeParams(final MetaClass fromType, final MetaClass toType) {
+  static Optional<MetaParameterizedType> getFromTypeParams(final MetaClass fromType, final MetaClass toType) {
     MetaClass parameterContainingType = null;
     if (toType.isInterface()) {
       if (fromType.getFullyQualifiedName().equals(toType.getFullyQualifiedName())) {
@@ -241,10 +241,10 @@ final class GraphUtil {
       + " through type " + fromType.getFullyQualifiedName());
     }
     else if (parameterContainingType.getParameterizedType() != null) {
-      return parameterContainingType.getParameterizedType();
+      return Optional.of(parameterContainingType.getParameterizedType());
     }
     else {
-      return MetaClassFactory.typeParametersOf(parameterContainingType.getTypeParameters());
+      return Optional.empty();
     }
   }
 

@@ -284,7 +284,7 @@ public class DefaultQualifierFactory implements QualifierFactory {
 
     @Override
     public String toString() {
-      return annotations.toString();
+      return annotations.stream().map(AnnotationWrapper::toString).reduce((s1, s2) -> s1 + " " + s2).orElse("");
     }
 
     @Override
@@ -343,7 +343,7 @@ public class DefaultQualifierFactory implements QualifierFactory {
 
     @Override
     public String toString() {
-      return getIdentifierSafeString();
+      return "@" + getIdentifierSafeString();
     }
 
     @Override
