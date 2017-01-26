@@ -9,7 +9,7 @@
     <title>Errai Reference Guide</title>
     
     
-    <date>2016-12-13</date>
+    <date>2017-01-12</date>
     
     
     
@@ -3267,6 +3267,10 @@ private void onUncaughtException(Throwable caught) {
   }
 }</programlisting>
 </section>
+<section id="_logging_rpc_exceptions_on_the_server">
+<title>Logging RPC exceptions on the server</title>
+<simpara>Errai logs all exceptions thrown by RPC endpoints on the server at the DEBUG level. To show these messages in your server logs, set the logger "org.jboss.errai.bus.server.io.AbstractRPCMethodCallback" to the DEBUG level. Errai uses SLF4J, so how you go about setting this logger to debug will depend on what logging backend you use.</simpara>
+</section>
 </section>
 <section id="sid-5931313_RemoteProcedureCalls%28RPC%29-ClientsideInterceptors">
 <title>Client-side Interceptors</title>
@@ -3617,11 +3621,12 @@ private Caller&lt;CustomerService&gt; customerService;</programlisting>
     Window.alert("Customer created with ID: " + id);
   }
 };</programlisting>
-<simpara>A special case of this <literal><phrase role="code">RemoteCallback</phrase></literal> is the <literal><phrase role="code">ResponseCallback</phrase></literal> which can be used as an alternative. It provides access to the <literal><phrase role="code">Response</phrase></literal> object representing the underlying HTTP response. This is useful when more details of the HTTP response are needed, such as headers and the status code. The <literal><phrase role="code">ResponseCallback</phrase></literal> can also be used for JAX-RS interface methods that return a <literal><phrase role="code">javax.ws.rs.core.Response</phrase></literal> type. In this case, the <literal><phrase role="code">MarshallingWrapper</phrase></literal> class can be used to manually demarshall the response body to an entity of the desired type.</simpara>
-<programlisting language="java" linenumbering="unnumbered">ResponseCallback callback = new ResponseCallback() {
+<simpara>One special use case for the <literal><phrase role="code">RemoteCallback</phrase></literal> is for JAX-RS interface methods that return a <literal><phrase role="code">javax.ws.rs.core.Response</phrase></literal> type. Errai does not provide a client implementation of the <literal><phrase role="code">javax.ws.rs.core.Response</phrase></literal> class. Instead calls to methods returning a <literal><phrase role="code">javax.ws.rs.core.Response</phrase></literal> should use a <literal><phrase role="code">RemoteCallback&lt;com.google.gwt.http.client.Response&gt;</phrase></literal>. The <literal><phrase role="code">MarshallingWrapper</phrase></literal> class can be used to manually deserialize an entity from the body of a response.</simpara>
+<programlisting language="java" linenumbering="unnumbered">RemoteCallback&lt;Response&gt; callback = new RemoteCallback&lt;Response&gt;() {
   public void callback(Response response) {
     Window.alert("HTTP status code: " + response.getStatusCode());
     Window.alert("HTTP response body: " + response.getText());
+    Window.alert("Demarshalled entity: " + MasrhallingWrapper.fromJSON(response.getText()));
   }
 };</programlisting>
 <section id="sid-19398997_ErraiJAX-RS-HandlingErrors">
@@ -3783,6 +3788,10 @@ public class MyCacheInterceptor implements RestClientInterceptor {
 <title>Configuring the Path</title>
 <simpara>To learn more about configuring the path, checkout <link linkend="sid-19398997_ErraiJAX-RS-Configuration">the JAX-RS Configuration Section</link>.</simpara>
 </important>
+</section>
+<section id="_csrf_protection">
+<title>CSRF Protection</title>
+<simpara>Errai provides a filter for protecting REST endpoints from Cross Site Request Forgery (CSRF) attacks. The filter <literal>org.jboss.errai.bus.server.servlet.CSRFTokenFilter</literal> generates a CSRF token for every HTTP session that is required as an HTTP header for all POST, PUT, and DELETE requests. Requests made with an Errai <literal>Caller&lt;T&gt;</literal> will automatically negotiate for a CSRF token, or the same filter can be added to the host page, where it will inject the token onto the page as a JavaScript variable.</simpara>
 </section>
 </chapter>
 <chapter id="sid-54493688">
@@ -6490,7 +6499,7 @@ public class ItemPage extends VerticalPanel {
 <section id="_optional_parameters">
 <title>Optional Parameters</title>
 <simpara>The <literal><phrase role="code">@PageShowing</phrase></literal> and <literal><phrase role="code">@PageShown</phrase></literal> methods are permitted one optional parameter of type <literal><phrase role="code">HistoryToken</phrase></literal>&#8201;&#8212;&#8201;more on this in the next section.</simpara>
-<simpara>The <literal><phrase role="code">@PageHiding</phrase></literal> method is also permitted one optional parameter of type <literal><phrase role="code">NavigationControl</phrase></literal>. If the parameter is present, the page navigation will not be carried out until <literal>NavigationControl.proceed()</literal> is invoked. This is useful for interrupting page navigations and then resuming at a later time (for example, to prompt the user to save their work before transitioning to a new page).</simpara>
+<simpara>The <literal><phrase role="code">@PageHiding</phrase></literal> and <literal><phrase role="code">PageShowing</phrase></literal> methods are also permitted one optional parameter of type <literal><phrase role="code">NavigationControl</phrase></literal>. If the parameter is present, the page navigation will not be carried out until <literal>NavigationControl.proceed()</literal> is invoked, or <literal>NavigationControl.redirect(Class)</literal> may be called to redirect to another page with the given class. In <literal><phrase role="code">PageHiding</phrase></literal> methods this is useful for interrupting page navigations and then resuming at a later time (for example, to prompt the user to save their work before transitioning to a new page). In <literal><phrase role="code">PageShowing</phrase></literal> methods, this is useful for redirecting a user before a page is shown based on business logic.</simpara>
 </section>
 <section id="_page_instance_lifespan">
 <title>Page Instance Lifespan</title>
@@ -7413,42 +7422,8 @@ public class AdminManagementPage extends SimplePanel {
 <simpara>Security checks performed before page navigation do not use any RPC calls, but are instead performed from a cached (in-memory) instance of the <literal>org.jboss.errai.security.shared.api.identity.User</literal>. This prevents the possibility of lengthy delays between page navigation while waiting for RPC return values.</simpara>
 <simpara>But the drawback is that any attempts to navigate to a secured <literal>@Page</literal> before the cache is populated will result in redirection to the <literal>LoginPage</literal>&#8201;&#8212;&#8201;even if the user is in fact logged in.</simpara>
 <simpara>In practice, this is only likely to happen if a user starts an Errai app with a URL to a secure page while still logged in on the server from a previous session.</simpara>
-<simpara>One option offered by Errai is to persist the <literal>org.jboss.errai.security.shared.api.identity.User</literal> object in a cookie. This can be done by adding the following to <literal>ErraiApp.properties</literal>:</simpara>
-<screen>errai.security.user_cookie_enabled=true</screen>
-<simpara>With this option enabled the <literal>User</literal> will be persisted in a browser cookie, which is loaded quickly enough to avoid the described navigation issue. This feature can also be used to allow an application to work offline, or allow the server to log in a user on an initial page request.</simpara>
-<warning>
-<title>User cookie is deprecated</title>
-<simpara>For users with many roles, the serialized string may be too large to fit in a cookie. For this reason, the user cookie is not recommended and is kept only for backwards compatibility.</simpara>
-</warning>
-<important>
-<title>User is stored in plain text</title>
-<simpara>The <literal>errai.security.user_cookie_enabled=true</literal> setting causes the <literal>User</literal> to be stored in <emphasis role="strong">plain text</emphasis>. That includes the following information:</simpara>
-
-<itemizedlist>
-  
-    <listitem>
-      <simpara>The user&#8217;s login name.</simpara>
-      
-    </listitem>
-  
-    <listitem>
-      <simpara>The user&#8217;s full name.</simpara>
-      
-    </listitem>
-  
-    <listitem>
-      <simpara>The user&#8217;s email address.</simpara>
-      
-    </listitem>
-  
-    <listitem>
-      <simpara>The user&#8217;s security roles.</simpara>
-      
-    </listitem>
-  
-</itemizedlist>
-
-</important>
+<simpara>One option offered by Errai is to persist the <literal>org.jboss.errai.security.shared.api.identity.User</literal> object on the GWT host page using a servlet filter. In errai-security-server there is <literal>org.jboss.errai.security.server.servlet.UserHostPageFilter</literal> that uses the <literal>AuthenticationService</literal> to do this. The <literal>UserHostPageFilter</literal> works in a CDI container. Enable the filter by setting <literal>errai.security.user_on_hostpage_enabled=true</literal> in ErraiApp.properties and ensuring the filter is active for your hostpage URL (filters index.html and index.jsp by default).</simpara>
+<simpara>With this option enabled the <literal>User</literal> will be persisted to a JavaScript variable on the GWT host page, which is loaded quickly enough to avoid the described navigation issue. This feature can also be used to allow an application to work offline, or allow the server to log in a user on an initial page request.</simpara>
 <simpara>If you do not wish to use this feature you will likely want to handle this case in the <literal>@PageShowing</literal> method of your <literal>LoginPage</literal>. Here is an outline of what you might want to do:</simpara>
 <programlisting language="java" linenumbering="unnumbered">@Page(role = LoginPage.class)
 @Templated
@@ -8386,6 +8361,19 @@ public class MyCacheManifestLinker extends DefaultCacheManifestLinker {
   
     <listitem>
       <simpara><emphasis>errai.bus.clustering_provider</emphasis> The fully qualified class name of the clustering provider implementation. A class that implements <literal><phrase role="code">org.jboss.errai.bus.server.cluster.ClusteringProvider</phrase></literal>. Currently the only build-in provider is the <literal><phrase role="code">org.jboss.errai.bus.server.cluster.jgroups.JGroupsClusteringProvider</phrase></literal>.</simpara>
+      
+    </listitem>
+  
+</itemizedlist>
+
+</section>
+<section id="_csrf_protection_2">
+<title>CSRF Protection</title>
+
+<itemizedlist>
+  
+    <listitem>
+      <simpara><emphasis>errai.bus.enable_csrf_token</emphasis> A boolean indicating whether or not a Cross Site Request Forgery (CSRF) protection is enabled. When enabled, the Errai Bus servlet generates a CSRF token for every HTTP session; all bus requests for a session must include the token in an HTTP header. The client-bus can negotiate with the server for a token when connecting, or else the <literal>org.jboss.errai.bus.server.servlet.CSRFTokenFilter</literal> can be configured to inject it into the host page as a JavaScript variable. The default value is <literal><phrase role="code">false</phrase></literal>.</simpara>
       
     </listitem>
   
