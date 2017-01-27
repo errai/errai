@@ -55,7 +55,6 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <webDescriptor>wildfly</webDescriptor>
     <skipTests>true</skipTests>
-    <weld.version>2.3.3.Final</weld.version>
     <argLine></argLine>
     <!-- maven plugins versions -->
     <maven.war.plugin.version>2.1.1</maven.war.plugin.version>
@@ -64,8 +63,12 @@
     <maven.deploy.plugin.version>2.7</maven.deploy.plugin.version> 
     <maven.gwt.plugin.version>2.8.0</maven.gwt.plugin.version>   
     <weld.version>2.3.3.Final</weld.version>
+    <jetty.version>9.2.14.v20151106</jetty.version>
+    <!-- Dev Mode config properties -->
+    <errai.dev.context>${project.artifactId}</errai.dev.context>
     <as.version>10.0.0.Final</as.version>
-    <errai.dev.context>${project.build.directory}/wildfly-${as.version}</errai.dev.context>
+    <!-- Add the absolute path for $JBOSS_HOME below to manage another instance -->
+    <errai.jboss.home>${project.build.directory}/wildfly-${as.version}</errai.jboss.home>
   </properties>
 
   <repositories>
@@ -235,7 +238,6 @@
         <dependency>
           <groupId>org.javassist</groupId>
           <artifactId>javassist</artifactId>
-          <scope>provided</scope>
         </dependency>
 
         <dependency>
@@ -257,26 +259,6 @@
           <scope>provided</scope>
         </dependency>
 
-        <dependency>
-          <groupId>org.jboss.weld.servlet</groupId>
-          <artifactId>weld-servlet-core</artifactId>
-          <version>${weld.version}</version>
-          <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-          <groupId>org.jboss.weld</groupId>
-          <artifactId>weld-core</artifactId>
-          <version>${weld.version}</version>
-          <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-          <groupId>org.jboss.weld.se</groupId>
-          <artifactId>weld-se-core</artifactId>
-          <scope>provided</scope>
-          <version>${weld.version}</version>
-        </dependency>
       </dependencies>
     </profile>
 
@@ -407,6 +389,44 @@
 
       </dependencies>
     </profile>
+
+    <profile>
+      <id>jetty</id>
+      <properties>
+        <webDescriptor>jetty</webDescriptor>
+      </properties>
+      <dependencies>
+
+        <dependency>
+          <groupId>org.eclipse.jetty</groupId>
+          <artifactId>jetty-server</artifactId>
+          <version>${jetty.version}</version>
+        </dependency>
+
+        <dependency>
+          <groupId>org.eclipse.jetty</groupId>
+          <artifactId>jetty-servlet</artifactId>
+          <version>${jetty.version}</version>
+        </dependency>
+
+        <dependency>
+          <groupId>javax.enterprise</groupId>
+          <artifactId>cdi-api</artifactId>
+        </dependency>
+
+        <dependency>
+          <groupId>org.jboss.weld.servlet</groupId>
+          <artifactId>weld-servlet-core</artifactId>
+        </dependency>
+
+        <dependency>
+          <groupId>org.jboss.weld.se</groupId>
+          <artifactId>weld-se-core</artifactId>
+        </dependency>
+
+      </dependencies>
+    </profile>
+
   </profiles>
   <build>
     <outputDirectory>src/main/webapp/WEB-INF/classes</outputDirectory>
@@ -432,8 +452,7 @@
           <runTarget>${errai.dev.context}</runTarget>
           <extraJvmArgs>${argLine} -Xmx2g -Xms1g -XX:+AggressiveOpts -XX:+UseNUMA -XX:CompileThreshold=100 -Derrai.jboss.home=${errai.jboss.home} -Derrai.dev.context=${errai.dev.context}</extraJvmArgs>
           <server>org.jboss.errai.cdi.server.gwt.EmbeddedWildFlyLauncher</server>
-          <soyc>false</soyc>
-          <hostedWebapp>src/main/webapp/</hostedWebapp>          
+          <hostedWebapp>src/main/webapp/</hostedWebapp>
         </configuration>
         <executions>
           <execution>
