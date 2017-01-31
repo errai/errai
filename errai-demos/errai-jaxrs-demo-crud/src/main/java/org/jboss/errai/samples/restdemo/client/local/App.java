@@ -88,12 +88,8 @@ public class App {
   final RemoteCallback<Response> deletionCallback = new RemoteCallback<Response>() {
     @Override
     public void callback(final Response response) {
-      if (response.getStatusCode() == Response.SC_NO_CONTENT) {
-        customersTable.removeAllRows();
-        populateCustomersTable();
-      } else {
-        Window.alert("Could not delete customer");
-      }
+      customersTable.removeAllRows();
+      populateCustomersTable();
     }
   };
 

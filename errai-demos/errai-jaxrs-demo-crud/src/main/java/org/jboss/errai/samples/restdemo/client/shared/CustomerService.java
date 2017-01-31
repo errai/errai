@@ -33,7 +33,7 @@ import javax.ws.rs.core.Response;
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-@Path("customers")
+@Path("rest/customers")
 public interface CustomerService {
   @GET
   @Produces("application/json")
