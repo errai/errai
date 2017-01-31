@@ -24,7 +24,12 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.spi.BeanManager;
 import javax.ws.rs.core.Response;
+
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
 import org.jboss.errai.samples.restdemo.client.shared.Customer;
 import org.jboss.errai.samples.restdemo.client.shared.CustomerNotFoundException;
@@ -35,10 +40,11 @@ import org.jboss.errai.samples.restdemo.client.shared.CustomerService;
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
+@ApplicationScoped
 public class CustomerServiceImpl implements CustomerService {
 
   private static AtomicInteger id = new AtomicInteger(3);
-  
+
   private static Map<Long, Customer> customers = new ConcurrentHashMap<Long, Customer>() {
     {
       put(1l, new Customer(1, "Christian", "Sadilek", "A1B2C3"));
