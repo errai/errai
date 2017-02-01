@@ -22,12 +22,13 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
- * Provides utitlity methods for interacting with the DOM.
+ * Provides utility methods for interacting with the DOM.
  *
  * @author Max Barkley <mbarkley@redhat.com>
  */
@@ -331,8 +332,8 @@ public abstract class DOMUtil {
    * {@link RootPanel#isInDetachList(Widget) dettach list} its underlying HTML element will also be removed from its
    * parent.
    *
-   * @param Must
-   *          not be null.
+   * @param child
+   *          The child Widget, whose underlying HTML element will be removed from the parent. Must not be null.
    */
   public static void removeFromParent(final IsWidget child) {
     removeFromParent(child.asWidget());
@@ -348,14 +349,87 @@ public abstract class DOMUtil {
    * {@link RootPanel#isInDetachList(Widget) dettach list} its underlying HTML element will also be removed from its
    * parent.
    *
-   * @param Must
-   *          not be null.
+   * @param child
+   *          The child Widget, whose underlying HTML element will be removed from the parent. Must not be null.
    */
   public static void removeFromParent(final Widget child) {
     final boolean wasInDettachList = RootPanel.isInDetachList(child);
     child.removeFromParent();
     if (wasInDettachList) {
       child.getElement().removeFromParent();
+    }
+  }
+
+  /**
+   * Adds a unique enumerated CSS class to an element's class list removing all others
+   * in the enumerated {@link Style.HasCssName}. Other CSS classes not in the enumerated
+   * {@link Style.HasCssName} are preserved.
+   *
+   * @param element
+   *          Must not be null.
+   * @param enumClass
+   *          The {@link Style.HasCssName} class. Must not be null.
+   * @param style
+   *          The enumerated {@link Style.HasCssName} element. Must not be null.
+   */
+  public static <E extends Style.HasCssName, F extends Enum<? extends Style.HasCssName>> void addUniqueEnumStyleName(final HTMLElement element,
+                                                                                                                     final Class<F> enumClass,
+                                                                                                                     final E style) {
+    removeEnumStyleNames(element,
+                         enumClass);
+    addEnumStyleName(element,
+                     style);
+  }
+
+  /**
+   * Removes all of the enumerated CSS classes on an element's class list.
+   *
+   * @param element
+   *          Must not be null.
+   * @param enumClass
+   *          The {@link Style.HasCssName} class. Must not be null.
+   */
+  public static <E extends Enum<? extends Style.HasCssName>> void removeEnumStyleNames(final HTMLElement element,
+                                                                                       final Class<E> enumClass) {
+    for (final Enum<? extends Style.HasCssName> constant : enumClass.getEnumConstants()) {
+      final String cssClass = ((Style.HasCssName) constant).getCssName();
+
+      if (cssClass != null && !cssClass.isEmpty()) {
+        removeCSSClass(element,
+                       cssClass);
+      }
+    }
+  }
+
+  /**
+   * Adds an enumerated CSS class to an element's class list.
+   *
+   * @param element
+   *          Must not be null.
+   * @param style
+   *          The enumerated {@link Style.HasCssName} element. Must not be null.
+   */
+  public static <E extends Style.HasCssName> void addEnumStyleName(final HTMLElement element,
+                                                                   final E style) {
+    if (style != null && style.getCssName() != null && !style.getCssName().isEmpty()) {
+      addCSSClass(element,
+                  style.getCssName());
+    }
+  }
+
+  /**
+   * Removes the enumerated CSS class from an element's class list.
+   *
+   * @param element
+   *          Must not be null.
+   * @param style
+   *          The enumerated {@link Style.HasCssName} element. Must not be null.
+   */
+  public static <E extends Style.HasCssName> void removeEnumStyleName(final HTMLElement element,
+                                                                      final E style) {
+    if (style != null && style.getCssName() != null && !style.getCssName().isEmpty()) {
+      removeCSSClass(element,
+                     style.getCssName());
     }
   }
 
