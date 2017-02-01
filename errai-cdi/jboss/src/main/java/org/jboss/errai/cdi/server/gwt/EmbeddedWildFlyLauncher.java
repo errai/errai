@@ -220,8 +220,9 @@ public class EmbeddedWildFlyLauncher extends ServletContainerLauncher {
     exclusions.append(ERRAI_SCANNER_HINT_START);
     for (File clientLocalClass : FileUtils.listFiles(appRootDir, new ClientLocalFileFilter(), TrueFileFilter.INSTANCE)) {
       final String className = clientLocalClass.getAbsolutePath();
-      if (className.endsWith(".class")) {
-        String exclusion = className
+      // Adding package-info exclusion makes beans.xml invalid.
+      if (className.endsWith(".class") && !className.endsWith("package-info.class")) {
+        final String exclusion = className
           .replace(classesDir.getAbsolutePath(), "")
           .replace(".class", "")
           .replace(File.separator, ".")
