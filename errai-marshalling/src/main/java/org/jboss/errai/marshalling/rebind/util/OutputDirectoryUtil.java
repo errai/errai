@@ -141,20 +141,16 @@ public class OutputDirectoryUtil {
             final Candidate candidate = new Candidate();
             candidate.root = f.getParentFile();
 
-            final Set<String> clazzes = ClassListReader.getClassSetFromFile(f);
+            try {
+              final Set<String> clazzes = ClassListReader.getClassSetFromFile(f);
 
-            for (final String fqcn : clazzes) {
-
-              try {
+              for (final String fqcn : clazzes) {
                 final JClassType type = context.getTypeOracle().findType(fqcn);
-
                 if (type != null && fqcn.startsWith(gwtModuleName)) {
                   candidate.score++;
                 }
               }
-              catch (final Throwable ignored) {
-              }
-            }
+            } catch (final Throwable ignored) {}
 
             if (candidate.score > 0 && (bestCandidate == null || candidate.score > bestCandidate.score)) {
               bestCandidate = candidate;
@@ -311,7 +307,7 @@ public class OutputDirectoryUtil {
     for (final DiscoveryStrategy strategy : rootDiscoveryStrategies) {
       final DiscoveryContext discoveryContext = DiscoveryContext.create();
       for (final String path : strategy.getCandidate(context, discoveryContext)) {
-        log.info("Considering '" + path + "' as an output path...");
+        log.info("Considering '" + path + "' as an output path (" + strategy.getClass().getSimpleName() + ")");
 
         if (discoveryContext.isVetoed()) {
           continue Strategies;
