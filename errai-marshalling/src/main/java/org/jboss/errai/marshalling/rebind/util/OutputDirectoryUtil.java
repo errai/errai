@@ -85,19 +85,11 @@ public class OutputDirectoryUtil {
       }
 
       final File cwd = new File("").getAbsoluteFile();
-
       final Set<File> roots = findMatchingOutputDirectoryByModel(matchNames, cwd);
 
-      if (!roots.isEmpty()) {
-        for (final File file : roots) {
-          log.info(" ** signature matched root! " + file.getAbsolutePath());
-        }
-      }
-      else {
-        log.warn(" ** NO ROOTS FOUND!");
+      if (roots.isEmpty()) {        
         discoveryContext.veto();
       }
-
 
       final Set<String> rootsPaths = new HashSet<String>();
       for (final File f : roots) {
@@ -191,9 +183,7 @@ public class OutputDirectoryUtil {
 
   public static final Optional<String> OUTPUT_DIR = Optional.ofNullable(System.getProperty(OUTPUT_DIR_PROP, null));
 
-  private static final String[] candidateOutputDirectories =
-  {
-      "target/classes/",
+  private static final String[] candidateOutputDirectories = {
       "war/WEB-INF/classes/",
       "web/WEB-INF/classes/",
       "target/war/WEB-INF/classes/",
@@ -201,12 +191,12 @@ public class OutputDirectoryUtil {
       "src/main/webapp/WEB-INF/classes/"
   };
 
-  private static final DiscoveryStrategy[] rootDiscoveryStrategies = new DiscoveryStrategy[]{
+  private static final DiscoveryStrategy[] rootDiscoveryStrategies = new DiscoveryStrategy[] {
         new CurrentWorkingDirectoryStrategy(),
         new ClassListManifestStrategy(),
         new MarshallerModelStrategy(),
         new ModuleStrategy(),
-    };
+  };
 
   public static Set<File> findMatchingOutputDirectoryByModel(final Map<String, String> toMatch, final File from) {
     final HashSet<File> matching = new HashSet<File>();
@@ -217,21 +207,21 @@ public class OutputDirectoryUtil {
   private static void _findMatchingOutputDirectoryByModel(final Set<File> matching,
                                                           final Map<String, String> toMatch,
                                                           final File from) {
+    if (from.getName().startsWith(".")) return;
+    
     if (from.isDirectory()) {
       final File[] files = from.listFiles();
       if (files != null) {
         for (final File file : files) {
-          final int currMatch = matching.size();
           _findMatchingOutputDirectoryByModel(matching, toMatch, file);
-          if (matching.size() > currMatch) {
-            break;
-          }
         }
       }
     }
     else {
       String name = from.getName();
-      if (name.endsWith(".class") && toMatch.containsKey(name = name.substring(0, name.length() - 6))) {
+      if (name.endsWith(".class") && toMatch.containsKey(name = name.substring(0, name.length() - 6)) 
+              && Arrays.stream(candidateOutputDirectories).anyMatch(s -> from.getAbsolutePath().contains(s))) {
+        
         final String full = toMatch.get(name);
         final ReverseMatchResult res = reversePathMatch(full, from);
 
