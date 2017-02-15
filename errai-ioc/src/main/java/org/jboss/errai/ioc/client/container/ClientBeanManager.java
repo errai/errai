@@ -16,8 +16,6 @@
 
 package org.jboss.errai.ioc.client.container;
 
-import javax.enterprise.context.spi.CreationalContext;
-
 /**
  * Contract for injectable client-side instances for run-time bean management.
  *
@@ -27,10 +25,10 @@ import javax.enterprise.context.spi.CreationalContext;
  */
 public interface ClientBeanManager {
   /**
-   * Destroy a bean and all other beans associated with its creational context in the bean manager.
+   * Destroy a bean and all other dependent scoped dependencies of this bean in the bean manager.
    *
    * @param ref
-   *     the instance reference of the bean
+   *     The instance reference of the bean.
    */
   void destroyBean(Object ref);
 
@@ -38,7 +36,7 @@ public interface ClientBeanManager {
    * Indicates whether the referenced object is currently a managed bean.
    *
    * @param ref
-   *     the reference to the bean
+   *     The instance reference of the bean.
    *
    * @return returns true if under management
    */
@@ -49,10 +47,10 @@ public interface ClientBeanManager {
    * return an un-proxied reference to the object.
    *
    * @param ref
-   *     the proxied or unproxied reference
+   *     The proxied or unproxied reference.
    *
-   * @return returns the absolute reference to bean if the specified reference is a proxy. If the specified reference
-   *         is not a proxy, the same instance passed to the method is returned.
+   * @return The actual reference to the bean if the specified reference is a proxy.
+   *         Otherwise the same instance passed to the method is returned.
    *
    * @see #isProxyReference(Object)
    */
@@ -62,27 +60,26 @@ public interface ClientBeanManager {
    * Determines whether the referenced object is itself a proxy to a managed bean.
    *
    * @param ref
-   *     the reference to check
+   *     The reference to check.
    *
-   * @return returns true if the specified reference is itself a proxy.
+   * @return True iff the specified reference is a proxy.
    *
    * @see #getActualBeanReference(Object)
    */
   boolean isProxyReference(Object ref);
 
   /**
-   * Associates a {@link DestructionCallback} with a bean instance. If the bean manager cannot find a valid
-   * {@link CreationalContext} to associate with the bean, or the bean is no longer considered active, the method
-   * returns <tt>false</tt>. Otherwise, the method returns <tt>true</tt>, indicating the callback is now registered
-   * and will be called when the bean is destroyed.
+   * Associates a {@link DestructionCallback} with a bean instance. If the given reference is not a managed bean,
+   * or the bean is no longer considered active, the method returns <tt>false</tt>. Otherwise, the method returns
+   * <tt>true</tt>, indicating the callback is now registered and will be called when the bean is destroyed.
    *
    * @param beanInstance
-   *     the bean instance to associate the callback to.
+   *     The bean instance to associate the callback to.
    * @param destructionCallback
-   *     the instance of the {@link DestructionCallback}.
+   *     The instance of the {@link DestructionCallback}.
    *
-   * @return <tt>true</tt> if the {@link DestructionCallback} is successfully registered against a valid
-   *         {@link CreationalContext} and <tt>false</tt> if not.
+   * @return <tt>true</tt> if the {@link DestructionCallback} is successfully registered for the given bean
+   *         and <tt>false</tt> if not.
    */
   boolean addDestructionCallback(Object beanInstance, DestructionCallback<?> destructionCallback);
 }
