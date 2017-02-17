@@ -25,6 +25,8 @@ import java.util.Set;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
+import javax.inject.Inject;
 
 import org.jboss.errai.cdi.injection.client.AbstractBean;
 import org.jboss.errai.cdi.injection.client.ApplicationScopedBean;
@@ -45,6 +47,9 @@ import org.jboss.errai.cdi.injection.client.InterfaceC;
 import org.jboss.errai.cdi.injection.client.InterfaceD;
 import org.jboss.errai.cdi.injection.client.InterfaceRoot;
 import org.jboss.errai.cdi.injection.client.InterfaceWithNamedImpls;
+import org.jboss.errai.cdi.injection.client.LookupContainer;
+import org.jboss.errai.cdi.injection.client.LookupQualifier;
+import org.jboss.errai.cdi.injection.client.LookupQualifierBean;
 import org.jboss.errai.cdi.injection.client.OuterBeanInterface;
 import org.jboss.errai.cdi.injection.client.Pig;
 import org.jboss.errai.cdi.injection.client.Visa;
@@ -129,6 +134,26 @@ public class BeanManagerIntegrationTest extends AbstractErraiCDITest {
     assertTrue("bean is incorrect instance: " + beanInst.getClass(), beanInst instanceof InheritedFromAbstractBean);
   }
 
+  public void testBeanManagerLookupBeanWithQualifier() {
+    final LookupQualifier qualifier = new LookupQualifier(){
+      @Override
+      public Class<? extends Annotation> annotationType() {
+        return LookupQualifier.class;
+      }
+    };
+
+    final SyncBeanDef<LookupContainer> bean = IOC.getBeanManager().lookupBean(LookupContainer.class );
+    assertNotNull("did not find any beans matching", bean);
+
+    final LookupContainer beanInst = bean.getInstance();
+    assertNotNull("bean instance is null", beanInst);
+
+    assertTrue("bean is incorrect instance: " + beanInst.getClass(), beanInst instanceof LookupContainer );
+
+    final InterfaceRoot instance = beanInst.get( qualifier);
+    assertNotNull("instance is null", instance);
+  }
+
   /**
    * This test effectively tests that the IOC container comprehends the full type hierarchy, considering both supertypes
    * and transverse interface types.
@@ -154,7 +179,7 @@ public class BeanManagerIntegrationTest extends AbstractErraiCDITest {
   public void testBeanManagerLookupForExtendedInterfaceType() {
     // This should find ApplicationScopedBeanA, ApplicationScopedBeanB and ApplicationScopedBeanC
     final Collection<SyncBeanDef<InterfaceRoot>> beans = IOC.getBeanManager().lookupBeans(InterfaceRoot.class);
-    assertEquals("did not find all managed implementations of " + InterfaceRoot.class.getName(), 3, beans.size());
+    assertEquals("did not find all managed implementations of " + InterfaceRoot.class.getName(), 5, beans.size());
 
     // This should find ApplicationScopedBeanA and ApplicationScopedBeanB (InterfaceB extends InterfaceA)
     final Collection<SyncBeanDef<InterfaceA>> beansB = IOC.getBeanManager().lookupBeans(InterfaceA.class);
