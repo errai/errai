@@ -29,6 +29,16 @@ public class ReflectableJSO {
                         + "this.set = function(name, value) {"
                           + "wrapped[name] = value;"
                         + "};"
+                        + "this.properties = function() {"
+                          + "var retVal = [];"
+                          + "for (key in wrapped) {"
+                            + "retVal.push(key);"
+                          + "}"
+                          + "return retVal;"
+                        + "};"
+                        + "this.unwrap = function() {"
+                          + "return wrapped;"
+                        + "}"
                       + "}"
                     + "}"
                   + "}"
@@ -37,7 +47,16 @@ public class ReflectableJSO {
     return new ReflectableJSO(wrapped);
   }
 
-  public final native Object get(final String property);
+  @JsOverlay
+  public final boolean hasProperty(final String name) {
+    return get(name) != null;
+  }
 
-  public final native void set(final String property, final Object value);
+  public final native Object get(final String name);
+
+  public final native void set(final String name, final Object value);
+
+  public final native String[] properties();
+
+  public final native Object unwrap();
 }

@@ -3,7 +3,9 @@ package org.jboss.errai.common.client.logging.util;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Formats stack traces so that the Google Chrome web console will translate the line numbers with source maps.
@@ -45,7 +47,7 @@ public class StackTraceFormatter {
     final StringBuilder builder = new StringBuilder();
     t.printStackTrace(new PrintStream((OutputStream) null) {
       @Override
-      public void println(String x) {
+      public void println(final String x) {
         builder.append(x).append('\n');
       }
     });
@@ -55,18 +57,28 @@ public class StackTraceFormatter {
   }
 
   private static String getNativeStack(final Throwable t) {
-    try {
-      final Object jsError = ReflectableJSO.create(t).get("__gwt$backingJsError");
-      String stack = (String) ReflectableJSO.create(jsError).get("stack");
+    return maybeGetJSError(t)
+            .map(jsError -> {
+              String stack = (String) ReflectableJSO.create(jsError).get("stack");
 
-      stack = stack.substring(stack.indexOf('\n'));
-      return stack;
-    } catch (Throwable ignore) {
-      return null;
-    }
+              stack = stack.substring(stack.indexOf('\n'));
+              return stack;
+            }).orElse(null);
   }
 
-  private static String getNameAndMessage(Throwable t) {
+  private static Optional<Object> maybeGetJSError( final Throwable t ) {
+    final ReflectableJSO reflectable = ReflectableJSO.create(t);
+    return Arrays
+      .stream(reflectable.properties())
+      .map(key -> reflectable.get(key))
+      .filter(obj -> obj != null)
+      .map(prop -> ReflectableJSO.create(prop))
+      .filter(prop -> prop.get("name") != null && prop.get("message") != null)
+      .map(prop -> prop.unwrap())
+      .findFirst();
+  }
+
+  private static String getNameAndMessage(final Throwable t) {
     return t.getClass().getSimpleName() + ": " + t.getMessage();
   }
 
