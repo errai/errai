@@ -21,14 +21,14 @@ import org.jboss.errai.databinding.client.api.Bindable;
 /**
  * Thrown to indicate that a JavaBean property does not exist on the object it was referred to. This exception is thrown
  * by implementations of {@link HasProperties} (e.g proxies for {@link Bindable} types).
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 @SuppressWarnings("serial")
 public class NonExistingPropertyException extends RuntimeException {
 
-  public NonExistingPropertyException(String message) {
-    super(message);
+  public NonExistingPropertyException(final String type, final String property) {
+    super("No property [" + property + "] in bindable type [" + type + "].");
   }
 
 }

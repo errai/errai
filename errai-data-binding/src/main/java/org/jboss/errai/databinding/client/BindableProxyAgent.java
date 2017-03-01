@@ -307,7 +307,8 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
       return agent.propertyTypes.get(property);
     }
     else {
-      throw new NonExistingPropertyException(property);
+      final String type = proxy.getClass().getSuperclass().getSimpleName();
+      throw new NonExistingPropertyException(type, property);
     }
   }
 
@@ -584,7 +585,8 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
     DataBinder<Object> binder = binders.get(bindableProperty);
 
     if (!propertyTypes.containsKey(bindableProperty)) {
-      throw new NonExistingPropertyException(bindableProperty);
+      final String type = proxy.getClass().getSuperclass().getSimpleName();
+      throw new NonExistingPropertyException(type, bindableProperty);
     }
 
     if (!propertyTypes.get(bindableProperty).isBindable()) {

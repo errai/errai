@@ -94,8 +94,9 @@ public class HasPropertiesIntegrationTest extends AbstractErraiIOCTest {
       model.get("prop1");
       fail("Expected NonExistingPropertyException");
     }
-    catch(NonExistingPropertyException nope) {
-      // expected
+    catch(final NonExistingPropertyException ex) {
+      assertTrue("Property name was not mentioned in error message: " + ex.getMessage(), ex.getMessage().contains("prop1"));
+      assertTrue("Entity type was not mentioned in error message: " + ex.getMessage(), ex.getMessage().contains("TestModel"));
     }
   }
 
@@ -106,8 +107,9 @@ public class HasPropertiesIntegrationTest extends AbstractErraiIOCTest {
       model.set("prop1", "value");
       fail("Expected NonExistingPropertyException");
     }
-    catch(NonExistingPropertyException nope) {
-      // expected
+    catch(final NonExistingPropertyException ex) {
+      assertTrue("Property name was not mentioned in error message: " + ex.getMessage(), ex.getMessage().contains("prop1"));
+      assertTrue("Entity type was not mentioned in error message: " + ex.getMessage(), ex.getMessage().contains("TestModel"));
     }
   }
 

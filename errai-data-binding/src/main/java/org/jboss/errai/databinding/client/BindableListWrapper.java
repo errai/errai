@@ -469,7 +469,7 @@ public class BindableListWrapper<M> implements List<M>, BindableProxy<List<M>> {
       return list;
     }
     else {
-      throw new NonExistingPropertyException(propertyName);
+      throw new NonExistingPropertyException("List", propertyName);
     }
   }
 
@@ -482,7 +482,7 @@ public class BindableListWrapper<M> implements List<M>, BindableProxy<List<M>> {
       list = (List<M>) value;
     }
     else {
-      throw new NonExistingPropertyException(propertyName);
+      throw new NonExistingPropertyException("List", propertyName);
     }
   }
 

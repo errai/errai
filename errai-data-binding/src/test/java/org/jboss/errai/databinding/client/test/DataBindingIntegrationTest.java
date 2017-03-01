@@ -290,9 +290,9 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
       DataBinder.forType(TestModel.class).bind(new TextBox(), "non-existing");
       fail("Expected NonExistingPropertyException!");
     }
-    catch (final NonExistingPropertyException nepe) {
-      // expected
-      assertEquals("Exception message contains wrong property name", "non-existing", nepe.getMessage());
+    catch (final NonExistingPropertyException ex) {
+      assertTrue("Exception message does not contain correct property name: " + ex.getMessage(), ex.getMessage().contains("non-existing"));
+      assertTrue("Exception message does not contain correct type name: " + ex.getMessage(), ex.getMessage().contains("TestModel"));
     }
   }
 

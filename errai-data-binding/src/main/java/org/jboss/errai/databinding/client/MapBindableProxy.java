@@ -55,7 +55,7 @@ public class MapBindableProxy implements Map<String, Object>, BindableProxy<Map<
   @Override
   public Object get(final String propertyName) {
     if (!agent.propertyTypes.containsKey(propertyName)) {
-      throw new NonExistingPropertyException(propertyName);
+      throw new NonExistingPropertyException("Map", propertyName);
     }
 
     return agent.target.get(propertyName);
@@ -64,7 +64,7 @@ public class MapBindableProxy implements Map<String, Object>, BindableProxy<Map<
   @Override
   public void set(final String propertyName, final Object value) {
     if (!agent.propertyTypes.containsKey(propertyName)) {
-      throw new NonExistingPropertyException(propertyName);
+      throw new NonExistingPropertyException("Map", propertyName);
     }
 
     agent.target.put(propertyName, value);
@@ -122,7 +122,7 @@ public class MapBindableProxy implements Map<String, Object>, BindableProxy<Map<
   public Object put(final String key, Object value) {
     final PropertyType propertyType = agent.propertyTypes.get(key);
     if (propertyType == null) {
-      throw new NonExistingPropertyException(key);
+      throw new NonExistingPropertyException("Map", key);
     }
 
     if (propertyType.isList() && value instanceof List) {

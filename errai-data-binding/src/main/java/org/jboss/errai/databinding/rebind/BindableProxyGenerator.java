@@ -168,7 +168,8 @@ public class BindableProxyGenerator {
             .finish()
         );
 
-    final Statement nonExistingPropertyException = Stmt.throw_(NonExistingPropertyException.class, Variable.get("property"));
+    final Statement nonExistingPropertyException = Stmt.throw_(NonExistingPropertyException.class,
+            Stmt.loadLiteral(bindable.getName()), Variable.get("property"));
     getMethod.append(nonExistingPropertyException).finish();
     setMethod.append(nonExistingPropertyException).finish();
 
