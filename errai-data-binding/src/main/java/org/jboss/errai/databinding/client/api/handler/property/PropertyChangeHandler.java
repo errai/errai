@@ -21,6 +21,7 @@ package org.jboss.errai.databinding.client.api.handler.property;
  *
  * @author David Cracauer <dcracauer@gmail.com>
  */
+@FunctionalInterface
 public interface PropertyChangeHandler<T> {
 
   /**

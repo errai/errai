@@ -16,6 +16,8 @@
 
 package org.jboss.errai.databinding.client.api.handler.property;
 
+import java.util.Objects;
+
 /**
  * Dispatched when a bound property has changed.
  *
@@ -28,7 +30,7 @@ public class PropertyChangeEvent<T> {
   private final T oldValue;
   private final T newValue;
 
-  public PropertyChangeEvent(Object source, String propertyName, T oldValue, T newValue) {
+  public PropertyChangeEvent(final Object source, final String propertyName, final T oldValue, final T newValue) {
     this.source = source;
     this.propertyName = propertyName;
     this.oldValue = oldValue;
@@ -75,5 +77,23 @@ public class PropertyChangeEvent<T> {
   public String toString() {
     return "[property=" + propertyName + ", source=" + source.toString() + ", oldValue=" + oldValue + ", newValue="
             + newValue + "]";
+  }
+
+  @Override
+  public boolean equals(final Object obj) {
+    if (obj instanceof PropertyChangeEvent) {
+      final PropertyChangeEvent<?> other = (PropertyChangeEvent<?>) obj;
+      return Objects.equals(other.source, source)
+              && Objects.equals(other.propertyName, propertyName)
+              && Objects.equals(other.oldValue, oldValue)
+              && Objects.equals(other.newValue, newValue);
+    }
+
+    return false;
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(source, propertyName, oldValue, newValue);
   }
 }
