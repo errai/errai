@@ -16,6 +16,8 @@
 
 package org.jboss.errai.databinding.client.test;
 
+import static java.util.Arrays.asList;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -25,6 +27,7 @@ import java.util.List;
 import org.jboss.errai.databinding.client.BindableProxy;
 import org.jboss.errai.databinding.client.InvalidPropertyExpressionException;
 import org.jboss.errai.databinding.client.MockHandler;
+import org.jboss.errai.databinding.client.ModelWithDeclarativeHandler;
 import org.jboss.errai.databinding.client.PropertyChangeUnsubscribeHandle;
 import org.jboss.errai.databinding.client.TestModel;
 import org.jboss.errai.databinding.client.TestModelWithBindableTypeList;
@@ -36,6 +39,7 @@ import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.databinding.client.api.StateSync;
 import org.jboss.errai.databinding.client.api.handler.property.PropertyChangeEvent;
 import org.jboss.errai.databinding.client.api.handler.property.PropertyChangeHandler;
+import org.jboss.errai.ioc.client.container.Proxy;
 import org.jboss.errai.ioc.client.container.RefHolder;
 import org.jboss.errai.ioc.client.test.AbstractErraiIOCTest;
 import org.jboss.errai.marshalling.client.api.MarshallerFramework;
@@ -65,10 +69,10 @@ public class PropertyChangeHandlerIntegrationTest extends AbstractErraiIOCTest {
 
   @Test
   public void testPropertyChangeHandling() {
-    MockHandler handler = new MockHandler();
+    final MockHandler handler = new MockHandler();
 
-    TextBox textBox = new TextBox();
-    DataBinder<TestModel> binder = DataBinder.forType(TestModel.class).bind(textBox, "value");
+    final TextBox textBox = new TextBox();
+    final DataBinder<TestModel> binder = DataBinder.forType(TestModel.class).bind(textBox, "value");
     binder.addPropertyChangeHandler(handler);
 
     textBox.setValue("UI change", true);
@@ -93,10 +97,10 @@ public class PropertyChangeHandlerIntegrationTest extends AbstractErraiIOCTest {
 
   @Test
   public void testPropertyChangeHandlingWithPropertyChain() {
-    MockHandler handler = new MockHandler();
+    final MockHandler handler = new MockHandler();
 
-    TextBox textBox = new TextBox();
-    DataBinder<TestModel> binder = DataBinder.forType(TestModel.class).bind(textBox, "child.child.value");
+    final TextBox textBox = new TextBox();
+    final DataBinder<TestModel> binder = DataBinder.forType(TestModel.class).bind(textBox, "child.child.value");
     final PropertyChangeUnsubscribeHandle unsubHandle = binder.addPropertyChangeHandler("child.child.value", handler);
 
     textBox.setValue("UI change", true);
@@ -124,16 +128,16 @@ public class PropertyChangeHandlerIntegrationTest extends AbstractErraiIOCTest {
 
   @Test
   public void testPropertyChangeHandlingWithPropertyChainAndRootInstanceChange() {
-    MockHandler childHandler = new MockHandler();
-    MockHandler valueHandler = new MockHandler();
+    final MockHandler childHandler = new MockHandler();
+    final MockHandler valueHandler = new MockHandler();
 
-    TextBox textBox = new TextBox();
-    DataBinder<TestModel> binder = DataBinder.forType(TestModel.class).bind(textBox, "child.value");
+    final TextBox textBox = new TextBox();
+    final DataBinder<TestModel> binder = DataBinder.forType(TestModel.class).bind(textBox, "child.value");
     binder.addPropertyChangeHandler("child", childHandler);
     binder.addPropertyChangeHandler("child.value", valueHandler);
 
-    TestModel oldChild = binder.getModel().getChild();
-    TestModel newChild = new TestModel("model change");
+    final TestModel oldChild = binder.getModel().getChild();
+    final TestModel newChild = new TestModel("model change");
     binder.getModel().setChild(newChild);
 
     assertEquals("Widget not properly updated", "model change", textBox.getText());
@@ -152,16 +156,16 @@ public class PropertyChangeHandlerIntegrationTest extends AbstractErraiIOCTest {
 
   @Test
   public void testPropertyChangeHandlingWithPropertyChainAndRootInstanceChangeOfTwoLevels() {
-    MockHandler childHandler = new MockHandler();
-    MockHandler valueHandler = new MockHandler();
+    final MockHandler childHandler = new MockHandler();
+    final MockHandler valueHandler = new MockHandler();
 
-    TextBox textBox = new TextBox();
-    DataBinder<TestModel> binder = DataBinder.forType(TestModel.class).bind(textBox, "child.child.value");
+    final TextBox textBox = new TextBox();
+    final DataBinder<TestModel> binder = DataBinder.forType(TestModel.class).bind(textBox, "child.child.value");
     binder.addPropertyChangeHandler("child", childHandler);
     binder.addPropertyChangeHandler("child.child.value", valueHandler);
 
-    TestModel oldChild = binder.getModel().getChild();
-    TestModel newChild = new TestModel();
+    final TestModel oldChild = binder.getModel().getChild();
+    final TestModel newChild = new TestModel();
     newChild.setChild(new TestModel("model change"));
     binder.getModel().setChild(newChild);
 
@@ -181,10 +185,10 @@ public class PropertyChangeHandlerIntegrationTest extends AbstractErraiIOCTest {
 
   @Test
   public void testPropertyChangeHandlingWithWildcardAndPropertyChain() {
-    MockHandler handler = new MockHandler();
+    final MockHandler handler = new MockHandler();
 
-    TextBox textBox = new TextBox();
-    DataBinder<TestModel> binder = DataBinder.forType(TestModel.class).bind(textBox, "child.child.value");
+    final TextBox textBox = new TextBox();
+    final DataBinder<TestModel> binder = DataBinder.forType(TestModel.class).bind(textBox, "child.child.value");
     binder.addPropertyChangeHandler("child.child.*", handler);
 
     textBox.setValue("UI change", true);
@@ -210,15 +214,15 @@ public class PropertyChangeHandlerIntegrationTest extends AbstractErraiIOCTest {
 
   @Test
   public void testPropertyChangeHandlingOfBoundList() {
-    MockHandler handler = new MockHandler();
+    final MockHandler handler = new MockHandler();
 
-    TestModelWithListWidget widget = new TestModelWithListWidget();
-    DataBinder<TestModelWithList> binder = DataBinder.forType(TestModelWithList.class).bind(widget, "list");
+    final TestModelWithListWidget widget = new TestModelWithListWidget();
+    final DataBinder<TestModelWithList> binder = DataBinder.forType(TestModelWithList.class).bind(widget, "list");
     binder.getModel().setList(null);
 
     binder.addPropertyChangeHandler(handler);
 
-    List<String> list = new ArrayList<String>();
+    List<String> list = new ArrayList<>();
     widget.setValue(list, true);
     assertEquals("Model not properly updated", list, binder.getModel().getList());
     assertEquals("Should have received exactly one property change event", 1, handler.getEvents().size());
@@ -227,7 +231,7 @@ public class PropertyChangeHandlerIntegrationTest extends AbstractErraiIOCTest {
     assertNull("Previous value should have been null", handler.getEvents().get(0).getOldValue());
     assertEquals("Wrong event source", binder.getModel(), handler.getEvents().get(0).getSource());
 
-    list = new ArrayList<String>(Arrays.asList("1"));
+    list = new ArrayList<>(Arrays.asList("1"));
     binder.getModel().setList(list);
     assertEquals("Widget not properly updated", list, widget.getValue());
     assertEquals("Should have received exactly two property change events", 2, handler.getEvents().size());
@@ -253,9 +257,9 @@ public class PropertyChangeHandlerIntegrationTest extends AbstractErraiIOCTest {
 
   @Test
   public void testBoundListFiresPropertyChangeEventOnElementChange() {
-    MockHandler handler = new MockHandler();
+    final MockHandler handler = new MockHandler();
 
-    DataBinder<TestModelWithBindableTypeList> binder =
+    final DataBinder<TestModelWithBindableTypeList> binder =
             DataBinder.forType(TestModelWithBindableTypeList.class).bind(new TextBox(), "list", new Converter<List<TestModelWithBindableTypeList>, String>() {
 
               @SuppressWarnings("rawtypes")
@@ -270,12 +274,12 @@ public class PropertyChangeHandlerIntegrationTest extends AbstractErraiIOCTest {
               }
 
               @Override
-              public List<TestModelWithBindableTypeList> toModelValue(String widgetValue) {
+              public List<TestModelWithBindableTypeList> toModelValue(final String widgetValue) {
                 return Collections.emptyList();
               }
 
               @Override
-              public String toWidgetValue(List<TestModelWithBindableTypeList> modelValue) {
+              public String toWidgetValue(final List<TestModelWithBindableTypeList> modelValue) {
                 return "";
               }
             });
@@ -284,7 +288,7 @@ public class PropertyChangeHandlerIntegrationTest extends AbstractErraiIOCTest {
     binder.addPropertyChangeHandler(handler);
 
     // Mutating the list element should cause a property change event for the list
-    TestModelWithBindableTypeList element = binder.getModel().getList().get(0);
+    final TestModelWithBindableTypeList element = binder.getModel().getList().get(0);
 
     // Guards against regressions of ERRAI-848: no list operation should re-wrap an element proxy and add
     // additional change handlers
@@ -309,10 +313,10 @@ public class PropertyChangeHandlerIntegrationTest extends AbstractErraiIOCTest {
 
   @Test
   public void testCascadingPropertyChangeHandlingSetBindingBeforeHandler() {
-    MockHandler handler = new MockHandler();
+    final MockHandler handler = new MockHandler();
 
-    TextBox textBox = new TextBox();
-    DataBinder<TestModel> binder = DataBinder.forType(TestModel.class).bind(textBox, "child.child.value");
+    final TextBox textBox = new TextBox();
+    final DataBinder<TestModel> binder = DataBinder.forType(TestModel.class).bind(textBox, "child.child.value");
     binder.addPropertyChangeHandler("**", handler);
 
     textBox.setValue("UI change", true);
@@ -338,10 +342,10 @@ public class PropertyChangeHandlerIntegrationTest extends AbstractErraiIOCTest {
 
   @Test
   public void testCascadingPropertyChangeHandlingSetHandlerBeforeBinding() {
-    MockHandler handler = new MockHandler();
+    final MockHandler handler = new MockHandler();
 
-    TextBox textBox = new TextBox();
-    DataBinder<TestModel> binder = DataBinder.forType(TestModel.class);
+    final TextBox textBox = new TextBox();
+    final DataBinder<TestModel> binder = DataBinder.forType(TestModel.class);
     binder.addPropertyChangeHandler("**", handler);
     binder.bind(textBox, "child.child.value");
 
@@ -368,10 +372,10 @@ public class PropertyChangeHandlerIntegrationTest extends AbstractErraiIOCTest {
 
   @Test
   public void testCascadingPropertyChangeHandlingWithPropertyChain() {
-    MockHandler handler = new MockHandler();
+    final MockHandler handler = new MockHandler();
 
-    TextBox textBox = new TextBox();
-    DataBinder<TestModel> binder = DataBinder.forType(TestModel.class).bind(textBox, "child.child.value");
+    final TextBox textBox = new TextBox();
+    final DataBinder<TestModel> binder = DataBinder.forType(TestModel.class).bind(textBox, "child.child.value");
     binder.addPropertyChangeHandler("child.**", handler);
 
     textBox.setValue("UI change", true);
@@ -397,10 +401,10 @@ public class PropertyChangeHandlerIntegrationTest extends AbstractErraiIOCTest {
 
   @Test
   public void testBinderRetainsPropertyChangeHandlersAfterModelChange() {
-    MockHandler handler = new MockHandler();
+    final MockHandler handler = new MockHandler();
 
-    TextBox textBox = new TextBox();
-    DataBinder<TestModel> binder = DataBinder.forType(TestModel.class).bind(textBox, "value");
+    final TextBox textBox = new TextBox();
+    final DataBinder<TestModel> binder = DataBinder.forType(TestModel.class).bind(textBox, "value");
     binder.addPropertyChangeHandler(handler);
     binder.addPropertyChangeHandler("value", handler);
     binder.setModel(new TestModel());
@@ -416,10 +420,10 @@ public class PropertyChangeHandlerIntegrationTest extends AbstractErraiIOCTest {
 
   @Test
   public void testBinderRetainsPropertyChangeHandlersWithPropertyChainAfterModelChange() {
-    MockHandler handler = new MockHandler();
+    final MockHandler handler = new MockHandler();
 
-    TextBox textBox = new TextBox();
-    DataBinder<TestModel> binder = DataBinder.forType(TestModel.class).bind(textBox, "child.child.value");
+    final TextBox textBox = new TextBox();
+    final DataBinder<TestModel> binder = DataBinder.forType(TestModel.class).bind(textBox, "child.child.value");
     binder.addPropertyChangeHandler("child.child.value", handler);
     binder.setModel(new TestModel());
 
@@ -434,10 +438,10 @@ public class PropertyChangeHandlerIntegrationTest extends AbstractErraiIOCTest {
 
   @Test
   public void testBinderRetainsCascadingPropertyChangeHandlerAfterModelChange() {
-    MockHandler handler = new MockHandler();
+    final MockHandler handler = new MockHandler();
 
-    TextBox textBox = new TextBox();
-    DataBinder<TestModel> binder = DataBinder.forType(TestModel.class).bind(textBox, "child.child.value");
+    final TextBox textBox = new TextBox();
+    final DataBinder<TestModel> binder = DataBinder.forType(TestModel.class).bind(textBox, "child.child.value");
     binder.addPropertyChangeHandler("**", handler);
     binder.setModel(new TestModel());
 
@@ -452,12 +456,12 @@ public class PropertyChangeHandlerIntegrationTest extends AbstractErraiIOCTest {
 
   @Test
   public void testPropertyChangeEventsAreFiredDuringStateSync() {
-    MockHandler handler = new MockHandler();
+    final MockHandler handler = new MockHandler();
 
-    TextBox textBox = new TextBox();
+    final TextBox textBox = new TextBox();
     textBox.setValue("UI change");
 
-    DataBinder<TestModel> binder = DataBinder.forType(TestModel.class);
+    final DataBinder<TestModel> binder = DataBinder.forType(TestModel.class);
     binder.addPropertyChangeHandler(handler);
     binder.bind(textBox, "value", null, StateSync.FROM_UI);
 
@@ -469,18 +473,18 @@ public class PropertyChangeHandlerIntegrationTest extends AbstractErraiIOCTest {
 
   @Test
   public void testNewValueIsSetBeforePropertyChangeEventIsFired() {
-    TextBox textBox = new TextBox();
+    final TextBox textBox = new TextBox();
     final DataBinder<TestModel> binder = DataBinder.forType(TestModel.class).bind(textBox, "value");
     binder.getModel().setValue("Old Value");
     class MyHandler implements PropertyChangeHandler<String> {
       String observedValueWhenEventFired;
 
       @Override
-      public void onPropertyChange(PropertyChangeEvent<String> event) {
+      public void onPropertyChange(final PropertyChangeEvent<String> event) {
         observedValueWhenEventFired = binder.getModel().getValue();
       }
     }
-    MyHandler handler = new MyHandler();
+    final MyHandler handler = new MyHandler();
     binder.addPropertyChangeHandler(handler);
 
     textBox.setValue("New Value", true);
@@ -492,10 +496,10 @@ public class PropertyChangeHandlerIntegrationTest extends AbstractErraiIOCTest {
 
   @Test
   public void testPropertyChangeHandlingWithWildcardDoesNotCascade() {
-    MockHandler handler = new MockHandler();
+    final MockHandler handler = new MockHandler();
 
-    TextBox textBox = new TextBox();
-    DataBinder<TestModel> binder = DataBinder.forType(TestModel.class).bind(textBox, "child.child.value");
+    final TextBox textBox = new TextBox();
+    final DataBinder<TestModel> binder = DataBinder.forType(TestModel.class).bind(textBox, "child.child.value");
     binder.addPropertyChangeHandler("child.*", handler);
 
     textBox.setValue("UI change", true);
@@ -509,10 +513,10 @@ public class PropertyChangeHandlerIntegrationTest extends AbstractErraiIOCTest {
 
   @Test
   public void testRemovingOfCascadedPropertyChangeHandling() {
-    MockHandler handler = new MockHandler();
+    final MockHandler handler = new MockHandler();
 
-    TextBox textBox = new TextBox();
-    DataBinder<TestModel> binder = DataBinder.forType(TestModel.class).bind(textBox, "child.child.value");
+    final TextBox textBox = new TextBox();
+    final DataBinder<TestModel> binder = DataBinder.forType(TestModel.class).bind(textBox, "child.child.value");
     final PropertyChangeUnsubscribeHandle childUnsubHandle = binder.addPropertyChangeHandler("child.**", handler);
     final PropertyChangeUnsubscribeHandle childChildUnsubHandle = binder.addPropertyChangeHandler("child.child.*", handler);
 
@@ -529,24 +533,24 @@ public class PropertyChangeHandlerIntegrationTest extends AbstractErraiIOCTest {
 
   @Test
   public void testWildcardFailsIfNotTheEndOfExpression() {
-    DataBinder<TestModel> binder = DataBinder.forType(TestModel.class);
+    final DataBinder<TestModel> binder = DataBinder.forType(TestModel.class);
     try {
       binder.addPropertyChangeHandler("child.*.xx", new MockHandler());
       fail("Expected InvalidPropertyExpressionException");
     }
-    catch(InvalidPropertyExpressionException e) {
+    catch(final InvalidPropertyExpressionException e) {
       // expected
     }
   }
 
   @Test
   public void testDoubleWildcardFailsIfNotTheEndOfExpression() {
-    DataBinder<TestModel> binder = DataBinder.forType(TestModel.class);
+    final DataBinder<TestModel> binder = DataBinder.forType(TestModel.class);
     try {
       binder.addPropertyChangeHandler("**.xx", new MockHandler());
       fail("Expected InvalidPropertyExpressionException");
     }
-    catch(InvalidPropertyExpressionException e) {
+    catch(final InvalidPropertyExpressionException e) {
       // expected
     }
   }
@@ -555,11 +559,11 @@ public class PropertyChangeHandlerIntegrationTest extends AbstractErraiIOCTest {
   @SuppressWarnings("rawtypes")
   public void testUpdateWidgetsInChangeHandlerDoesNotCauseRecursion() {
     final DataBinder<TestModel> binder = DataBinder.forType(TestModel.class);
-    final List<PropertyChangeEvent> events = new ArrayList<PropertyChangeEvent>();
+    final List<PropertyChangeEvent> events = new ArrayList<>();
 
     binder.addPropertyChangeHandler("value", new PropertyChangeHandler() {
       @Override
-      public void onPropertyChange(PropertyChangeEvent event) {
+      public void onPropertyChange(final PropertyChangeEvent event) {
         ((BindableProxy) binder.getModel()).updateWidgets();
         events.add(event);
       }
@@ -572,11 +576,11 @@ public class PropertyChangeHandlerIntegrationTest extends AbstractErraiIOCTest {
   public void testMutateHandlersInPropertyChangeEvent() {
     final TextBox textBox = new TextBox();
     final DataBinder<TestModel> binder = DataBinder.forType(TestModel.class).bind(textBox, "value");
-    final List<PropertyChangeEvent<?>> observedEvents = new ArrayList<PropertyChangeEvent<?>>();
+    final List<PropertyChangeEvent<?>> observedEvents = new ArrayList<>();
 
     final PropertyChangeHandler<String> handler = new PropertyChangeHandler<String>() {
       @Override
-      public void onPropertyChange(PropertyChangeEvent<String> event) {
+      public void onPropertyChange(final PropertyChangeEvent<String> event) {
         observedEvents.add(event);
         binder.addPropertyChangeHandler(new MockHandler());
       }
@@ -587,7 +591,7 @@ public class PropertyChangeHandlerIntegrationTest extends AbstractErraiIOCTest {
     try {
       binder.getModel().setValue("test");
     }
-    catch (ConcurrentModificationException e) {
+    catch (final ConcurrentModificationException e) {
       fail("Failed to mutate property change handlers in change event");
     }
     assertEquals("Should have received exactly 2 change events", 2, observedEvents.size());
@@ -595,7 +599,7 @@ public class PropertyChangeHandlerIntegrationTest extends AbstractErraiIOCTest {
 
   @Test
   public void testPropertyChangeHandlerIsRemovedIfRemoveCalledAfterUnbind() throws Exception {
-    final RefHolder<Integer> propertyChanges = new RefHolder<Integer>();
+    final RefHolder<Integer> propertyChanges = new RefHolder<>();
     propertyChanges.set(0);
     final TextBox textBox = new TextBox();
     final PropertyChangeHandler<String> testHandler = new PropertyChangeHandler<String>() {
@@ -617,5 +621,29 @@ public class PropertyChangeHandlerIntegrationTest extends AbstractErraiIOCTest {
 
     model.setValue("good bye");
     assertEquals("The handler should not have been invoked for this change since remove was called.", 1, (int) propertyChanges.get());
+  }
+
+  @Test
+  public void testDeclarativePropertyChangeHandler() throws Exception {
+    final ModelWithDeclarativeHandler unwrapped = new ModelWithDeclarativeHandler();
+    unwrapped.setStr(null);
+    unwrapped.setBool(false);
+    final DataBinder<ModelWithDeclarativeHandler> binder = DataBinder.forModel(unwrapped);
+    final ModelWithDeclarativeHandler model = binder.getModel();
+
+    model.setStr("foo");
+    model.setBool(true);
+
+    final List<PropertyChangeEvent<?>> expected = asList(
+            new PropertyChangeEvent<>(unwrapped, "str", null, "foo"),
+            new PropertyChangeEvent<>(unwrapped, "str", null, "foo"),
+            new PropertyChangeEvent<>(unwrapped, "bool", false, true),
+            new PropertyChangeEvent<>(unwrapped, "bool", false, true)
+            );
+
+    assertEquals(expected.size(), model.observedEvents().size());
+    for (int i = 0; i < expected.size(); i++) {
+      assertEquals(expected.get(i), model.observedEvents().get(i));
+    }
   }
 }
