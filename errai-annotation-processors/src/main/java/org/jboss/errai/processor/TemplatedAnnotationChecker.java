@@ -40,27 +40,28 @@ import javax.tools.StandardLocation;
  * the annotation is not being used correctly.
  */
 @SupportedAnnotationTypes(TypeNames.TEMPLATED)
-@SupportedSourceVersion(SourceVersion.RELEASE_6)
+@SupportedSourceVersion(SourceVersion.RELEASE_8)
 public class TemplatedAnnotationChecker extends AbstractProcessor {
 
   @Override
-  public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
+  public boolean process(final Set<? extends TypeElement> annotations, final RoundEnvironment roundEnv) {
     final Elements elements = processingEnv.getElementUtils();
 
-    for (TypeElement annotation : annotations) {
-      for (Element target : roundEnv.getElementsAnnotatedWith(annotation)) {
+    for (final TypeElement annotation : annotations) {
+      for (final Element target : roundEnv.getElementsAnnotatedWith(annotation)) {
 
-        PackageElement packageElement = elements.getPackageOf(target);
-        String templateRef = getReferencedTemplate(target);
+        final PackageElement packageElement = elements.getPackageOf(target);
+        final String templateRef = getReferencedTemplate(target);
         String templateRefError = null;
         try {
-          FileObject resource = processingEnv.getFiler().getResource(StandardLocation.CLASS_PATH, packageElement.getQualifiedName(), templateRef);
+          final FileObject resource = processingEnv.getFiler().getResource(StandardLocation.CLASS_PATH,
+                  packageElement.getQualifiedName(), templateRef);
           resource.getCharContent(true);
-        } catch (IllegalArgumentException e) {
+        } catch (final IllegalArgumentException e) {
           // unfortunately, Eclipse just throws IAE when we try to read files from CLASS_PATH
           // so the best we can do is ignore this error and skip validating the template reference
-        } catch (IOException e) {
-          templateRefError = "Could not access associated template " + templateRef;
+        } catch (final IOException e) {
+          templateRefError = "Could not access associated template " + templateRef + ": " + e.getMessage();
         }
         if (templateRefError != null) {
           processingEnv.getMessager().printMessage(Kind.ERROR, templateRefError, annotation);
@@ -77,16 +78,16 @@ public class TemplatedAnnotationChecker extends AbstractProcessor {
    * @param target
    *          a class that bears the {@code Templated} annotation.
    */
-  private String getReferencedTemplate(Element target) {
+  private String getReferencedTemplate(final Element target) {
     String templateRef = "";
-    AnnotationValue paramValue = getAnnotationParamValueWithoutDefaults(target,
+    final AnnotationValue paramValue = getAnnotationParamValueWithoutDefaults(target,
             TypeNames.TEMPLATED, "value");
     if (paramValue != null) {
       if (paramValue.getValue().toString().startsWith("#")) {
         // use simple name
       }
       else if (paramValue.getValue().toString().contains("#")) {
-        String[] split = paramValue.getValue().toString().split("#");
+        final String[] split = paramValue.getValue().toString().split("#");
         if (split != null && split.length > 0) {
           // use html part
           templateRef = split[0];

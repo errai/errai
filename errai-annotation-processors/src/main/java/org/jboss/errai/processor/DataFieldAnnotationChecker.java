@@ -37,25 +37,32 @@ import javax.tools.Diagnostic.Kind;
  * the annotation is not being used correctly.
  */
 @SupportedAnnotationTypes(TypeNames.DATA_FIELD)
-@SupportedSourceVersion(SourceVersion.RELEASE_6)
+@SupportedSourceVersion(SourceVersion.RELEASE_8)
 public class DataFieldAnnotationChecker extends AbstractProcessor {
 
   @Override
-  public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
+  public boolean process(final Set<? extends TypeElement> annotations, final RoundEnvironment roundEnv) {
     final Types types = processingEnv.getTypeUtils();
     final Elements elements = processingEnv.getElementUtils();
     final TypeMirror gwtWidgetType = elements.getTypeElement(TypeNames.GWT_WIDGET).asType();
     final TypeMirror gwtElementType = elements.getTypeElement(TypeNames.GWT_ELEMENT).asType();
+    final TypeMirror listChangeHandlerType = types.erasure(elements.getTypeElement(TypeNames.LIST_CHANGE_HANDLER).asType());
 
-    for (TypeElement annotation : annotations) {
-      for (Element target : roundEnv.getElementsAnnotatedWith(annotation)) {
-        if (!types.isAssignable(target.asType(), gwtWidgetType) && !types.isAssignable(target.asType(), gwtElementType)
-                && !isNativeJsType(target.asType(), elements)) {
+    annotations
+      .stream()
+      .flatMap(annotation -> roundEnv.getElementsAnnotatedWith(annotation).stream())
+      .forEach(target -> {
+        final TypeMirror targetType = target.asType();
+        if (!types.isAssignable(targetType, gwtWidgetType)
+                && !types.isAssignable(targetType, gwtElementType)
+                && !types.isAssignable(targetType, listChangeHandlerType)
+                && !isTemplated(targetType, elements)
+                && !isNativeJsType(targetType, elements)) {
           processingEnv.getMessager().printMessage(
                   Kind.ERROR, "Fields anotated with @DataField must be assignable to Widget or Element, or be a native JsType element wrapper.", target);
         }
 
-        Element enclosingClassElement = target.getEnclosingElement();
+        final Element enclosingClassElement = target.getEnclosingElement();
         if (!hasAnnotation(enclosingClassElement, TypeNames.TEMPLATED)) {
           processingEnv.getMessager().printMessage(
                   Kind.WARNING, "@DataField annotations have no effect outside of @Templated classes",
@@ -64,8 +71,8 @@ public class DataFieldAnnotationChecker extends AbstractProcessor {
 
         // ideally, we would read the template file now and search it to be sure the element exists.
         // but unfortunately eclipse doesn't let annotation processors read files from the source directory
-      }
-    }
+      });
+
     return false;
   }
 

@@ -18,6 +18,8 @@ package org.jboss.errai.processor;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
@@ -31,6 +33,7 @@ import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
 import javax.lang.model.util.Elements;
+import javax.lang.model.util.Types;
 
 /**
  * An indiscriminate dumping ground for static methods that help paper over the
@@ -46,17 +49,17 @@ public class AnnotationProcessors {
   private AnnotationProcessors() {
   }
 
-  public static boolean hasAnnotation(Element target, CharSequence annotationQualifiedName) {
+  public static boolean hasAnnotation(final Element target, final CharSequence annotationQualifiedName) {
     return getAnnotation(target, annotationQualifiedName) != null;
   }
 
-  public static AnnotationMirror getAnnotation(Element target, CharSequence annotationQualifiedName) {
+  public static AnnotationMirror getAnnotation(final Element target, final CharSequence annotationQualifiedName) {
     return getAnnotation(target.getAnnotationMirrors(), annotationQualifiedName);
   }
 
-  public static AnnotationMirror getAnnotation(List<? extends AnnotationMirror> annotationMirrors, CharSequence annotationQualifiedName) {
-    for (AnnotationMirror am : annotationMirrors) {
-      Name annotationClassName = ((TypeElement) am.getAnnotationType().asElement()).getQualifiedName();
+  public static AnnotationMirror getAnnotation(final List<? extends AnnotationMirror> annotationMirrors, final CharSequence annotationQualifiedName) {
+    for (final AnnotationMirror am : annotationMirrors) {
+      final Name annotationClassName = ((TypeElement) am.getAnnotationType().asElement()).getQualifiedName();
       if (annotationClassName.contentEquals(annotationQualifiedName)) {
         return am;
       }
@@ -79,12 +82,12 @@ public class AnnotationProcessors {
    * @return the String value of the given annotation's parameter, or null if
    *         the parameter is not present on the annotation.
    */
-  static AnnotationValue getAnnotationParamValueWithoutDefaults(Element target, CharSequence annotationQualifiedName,
-          CharSequence paramName) {
-    AnnotationMirror templatedAnnotation = getAnnotation(target, annotationQualifiedName);
-    Map<? extends ExecutableElement, ? extends AnnotationValue> annotationParams = templatedAnnotation
+  static AnnotationValue getAnnotationParamValueWithoutDefaults(final Element target, final CharSequence annotationQualifiedName,
+          final CharSequence paramName) {
+    final AnnotationMirror templatedAnnotation = getAnnotation(target, annotationQualifiedName);
+    final Map<? extends ExecutableElement, ? extends AnnotationValue> annotationParams = templatedAnnotation
             .getElementValues();
-    for (Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> param : annotationParams.entrySet()) {
+    for (final Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> param : annotationParams.entrySet()) {
       if (param.getKey().getSimpleName().contentEquals(paramName)) {
         return param.getValue();
       }
@@ -105,8 +108,8 @@ public class AnnotationProcessors {
    * @return the String value of the given annotation's parameter, or null if
    *         the parameter is not present on the annotation.
    */
-  public static String extractAnnotationStringValue(Elements elementUtils, AnnotationMirror annotation,
-          CharSequence paramName) {
+  public static String extractAnnotationStringValue(final Elements elementUtils, final AnnotationMirror annotation,
+          final CharSequence paramName) {
 
     final AnnotationValue av = extractAnnotationPropertyValue(elementUtils, annotation, paramName);
     if (av != null && av.getValue() != null) {
@@ -116,13 +119,13 @@ public class AnnotationProcessors {
     return null;
   }
 
-  public static AnnotationValue extractAnnotationPropertyValue(Elements elementUtils, AnnotationMirror annotation,
-          CharSequence annotationProperty) {
+  public static AnnotationValue extractAnnotationPropertyValue(final Elements elementUtils, final AnnotationMirror annotation,
+          final CharSequence annotationProperty) {
 
-    Map<? extends ExecutableElement, ? extends AnnotationValue> annotationParams = elementUtils
+    final Map<? extends ExecutableElement, ? extends AnnotationValue> annotationParams = elementUtils
             .getElementValuesWithDefaults(annotation);
 
-    for (Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> param : annotationParams.entrySet()) {
+    for (final Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> param : annotationParams.entrySet()) {
       if (param.getKey().getSimpleName().contentEquals(annotationProperty)) {
         return param.getValue();
       }
@@ -130,16 +133,33 @@ public class AnnotationProcessors {
     return null;
   }
 
-  static Element getField(TypeElement classElement, CharSequence fieldName) {
+  static Optional<Element> getDeclaredField(final TypeElement classElement, final CharSequence fieldName) {
     if (fieldName.charAt(0) == '\"') {
       throw new IllegalArgumentException("given field name begins with invalid character: " + fieldName.charAt(0));
     }
-    for (Element field : ElementFilter.fieldsIn(classElement.getEnclosedElements())) {
+    for (final Element field : ElementFilter.fieldsIn(classElement.getEnclosedElements())) {
       if (field.getSimpleName().contentEquals(fieldName)) {
-        return field;
+        return Optional.of(field);
       }
     }
-    return null;
+    return Optional.empty();
+  }
+
+  static Optional<Element> getField(final TypeElement classElement, final CharSequence fieldName) {
+    final Optional<Element> oField = getDeclaredField(classElement, fieldName);
+    if (oField.isPresent()) {
+      return oField;
+    }
+    else {
+      final TypeMirror superclass = classElement.getSuperclass();
+      if (superclass instanceof DeclaredType) {
+        final TypeElement superclassElement = (TypeElement) ((DeclaredType) superclass).asElement();
+        return getField(superclassElement, fieldName);
+      }
+      else {
+        return Optional.empty();
+      }
+    }
   }
 
   public static TypeElement getEnclosingTypeElement(final Element element) {
@@ -167,23 +187,23 @@ public class AnnotationProcessors {
    *         convention, or null if the method does not define a JavaBeans
    *         property setter/getter.
    */
-  static String propertyNameOfMethod(Element el) {
-    Name methodName = el.getSimpleName();
+  static String propertyNameOfMethod(final Element el) {
+    final Name methodName = el.getSimpleName();
     String propertyName = null;
     if (methodName.length() > 3 && "get".contentEquals(methodName.subSequence(0, 3))) {
-      StringBuilder sb = new StringBuilder(methodName.length() - 3);
+      final StringBuilder sb = new StringBuilder(methodName.length() - 3);
       sb.append(Character.toLowerCase(methodName.charAt(3)));
       sb.append(methodName.subSequence(4, methodName.length()));
       propertyName = sb.toString();
     }
     else if (methodName.length() > 2 && "is".contentEquals(methodName.subSequence(0, 2))) {
-      StringBuilder sb = new StringBuilder(methodName.length() - 2);
+      final StringBuilder sb = new StringBuilder(methodName.length() - 2);
       sb.append(Character.toLowerCase(methodName.charAt(2)));
       sb.append(methodName.subSequence(3, methodName.length()));
       propertyName = sb.toString();
     }
     else if (methodName.length() > 3 && "set".contentEquals(methodName.subSequence(0, 2))) {
-      StringBuilder sb = new StringBuilder(methodName.length() - 3);
+      final StringBuilder sb = new StringBuilder(methodName.length() - 3);
       sb.append(Character.toLowerCase(methodName.charAt(3)));
       sb.append(methodName.subSequence(4, methodName.length()));
       propertyName = sb.toString();
@@ -191,10 +211,48 @@ public class AnnotationProcessors {
     return propertyName;
   }
 
-  public static boolean isNativeJsType(TypeMirror targetType, Elements elements) {
+  public static boolean isNativeJsType(final TypeMirror targetType, final Elements elements) {
     final AnnotationMirror am = getAnnotation(((DeclaredType) targetType).asElement(), TypeNames.JS_TYPE);
     final AnnotationValue isNativeValue = (am != null ? extractAnnotationPropertyValue(elements, am, "isNative") : null);
-  
+
     return isNativeValue != null && (Boolean) isNativeValue.getValue();
+  }
+
+  public static boolean isBrowserEvent(final TypeMirror targetType, final Elements elements) {
+    final AnnotationMirror am = getAnnotation(((DeclaredType) targetType).asElement(), TypeNames.BROWSER_EVENT);
+
+    return am != null;
+  }
+
+  public static boolean isElementWrapper(final TypeMirror targetType, final Elements elements) {
+    final AnnotationMirror am = getAnnotation(((DeclaredType) targetType).asElement(), TypeNames.NATIVE_ELEMENT);
+
+    return am != null;
+  }
+
+  public static boolean isTemplated(final TypeMirror targetType, final Elements elements) {
+    final AnnotationMirror am = getAnnotation(((DeclaredType) targetType).asElement(), TypeNames.TEMPLATED);
+
+    return am != null;
+  }
+
+  public static Optional<TypeMirror> findSuperType(final TypeMirror targetType, final TypeMirror superType, final Types types) {
+    final TypeMirror erasedSuperType = types.erasure(superType);
+    return getAllSuperTypes(targetType, types)
+            .filter(t -> types.isSameType(types.erasure(t), erasedSuperType))
+            .findFirst();
+  }
+
+  public static Optional<TypeMirror> resolveSingleTypeArgumentForGenericSuperType(final TypeMirror targetType,
+          final TypeMirror superTypeWithParameter, final Types types) {
+    return findSuperType(targetType, superTypeWithParameter, types)
+        .filter(t -> t instanceof DeclaredType)
+        .map(t -> ((DeclaredType) t).getTypeArguments())
+        .filter(typeArgs -> typeArgs.size() == 1)
+        .map(typeArgs -> typeArgs.get(0));
+  }
+
+  public static Stream<TypeMirror> getAllSuperTypes(final TypeMirror type, final Types types) {
+    return Stream.concat(Stream.of(type), types.directSupertypes(type).stream().flatMap(t -> getAllSuperTypes(t, types)));
   }
 }

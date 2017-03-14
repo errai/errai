@@ -60,7 +60,7 @@ public abstract class AbstractProcessorTest {
   /**
    * Warning messages that don't count against {@link #assertSuccessfulCompilation(List)}.
    */
-  private final Set<String> ignorableWarnings = new HashSet<String>(
+  private final Set<String> ignorableWarnings = new HashSet<>(
           Arrays.asList(
                   "bootstrap class path not set in conjunction with -source 1.6",
                   "Implicitly compiled files were not subject to annotation processing."));
@@ -77,7 +77,7 @@ public abstract class AbstractProcessorTest {
    */
   public List<Diagnostic<? extends JavaFileObject>> compile(final String compilationUnit) {
 
-    final DiagnosticCollector<JavaFileObject> diagnosticListener = new DiagnosticCollector<JavaFileObject>();
+    final DiagnosticCollector<JavaFileObject> diagnosticListener = new DiagnosticCollector<>();
 
     try {
 
@@ -90,13 +90,13 @@ public abstract class AbstractProcessorTest {
 
       // Compile with provided annotation processor
       final CompilationTask task = compiler
-              .getTask(null, fileManager, diagnosticListener, Arrays.asList("-source", "1.6", "-target", "1.6"), null, compilationUnits);
+              .getTask(null, fileManager, diagnosticListener, Arrays.asList("-source", "1.8", "-target", "1.8"), null, compilationUnits);
       task.setProcessors(Arrays.asList(getProcessorUnderTest()));
       task.call();
 
       fileManager.close();
 
-    } catch (IOException ioe) {
+    } catch (final IOException ioe) {
       fail(ioe.getMessage());
     }
 
@@ -107,11 +107,11 @@ public abstract class AbstractProcessorTest {
    * Checks that there are no unignorable errors or warnings in the given list of diagnostics.
    */
   public void assertSuccessfulCompilation(final List<Diagnostic<? extends JavaFileObject>> diagnostics) {
-    StringBuilder sb = new StringBuilder(100);
+    final StringBuilder sb = new StringBuilder(100);
 
     nextMessage:
-    for (Diagnostic<? extends JavaFileObject> msg : diagnostics) {
-      for (String ignorableWarning : ignorableWarnings) {
+    for (final Diagnostic<? extends JavaFileObject> msg : diagnostics) {
+      for (final String ignorableWarning : ignorableWarnings) {
         if (msg.getMessage(null).contains(ignorableWarning)) {
           continue nextMessage;
         }
@@ -140,7 +140,7 @@ public abstract class AbstractProcessorTest {
   }
 
   private boolean hasErrors(final List<Diagnostic<? extends JavaFileObject>> diagnostics) {
-    for (Diagnostic<? extends JavaFileObject> diagnostic : diagnostics) {
+    for (final Diagnostic<? extends JavaFileObject> diagnostic : diagnostics) {
       if (diagnostic.getKind().equals(Kind.ERROR)) {
         return true;
       }
@@ -167,9 +167,9 @@ public abstract class AbstractProcessorTest {
    *          the message to search for. If any otherwise matching message in
    *          the given list contains this string, the assertion passes. Must not be null.
    */
-  public void assertCompilationMessage(List<Diagnostic<? extends JavaFileObject>> diagnostics, Kind kind, long line, long col, final String message) {
-    StringBuilder sb = new StringBuilder(100);
-    for (Diagnostic<? extends JavaFileObject> msg : diagnostics) {
+  public void assertCompilationMessage(final List<Diagnostic<? extends JavaFileObject>> diagnostics, final Kind kind, final long line, final long col, final String message) {
+    final StringBuilder sb = new StringBuilder(100);
+    for (final Diagnostic<? extends JavaFileObject> msg : diagnostics) {
       sb.append(msg.getKind())
         .append(" ")
         .append(msg.getLineNumber())

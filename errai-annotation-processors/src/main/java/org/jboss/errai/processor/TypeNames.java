@@ -35,6 +35,9 @@ public class TypeNames {
   static final String GWT_OPAQUE_DOM_EVENT = "com.google.gwt.user.client.Event";
   static final String GWT_EVENT = "com.google.gwt.event.shared.GwtEvent";
   static final String JS_TYPE = "jsinterop.annotations.JsType";
+  static final String LIST_CHANGE_HANDLER = "org.jboss.errai.databinding.client.api.handler.list.BindableListChangeHandler";
+  static final String TAKES_VALUE = "com.google.gwt.user.client.TakesValue";
+  static final String NATIVE_HAS_VALUE = "org.jboss.errai.common.client.ui.HasValue";
 
   static final String JAVAX_INJECT = "javax.inject.Inject";
 
@@ -42,6 +45,8 @@ public class TypeNames {
   static final String DATA_FIELD = "org.jboss.errai.ui.shared.api.annotations.DataField";
   static final String EVENT_HANDLER = "org.jboss.errai.ui.shared.api.annotations.EventHandler";
   static final String SINK_NATIVE = "org.jboss.errai.ui.shared.api.annotations.SinkNative";
+  static final String BROWSER_EVENT = "org.jboss.errai.common.client.api.annotations.BrowserEvent";
+  static final String NATIVE_ELEMENT = "org.jboss.errai.common.client.api.annotations.Element";
 
   static final String BOUND = "org.jboss.errai.ui.shared.api.annotations.Bound";
   static final String AUTO_BOUND = "org.jboss.errai.ui.shared.api.annotations.AutoBound";
