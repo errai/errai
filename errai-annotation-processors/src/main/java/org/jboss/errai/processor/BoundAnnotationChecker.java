@@ -16,18 +16,25 @@
 
 package org.jboss.errai.processor;
 
+import static org.jboss.errai.processor.AnnotationProcessors.extractAnnotationStringValue;
 import static org.jboss.errai.processor.AnnotationProcessors.getAnnotation;
-import static org.jboss.errai.processor.AnnotationProcessors.getEnclosingTypeElement;
 import static org.jboss.errai.processor.AnnotationProcessors.hasAnnotation;
+import static org.jboss.errai.processor.AnnotationProcessors.isElementWrapper;
 import static org.jboss.errai.processor.AnnotationProcessors.isNativeJsType;
 import static org.jboss.errai.processor.AnnotationProcessors.propertyNameOfMethod;
+import static org.jboss.errai.processor.AnnotationProcessors.resolveSingleTypeArgumentForGenericSuperType;
+import static org.jboss.errai.processor.TypeNames.GWT_ELEMENT;
+import static org.jboss.errai.processor.TypeNames.LIST_CHANGE_HANDLER;
+import static org.jboss.errai.processor.TypeNames.NATIVE_HAS_VALUE;
+import static org.jboss.errai.processor.TypeNames.TAKES_VALUE;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.RoundEnvironment;
@@ -51,113 +58,129 @@ import javax.tools.Diagnostic.Kind;
  * the annotation is not being used correctly.
  */
 @SupportedAnnotationTypes(TypeNames.BOUND)
-@SupportedSourceVersion(SourceVersion.RELEASE_6)
+@SupportedSourceVersion(SourceVersion.RELEASE_8)
 public class BoundAnnotationChecker extends AbstractProcessor {
 
   @Override
-  public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
+  public boolean process(final Set<? extends TypeElement> annotations, final RoundEnvironment roundEnv) {
     final Types types = processingEnv.getTypeUtils();
     final Elements elements = processingEnv.getElementUtils();
     final TypeMirror gwtWidgetType = elements.getTypeElement(TypeNames.GWT_WIDGET).asType();
     final TypeMirror gwtElementType = elements.getTypeElement(TypeNames.GWT_ELEMENT).asType();
+    final TypeMirror listChangeHandlerType = elements.getTypeElement(TypeNames.LIST_CHANGE_HANDLER).asType();
 
-    Map<TypeElement, List<Element>> classesWithBoundThings = new HashMap<TypeElement, List<Element>>();
-    for (TypeElement annotation : annotations) {
-      for (Element target : roundEnv.getElementsAnnotatedWith(annotation)) {
-        TypeMirror targetType;
-        if (target.getKind() == ElementKind.METHOD) {
-          targetType = ((ExecutableElement) target).getReturnType();
+    final Map<TypeElement, List<Element>> classesWithBoundThings =
+            annotations
+            .stream()
+            .flatMap(anno -> roundEnv.getElementsAnnotatedWith(anno).stream())
+            .peek(target -> validateBoundType(types, elements, gwtWidgetType, gwtElementType, listChangeHandlerType, target))
+            .collect(Collectors.groupingBy(AnnotationProcessors::getEnclosingTypeElement));
+
+    classesWithBoundThings
+      .entrySet()
+      .stream()
+      .forEach(entry -> {
+        final List<TypeMirror> modelTypes = findAllModelTypes(entry.getKey());
+        if (modelTypes.size() == 0) {
+          printMissingModelErrorsForBoundElements(entry.getValue());
+        }
+        else if (modelTypes.size() > 1) {
+          // TODO mark everything annotated with @AutoBound or @Model with an error
         }
         else {
-          targetType = target.asType();
+          validateBoundPropertyChains(elements, entry.getValue(), modelTypes.get(0));
         }
-        if (!types.isAssignable(targetType, gwtWidgetType) && !types.isAssignable(targetType, gwtElementType) && !isNativeJsType(targetType, elements)) {
-          processingEnv.getMessager().printMessage(
-                  Kind.ERROR, "@Bound must target a type assignable to Widget or Element, or be a JsType element wrapper.", target);
-        }
-
-        TypeElement enclosingClass = getEnclosingTypeElement(target);
-        List<Element> boundThings = classesWithBoundThings.get(enclosingClass);
-        if (boundThings == null) {
-          boundThings = new ArrayList<Element>();
-          classesWithBoundThings.put(enclosingClass, boundThings);
-        }
-
-        boundThings.add(target);
-      }
-    }
-
-    for (Map.Entry<TypeElement, List<Element>> classWithItsBoundThings : classesWithBoundThings.entrySet()) {
-      List<TypeMirror> modelTypes = findAllModelTypes(classWithItsBoundThings.getKey());
-      if (modelTypes.size() == 0) {
-        for (Element boundElement : classWithItsBoundThings.getValue()) {
-          processingEnv.getMessager().printMessage(
-                  Kind.ERROR, "@Bound requires that this class also contains a @Model or @AutoBound DataBinder",
-                  boundElement, getAnnotation(boundElement, TypeNames.BOUND));
-        }
-      }
-      else if (modelTypes.size() > 1) {
-        // TODO mark everything annotated with @AutoBound or @Model with an error
-      }
-      else {
-        TypeMirror modelType = modelTypes.get(0);
-        for (Element boundElement : classWithItsBoundThings.getValue()) {
-          String configuredProperty = AnnotationProcessors.
-                  extractAnnotationStringValue(elements, getAnnotation(boundElement, TypeNames.BOUND), "property");
-
-          final String boundProperty = (configuredProperty != null && !configuredProperty.isEmpty()) ?
-                  configuredProperty : boundElement.getSimpleName().toString();
-
-          switch (boundElement.getKind()) {
-          case FIELD:
-          case PARAMETER:
-            if (!isValidPropertyChain(modelType, boundProperty)) {
-              processingEnv.getMessager().printMessage(
-                      Kind.ERROR, "The model type " + ((DeclaredType) modelType).asElement().getSimpleName() + " does not have property \"" + boundProperty + "\"",
-                      boundElement, getAnnotation(boundElement, TypeNames.BOUND));
-            }
-            break;
-          case METHOD:
-            String propertyName = propertyNameOfMethod(boundElement);
-            if (!isValidPropertyChain(modelType, propertyName)) {
-              processingEnv.getMessager().printMessage(
-                      Kind.ERROR, "The model type " + ((DeclaredType) modelType).asElement().getSimpleName() + " does not have property \"" + propertyName + "\"",
-                      boundElement, getAnnotation(boundElement, TypeNames.BOUND));
-            }
-            break;
-          default:
-            break;
-          }
-        }
-      }
-    }
+      });
 
     return false;
+  }
+
+  private void validateBoundPropertyChains(final Elements elements, final List<Element> boundElements,
+          final TypeMirror modelType) {
+    boundElements
+      .stream()
+      .forEach(boundElement -> {
+        final String configuredProperty =
+                extractAnnotationStringValue(elements, getAnnotation(boundElement, TypeNames.BOUND), "property");
+
+        final boolean configured = configuredProperty != null && !configuredProperty.isEmpty();
+        final String boundProperty = configured ? configuredProperty
+                : getDefaultPropertyName(boundElement).orElseThrow(() -> new IllegalStateException(
+                        String.format("Found a %s element [%s] annotated with @Bound.", boundElement.getKind(),
+                                boundElement.getSimpleName())));
+
+        final TypeMirror boundComponentType = (boundElement instanceof ExecutableElement
+                ? ((ExecutableElement) boundElement).getReturnType() : boundElement.asType());
+        if (!isValidPropertyChain(modelType, boundComponentType, boundProperty, configured)) {
+          processingEnv.getMessager().printMessage(Kind.ERROR,
+                  "The model type " + ((DeclaredType) modelType).asElement().getSimpleName()
+                          + " does not have property \"" + boundProperty + "\"",
+                  boundElement, getAnnotation(boundElement, TypeNames.BOUND));
+        }
+      });
+  }
+
+  private Optional<String> getDefaultPropertyName(final Element boundElement) {
+    switch (boundElement.getKind()) {
+    case FIELD:
+    case PARAMETER:
+      return Optional.of(boundElement.getSimpleName().toString());
+    case METHOD:
+      return Optional.of(propertyNameOfMethod(boundElement));
+    default:
+      return Optional.empty();
+    }
+  }
+
+  private void printMissingModelErrorsForBoundElements(final List<Element> value) {
+    value
+      .stream()
+      .forEach(boundElement ->
+        processingEnv
+          .getMessager()
+          .printMessage(Kind.ERROR,
+                        "@Bound requires that this class also contains a @Model or @AutoBound DataBinder",
+                        boundElement,
+                        getAnnotation(boundElement, TypeNames.BOUND)));
+  }
+
+  private void validateBoundType(final Types types, final Elements elements, final TypeMirror gwtWidgetType,
+          final TypeMirror gwtElementType, final TypeMirror listChangeHandlerType, final Element target) {
+    final TypeMirror targetType = getTargetType(target);
+    if (!types.isAssignable(targetType, gwtWidgetType)
+            && !types.isAssignable(targetType, gwtElementType)
+            && !isNativeJsType(targetType, elements)
+            && !types.isAssignable(targetType, types.erasure(listChangeHandlerType))) {
+      processingEnv.getMessager().printMessage(
+              Kind.ERROR, "@Bound must target a type assignable to Widget or Element, or be a JsType element wrapper.", target);
+    }
+  }
+
+  private TypeMirror getTargetType(final Element target) {
+    TypeMirror targetType;
+    if (target.getKind() == ElementKind.METHOD) {
+      targetType = ((ExecutableElement) target).getReturnType();
+    }
+    else {
+      targetType = target.asType();
+    }
+    return targetType;
   }
 
   /**
    * Returns the set of all bindable property names in the given model.
    */
-  private Set<String> getPropertyNames(TypeMirror modelType) {
+  private Set<String> getPropertyNames(final TypeMirror modelType) {
     final Elements elements = processingEnv.getElementUtils();
     final Types types = processingEnv.getTypeUtils();
 
-    Set<String> result = new HashSet<String>();
+    final Set<String> result = new HashSet<>();
 
-    for (Element el : ElementFilter.methodsIn(elements.getAllMembers((TypeElement) types.asElement(modelType)))) {
-      String propertyName = AnnotationProcessors.propertyNameOfMethod(el);
+    for (final Element el : ElementFilter.methodsIn(elements.getAllMembers((TypeElement) types.asElement(modelType)))) {
+      final String propertyName = AnnotationProcessors.propertyNameOfMethod(el);
       if (propertyName != null) {
         result.add(propertyName);
       }
-      // TODO extract type info from methods
-//        for (VariableElement param : ((ExecutableElement) el).getParameters()) {
-//          if (hasAnnotation(param, TypeNames.MODEL)) {
-//            result.add(param.asType());
-//          }
-//          else if (hasAnnotation(param, TypeNames.AUTO_BOUND)) {
-//            result.add(typeOfDataBinder(param.asType()));
-//          }
-//        }
     }
     return result;
   }
@@ -165,13 +188,13 @@ public class BoundAnnotationChecker extends AbstractProcessor {
   /**
    * Returns the type of the provided property in the given model type.
    */
-  private TypeMirror getPropertyType(TypeMirror modelType, String property) {
+  private TypeMirror getPropertyType(final TypeMirror modelType, final String property) {
     final Elements elements = processingEnv.getElementUtils();
     final Types types = processingEnv.getTypeUtils();
 
     TypeMirror result = null;
-    for (Element el : ElementFilter.methodsIn(elements.getAllMembers((TypeElement) types.asElement(modelType)))) {
-      String methodName = el.getSimpleName().toString();
+    for (final Element el : ElementFilter.methodsIn(elements.getAllMembers((TypeElement) types.asElement(modelType)))) {
+      final String methodName = el.getSimpleName().toString();
       if (methodName.toLowerCase().equals("get" + property.toLowerCase()) ||
               methodName.toLowerCase().equals("is" + property.toLowerCase())) {
         result = ((ExecutableElement) el).getReturnType();
@@ -190,17 +213,17 @@ public class BoundAnnotationChecker extends AbstractProcessor {
    * @param classContainingBindableThings
    * @return
    */
-  private List<TypeMirror> findAllModelTypes(TypeElement classContainingBindableThings) {
-    final List<TypeMirror> result = new ArrayList<TypeMirror>();
+  private List<TypeMirror> findAllModelTypes(final TypeElement classContainingBindableThings) {
+    final List<TypeMirror> result = new ArrayList<>();
     final Elements elements = processingEnv.getElementUtils();
 
-    for (Element el : elements.getAllMembers(classContainingBindableThings)) {
+    for (final Element el : elements.getAllMembers(classContainingBindableThings)) {
       switch (el.getKind()) {
       case METHOD:
       case CONSTRUCTOR:
         if (!hasAnnotation(el, TypeNames.JAVAX_INJECT)) continue;
 
-        for (VariableElement param : ((ExecutableElement) el).getParameters()) {
+        for (final VariableElement param : ((ExecutableElement) el).getParameters()) {
           if (hasAnnotation(param, TypeNames.MODEL)) {
             result.add(param.asType());
           }
@@ -230,37 +253,62 @@ public class BoundAnnotationChecker extends AbstractProcessor {
    * @param dataBinderDeclaration
    * @return
    */
-  private TypeMirror typeOfDataBinder(TypeMirror dataBinderDeclaration) {
+  private TypeMirror typeOfDataBinder(final TypeMirror dataBinderDeclaration) {
     // in a superclass, this could return a type variable or a wildcard
     return ((DeclaredType) dataBinderDeclaration).getTypeArguments().get(0);
   }
 
-  /**
-   * Returns true if and only if the given property chain is a valid property
-   * expression rooted in the given bindable type.
-   *
-   * @param bindableType
-   *          The root type the given property chain is resolved against. Not
-   *          null.
-   * @param propertyChain
-   *          The data binding property chain to validate. Not null.
-   * @return True if the given property chain is resolvable from the given
-   *         bindable type.
-   */
-  private boolean isValidPropertyChain(TypeMirror bindableType, String propertyChain) {
-    int dotPos = propertyChain.indexOf(".");
+  private boolean isValidPropertyChain(final TypeMirror bindableType, final String propertyChain) {
+    final int dotPos = propertyChain.indexOf(".");
     if (dotPos <= 0) {
       return getPropertyNames(bindableType).contains(propertyChain);
     }
     else {
-      String thisProperty = propertyChain.substring(0, dotPos);
-      String moreProperties = propertyChain.substring(dotPos + 1);
+      final String thisProperty = propertyChain.substring(0, dotPos);
+      final String moreProperties = propertyChain.substring(dotPos + 1);
       if (!getPropertyNames(bindableType).contains(thisProperty)) {
         return false;
       }
 
-      TypeMirror propertyType = getPropertyType(bindableType, thisProperty);
+      final TypeMirror propertyType = getPropertyType(bindableType, thisProperty);
       return isValidPropertyChain(propertyType, moreProperties);
     }
+  }
+
+  private boolean isValidPropertyChain(final TypeMirror bindableType, final TypeMirror boundElementType, final String propertyChain, final boolean configured) {
+    return (!configured && bindsToType(boundElementType, bindableType))
+            || isValidPropertyChain(bindableType, propertyChain);
+  }
+
+  private boolean bindsToType(final TypeMirror boundElementType, final TypeMirror bindableType) {
+    final Types types = processingEnv.getTypeUtils();
+    final Elements elements = processingEnv.getElementUtils();
+    final TypeMirror takesValue;
+    final TypeMirror nativeHasValue;
+    final TypeMirror listChangeHandler;
+
+    Optional<TypeMirror> oBoundPropertyType;
+    if (types.isAssignable(boundElementType, takesValue = types.erasure(elements.getTypeElement(TAKES_VALUE).asType()))) {
+      oBoundPropertyType = resolveSingleTypeArgumentForGenericSuperType(boundElementType, takesValue, types);
+    }
+    else if (types.isAssignable(boundElementType, nativeHasValue = types.erasure(elements.getTypeElement(NATIVE_HAS_VALUE).asType()))) {
+      oBoundPropertyType = resolveSingleTypeArgumentForGenericSuperType(boundElementType, nativeHasValue, types);
+    }
+    else if (types.isAssignable(boundElementType, listChangeHandler = types.erasure(elements.getTypeElement(LIST_CHANGE_HANDLER).asType()))) {
+      oBoundPropertyType =
+              resolveSingleTypeArgumentForGenericSuperType(boundElementType, listChangeHandler, types)
+              .map(listTypeArg -> types.getDeclaredType(elements.getTypeElement(List.class.getName()), listTypeArg));
+    }
+    else if (types.isAssignable(boundElementType, elements.getTypeElement(GWT_ELEMENT).asType())
+            || isElementWrapper(boundElementType, elements)) {
+      oBoundPropertyType = Optional.of(elements.getTypeElement(String.class.getName()).asType());
+    }
+    else {
+      oBoundPropertyType = Optional.empty();
+    }
+
+    return oBoundPropertyType
+            .filter(propertyType -> types.isSameType(propertyType, bindableType))
+            .isPresent();
   }
 }

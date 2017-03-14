@@ -16,6 +16,9 @@
 
 package org.jboss.errai.processor;
 
+import static org.jboss.errai.processor.TypeNames.GWT_EVENT;
+import static org.jboss.errai.processor.TypeNames.GWT_OPAQUE_DOM_EVENT;
+
 import java.io.FileNotFoundException;
 import java.util.List;
 
@@ -47,6 +50,14 @@ public class EventHandlerAnnotationCheckerTest extends AbstractProcessorTest {
   }
 
   @Test
+  public void shouldCompileCleanlyWithEventHandlerForSuperTypeDataField() throws FileNotFoundException {
+    final List<Diagnostic<? extends JavaFileObject>> diagnostics = compile(
+            "org/jboss/errai/processor/testcase/EventHandlerSubType.java");
+
+    assertSuccessfulCompilation(diagnostics);
+  }
+
+  @Test
   public void shouldPrintErrorWhenEventHandlerMethodReturnsNonVoid() throws FileNotFoundException {
     final List<Diagnostic<? extends JavaFileObject>> diagnostics = compile(
             "org/jboss/errai/processor/testcase/EventHandlerNonVoidReturnType.java");
@@ -59,8 +70,8 @@ public class EventHandlerAnnotationCheckerTest extends AbstractProcessorTest {
   public void shouldPrintErrorWhenEventHandlerMethodHasNoArgs() throws FileNotFoundException {
     final List<Diagnostic<? extends JavaFileObject>> diagnostics = compile(
             "org/jboss/errai/processor/testcase/EventHandlerNoArguments.java");
-    assertCompilationMessage(diagnostics, Kind.ERROR, 19, 8, "one argument of a concrete subtype of com.google.gwt.event.shared.GwtEvent");
-    assertCompilationMessage(diagnostics, Kind.ERROR, 25, 8, "exactly one argument of type com.google.gwt.user.client.Event");
+    assertCompilationMessage(diagnostics, Kind.ERROR, 19, 8, "Event handling methods must take exactly one argument.");
+    assertCompilationMessage(diagnostics, Kind.ERROR, 25, 8, "Event handling methods must take exactly one argument.");
   }
 
   @Test
@@ -68,8 +79,12 @@ public class EventHandlerAnnotationCheckerTest extends AbstractProcessorTest {
     final List<Diagnostic<? extends JavaFileObject>> diagnostics = compile(
             "org/jboss/errai/processor/testcase/EventHandlerWrongArgumentTypes.java");
 
-    assertCompilationMessage(diagnostics, Kind.ERROR, 19, 8, "one argument of a concrete subtype of com.google.gwt.event.shared.GwtEvent");
-    assertCompilationMessage(diagnostics, Kind.ERROR, 25, 8, "exactly one argument of type com.google.gwt.user.client.Event");
+    assertCompilationMessage(diagnostics, Kind.ERROR, 19, 8,
+            String.format(
+                    "Event handling methods must take exactly one argument that is a [%s], [%s], or a native @BrowserEvent.",
+                    GWT_OPAQUE_DOM_EVENT, GWT_EVENT));
+    assertCompilationMessage(diagnostics, Kind.ERROR, 25, 8,
+            "@SinkNative event handling methods must take exactly one argument of type com.google.gwt.user.client.Event");
   }
 
   @Test

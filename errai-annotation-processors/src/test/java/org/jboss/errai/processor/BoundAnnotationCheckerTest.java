@@ -36,18 +36,18 @@ public class BoundAnnotationCheckerTest extends AbstractProcessorTest {
     return new BoundAnnotationChecker();
   }
 
-  //  @Test
-  //  public void shouldPrintErrorOnFieldNotExtendingWidget() throws FileNotFoundException {
-  //    final List<Diagnostic<? extends JavaFileObject>> diagnostics = compile(
-  //            "org/jboss/errai/processor/testcase/DataFieldNotWidget.java");
-  //
-  //    assertCompilationMessage(diagnostics, Kind.ERROR, 10, 21, "must be assignable to Widget");
-  //  }
-
   @Test
   public void shouldCompileCleanlyWhenAllRulesAreFollowed() throws FileNotFoundException {
     final List<Diagnostic<? extends JavaFileObject>> diagnostics = compile(
             "org/jboss/errai/processor/testcase/BoundNoWarnings.java");
+
+    assertSuccessfulCompilation(diagnostics);
+  }
+
+  @Test
+  public void shouldCompileCleanlyWhenBoundPropertyIsImplicitlyThis() throws FileNotFoundException {
+    final List<Diagnostic<? extends JavaFileObject>> diagnostics = compile(
+            "org/jboss/errai/processor/testcase/BoundToList.java");
 
     assertSuccessfulCompilation(diagnostics);
   }
