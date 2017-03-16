@@ -115,6 +115,12 @@
   <dependencies>
     <dependency>
       <groupId>org.jboss.errai</groupId>
+      <artifactId>errai-annotation-processors</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.jboss.errai</groupId>
       <artifactId>errai-jpa-client</artifactId>
       <scope>provided</scope>
     </dependency>
