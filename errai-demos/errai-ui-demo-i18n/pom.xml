@@ -111,6 +111,11 @@
   </dependencyManagement>
 
   <dependencies>
+    <dependency>
+      <groupId>org.jboss.errai</groupId>
+      <artifactId>errai-annotation-processors</artifactId>
+      <scope>provided</scope>
+    </dependency>
     <!-- Must be here because the gwt-maven-plugin snapshot has the wrong gwt-dev version. -->
     <dependency>
       <groupId>com.google.gwt</groupId>
