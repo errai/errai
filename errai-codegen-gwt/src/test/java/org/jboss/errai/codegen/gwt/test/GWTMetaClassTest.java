@@ -56,6 +56,11 @@ public class GWTMetaClassTest extends AbstractMetaClassTest {
     f.addTestClass("org.jboss.errai.codegen.test.model.GenericSuperClass");
     f.addTestClass("org.jboss.errai.codegen.test.model.GenericArraySubclass");
     f.addTestClass("org.jboss.errai.codegen.test.model.ClassWithArrayGenerics");
+    f.addTestClass("org.jboss.errai.codegen.test.model.ClassWithAnnotations");
+    f.addTestClass("org.jboss.errai.codegen.test.model.Plain");
+    f.addTestClass("org.jboss.errai.codegen.test.model.SingleValue");
+    f.addTestClass("org.jboss.errai.codegen.test.model.MultipleValues");
+    f.addTestClass("org.jboss.errai.codegen.test.model.Nested");
     f.addTestClass(PrimitiveFieldContainer.class.getName());
 
     mockacle = f.generateMockacle();
@@ -75,7 +80,12 @@ public class GWTMetaClassTest extends AbstractMetaClassTest {
       // This is a hack for getting a JType for a primitive
       // (I couldn't find any Source implementation that does it directly)
       final MetaClass container = GWTClass.newInstance(mockacle, PrimitiveFieldContainer.class.getName());
-      metaClass = container.getDeclaredField(javaClass.getName() + "Field").getType();
+      if ("void".equals(javaClass.getName())) {
+        metaClass = container.getDeclaredMethod("voidMethod", new MetaClass[0]).getReturnType();
+      }
+      else {
+        metaClass = container.getDeclaredField(javaClass.getName() + "Field").getType();
+      }
     }
     else {
       metaClass = GWTClass.newInstance(mockacle, javaClass.getName());

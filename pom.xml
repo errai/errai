@@ -106,6 +106,7 @@
     <module>errai-annotation-processors</module>
     <module>errai-forge-addon</module>
     <module>errai-api</module>
+    <module>errai-codegen-apt</module>
   </modules>
 
   <repositories>

@@ -28,7 +28,7 @@ import org.jboss.errai.codegen.meta.MetaParameter;
  */
 public class JavaReflectionParameter extends MetaParameter {
   private final static AtomicInteger paramNameCounter = new AtomicInteger();
-  
+
   private final String name;
   private final MetaClass type;
   private final Annotation[] annotations;
@@ -37,10 +37,10 @@ public class JavaReflectionParameter extends MetaParameter {
   public JavaReflectionParameter(final MetaClass type,
                                  final Annotation[] annotations,
                                  final MetaClassMember declaredBy) {
-    
+
     // Java Reflection doesn't provide parameter names, so we have to make one up to satisfy the Parameter interface.
     this.name = "jp" + paramNameCounter.getAndIncrement();
-    
+
     this.type = type;
     this.annotations = annotations;
     this.declaredBy = declaredBy;
@@ -64,10 +64,5 @@ public class JavaReflectionParameter extends MetaParameter {
   @Override
   public MetaClassMember getDeclaringMember() {
     return declaredBy;
-  }
-
-  @Override
-  public String toString() {
-    return type.getFullyQualifiedName();
   }
 }

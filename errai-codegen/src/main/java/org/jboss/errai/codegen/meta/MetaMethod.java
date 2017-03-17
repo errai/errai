@@ -26,8 +26,6 @@ import java.util.stream.Collectors;
 import org.jboss.errai.codegen.util.GenUtil;
 
 public abstract class MetaMethod extends AbstractHasAnnotations implements MetaClassMember, MetaGenericDeclaration {
-  @Override
-  public abstract String getName();
 
   /**
    * Returns the MetaClass representing this method's return type. The returned
@@ -74,11 +72,11 @@ public abstract class MetaMethod extends AbstractHasAnnotations implements MetaC
   }
 
   @Override
-  public boolean equals(Object o) {
+  public boolean equals(final Object o) {
     return o instanceof MetaMethod && ((MetaMethod)o).hashString().equals(hashString());
   }
 
-  public List<MetaParameter> getParametersAnnotatedWith(Class<? extends Annotation> annotation) {
+  public List<MetaParameter> getParametersAnnotatedWith(final Class<? extends Annotation> annotation) {
     return Arrays.stream(getParameters())
             .filter(p -> p.isAnnotationPresent(annotation))
             .collect(Collectors.collectingAndThen(Collectors.toList(), l -> Collections.unmodifiableList(l)));
@@ -100,7 +98,7 @@ public abstract class MetaMethod extends AbstractHasAnnotations implements MetaC
       return null;
     }
   }
-  
+
   @Override
   public String toString() {
     final StringBuilder sb = new StringBuilder();
@@ -113,7 +111,7 @@ public abstract class MetaMethod extends AbstractHasAnnotations implements MetaC
     sb.append(" ").append(GenUtil.scopeOf(this).getCanonicalName()).append(" ")
     .append(getReturnType()).append(" ")
     .append(getName()).append("(").append(Arrays.toString(getParameters())).append(")");
-    
+
     return sb.toString();
   }
 }

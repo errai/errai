@@ -41,7 +41,7 @@ public abstract class MetaParameter extends AbstractHasAnnotations {
   }
 
   @Override
-  public boolean equals(Object o) {
+  public boolean equals(final Object o) {
     return o instanceof  MetaParameter && ((MetaParameter) o).hashString().equals(hashString());
   }
 
@@ -70,5 +70,10 @@ public abstract class MetaParameter extends AbstractHasAnnotations {
     }
 
     return index;
+  }
+
+  @Override
+  public String toString() {
+    return getType().getFullyQualifiedName();
   }
 }
