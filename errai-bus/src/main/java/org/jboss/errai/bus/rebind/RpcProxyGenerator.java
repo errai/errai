@@ -16,8 +16,10 @@
 
 package org.jboss.errai.bus.rebind;
 
+import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.api.builder.RemoteCallSendable;
@@ -42,22 +44,29 @@ import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.client.api.interceptor.RemoteCallContext;
 import org.jboss.errai.common.client.framework.CallContextStatus;
 
-import com.google.gwt.core.ext.GeneratorContext;
-
 /**
  * Generates an Errai RPC remote proxy.
  *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class RpcProxyGenerator {
-  private final MetaClass remote;
-  private final GeneratorContext context;
-  private final InterceptorProvider interceptorProvider;
 
-  public RpcProxyGenerator(MetaClass remote, GeneratorContext context, InterceptorProvider interceptorProvider) {
+  private final MetaClass remote;
+  private final InterceptorProvider interceptorProvider;
+  private final boolean iocEnabled;
+  private final Function<Annotation[], Annotation[]> annoFilter;
+
+
+  public RpcProxyGenerator(final MetaClass remote, final InterceptorProvider interceptorProvider,
+          final Function<Annotation[], Annotation[]> annoFilter, final boolean iocEnabled) {
     this.remote = remote;
-    this.context = context;
     this.interceptorProvider = interceptorProvider;
+    this.annoFilter = annoFilter;
+    this.iocEnabled = iocEnabled;
+  }
+
+  public MetaClass getRemoteType() {
+    return remote;
   }
 
   public ClassStructureBuilder<?> generate() {
@@ -77,13 +86,13 @@ public class RpcProxyGenerator {
     return classBuilder;
   }
 
-  private void generateMethod(ClassStructureBuilder<?> classBuilder, MetaMethod method) {
+  private void generateMethod(final ClassStructureBuilder<?> classBuilder, final MetaMethod method) {
     final List<Class<?>> interceptors = interceptorProvider.getInterceptors(remote, method);
     final boolean intercepted = !interceptors.isEmpty();
 
     final Parameter[] parms = DefParameters.from(method).getParameters().toArray(new Parameter[0]);
     final Parameter[] finalParms = new Parameter[parms.length];
-    final List<Statement> parmVars = new ArrayList<Statement>();
+    final List<Statement> parmVars = new ArrayList<>();
     for (int i = 0; i < parms.length; i++) {
       finalParms[i] = Parameter.of(parms[i].getType().getErased(), parms[i].getName(), true);
       parmVars.add(Stmt.loadVariable(parms[i].getName()));
@@ -112,10 +121,10 @@ public class RpcProxyGenerator {
     methodBlock.finish();
   }
 
-  private Statement generateInterceptorLogic(ClassStructureBuilder<?> classBuilder,
-      MetaMethod method, Statement requestLogic, List<Statement> parmVars, List<Class<?>> interceptors) {
-    final Statement callContext = ProxyUtil.generateProxyMethodCallContext(context, RemoteCallContext.class,
-        classBuilder.getClassDefinition(), method, requestLogic, interceptors).finish();
+  private Statement generateInterceptorLogic(final ClassStructureBuilder<?> classBuilder,
+      final MetaMethod method, final Statement requestLogic, final List<Statement> parmVars, final List<Class<?>> interceptors) {
+    final Statement callContext = ProxyUtil.generateProxyMethodCallContext(RemoteCallContext.class,
+        classBuilder.getClassDefinition(), method, requestLogic, interceptors, annoFilter, iocEnabled).finish();
 
     return Stmt.try_()
             .append(
@@ -142,9 +151,9 @@ public class RpcProxyGenerator {
             .finish();
   }
 
-  private Statement generateRequest(ClassStructureBuilder<?> classBuilder,
-      MetaMethod method, Statement methodParams, boolean intercepted) {
-    
+  private Statement generateRequest(final ClassStructureBuilder<?> classBuilder,
+      final MetaMethod method, final Statement methodParams, final boolean intercepted) {
+
     final Statement sendable = Stmt
             .invokeStatic(MessageBuilder.class, "createCall")
             .invoke("call", remote.getFullyQualifiedName())

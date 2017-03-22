@@ -67,11 +67,11 @@ public final class APTClassUtil {
   static Types types;
   static Elements elements;
 
-  static void setTypes(final Types types) {
+  public static void setTypes(final Types types) {
     APTClassUtil.types = types;
   }
 
-  static void setElements(final Elements elements) {
+  public static void setElements(final Elements elements) {
     APTClassUtil.elements = elements;
   }
 
@@ -135,7 +135,7 @@ public final class APTClassUtil {
       .entrySet()
       .stream()
       .collect(toMap(e -> e.getKey().getSimpleName().toString(), e -> e.getValue().getValue()));
-    final Object annoProxy = Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(), new Class<?>[] { annoClazz },
+    final Object annoProxy = Proxy.newProxyInstance(annoClazz.getClassLoader(), new Class<?>[] { annoClazz },
             new InvocationHandler() {
               @Override
               public Object invoke(final Object proxy, final Method method, final Object[] args) throws Throwable {

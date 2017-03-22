@@ -58,6 +58,7 @@
     <!-- TODO remove this when ip-bom version is greater (currently ip-bom is on 1.x) -->
     <quartz.version>2.1.6</quartz.version>
     <version.com.google.jsinterop>1.0.1</version.com.google.jsinterop> <!-- Remove after upgrading to IP BOM 7.0.0.CR7+ -->
+    <version.com.google.testing.compile-testing>0.10</version.com.google.testing.compile-testing>
     <!-- Hibernate Validator 4.3.x coming from IP BOM is not compatible with GWT 2.8-beta1 -->
     <version.org.hibernate.validator>4.1.0.Final</version.org.hibernate.validator>
     <version.org.wildfly.core>2.1.0.Final</version.org.wildfly.core>
@@ -307,6 +308,12 @@
         <groupId>com.google.jsinterop</groupId>
         <artifactId>jsinterop-annotations</artifactId>
         <version>${version.com.google.jsinterop}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.google.testing.compile</groupId>
+        <artifactId>compile-testing</artifactId>
+        <version>${version.com.google.testing.compile-testing}</version>
       </dependency>
 
       <dependency>

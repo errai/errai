@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Function;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Dependent;
@@ -50,12 +51,10 @@ import org.jboss.errai.common.client.api.interceptor.InterceptsRemoteCall;
 import org.jboss.errai.common.client.api.interceptor.RemoteCallContext;
 import org.jboss.errai.common.client.util.AsyncBeanFactory;
 import org.jboss.errai.common.client.util.CreationalCallback;
-import org.jboss.errai.common.metadata.RebindUtils;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.reflect.TypeToken;
-import com.google.gwt.core.ext.GeneratorContext;
 
 /**
  * Utilities to avoid redundant code for proxy generation.
@@ -64,8 +63,6 @@ import com.google.gwt.core.ext.GeneratorContext;
  * @author Mike Brock
  */
 public abstract class ProxyUtil {
-
-  private static final String IOC_MODULE_NAME = "org.jboss.errai.ioc.Container";
 
   private ProxyUtil() {}
 
@@ -89,12 +86,13 @@ public abstract class ProxyUtil {
    *         {@link org.jboss.errai.common.client.api.interceptor.CallContext}
    */
   public static AnonymousClassStructureBuilder generateProxyMethodCallContext(
-          final GeneratorContext context,
           final Class<? extends RemoteCallContext> callContextType,
-          final MetaClass proxyClass, final MetaMethod method,
-          final Statement proceed, final List<Class<?>> interceptors) {
-
-    final Set<String> translatablePackages = RebindUtils.findTranslatablePackages(context);
+          final MetaClass proxyClass,
+          final MetaMethod method,
+          final Statement proceed,
+          final List<Class<?>> interceptors,
+          final Function<Annotation[], Annotation[]> annoFilter,
+          final boolean iocEnabled) {
 
     return Stmt.newObject(callContextType).extend()
               .publicOverridesMethod("getMethodName")
@@ -104,14 +102,14 @@ public abstract class ProxyUtil {
               .append(Stmt.load(method.getReturnType()).returnValue())
               .finish()
               .publicOverridesMethod("getAnnotations")
-              .append(Stmt.load(filter(method.getAnnotations(), translatablePackages)).returnValue())
+              .append(Stmt.load(annoFilter.apply(method.getAnnotations())).returnValue())
               .finish()
               .publicOverridesMethod("getTypeAnnotations")
               .append(
-                  Stmt.load(filter(method.getDeclaringClass().getAnnotations(), translatablePackages)).returnValue())
+                  Stmt.load(annoFilter.apply(method.getDeclaringClass().getAnnotations())).returnValue())
               .finish()
               .publicOverridesMethod("proceed")
-              .append(generateInterceptorStackProceedMethod(context, callContextType, proceed, interceptors))
+              .append(generateInterceptorStackProceedMethod(callContextType, proceed, interceptors, iocEnabled))
               .append(Stmt.load(null).returnValue())
               .finish()
               .publicOverridesMethod("proceed", Parameter.of(RemoteCallback.class, "interceptorCallback", true))
@@ -175,14 +173,15 @@ public abstract class ProxyUtil {
   }
 
   private static Statement generateInterceptorStackProceedMethod(
-          final GeneratorContext context,
-          final Class<? extends RemoteCallContext> callContextType,
-          final Statement proceed, final List<Class<?>> interceptors) {
+            final Class<? extends RemoteCallContext> callContextType,
+            final Statement proceed,
+            final List<Class<?>> interceptors,
+            final boolean iocEnabled) {
     final BlockStatement proceedLogic = new BlockStatement();
     proceedLogic.addStatement(Stmt.loadVariable("status").invoke("proceed"));
 
     ElseBlockBuilder interceptorStack =
-              If.isNull(Stmt.loadVariable("status").invoke("getNextInterceptor"))._(proceed).finish();
+              If.isNull(Stmt.loadVariable("status").invoke("getNextInterceptor")).append(proceed).finish();
 
     for (final Class<?> interceptor : interceptors) {
       interceptorStack = interceptorStack.elseif_(Bool.equals(
@@ -208,7 +207,7 @@ public abstract class ProxyUtil {
                               .finish() // finish the method override body
                               .finish() // finish the anonymous CreationalCallback class body
                       ))
-              .append(generateAsyncInterceptorCreation(context, interceptor))
+              .append(generateAsyncInterceptorCreation(interceptor, iocEnabled))
               .finish();
     }
     proceedLogic.addStatement(interceptorStack.else_().finish());
@@ -223,9 +222,8 @@ public abstract class ProxyUtil {
    * @param context
    * @param interceptor
    */
-  private static Statement generateAsyncInterceptorCreation(final GeneratorContext context,
-          final Class<?> interceptor) {
-    if (RebindUtils.isModuleInherited(context, IOC_MODULE_NAME) && isManagedBean(interceptor)) {
+  private static Statement generateAsyncInterceptorCreation(final Class<?> interceptor, final boolean iocEnabled) {
+    if (iocEnabled && isManagedBean(interceptor)) {
       // Note: for the IOC path, generate the code via StringStatement because we
       // need to make sure that IOC is an optional dependency. This should probably
       // be replaced with some sort of pluggable model instead (where a Statement can
@@ -254,12 +252,12 @@ public abstract class ProxyUtil {
     // methods of this type.
     final Multimap<Class<?>, Class<?>> standaloneInterceptors = ArrayListMultimap.create();
 
-    public InterceptorProvider(final Collection<MetaClass> featureInterceptors, final Collection<MetaClass> standaloneInterceptors) {
+    public InterceptorProvider(final Collection<? extends MetaClass> featureInterceptors, final Collection<? extends MetaClass> standaloneInterceptors) {
       setFeatureInterceptors(featureInterceptors);
       setStandaloneInterceptors(standaloneInterceptors);
     }
 
-    private void setFeatureInterceptors(final Collection<MetaClass> featureInterceptors) {
+    private void setFeatureInterceptors(final Collection<? extends MetaClass> featureInterceptors) {
       for (final MetaClass featureInterceptor : featureInterceptors) {
         final Class<? extends Annotation>[] annotations =
             featureInterceptor.getAnnotation(FeatureInterceptor.class).value();
@@ -270,7 +268,7 @@ public abstract class ProxyUtil {
       }
     }
 
-    private void setStandaloneInterceptors(final Collection<MetaClass> standaloneInterceptors) {
+    private void setStandaloneInterceptors(final Collection<? extends MetaClass> standaloneInterceptors) {
       for (final MetaClass interceptorClass : standaloneInterceptors) {
         final InterceptsRemoteCall interceptor = interceptorClass.getAnnotation(InterceptsRemoteCall.class);
         final Class<?>[] intercepts = interceptor.value();
@@ -431,5 +429,9 @@ public abstract class ProxyUtil {
     }
 
     return retVal;
+  }
+
+  public static Function<Annotation[], Annotation[]> packageFilter(final Set<String> packages) {
+    return annos -> filter(annos, packages);
   }
 }

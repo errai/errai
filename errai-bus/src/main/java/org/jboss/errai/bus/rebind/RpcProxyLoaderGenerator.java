@@ -18,6 +18,8 @@ package org.jboss.errai.bus.rebind;
 
 import java.lang.annotation.Annotation;
 import java.util.Collection;
+import java.util.Set;
+import java.util.function.Function;
 
 import org.jboss.errai.bus.client.api.messaging.MessageBus;
 import org.jboss.errai.bus.client.framework.RpcProxyLoader;
@@ -31,6 +33,7 @@ import org.jboss.errai.codegen.builder.impl.ClassBuilder;
 import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.util.ProxyUtil.InterceptorProvider;
+import org.jboss.errai.codegen.util.ProxyUtil;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.client.api.interceptor.FeatureInterceptor;
 import org.jboss.errai.common.client.api.interceptor.InterceptsRemoteCall;
@@ -54,6 +57,7 @@ import com.google.gwt.core.ext.UnableToCompleteException;
  */
 @GenerateAsync(RpcProxyLoader.class)
 public class RpcProxyLoaderGenerator extends AbstractAsyncGenerator {
+  private static final String IOC_MODULE_NAME = "org.jboss.errai.ioc.Container";
   private static final Logger log = LoggerFactory.getLogger(RpcProxyLoaderGenerator.class);
   private final String packageName = RpcProxyLoader.class.getPackage().getName();
   private final String className = RpcProxyLoader.class.getSimpleName() + "Impl";
@@ -79,11 +83,14 @@ public class RpcProxyLoaderGenerator extends AbstractAsyncGenerator {
     addCacheRelevantClasses(remotes);
 
     final InterceptorProvider interceptorProvider = getInterceptorProvider(context);
+    final Function<Annotation[], Annotation[]> annoFilter = ProxyUtil.packageFilter(RebindUtils.findTranslatablePackages(context));
+    final boolean iocEnabled = RebindUtils.isModuleInherited(context, IOC_MODULE_NAME);
 
     for (final MetaClass remote : remotes) {
       if (remote.isInterface()) {
         // create the remote proxy for this interface
-        final ClassStructureBuilder<?> remoteProxy = new RpcProxyGenerator(remote, context, interceptorProvider).generate();
+        final ClassStructureBuilder<?> remoteProxy = new RpcProxyGenerator(remote, interceptorProvider, annoFilter,
+                iocEnabled).generate();
         loadProxies.append(new InnerClass(remoteProxy.getClassDefinition()));
 
         // create the proxy provider
@@ -100,7 +107,7 @@ public class RpcProxyLoaderGenerator extends AbstractAsyncGenerator {
 
     classBuilder = (ClassStructureBuilder<?>) loadProxies.finish();
 
-    String gen = classBuilder.toJavaString();
+    final String gen = classBuilder.toJavaString();
     log.info("generated RPC proxy loader class in " + (System.currentTimeMillis() - time) + "ms.");
     return gen;
   }
@@ -119,7 +126,7 @@ public class RpcProxyLoaderGenerator extends AbstractAsyncGenerator {
   }
 
   @Override
-  protected boolean isRelevantClass(MetaClass clazz) {
+  protected boolean isRelevantClass(final MetaClass clazz) {
     for (final Annotation anno : clazz.getAnnotations()) {
       if (anno.annotationType().equals(Remote.class) || anno.annotationType().equals(FeatureInterceptor.class)
               || anno.annotationType().equals(InterceptsRemoteCall.class)) {
