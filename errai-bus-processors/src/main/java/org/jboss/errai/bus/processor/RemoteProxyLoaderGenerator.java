@@ -50,6 +50,7 @@ import javax.tools.JavaFileObject;
 import org.jboss.errai.bus.client.api.messaging.MessageBus;
 import org.jboss.errai.bus.client.framework.RpcProxyLoader;
 import org.jboss.errai.bus.rebind.RpcProxyGenerator;
+import org.jboss.errai.bus.server.annotations.Remote;
 import org.jboss.errai.codegen.InnerClass;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
@@ -58,9 +59,13 @@ import org.jboss.errai.codegen.apt.APTClassUtil;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.MethodBlockBuilder;
 import org.jboss.errai.codegen.builder.impl.ClassBuilder;
+import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.impl.java.JavaReflectionClass;
 import org.jboss.errai.codegen.util.ProxyUtil.InterceptorProvider;
 import org.jboss.errai.common.client.framework.ProxyProvider;
 import org.jboss.errai.common.client.framework.RemoteServiceProxyFactory;
+import org.jboss.errai.common.metadata.MetaDataScanner;
+import org.jboss.errai.common.metadata.ScannerSingleton;
 
 /**
  *
@@ -74,11 +79,19 @@ public class RemoteProxyLoaderGenerator extends AbstractProcessor {
   private final List<APTClass> featureInterceptors = new ArrayList<>();
   private final List<APTClass> standaloneInterceptors = new ArrayList<>();
 
+  private final List<MetaClass> preCompiledRemoteIfaces = new ArrayList<>();
+
   @Override
   public synchronized void init(final ProcessingEnvironment processingEnv) {
     super.init(processingEnv);
     APTClassUtil.setTypes(processingEnv.getTypeUtils());
     APTClassUtil.setElements(processingEnv.getElementUtils());
+    final MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
+    scanner
+      .getTypesAnnotatedWith(Remote.class)
+      .stream()
+      .map(JavaReflectionClass::newInstance)
+      .collect(toCollection(() -> preCompiledRemoteIfaces));
   }
 
   @Override
@@ -93,8 +106,9 @@ public class RemoteProxyLoaderGenerator extends AbstractProcessor {
               classBuilder.publicMethod(void.class, "loadProxies", Parameter.of(MessageBus.class, "bus", true));
       final InterceptorProvider interceptorProvider = generateInterceptorProvider();
 
-      remoteIfaces
-        .stream()
+      Stream
+        .of(remoteIfaces, preCompiledRemoteIfaces)
+        .flatMap(list -> list.stream())
         .map(remote -> new RpcProxyGenerator(remote, interceptorProvider, Function.identity(), true))
         .forEach(proxyGenerator -> {
           final ClassStructureBuilder<?> remoteProxy = proxyGenerator.generate();
