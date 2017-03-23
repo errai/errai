@@ -178,6 +178,12 @@
 
       <dependency>
         <groupId>org.jboss.errai</groupId>
+        <artifactId>errai-jaxrs-processors</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.jboss.errai</groupId>
         <artifactId>errai-jaxrs-client</artifactId>
         <type>test-jar</type>
         <version>${project.version}</version>

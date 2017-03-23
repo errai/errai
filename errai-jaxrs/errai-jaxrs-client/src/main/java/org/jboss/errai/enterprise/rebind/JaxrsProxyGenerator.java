@@ -16,7 +16,9 @@
 
 package org.jboss.errai.enterprise.rebind;
 
+import java.lang.annotation.Annotation;
 import java.util.Collection;
+import java.util.function.Function;
 
 import javax.ws.rs.Path;
 
@@ -37,11 +39,10 @@ import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.enterprise.client.jaxrs.AbstractJaxrsProxy;
 
 import com.google.common.collect.Multimap;
-import com.google.gwt.core.ext.GeneratorContext;
 
 /**
  * Generates a JAX-RS remote proxy.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class JaxrsProxyGenerator {
@@ -49,23 +50,29 @@ public class JaxrsProxyGenerator {
 
   private final JaxrsHeaders headers;
   private final String rootResourcePath;
-  private final GeneratorContext context;
   private final InterceptorProvider interceptorProvider;
   private final Multimap<MetaClass, MetaClass> exceptionMappers;
+  private final Function<Annotation[], Annotation[]> annoFilter;
+  private final boolean iocEnabled;
 
-  public JaxrsProxyGenerator(MetaClass remote, final GeneratorContext context,
-      final InterceptorProvider interceptorProvider, Multimap<MetaClass, MetaClass> exceptionMappers) {
+  public JaxrsProxyGenerator(
+          final MetaClass remote,
+          final InterceptorProvider interceptorProvider,
+          final Multimap<MetaClass, MetaClass> exceptionMappers,
+          final Function<Annotation[], Annotation[]> annoFilter,
+          final boolean iocEnabled) {
     this.remote = remote;
-    this.context = context;
     this.exceptionMappers = exceptionMappers;
+    this.annoFilter = annoFilter;
+    this.iocEnabled = iocEnabled;
     this.rootResourcePath = remote.getAnnotation(Path.class).value();
     this.headers = JaxrsHeaders.fromClass(remote);
     this.interceptorProvider = interceptorProvider;
   }
 
   public ClassStructureBuilder<?> generate() {
-    String safeProxyClassName = remote.getFullyQualifiedName().replace('.', '_') + "Impl";
-    ClassStructureBuilder<?> classBuilder =
+    final String safeProxyClassName = remote.getFullyQualifiedName().replace('.', '_') + "Impl";
+    final ClassStructureBuilder<?> classBuilder =
         ClassBuilder.define(safeProxyClassName, AbstractJaxrsProxy.class)
             .packageScope()
             .implementsInterface(remote)
@@ -90,10 +97,11 @@ public class JaxrsProxyGenerator {
             .append(Stmt.loadClassMember("errorCallback").assignValue(Variable.get("callback")))
             .finish();
 
-    for (MetaMethod method : remote.getMethods()) {
+    for (final MetaMethod method : remote.getMethods()) {
       if (ProxyUtil.shouldProxyMethod(method)) {
-        JaxrsResourceMethod resourceMethod = new JaxrsResourceMethod(method, headers, rootResourcePath);
-        new JaxrsProxyMethodGenerator(remote, classBuilder, resourceMethod, interceptorProvider, context).generate();
+        final JaxrsResourceMethod resourceMethod = new JaxrsResourceMethod(method, headers, rootResourcePath);
+        new JaxrsProxyMethodGenerator(remote, classBuilder, resourceMethod, interceptorProvider, annoFilter, iocEnabled)
+                .generate();
       }
     }
     return classBuilder;
@@ -104,27 +112,27 @@ public class JaxrsProxyGenerator {
    */
   private Statement generateConstructor() {
     MetaClass exceptionMapperClass = null;
-    for (MetaClass exceptionMapper : exceptionMappers.keySet()) {
-      Collection<MetaClass> remotes = exceptionMappers.get(exceptionMapper);
+    for (final MetaClass exceptionMapper : exceptionMappers.keySet()) {
+      final Collection<MetaClass> remotes = exceptionMappers.get(exceptionMapper);
       if (remotes.contains(null) && exceptionMapperClass == null) {
         // generic (default) exception mapper
         exceptionMapperClass = exceptionMapper;
       }
       else if (remotes.contains(remote)) {
         exceptionMapperClass = exceptionMapper;
-        // Stop if we find an exception mapper specific to this remote interface 
+        // Stop if we find an exception mapper specific to this remote interface
         break;
       }
     }
-    
+
     // If we found one, create it in the c'tor and assign it to the proxy's exceptionMapper field
     if (exceptionMapperClass != null) {
-      ContextualStatementBuilder setMapper = Stmt.loadVariable("this").invoke("setExceptionMapper", 
+      final ContextualStatementBuilder setMapper = Stmt.loadVariable("this").invoke("setExceptionMapper",
           Stmt.newObject(exceptionMapperClass));
       return setMapper;
-    } 
+    }
     else {
-      return EmptyStatement.INSTANCE; 
+      return EmptyStatement.INSTANCE;
     }
   }
 }

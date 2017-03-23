@@ -108,6 +108,7 @@
     <module>errai-api</module>
     <module>errai-codegen-apt</module>
     <module>errai-bus-processors</module>
+    <module>errai-jaxrs-processors</module>
   </modules>
 
   <repositories>

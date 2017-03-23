@@ -53,13 +53,11 @@ import org.jboss.errai.codegen.util.ProxyUtil;
 import org.jboss.errai.codegen.util.ProxyUtil.InterceptorProvider;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.client.framework.CallContextStatus;
-import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.enterprise.client.jaxrs.ResponseDemarshallingCallback;
 import org.jboss.errai.enterprise.client.jaxrs.api.RestClient;
 import org.jboss.errai.enterprise.client.jaxrs.api.interceptor.RestCallContext;
 import org.jboss.errai.enterprise.rebind.TypeMarshaller.PrimitiveTypeMarshaller;
 
-import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.http.client.URL;
@@ -70,8 +68,6 @@ import com.google.gwt.http.client.URL;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class JaxrsProxyMethodGenerator {
-  private static final String IOC_MODULE_NAME = "org.jboss.errai.ioc.Container";
-
   private static final String APPEND = "append";
 
   private final MetaClass remote;
@@ -80,19 +76,22 @@ public class JaxrsProxyMethodGenerator {
   private final BlockBuilder<?> methodBlock;
   private final List<Statement> parameters;
   private final InterceptorProvider interceptorProvider;
-  private final GeneratorContext context;
+  private final Function<Annotation[], Annotation[]> annoFilter;
+  private final boolean iocEnabled;
 
   public JaxrsProxyMethodGenerator(final MetaClass remote,
       final ClassStructureBuilder<?> classBuilder,
       final JaxrsResourceMethod resourceMethod,
       final InterceptorProvider interceptorProvider,
-      final GeneratorContext context) {
+      final Function<Annotation[], Annotation[]> annoFilter,
+      final boolean iocEnabled) {
 
     this.remote = remote;
+    this.annoFilter = annoFilter;
+    this.iocEnabled = iocEnabled;
     this.declaringClass = classBuilder.getClassDefinition();
     this.resourceMethod = resourceMethod;
     this.interceptorProvider = interceptorProvider;
-    this.context = context;
 
     final Parameter[] parms = DefParameters.from(resourceMethod.getMethod()).getParameters().toArray(new Parameter[0]);
     final Parameter[] finalParms = new Parameter[parms.length];
@@ -320,12 +319,9 @@ public class JaxrsProxyMethodGenerator {
   private Statement generateInterceptorLogic(final List<Class<?>> interceptors) {
     final JaxrsResourceMethodParameters jaxrsParams =
         JaxrsResourceMethodParameters.fromMethod(resourceMethod.getMethod(), "parameters");
-    final boolean iocEnabled = RebindUtils.isModuleInherited(context, IOC_MODULE_NAME);
-    final Set<String> translatablePackages = RebindUtils.findTranslatablePackages(context);
-    final Function<Annotation[], Annotation[]> translatableAnnoFilter = ProxyUtil.packageFilter(translatablePackages);
     final Statement callContext =
         ProxyUtil.generateProxyMethodCallContext(RestCallContext.class, declaringClass,
-            resourceMethod.getMethod(), generateInterceptedRequest(), interceptors, translatableAnnoFilter, iocEnabled)
+            resourceMethod.getMethod(), generateInterceptedRequest(), interceptors, annoFilter, iocEnabled)
             .publicOverridesMethod("setParameters", Parameter.of(Object[].class, "parameters"))
               .append(new StringStatement("super.setParameters(parameters)"))
               .append(generateUrl(jaxrsParams))

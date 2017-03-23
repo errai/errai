@@ -18,7 +18,6 @@ package org.jboss.errai.bus.rebind;
 
 import java.lang.annotation.Annotation;
 import java.util.Collection;
-import java.util.Set;
 import java.util.function.Function;
 
 import org.jboss.errai.bus.client.api.messaging.MessageBus;
@@ -32,8 +31,8 @@ import org.jboss.errai.codegen.builder.MethodBlockBuilder;
 import org.jboss.errai.codegen.builder.impl.ClassBuilder;
 import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
-import org.jboss.errai.codegen.util.ProxyUtil.InterceptorProvider;
 import org.jboss.errai.codegen.util.ProxyUtil;
+import org.jboss.errai.codegen.util.ProxyUtil.InterceptorProvider;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.client.api.interceptor.FeatureInterceptor;
 import org.jboss.errai.common.client.api.interceptor.InterceptsRemoteCall;

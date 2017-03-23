@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.processor;
+package org.jboss.errai.enterprise.processor;
 
 import static java.util.stream.Collectors.toCollection;
 import static javax.tools.StandardLocation.CLASS_OUTPUT;
-import static org.jboss.errai.bus.processor.TypeNames.FEATURE_INTERCEPTOR;
-import static org.jboss.errai.bus.processor.TypeNames.INTERCEPTED_CALL;
-import static org.jboss.errai.bus.processor.TypeNames.REMOTE;
-import static org.jboss.errai.codegen.builder.impl.ObjectBuilder.newInstanceOf;
 import static org.jboss.errai.codegen.util.Stmt.invokeStatic;
 import static org.jboss.errai.codegen.util.Stmt.nestedCall;
 import static org.jboss.errai.codegen.util.Stmt.newObject;
+import static org.jboss.errai.enterprise.processor.TypeNames.FEATURE_INTERCEPTOR;
+import static org.jboss.errai.enterprise.processor.TypeNames.INTERCEPTED_CALL;
+import static org.jboss.errai.enterprise.processor.TypeNames.PATH;
+import static org.jboss.errai.enterprise.processor.TypeNames.PROVIDER;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -48,91 +48,82 @@ import javax.lang.model.type.TypeKind;
 import javax.tools.Diagnostic.Kind;
 import javax.tools.FileObject;
 
-import org.jboss.errai.bus.client.api.messaging.MessageBus;
-import org.jboss.errai.bus.client.framework.RpcProxyLoader;
-import org.jboss.errai.bus.rebind.RpcProxyGenerator;
-import org.jboss.errai.bus.server.annotations.Remote;
 import org.jboss.errai.codegen.InnerClass;
-import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.apt.APTClass;
 import org.jboss.errai.codegen.apt.APTClassUtil;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.MethodBlockBuilder;
 import org.jboss.errai.codegen.builder.impl.ClassBuilder;
+import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.impl.build.BuildMetaClass;
-import org.jboss.errai.codegen.meta.impl.java.JavaReflectionClass;
 import org.jboss.errai.codegen.util.ProxyUtil.InterceptorProvider;
 import org.jboss.errai.common.client.framework.ProxyProvider;
 import org.jboss.errai.common.client.framework.RemoteServiceProxyFactory;
-import org.jboss.errai.common.metadata.MetaDataScanner;
-import org.jboss.errai.common.metadata.ScannerSingleton;
+import org.jboss.errai.enterprise.client.jaxrs.JaxrsProxyLoader;
+import org.jboss.errai.enterprise.rebind.JaxrsProxyGenerator;
+import org.jboss.errai.enterprise.rebind.Utils;
+
+import com.google.common.collect.Multimap;
 
 /**
  *
  * @author Max Barkley <mbarkley@redhat.com>
  */
-@SupportedAnnotationTypes({REMOTE, FEATURE_INTERCEPTOR, INTERCEPTED_CALL})
+@SupportedAnnotationTypes({PATH, FEATURE_INTERCEPTOR, INTERCEPTED_CALL, PROVIDER})
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
-public class RemoteProxyLoaderGenerator extends AbstractProcessor {
+public class JaxrsProxyLoaderGenerator extends AbstractProcessor {
 
-  private static final String IMPL_FQCN = "org.jboss.errai.bus.client.local.RpcProxyLoaderImpl";
-  private final List<APTClass> remoteIfaces = new ArrayList<>();
+  private static final String IMPL_FQCN = "org.jboss.errai.enterprise.client.local.JaxrsProxyLoaderImpl";
+  private final List<APTClass> jaxrsIfaces = new ArrayList<>();
   private final List<APTClass> featureInterceptors = new ArrayList<>();
   private final List<APTClass> standaloneInterceptors = new ArrayList<>();
-
-  private final List<MetaClass> preCompiledRemoteIfaces = new ArrayList<>();
+  private final List<APTClass> providers = new ArrayList<>();
 
   @Override
   public synchronized void init(final ProcessingEnvironment processingEnv) {
     super.init(processingEnv);
     APTClassUtil.setTypes(processingEnv.getTypeUtils());
     APTClassUtil.setElements(processingEnv.getElementUtils());
-    final MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
-    scanner
-      .getTypesAnnotatedWith(Remote.class)
-      .stream()
-      .map(JavaReflectionClass::newInstance)
-      .collect(toCollection(() -> preCompiledRemoteIfaces));
   }
 
   @Override
   public boolean process(final Set<? extends TypeElement> annotations, final RoundEnvironment roundEnv) {
-    storeRemoteIfaces(annotations, roundEnv);
+    storeJaxrsIfaces(annotations, roundEnv);
     storeFeatureInterceptors(annotations, roundEnv);
     storeInterceptedCalls(annotations, roundEnv);
+    storeProviders(annotations, roundEnv);
 
     if (roundEnv.processingOver()) {
       ClassStructureBuilder<?> classBuilder = ClassBuilder
         .define(IMPL_FQCN)
         .publicScope()
-        .implementsInterface(RpcProxyLoader.class)
+        .implementsInterface(JaxrsProxyLoader.class)
         .body();
-      final MethodBlockBuilder<?> loadProxies =
-              classBuilder.publicMethod(void.class, "loadProxies", Parameter.of(MessageBus.class, "bus", true));
+      final MethodBlockBuilder<?> loadProxies = classBuilder.publicMethod(void.class, "loadProxies");
       final InterceptorProvider interceptorProvider = generateInterceptorProvider();
+      final Multimap<MetaClass, MetaClass> exceptionMappers = Utils.getClientExceptionMappers(providers);
 
-      Stream
-        .of(remoteIfaces, preCompiledRemoteIfaces)
-        .flatMap(list -> list.stream())
-        .map(remote -> new RpcProxyGenerator(remote, interceptorProvider, Function.identity(), true))
-        .forEach(proxyGenerator -> {
-          final ClassStructureBuilder<?> remoteProxy = proxyGenerator.generate();
+      jaxrsIfaces
+        .stream()
+        .forEach(remote -> {
+          // create the remote proxy for this interface
+          final ClassStructureBuilder<?> remoteProxy =
+              new JaxrsProxyGenerator(remote, interceptorProvider, exceptionMappers, Function.identity(), true).generate();
+          loadProxies.append(new InnerClass(remoteProxy.getClassDefinition()));
 
           // create the proxy provider
-          final Statement proxyProvider = newInstanceOf(ProxyProvider.class)
-                  .extend()
-                  .publicOverridesMethod("getProxy")
-                  .append(nestedCall(newObject(remoteProxy.getClassDefinition())).returnValue())
-                  .finish()
-                  .finish();
+          final Statement proxyProvider = ObjectBuilder.newInstanceOf(ProxyProvider.class)
+              .extend()
+              .publicOverridesMethod("getProxy")
+              .append(nestedCall(newObject(remoteProxy.getClassDefinition())).returnValue())
+              .finish()
+              .finish();
 
-
-          loadProxies.append(new InnerClass(remoteProxy.getClassDefinition()));
-          loadProxies.append(invokeStatic(RemoteServiceProxyFactory.class, "addRemoteProxy",
-                  proxyGenerator.getRemoteType(), proxyProvider));
-      });
+          // create the call that registers the proxy provided for the generated proxy
+          loadProxies.append(invokeStatic(RemoteServiceProxyFactory.class, "addRemoteProxy", remote, proxyProvider));
+        });
       classBuilder = (ClassStructureBuilder<?>) loadProxies.finish();
       final String gen = classBuilder.toJavaString();
       final Filer filer = processingEnv.getFiler();
@@ -156,24 +147,42 @@ public class RemoteProxyLoaderGenerator extends AbstractProcessor {
 
   private Element[] getOriginatingElements() {
     return Stream
-      .of(remoteIfaces, featureInterceptors, standaloneInterceptors)
+      .of(jaxrsIfaces, featureInterceptors, standaloneInterceptors)
       .flatMap(list -> list.stream())
       .map(aptClass -> aptClass.getEnclosedMetaObject())
       .map(mirror -> processingEnv.getTypeUtils().asElement(mirror))
       .toArray(Element[]::new);
   }
 
-  private void storeRemoteIfaces(final Set<? extends TypeElement> annotations, final RoundEnvironment roundEnv) {
+  private InterceptorProvider generateInterceptorProvider() {
+    return new InterceptorProvider(featureInterceptors, standaloneInterceptors);
+  }
+
+  private void storeProviders(final Set<? extends TypeElement> annotations, final RoundEnvironment roundEnv) {
     // TODO validate types are interfaces and show warnings/errors
     annotations
     .stream()
-    .filter(anno -> anno.getQualifiedName().contentEquals(REMOTE))
+    .filter(anno -> anno.getQualifiedName().contentEquals(PROVIDER))
     .flatMap(anno -> roundEnv.getElementsAnnotatedWith(anno).stream())
-    .map(element -> (TypeElement) element)
+    .map(TypeElement.class::cast)
     .map(TypeElement::asType)
     .map(APTClass::new)
     .filter(mc -> mc.isInterface())
-    .collect(toCollection(() -> remoteIfaces));
+    .collect(toCollection(() -> providers));
+  }
+
+  private void storeJaxrsIfaces(final Set<? extends TypeElement> annotations, final RoundEnvironment roundEnv) {
+    // TODO validate types are interfaces and show warnings/errors
+    annotations
+    .stream()
+    .filter(anno -> anno.getQualifiedName().contentEquals(PATH))
+    .flatMap(anno -> roundEnv.getElementsAnnotatedWith(anno).stream())
+    .filter(TypeElement.class::isInstance)
+    .map(TypeElement.class::cast)
+    .map(TypeElement::asType)
+    .map(APTClass::new)
+    .filter(mc -> mc.isInterface())
+    .collect(toCollection(() -> jaxrsIfaces));
   }
 
   private void storeFeatureInterceptors(final Set<? extends TypeElement> annotations, final RoundEnvironment roundEnv) {
@@ -182,7 +191,7 @@ public class RemoteProxyLoaderGenerator extends AbstractProcessor {
     .stream()
     .filter(anno -> anno.getQualifiedName().contentEquals(FEATURE_INTERCEPTOR))
     .flatMap(anno -> roundEnv.getElementsAnnotatedWith(anno).stream())
-    .map(element -> (TypeElement) element)
+    .map(TypeElement.class::cast)
     .map(TypeElement::asType)
     .map(APTClass::new)
     .collect(toCollection(() -> featureInterceptors));
@@ -195,14 +204,10 @@ public class RemoteProxyLoaderGenerator extends AbstractProcessor {
     .filter(anno -> anno.getQualifiedName().contentEquals(INTERCEPTED_CALL))
     .flatMap(anno -> roundEnv.getElementsAnnotatedWith(anno).stream())
     .filter(element -> TypeKind.DECLARED.equals(element.getKind()))
-    .map(element -> (TypeElement) element)
+    .map(TypeElement.class::cast)
     .map(TypeElement::asType)
     .map(APTClass::new)
     .collect(toCollection(() -> standaloneInterceptors));
-  }
-
-  private InterceptorProvider generateInterceptorProvider() {
-    return new InterceptorProvider(featureInterceptors, standaloneInterceptors);
   }
 
 }

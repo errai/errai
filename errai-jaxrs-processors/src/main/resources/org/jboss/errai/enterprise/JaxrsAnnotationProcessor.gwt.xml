@@ -4,7 +4,7 @@
 <module>
   <inherits name="org.jboss.errai.enterprise.JaxrsNoGenerator" />
 
-  <generate-with class="org.jboss.errai.enterprise.rebind.JaxrsProxyLoaderGenerator">
+  <replace-with class="org.jboss.errai.enterprise.client.local.JaxrsProxyLoaderImpl">
     <when-type-assignable class="org.jboss.errai.enterprise.client.jaxrs.JaxrsProxyLoader" />
-  </generate-with>
+  </replace-with>
 </module>

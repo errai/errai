@@ -3,7 +3,7 @@
 <module>
   <inherits name="org.jboss.errai.bus.ErraiBus" />
 
-  <replace-with class="org.jboss.errai.bus.client.framework.RpcProxyLoaderImpl">
+  <replace-with class="org.jboss.errai.bus.client.local.RpcProxyLoaderImpl">
     <when-type-assignable class="org.jboss.errai.bus.client.framework.RpcProxyLoader" />
   </replace-with>
 </module>
