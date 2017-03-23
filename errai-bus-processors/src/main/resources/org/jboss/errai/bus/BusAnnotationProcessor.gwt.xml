@@ -1,9 +1,9 @@
 <!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 1.6//EN"
         "http://google-web-toolkit.googlecode.com/svn/releases/1.6/distro-source/core/src/gwt-module.dtd">
 <module>
-  <inherits name="org.jboss.errai.bus.ErraiBusNoGenerator" />
+  <inherits name="org.jboss.errai.bus.ErraiBus" />
 
-  <generate-with class="org.jboss.errai.bus.rebind.RpcProxyLoaderGenerator">
+  <replace-with class="org.jboss.errai.bus.client.framework.RpcProxyLoaderImpl">
     <when-type-assignable class="org.jboss.errai.bus.client.framework.RpcProxyLoader" />
-  </generate-with>
+  </replace-with>
 </module>
