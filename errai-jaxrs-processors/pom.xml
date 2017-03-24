@@ -18,6 +18,10 @@
       <groupId>org.jboss.errai</groupId>
       <artifactId>errai-jaxrs-client</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.jboss.spec.javax.ws.rs</groupId>
+      <artifactId>jboss-jaxrs-api_2.0_spec</artifactId>
+    </dependency>
   </dependencies>
   
   <build>
@@ -27,6 +31,18 @@
           <configuration>
             <proc>none</proc>
           </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-shade-plugin</artifactId>
+          <executions>
+            <execution>
+              <phase>package</phase>
+              <goals>
+                <goal>shade</goal>
+              </goals>
+            </execution>
+          </executions>
         </plugin>
     </plugins>
   </build>
