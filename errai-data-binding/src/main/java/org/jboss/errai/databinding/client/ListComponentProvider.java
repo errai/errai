@@ -57,7 +57,7 @@ public class ListComponentProvider implements ContextualTypeProvider<ListCompone
     final HTMLElement root = (HTMLElement) Document.get().createElement(listContainer.map(anno -> anno.value()).orElse("div"));
     final SyncBeanDef<?> beanDef = IOC.getBeanManager().lookupBean(typeargs[1], filteredQualifiers);
     final Supplier<?> supplier = () -> beanDef.getInstance();
-    final Consumer<?> destroyer = (Dependent.class.equals(beanDef.getScope()) ? c -> {} : c -> IOC.getBeanManager().destroyBean(c));
+    final Consumer<?> destroyer = (!Dependent.class.equals(beanDef.getScope()) ? c -> {} : c -> IOC.getBeanManager().destroyBean(c));
     final Function<?, HTMLElement> elementAccessor;
     if (beanDef.isAssignableTo(IsElement.class)) {
       elementAccessor = c -> ((IsElement) c).getElement();

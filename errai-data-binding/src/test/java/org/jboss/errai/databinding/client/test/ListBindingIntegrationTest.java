@@ -90,6 +90,24 @@ public class ListBindingIntegrationTest extends AbstractErraiIOCTest {
 
     runTestModelListAssertions(list, component, one, two, three);
   }
+  public void testDeclarativeListHandlerBindingWithInjectedListDestroyerCallAfterRemove() throws Exception {
+    final ListComponentModule module = IOC.getBeanManager().lookupBean(ListComponentModule.class).getInstance();
+    final ListComponent<TestModel, TestModelWidget> component = module.list;
+    final TestModelWithListOfTestModels model = module.binder.getModel();
+    model.setList(new ArrayList<>());
+    final List<TestModel> list = model.getList();
+    final TestModel one = new TestModel("one");
+
+    list.add(one);
+    TestModelWidget testBean = component.getComponent(0);
+    assertFalse(component.getComponent(0).isQualified());
+    assertIndexOutOfBounds(component, 1);
+    assertFalse(testBean.isDestroyed());
+    list.remove(0);
+    assertTrue(testBean.isDestroyed());
+    assertIndexOutOfBounds(component, 0);
+
+  }
 
   public void testDeclarativeBindingDirectlyToList() throws Exception {
     final DirectBindingListComponentModule module = IOC.getBeanManager()
