@@ -16,6 +16,7 @@
 
 package org.jboss.errai.databinding.client;
 
+import javax.annotation.PreDestroy;
 import javax.enterprise.context.Dependent;
 
 import org.jboss.errai.common.client.api.annotations.IOCProducer;
@@ -34,6 +35,7 @@ import com.google.gwt.user.client.ui.Widget;
  */
 @Dependent
 public class TestModelWidget extends Widget implements HasValue<TestModel> {
+  public boolean destroyed=false;
 
   @IOCProducer
   @Qual
@@ -75,6 +77,15 @@ public class TestModelWidget extends Widget implements HasValue<TestModel> {
   @Override
   public void setValue(TestModel value, boolean fireEvents) {
     this.value = value;
+  }
+
+  @PreDestroy
+  public void setDestroyed(){
+      destroyed = true;
+  }
+
+  public boolean isDestroyed() {
+    return destroyed;
   }
 
   public boolean isQualified() {
