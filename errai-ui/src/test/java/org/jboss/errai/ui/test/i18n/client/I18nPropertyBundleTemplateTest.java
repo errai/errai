@@ -55,6 +55,16 @@ public class I18nPropertyBundleTemplateTest extends AbstractErraiCDITest {
 
     TranslationService.setCurrentLocale("de");
     assertEquals("Testen macht Spass!", translationService.format(AppMessages.MESSAGE));
+    assertNull(translationService.getTranslation(AppMessages.ENGLISH_MESSAGE));
+  }
+
+  @Test
+  public void testTranslationKeyWithPropertyBundleSearchingDefaultKey() {
+    final TranslationService translationService = IOC.getBeanManager().lookupBean(TranslationService.class).getInstance();
+    TranslationService.setCurrentLocale("de");
+    TranslationService.setShouldSearchKeyOnDefaultLocale(true);
+
+    assertEquals("English message!", translationService.format(AppMessages.ENGLISH_MESSAGE));
   }
 
 }

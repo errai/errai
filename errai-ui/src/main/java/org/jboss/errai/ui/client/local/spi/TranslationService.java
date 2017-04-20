@@ -52,6 +52,8 @@ public abstract class TranslationService {
 
   private final Dictionary dictionary = new Dictionary();
 
+  private static boolean shouldSearchKeyOnDefaultLocale = Boolean.parseBoolean(System.getProperty("errai.i18n.default_per_key"));
+
   /**
    * Constructor.
    */
@@ -128,6 +130,10 @@ public abstract class TranslationService {
    */
   public String getTranslation(final String translationKey) {
     final String localeName = getActiveLocale();
+    return getTranslation(translationKey, localeName, null);
+  }
+
+  private String getTranslation(final String translationKey, final String localeName, final String defaultValue) {
     logger.fine("Translating key: " + translationKey + "  into locale: " + localeName);
     final Map<String, String> translationData = dictionary.get(localeName);
     if (translationData.containsKey(translationKey)) {
@@ -140,9 +146,16 @@ public abstract class TranslationService {
         return translationData.get(nonNamespacedKey);
       }
     }
-    // Nothing? Then return null.
+    if (localeName != null && shouldSearchKeyOnDefaultLocale) {
+      // Nothing? Tries to find translation in default locale.
+      logger.fine("Translation not found in locale map: " + localeName);
+      return getTranslation(translationKey,
+                            null,
+                            defaultValue);
+    }
+    // Nothing in the default locale? Then return the default value.
     logger.fine("Translation not found in any locale map, leaving unchanged.");
-    return null;
+    return defaultValue;
   }
 
   /**
@@ -153,9 +166,7 @@ public abstract class TranslationService {
    * @param args
    */
   public String format(final String key, final Object... args) {
-    final String pattern = getTranslation(key);
-    if (pattern == null)
-      return "!!!" + key + "!!!"; //$NON-NLS-1$ //$NON-NLS-2$
+    final String pattern = getTranslation(key, getActiveLocale(), "!!!" + key + "!!!"); //$NON-NLS-1$ //$NON-NLS-2$
     if (args.length == 0)
       return pattern;
 
@@ -233,6 +244,14 @@ public abstract class TranslationService {
   public final static void setCurrentLocale(final String locale) {
     setCurrentLocaleWithoutUpdate(locale);
     retranslateTemplatedBeans();
+  }
+
+  /**
+   * Forcibly set if the default locale should be searched when a translation key does not have a
+   * translation registered.
+   */
+  public static void setShouldSearchKeyOnDefaultLocale(final boolean newShouldSearchKeyOnDefaultLocale) {
+    shouldSearchKeyOnDefaultLocale = newShouldSearchKeyOnDefaultLocale;
   }
 
   /**
