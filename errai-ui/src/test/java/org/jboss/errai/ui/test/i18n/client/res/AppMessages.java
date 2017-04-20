@@ -6,5 +6,8 @@ public class AppMessages {
 
   @TranslationKey(defaultValue = "not-translated")
   public static final String MESSAGE = "app.message";
+
+  @TranslationKey(defaultValue = "")
+  public static final String ENGLISH_MESSAGE = "app.english.message";
   
 }
