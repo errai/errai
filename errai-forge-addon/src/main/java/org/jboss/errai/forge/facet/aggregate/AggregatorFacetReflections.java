@@ -25,21 +25,21 @@ import java.util.Map;
 
 /**
  * A class for querying meta-data on of top-level aggregator facets.
- * 
+ *
  * @author Max Barkley <mbarkley@redhat.com>
  */
 @Singleton
 public class AggregatorFacetReflections {
 
   private final Map<String, Feature> shortFeatureMap =
-          new LinkedHashMap<String, Feature>();
+          new LinkedHashMap<>();
 
   private final Map<String, Feature> longFeatureMap =
-          new LinkedHashMap<String, Feature>();
+          new LinkedHashMap<>();
 
   /**
    * Represents a feature that can be installed.
-   * 
+   *
    * @author Max Barkley <mbarkley@redhat.com>
    */
   public static class Feature {
@@ -108,8 +108,7 @@ public class AggregatorFacetReflections {
         ErraiJaxrsFacet.class,
         ErraiJpaClientFacet.class,
         ErraiJpaDatasyncFacet.class,
-        ErraiSecurityFacet.class,
-        ErraiCordovaFacet.class
+        ErraiSecurityFacet.class
     };
 
     for (int i = 0; i < types.length; i++) {
@@ -123,7 +122,7 @@ public class AggregatorFacetReflections {
   /**
    * Get a {@link Feature} by it's {@linkplain Feature#getShortName() short
    * name}.
-   * 
+   *
    * @param shortName
    *          The {@linkplain Feature#getShortName() short name} of the feature
    *          to retrieve.
@@ -136,7 +135,7 @@ public class AggregatorFacetReflections {
 
   /**
    * Check if a feature exists.
-   * 
+   *
    * @param shortName
    *          The {@linkplain Feature#getShortName() short name} of a feature.
    * @return True iff there is a feature matching the given short name.
@@ -148,7 +147,7 @@ public class AggregatorFacetReflections {
   /**
    * Get a {@link Feature} by it's {@linkplain Feature#getLongName() long
    * name}.
-   * 
+   *
    * @param shortName
    *          The {@linkplain Feature#getLongName() long name} of the feature
    *          to retrieve.
@@ -161,7 +160,7 @@ public class AggregatorFacetReflections {
 
   /**
    * Check if a feature exists.
-   * 
+   *
    * @param longName
    *          The {@linkplain Feature#getLongName() long name} of a feature.
    * @return True iff there is a feature matching the given long name.
