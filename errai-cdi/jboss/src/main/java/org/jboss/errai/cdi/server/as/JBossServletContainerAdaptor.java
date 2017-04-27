@@ -84,6 +84,11 @@ public class JBossServletContainerAdaptor extends ServletContainer {
     this.jbossProcess = jbossProcess;
     this.context = context;
     
+    String alternativePort = System.getProperty( "jboss.management.http.port" );
+    if( alternativePort != null ){
+    	httpControllerPath = httpControllerPath.substring( 0, httpControllerPath.lastIndexOf(":") ) +":" + alternativePort;
+    }
+    
     logger.branch(Type.INFO, "Starting container initialization...");
     // Overrides remoting address if and only if an ovverride is passed.
     if (httpRemotingAddress != null && !httpRemotingAddress.trim().equalsIgnoreCase(httpControllerPath)) {
