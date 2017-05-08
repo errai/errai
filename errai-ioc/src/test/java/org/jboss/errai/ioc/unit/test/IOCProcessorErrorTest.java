@@ -65,11 +65,13 @@ import org.jboss.errai.ioc.unit.res.InjectsInstanceFieldProducedBeanByWrongTypes
 import org.jboss.errai.ioc.unit.res.InjectsInstanceMethodProducedBeanByWrongTypes;
 import org.jboss.errai.ioc.unit.res.InjectsStaticFieldProducedBeanByWrongTypes;
 import org.jboss.errai.ioc.unit.res.InjectsStaticMethodProducedBeanByWrongTypes;
+import org.jboss.errai.ioc.unit.res.JSTypeWithPrivateConstructor;
 import org.jboss.errai.ioc.unit.res.ParameterizedIface;
 import org.jboss.errai.ioc.unit.res.PseudoCycleA;
 import org.jboss.errai.ioc.unit.res.PseudoCycleB;
 import org.jboss.errai.ioc.unit.res.TypeParameterControlModule;
 import org.jboss.errai.ioc.unit.res.TypeParameterTestModule;
+import org.jboss.errai.ioc.unit.res.UsesJSTypeWithPrivateConstructor;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -477,6 +479,24 @@ public class IOCProcessorErrorTest {
     }
     finally {
       execService.shutdown();
+    }
+  }
+
+  @Test
+  public void cannotSatisfyInjectionSiteOfNativeJSTypeWithPrivateConstructor() throws Exception {
+    addToMetaClassCache(
+            Object.class,
+            JSTypeWithPrivateConstructor.class,
+            UsesJSTypeWithPrivateConstructor.class
+            );
+    try {
+      processor.process(procContext);
+      fail("Did not produce an error for native JS type with private constructor.");
+    } catch (final AssertionError ae) {
+      throw ae;
+    } catch (final Throwable t) {
+      assertTrue("Error message did not mention unsatisfied dependency.",
+              t.getMessage().contains(JSTypeWithPrivateConstructor.class.getSimpleName()));
     }
   }
 

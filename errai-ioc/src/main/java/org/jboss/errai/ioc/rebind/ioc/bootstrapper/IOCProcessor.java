@@ -800,7 +800,7 @@ public class IOCProcessor {
     }
 
     final MetaConstructor noArgConstructor = type.getDeclaredConstructor(new MetaClass[0]);
-    return noArgConstructor != null && (noArgConstructor.isPublic() || !type.isAssignableTo(JavaScriptObject.class));
+    return noArgConstructor != null && (noArgConstructor.isPublic() || !isJavaScriptObject(type));
   }
 
   private WiringElementType[] getWiringTypes(final MetaClass type, final Class<? extends Annotation> directScope) {
@@ -1206,7 +1206,7 @@ public class IOCProcessor {
     else {
       if (injectableConstructors.size() == 1) {
         final MetaConstructor injectConstructor = injectableConstructors.get(0);
-        final boolean instantiable = injectConstructor.isPublic() || !type.isAssignableTo(JavaScriptObject.class);
+        final boolean instantiable = injectConstructor.isPublic() || !isJavaScriptObject(type);
         if (!instantiable) {
           problems.add(String.format("Cannot access constructor for %s.", type.getFullyQualifiedName()));
         }
@@ -1227,7 +1227,7 @@ public class IOCProcessor {
           return instantiable;
         }
       } else {
-        final boolean instantiable = noArgConstructor != null && (noArgConstructor.isPublic() || !type.isAssignableTo(JavaScriptObject.class));
+        final boolean instantiable = noArgConstructor != null && (noArgConstructor.isPublic() || !isJavaScriptObject(type));
         final boolean proxiable = noArgConstructor != null && (noArgConstructor.isPublic() || noArgConstructor.isProtected());
         final boolean passesProxiability = scopeDoesNotRequireProxy(type) || proxiable;
 
@@ -1245,6 +1245,15 @@ public class IOCProcessor {
         return instantiable && passesProxiability;
       }
     }
+  }
+
+  private boolean isJavaScriptObject(final MetaClass type) {
+    return type.isAssignableTo(JavaScriptObject.class) || isNativeJSType(type);
+  }
+
+  private boolean isNativeJSType(final MetaClass type) {
+    final JsType anno = type.getAnnotation(JsType.class);
+    return type.getAnnotation(JsType.class) != null && anno.isNative();
   }
 
   private boolean scopeDoesNotRequireProxy(final MetaClass type) {
