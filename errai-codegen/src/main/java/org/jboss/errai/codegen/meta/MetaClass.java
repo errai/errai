@@ -120,6 +120,8 @@ public abstract class MetaClass extends AbstractHasAnnotations implements MetaTy
 
   public abstract MetaConstructor getDeclaredConstructor(Class... parameters);
 
+  public abstract MetaConstructor getDeclaredConstructor(MetaClass... parameters);
+
   public abstract MetaParameterizedType getParameterizedType();
 
   public abstract MetaParameterizedType getGenericSuperClass();

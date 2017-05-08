@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Stream;
 
 import org.jboss.errai.codegen.DefModifiers;
 import org.jboss.errai.codegen.Parameter;
@@ -418,8 +419,8 @@ public class GWTClass extends AbstractMetaClass<JType> {
     return new GWTField(oracle, field);
   }
 
-  private static MetaConstructor[] fromMethodArray(final TypeOracle oracle, final JConstructor[] constructors) {
-    return Arrays.stream(constructors).map(c -> new GWTConstructor(oracle, c)).toArray(s -> new MetaConstructor[s]);
+  private static MetaConstructor[] fromMethodArray(final TypeOracle oracle, final Stream<JConstructor> constructors) {
+    return constructors.map(c -> new GWTConstructor(oracle, c)).toArray(s -> new MetaConstructor[s]);
   }
 
   @Override
@@ -429,12 +430,20 @@ public class GWTClass extends AbstractMetaClass<JType> {
       return null;
     }
 
-    return fromMethodArray(oracle, type.getConstructors());
+    return fromMethodArray(oracle,
+                           Arrays
+                             .stream(type.getConstructors())
+                             .filter(ctor -> ctor.isPublic()));
   }
 
   @Override
   public MetaConstructor[] getDeclaredConstructors() {
-    return getConstructors();
+    final JClassType type = getEnclosedMetaObject().isClassOrInterface();
+    if (type == null) {
+      return null;
+    }
+
+    return fromMethodArray(oracle, Arrays.stream(type.getConstructors()));
   }
 
   @Override

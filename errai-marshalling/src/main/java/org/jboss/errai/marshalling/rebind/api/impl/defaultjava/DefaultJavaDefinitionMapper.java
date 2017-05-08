@@ -56,12 +56,12 @@ public class DefaultJavaDefinitionMapper {
       return definitionsFactory.getDefinition(toMap.asBoxed());
     }
 
-    final Set<MetaConstructor> constructors = new HashSet<MetaConstructor>();
+    final Set<MetaConstructor> constructors = new HashSet<>();
     final SimpleConstructorMapping simpleConstructorMapping = new SimpleConstructorMapping();
     final MappingDefinition definition = new MappingDefinition(toMap, false);
 
-    for (MetaConstructor c : toMap.getDeclaredConstructors()) {
-      List<Boolean> hasMapsTos = new ArrayList<Boolean>();
+    for (final MetaConstructor c : toMap.getDeclaredConstructors()) {
+      final List<Boolean> hasMapsTos = new ArrayList<>();
       if (c.getParameters().length != 0) {
         for (int i = 0; i < c.getParameters().length; i++) {
           final Annotation[] annotations = c.getParameters()[i].getAnnotations();
@@ -70,11 +70,11 @@ public class DefaultJavaDefinitionMapper {
           }
           else {
             boolean hasMapsTo = false;
-            for (Annotation a : annotations) {
+            for (final Annotation a : annotations) {
               if (MapsTo.class.isAssignableFrom(a.annotationType())) {
                 hasMapsTo = true;
-                MapsTo mapsTo = (MapsTo) a;
-                String key = mapsTo.value();
+                final MapsTo mapsTo = (MapsTo) a;
+                final String key = mapsTo.value();
                 simpleConstructorMapping.mapParmToIndex(key, i, c.getParameters()[i].getType());
               }
             }
@@ -112,12 +112,12 @@ public class DefaultJavaDefinitionMapper {
     }
 
     if (simpleConstructorMapping.getMappings().length == 0) {
-      final Set<MetaMethod> factoryMethods = new HashSet<MetaMethod>();
+      final Set<MetaMethod> factoryMethods = new HashSet<>();
       final SimpleFactoryMapping simpleFactoryMapping = new SimpleFactoryMapping();
 
       for (final MetaMethod method : toMap.getDeclaredMethods()) {
         if (method.isStatic()) {
-          List<Boolean> hasMapsTos = new ArrayList<Boolean>();
+          final List<Boolean> hasMapsTos = new ArrayList<>();
           for (int i = 0; i < method.getParameters().length; i++) {
             final Annotation[] annotations = method.getParameters()[i].getAnnotations();
             if (annotations.length == 0) {
@@ -125,11 +125,11 @@ public class DefaultJavaDefinitionMapper {
             }
             else {
               boolean hasMapsTo = false;
-              for (Annotation a : annotations) {
+              for (final Annotation a : annotations) {
                 if (MapsTo.class.isAssignableFrom(a.annotationType())) {
                   hasMapsTo = true;
-                  MapsTo mapsTo = (MapsTo) a;
-                  String key = mapsTo.value();
+                  final MapsTo mapsTo = (MapsTo) a;
+                  final String key = mapsTo.value();
                   simpleFactoryMapping.mapParmToIndex(key, i, method.getParameters()[i].getType());
                 }
               }
@@ -161,15 +161,15 @@ public class DefaultJavaDefinitionMapper {
     if (definition.getInstantiationMapping() instanceof ConstructorMapping
             && definition.getInstantiationMapping().getMappings().length == 0) {
 
-      final MetaConstructor defaultConstructor = toMap.getDeclaredConstructor();
+      final MetaConstructor defaultConstructor = toMap.getDeclaredConstructor(new Class[0]);
       if (defaultConstructor == null || !defaultConstructor.isPublic()) {
         throw new InvalidMappingException("there is no custom mapping or default no-arg constructor to map: "
                 + toMap.getFullyQualifiedName());
       }
     }
 
-    final Set<String> writeKeys = new HashSet<String>();
-    final Set<String> readKeys = new HashSet<String>();
+    final Set<String> writeKeys = new HashSet<>();
+    final Set<String> readKeys = new HashSet<>();
 
     for (final Mapping m : simpleConstructorMapping.getMappings()) {
       writeKeys.add(m.getKey());
@@ -210,7 +210,7 @@ public class DefaultJavaDefinitionMapper {
           final Field fld = field.asField();
           fld.setAccessible(true);
         }
-        catch (IllegalStateException e) {
+        catch (final IllegalStateException e) {
           // field is not known to the current classloader. continue anyway.
         }
 
