@@ -296,7 +296,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
 
   @Override
   public MetaConstructor getBestMatchingConstructor(final MetaClass... parameters) {
-    return GenUtil.getBestConstructorCandidate(parameters, this, getConstructors(), false);
+    return GenUtil.getBestConstructorCandidate(parameters, this, getDeclaredConstructors(), false);
   }
 
   @Override
@@ -312,6 +312,11 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
   @Override
   public MetaConstructor getDeclaredConstructor(final Class... parameters) {
     return _getConstructor(getDeclaredConstructors(), classToMeta(parameters));
+  }
+
+  @Override
+  public MetaConstructor getDeclaredConstructor(final MetaClass... parameters) {
+    return _getConstructor(getDeclaredConstructors(), parameters);
   }
 
   @Override

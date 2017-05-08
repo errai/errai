@@ -799,7 +799,7 @@ public class IOCProcessor {
       }
     }
 
-    final MetaConstructor noArgConstructor = type.getConstructor(new MetaClass[0]);
+    final MetaConstructor noArgConstructor = type.getDeclaredConstructor(new MetaClass[0]);
     return noArgConstructor != null && (noArgConstructor.isPublic() || !type.isAssignableTo(JavaScriptObject.class));
   }
 
@@ -1197,7 +1197,7 @@ public class IOCProcessor {
   private boolean isConstructable(final MetaClass type, final List<String> problems) {
     final boolean explicitlyScoped = getDirectScope(type) != null;
     final List<MetaConstructor> injectableConstructors = getInjectableConstructors(type);
-    final MetaConstructor noArgConstructor = type.getConstructor(new MetaClass[0]);
+    final MetaConstructor noArgConstructor = type.getDeclaredConstructor(new MetaClass[0]);
 
     if (injectableConstructors.size() > 1) {
       problems.add(type.getFullyQualifiedName() + " has " + injectableConstructors.size() + " constructors annotated with @Inject.");

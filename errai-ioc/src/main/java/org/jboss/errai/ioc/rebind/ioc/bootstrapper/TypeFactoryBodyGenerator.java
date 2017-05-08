@@ -397,7 +397,7 @@ class TypeFactoryBodyGenerator extends AbstractBodyGenerator {
   }
 
   private void assignNewObjectWithZeroArgConstructor(final Injectable injectable, final List<Statement> createInstanceStatements) {
-    final MetaConstructor noArgConstr = injectable.getInjectedType().getConstructor(new MetaClass[0]);
+    final MetaConstructor noArgConstr = injectable.getInjectedType().getDeclaredConstructor(new MetaClass[0]);
     final Object newObjectStmt;
 
     if (noArgConstr.isPublic()) {

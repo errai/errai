@@ -248,7 +248,7 @@ public abstract class AbstractBodyGenerator implements FactoryBodyGenerator {
   }
 
   private MetaConstructor getAccessibleNoArgConstructor(final MetaClass type) {
-    final MetaConstructor noArgConstr = type.getConstructor(new MetaClass[0]);
+    final MetaConstructor noArgConstr = type.getDeclaredConstructor(new MetaClass[0]);
 
     if (noArgConstr != null && (noArgConstr.isPublic() || noArgConstr.isProtected())) {
       return noArgConstr;

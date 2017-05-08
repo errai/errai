@@ -16,13 +16,7 @@
 
 package org.jboss.errai.codegen.test.meta;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -32,6 +26,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaConstructor;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameterizedType;
@@ -40,6 +35,7 @@ import org.jboss.errai.codegen.meta.MetaTypeVariable;
 import org.jboss.errai.codegen.meta.MetaWildcardType;
 import org.jboss.errai.codegen.test.model.ClassWithGenericCollections;
 import org.jboss.errai.codegen.test.model.ClassWithGenericMethods;
+import org.jboss.errai.codegen.test.model.HasManyConstructors;
 import org.jboss.errai.codegen.test.model.ObjectWithNested;
 import org.jboss.errai.codegen.test.model.ParameterizedClass;
 import org.jboss.errai.codegen.test.model.TestInterface;
@@ -78,8 +74,8 @@ public abstract class AbstractMetaClassTest {
    * @param javaClass
    * @return
    */
-  private MetaClass getMetaClass(Class<?> javaClass) {
-    MetaClass impl = getMetaClassImpl(javaClass);
+  private MetaClass getMetaClass(final Class<?> javaClass) {
+    final MetaClass impl = getMetaClassImpl(javaClass);
     assertEquals(getTypeOfMetaClassBeingTested(), impl.getClass());
     return impl;
   }
@@ -99,28 +95,28 @@ public abstract class AbstractMetaClassTest {
 
   @Test
   public void testInternalNameForOneDimensionalPrimitiveArray() {
-   String internalName = getMetaClass(char[].class).getInternalName();
+   final String internalName = getMetaClass(char[].class).getInternalName();
    assertEquals("Wrong internal name generated for one-dimensional primitive array",
        "[C", internalName);
   }
 
   @Test
   public void testInternalNameForOneDimensionalObjectArray() {
-   String internalName = getMetaClass(String[].class).getInternalName();
+   final String internalName = getMetaClass(String[].class).getInternalName();
    assertEquals("Wrong internal name generated for one-dimensional object array",
        "[Ljava/lang/String;", internalName);
   }
 
   @Test
   public void testInternalNameForMultiDimensionalPrimitiveArray() {
-   String internalName = getMetaClass(char[][].class).getInternalName();
+   final String internalName = getMetaClass(char[][].class).getInternalName();
    assertEquals("Wrong internal name generated for multidimensional primitive array",
        "[[C", internalName);
   }
 
   @Test
   public void testInternalNameForMultiDimensionalObjectArray() {
-   String internalName = getMetaClass(String[][].class).getInternalName();
+   final String internalName = getMetaClass(String[][].class).getInternalName();
    assertEquals("Wrong internal name generated for multidimensional object array",
        "[[Ljava/lang/String;", internalName);
   }
@@ -130,8 +126,8 @@ public abstract class AbstractMetaClassTest {
 	  // This test checks the valid case:
 	  // Object example = null;
 
-	  MetaClass metaObject = getMetaClass(Object.class);
-	  MetaClass metaNull = getMetaClass(NullType.class);
+	  final MetaClass metaObject = getMetaClass(Object.class);
+	  final MetaClass metaNull = getMetaClass(NullType.class);
 
 	  assertTrue(metaObject.isAssignableFrom(metaNull));
   }
@@ -141,8 +137,8 @@ public abstract class AbstractMetaClassTest {
 	  // This test checks the valid case:
 	  // Child example = null;
 
-	  MetaClass metaChild = getMetaClass(Child.class);
-	  MetaClass metaNull = getMetaClass(NullType.class);
+	  final MetaClass metaChild = getMetaClass(Child.class);
+	  final MetaClass metaNull = getMetaClass(NullType.class);
 
 	  assertTrue(metaChild.isAssignableFrom(metaNull));
   }
@@ -152,19 +148,19 @@ public abstract class AbstractMetaClassTest {
 	  // This test checks the valid case:
 	  // Child example = null;
 
-	  MetaClass metaChild = getMetaClass(Child.class);
-	  MetaClass metaNull = getMetaClass(NullType.class);
+	  final MetaClass metaChild = getMetaClass(Child.class);
+	  final MetaClass metaNull = getMetaClass(NullType.class);
 
 	  assertTrue(metaNull.isAssignableTo(metaChild));
   }
 
   @Test
   public void testIsAssignableFromComparisonForNested() {
-    MetaClass interfaceClass = getMetaClass(TestInterface.class);
-    MetaClass metaHolderClass = getMetaClass(ObjectWithNested.class);
+    final MetaClass interfaceClass = getMetaClass(TestInterface.class);
+    final MetaClass metaHolderClass = getMetaClass(ObjectWithNested.class);
 
     // dig out the nested interface from the holder class and ensure it's what we were looking for
-    MetaClass nestedInterface = metaHolderClass.getDeclaredClasses()[0];
+    final MetaClass nestedInterface = metaHolderClass.getDeclaredClasses()[0];
     assertEquals("MyNestedInterface", nestedInterface.getName());
     assertEquals(getTypeOfMetaClassBeingTested(), nestedInterface.getClass());
 
@@ -177,7 +173,7 @@ public abstract class AbstractMetaClassTest {
     // This test checks the valid case:
     // Child example = new Child();
 
-    MetaClass metaChild = getMetaClass(Child.class);
+    final MetaClass metaChild = getMetaClass(Child.class);
 
     assertTrue(metaChild.isAssignableFrom(metaChild));
   }
@@ -187,7 +183,7 @@ public abstract class AbstractMetaClassTest {
     // This test checks the valid case:
     // Child example = new Child();
 
-    MetaClass metaChild = getMetaClass(Child.class);
+    final MetaClass metaChild = getMetaClass(Child.class);
 
     assertTrue(metaChild.isAssignableTo(metaChild));
   }
@@ -197,8 +193,8 @@ public abstract class AbstractMetaClassTest {
     // This test checks the valid case:
     // Parent example = new Child();
 
-    MetaClass metaChild = getMetaClass(Child.class);
-    MetaClass metaParent = getMetaClass(Parent.class);
+    final MetaClass metaChild = getMetaClass(Child.class);
+    final MetaClass metaParent = getMetaClass(Parent.class);
 
     assertTrue(metaParent.isAssignableFrom(metaChild));
   }
@@ -208,8 +204,8 @@ public abstract class AbstractMetaClassTest {
     // This test checks the disallowed case:
     // Child child = new Parent();
 
-    MetaClass metaChild = getMetaClass(Child.class);
-    MetaClass metaParent = getMetaClass(Parent.class);
+    final MetaClass metaChild = getMetaClass(Child.class);
+    final MetaClass metaParent = getMetaClass(Parent.class);
 
     assertFalse(metaChild.isAssignableFrom(metaParent));
   }
@@ -219,8 +215,8 @@ public abstract class AbstractMetaClassTest {
     // This test checks the valid case:
     // Grandparent example = new Child();
 
-    MetaClass metaChild = getMetaClass(Child.class);
-    MetaClass metaGrandparent = getMetaClass(Grandparent.class);
+    final MetaClass metaChild = getMetaClass(Child.class);
+    final MetaClass metaGrandparent = getMetaClass(Grandparent.class);
 
     assertTrue(metaGrandparent.isAssignableFrom(metaChild));
   }
@@ -230,8 +226,8 @@ public abstract class AbstractMetaClassTest {
     // This test checks the disallowed case:
     // Child child = new Grandparent();
 
-    MetaClass metaChild = getMetaClass(Child.class);
-    MetaClass metaGrandparent = getMetaClass(Grandparent.class);
+    final MetaClass metaChild = getMetaClass(Child.class);
+    final MetaClass metaGrandparent = getMetaClass(Grandparent.class);
 
     assertFalse(metaChild.isAssignableFrom(metaGrandparent));
   }
@@ -244,8 +240,8 @@ public abstract class AbstractMetaClassTest {
     // This test checks the valid case:
     // ParentInterface example = new Child();
 
-    MetaClass metaChild = getMetaClass(Child.class);
-    MetaClass metaUncle = getMetaClass(ParentInterface.class);
+    final MetaClass metaChild = getMetaClass(Child.class);
+    final MetaClass metaUncle = getMetaClass(ParentInterface.class);
 
     assertTrue(metaUncle.isAssignableFrom(metaChild));
   }
@@ -255,8 +251,8 @@ public abstract class AbstractMetaClassTest {
     // This test checks the disallowed case:
     // Child child = new ParentInterface() {};
 
-    MetaClass metaChild = getMetaClass(Child.class);
-    MetaClass metaUncle = getMetaClass(ParentInterface.class);
+    final MetaClass metaChild = getMetaClass(Child.class);
+    final MetaClass metaUncle = getMetaClass(ParentInterface.class);
 
     assertFalse(metaChild.isAssignableFrom(metaUncle));
   }
@@ -269,8 +265,8 @@ public abstract class AbstractMetaClassTest {
     // This test checks the valid case:
     // ParentSuperInterface1 example = new Child();
 
-    MetaClass metaChild = getMetaClass(Child.class);
-    MetaClass metaUncleInLaw = getMetaClass(ParentSuperInterface1.class);
+    final MetaClass metaChild = getMetaClass(Child.class);
+    final MetaClass metaUncleInLaw = getMetaClass(ParentSuperInterface1.class);
 
     assertTrue(metaUncleInLaw.isAssignableFrom(metaChild));
   }
@@ -280,8 +276,8 @@ public abstract class AbstractMetaClassTest {
     // This test checks the disallowed case:
     // Child child = new ParentSuperInterface1() {};
 
-    MetaClass metaChild = getMetaClass(Child.class);
-    MetaClass metaUncleInLaw = getMetaClass(ParentSuperInterface1.class);
+    final MetaClass metaChild = getMetaClass(Child.class);
+    final MetaClass metaUncleInLaw = getMetaClass(ParentSuperInterface1.class);
 
     assertFalse(metaChild.isAssignableFrom(metaUncleInLaw));
   }
@@ -294,8 +290,8 @@ public abstract class AbstractMetaClassTest {
     // This test checks the valid case:
     // ParentSuperInterface2 example = new Child();
 
-    MetaClass metaChild = getMetaClass(Child.class);
-    MetaClass metaUncleInLaw = getMetaClass(ParentSuperInterface2.class);
+    final MetaClass metaChild = getMetaClass(Child.class);
+    final MetaClass metaUncleInLaw = getMetaClass(ParentSuperInterface2.class);
 
     assertTrue(metaUncleInLaw.isAssignableFrom(metaChild));
   }
@@ -305,8 +301,8 @@ public abstract class AbstractMetaClassTest {
     // This test checks the disallowed case:
     // Child child = new ParentSuperInterface2() {};
 
-    MetaClass metaChild = getMetaClass(Child.class);
-    MetaClass metaUncleInLaw = getMetaClass(ParentSuperInterface2.class);
+    final MetaClass metaChild = getMetaClass(Child.class);
+    final MetaClass metaUncleInLaw = getMetaClass(ParentSuperInterface2.class);
 
     assertFalse(metaChild.isAssignableFrom(metaUncleInLaw));
   }
@@ -319,8 +315,8 @@ public abstract class AbstractMetaClassTest {
     // This test checks the valid case:
     // GrandparentInterface example = new Child();
 
-    MetaClass metaChild = getMetaClass(Child.class);
-    MetaClass metaGreatUncle = getMetaClass(GrandparentInterface.class);
+    final MetaClass metaChild = getMetaClass(Child.class);
+    final MetaClass metaGreatUncle = getMetaClass(GrandparentInterface.class);
 
     assertTrue(metaGreatUncle.isAssignableFrom(metaChild));
   }
@@ -330,8 +326,8 @@ public abstract class AbstractMetaClassTest {
     // This test checks the disallowed case:
     // Child child = new GrandparentInterface() {};
 
-    MetaClass metaChild = getMetaClass(Child.class);
-    MetaClass metaGreatUncle = getMetaClass(GrandparentInterface.class);
+    final MetaClass metaChild = getMetaClass(Child.class);
+    final MetaClass metaGreatUncle = getMetaClass(GrandparentInterface.class);
 
     assertFalse(metaChild.isAssignableFrom(metaGreatUncle));
   }
@@ -344,8 +340,8 @@ public abstract class AbstractMetaClassTest {
     // This test checks the valid case:
     //GrandparentSuperInterface example = new Child();
 
-    MetaClass metaChild = getMetaClass(Child.class);
-    MetaClass metaGreatUncleInLaw = getMetaClass(GrandparentSuperInterface.class);
+    final MetaClass metaChild = getMetaClass(Child.class);
+    final MetaClass metaGreatUncleInLaw = getMetaClass(GrandparentSuperInterface.class);
 
     assertTrue(metaGreatUncleInLaw.isAssignableFrom(metaChild));
   }
@@ -355,8 +351,8 @@ public abstract class AbstractMetaClassTest {
     // This test checks the disallowed case:
     // Child child = new GrandparentSuperInterface() {};
 
-    MetaClass metaChild = getMetaClass(Child.class);
-    MetaClass metaGreatUncleInLaw = getMetaClass(GrandparentSuperInterface.class);
+    final MetaClass metaChild = getMetaClass(Child.class);
+    final MetaClass metaGreatUncleInLaw = getMetaClass(GrandparentSuperInterface.class);
 
     assertFalse(metaChild.isAssignableFrom(metaGreatUncleInLaw));
   }
@@ -366,8 +362,8 @@ public abstract class AbstractMetaClassTest {
     // This test checks the valid case:
     //Object example = new Child();
 
-    MetaClass metaChild = getMetaClass(Child.class);
-    MetaClass metaObject = getMetaClass(Object.class);
+    final MetaClass metaChild = getMetaClass(Child.class);
+    final MetaClass metaObject = getMetaClass(Object.class);
 
     assertTrue(metaObject.isAssignableFrom(metaChild));
   }
@@ -377,8 +373,8 @@ public abstract class AbstractMetaClassTest {
     // This test checks the disallowed case:
     // Child child = new Object();
 
-    MetaClass metaChild = getMetaClass(Child.class);
-    MetaClass metaObject = getMetaClass(Object.class);
+    final MetaClass metaChild = getMetaClass(Child.class);
+    final MetaClass metaObject = getMetaClass(Object.class);
 
     assertFalse(metaChild.isAssignableFrom(metaObject));
   }
@@ -388,8 +384,8 @@ public abstract class AbstractMetaClassTest {
     // This test checks the valid case:
     // Object example = new IsolatedInterface() {};
 
-    MetaClass metaInterface = getMetaClass(IsolatedInterface.class);
-    MetaClass metaObject = getMetaClass(Object.class);
+    final MetaClass metaInterface = getMetaClass(IsolatedInterface.class);
+    final MetaClass metaObject = getMetaClass(Object.class);
 
     assertTrue(metaObject.isAssignableFrom(metaInterface));
   }
@@ -399,8 +395,8 @@ public abstract class AbstractMetaClassTest {
     // This test checks the disallowed case:
     // IsolatedInterface ii = new Object();
 
-    MetaClass metaInterface = getMetaClass(IsolatedInterface.class);
-    MetaClass metaObject = getMetaClass(Object.class);
+    final MetaClass metaInterface = getMetaClass(IsolatedInterface.class);
+    final MetaClass metaObject = getMetaClass(Object.class);
 
     assertFalse(metaInterface.isAssignableFrom(metaObject));
   }
@@ -410,8 +406,8 @@ public abstract class AbstractMetaClassTest {
     // This test checks the allowed case:
 	// ParentInterface pi = new Child();
 
-    MetaClass metaChild = getMetaClass(Child.class);
-    MetaClass metaUncle = getMetaClass(ParentInterface.class);
+    final MetaClass metaChild = getMetaClass(Child.class);
+    final MetaClass metaUncle = getMetaClass(ParentInterface.class);
 
     assertTrue(metaChild.isAssignableTo(metaUncle));
   }
@@ -420,8 +416,8 @@ public abstract class AbstractMetaClassTest {
   public void testNoDuplicateMethodsInClassHierarchy() throws NotFoundException {
     final MetaClass child = getMetaClass(Child.class);
 
-    List<MetaMethod> foundMethods = new ArrayList<MetaMethod>();
-    for (MetaMethod m : child.getMethods()) {
+    final List<MetaMethod> foundMethods = new ArrayList<>();
+    for (final MetaMethod m : child.getMethods()) {
       if (m.getName().equals("interfaceMethodOverriddenMultipleTimes")) {
         foundMethods.add(m);
       }
@@ -479,7 +475,7 @@ public abstract class AbstractMetaClassTest {
   @Test
   public void testFieldWithStringTypeParam() throws Exception {
     final MetaClass metaClass = getMetaClass(ClassWithGenericCollections.class);
-    MetaField field = metaClass.getDeclaredField("hasStringParam");
+    final MetaField field = metaClass.getDeclaredField("hasStringParam");
     assertNotNull(field);
 
     assertEquals("Collection", field.getType().getName());
@@ -495,7 +491,7 @@ public abstract class AbstractMetaClassTest {
   @Test
   public void testFieldWithStringBoundedWildcardTypeParam() throws Exception {
     final MetaClass metaClass = getMetaClass(ClassWithGenericCollections.class);
-    MetaField field = metaClass.getDeclaredField("hasWildcardExtendsStringParam");
+    final MetaField field = metaClass.getDeclaredField("hasWildcardExtendsStringParam");
     assertNotNull(field);
 
     assertEquals("Collection", field.getType().getName());
@@ -505,7 +501,7 @@ public abstract class AbstractMetaClassTest {
     assertEquals("java.util.Collection", field.getType().getErased().getFullyQualifiedNameWithTypeParms());
 
     assertEquals(1, field.getType().getParameterizedType().getTypeParameters().length);
-    MetaWildcardType typeParam = (MetaWildcardType) field.getType().getParameterizedType().getTypeParameters()[0];
+    final MetaWildcardType typeParam = (MetaWildcardType) field.getType().getParameterizedType().getTypeParameters()[0];
 
     assertEquals("Should have no lower bound",
             Arrays.asList(),
@@ -519,7 +515,7 @@ public abstract class AbstractMetaClassTest {
   @Test
   public void testFieldWithUnboundedTypeVarParam() throws Exception {
     final MetaClass metaClass = getMetaClass(ClassWithGenericCollections.class);
-    MetaField field = metaClass.getDeclaredField("hasUnboundedTypeVarFromClass");
+    final MetaField field = metaClass.getDeclaredField("hasUnboundedTypeVarFromClass");
     assertNotNull(field);
 
     assertEquals("Collection", field.getType().getName());
@@ -529,7 +525,7 @@ public abstract class AbstractMetaClassTest {
     assertEquals("java.util.Collection", field.getType().getErased().getFullyQualifiedNameWithTypeParms());
 
     assertEquals(1, field.getType().getParameterizedType().getTypeParameters().length);
-    MetaTypeVariable typeVar = (MetaTypeVariable) field.getType().getParameterizedType().getTypeParameters()[0];
+    final MetaTypeVariable typeVar = (MetaTypeVariable) field.getType().getParameterizedType().getTypeParameters()[0];
 
     assertEquals("T", typeVar.getName());
     assertEquals("Should have no upper bound",
@@ -540,10 +536,10 @@ public abstract class AbstractMetaClassTest {
   @Test
   public void testFieldWithSingleUpperBoundedTypeVarParam() throws Exception {
     final MetaClass metaClass = getMetaClass(ClassWithGenericCollections.class);
-    MetaMethod field = metaClass.getDeclaredMethod("hasSingleBoundedTypeVarFromSelf", new Class[] {});
+    final MetaMethod field = metaClass.getDeclaredMethod("hasSingleBoundedTypeVarFromSelf", new Class[] {});
     assertNotNull(field);
 
-    MetaTypeVariable returnType = (MetaTypeVariable) field.getGenericReturnType();
+    final MetaTypeVariable returnType = (MetaTypeVariable) field.getGenericReturnType();
     assertEquals("B", returnType.getName());
 
     assertEquals("Should have a single upper bound",
@@ -554,10 +550,10 @@ public abstract class AbstractMetaClassTest {
   @Test
   public void testFieldWithTwoUpperBoundedTypeVarParam() throws Exception {
     final MetaClass metaClass = getMetaClass(ClassWithGenericCollections.class);
-    MetaMethod field = metaClass.getDeclaredMethod("hasDoubleBoundedTypeVarFromSelf", new Class[] {});
+    final MetaMethod field = metaClass.getDeclaredMethod("hasDoubleBoundedTypeVarFromSelf", new Class[] {});
     assertNotNull(field);
 
-    MetaTypeVariable returnType = (MetaTypeVariable) field.getGenericReturnType();
+    final MetaTypeVariable returnType = (MetaTypeVariable) field.getGenericReturnType();
     assertEquals("B", returnType.getName());
 
     assertEquals("Should have two upper bounds",
@@ -587,7 +583,7 @@ public abstract class AbstractMetaClassTest {
   @Test
   public void testMethodObjectReturnType() {
     final MetaClass c = getMetaClass(ClassWithGenericMethods.class);
-    MetaMethod method = c.getMethod("methodReturningObject", new Class[] {});
+    final MetaMethod method = c.getMethod("methodReturningObject", new Class[] {});
     assertEquals("java.lang.Object", method.getReturnType().getFullyQualifiedNameWithTypeParms());
     assertEquals(getTypeOfMetaClassBeingTested(), method.getReturnType().getClass());
 
@@ -598,22 +594,22 @@ public abstract class AbstractMetaClassTest {
   @Test
   public void testMethodReturnTypeWithWildcardParameter() {
     final MetaClass c = getMetaClass(ClassWithGenericMethods.class);
-    MetaMethod method = c.getMethod("methodReturningUnboundedWildcardCollection", new Class[] {});
+    final MetaMethod method = c.getMethod("methodReturningUnboundedWildcardCollection", new Class[] {});
 
     // TODO (ERRAI-459) decide whether it's correct to have the type param present or not
     // then adjust this assertion to strict equality rather than startsWith()
     assertTrue(method.getReturnType().getFullyQualifiedNameWithTypeParms().startsWith("java.util.Collection"));
 
-    MetaType genericReturnType = method.getGenericReturnType();
+    final MetaType genericReturnType = method.getGenericReturnType();
     assertNotNull(genericReturnType);
     assertTrue("Got unexpected return type type " + genericReturnType.getClass(),
             genericReturnType instanceof MetaParameterizedType);
-    MetaParameterizedType mpReturnType = (MetaParameterizedType) genericReturnType;
+    final MetaParameterizedType mpReturnType = (MetaParameterizedType) genericReturnType;
     assertEquals(1, mpReturnType.getTypeParameters().length);
 
     // Sole type parameter should be <?>
     assertTrue(mpReturnType.getTypeParameters()[0] instanceof MetaWildcardType);
-    MetaWildcardType typeParam = (MetaWildcardType) mpReturnType.getTypeParameters()[0];
+    final MetaWildcardType typeParam = (MetaWildcardType) mpReturnType.getTypeParameters()[0];
     assertArrayEquals(new MetaType[] {}, typeParam.getLowerBounds());
     assertArrayEquals(new MetaType[] { getMetaClass(Object.class) }, typeParam.getUpperBounds());
   }
@@ -621,22 +617,22 @@ public abstract class AbstractMetaClassTest {
   @Test
   public void testMethodReturnTypeWithUpperBoundedWildcardParameter() {
     final MetaClass c = getMetaClass(ClassWithGenericMethods.class);
-    MetaMethod method = c.getMethod("methodReturningUpperBoundedWildcardCollection", new Class[] {});
+    final MetaMethod method = c.getMethod("methodReturningUpperBoundedWildcardCollection", new Class[] {});
 
     // TODO (ERRAI-459) decide whether it's correct to have the type param present or not
     // then adjust this assertion to strict equality rather than startsWith()
     assertTrue(method.getReturnType().getFullyQualifiedNameWithTypeParms().startsWith("java.util.Collection"));
 
-    MetaType genericReturnType = method.getGenericReturnType();
+    final MetaType genericReturnType = method.getGenericReturnType();
     assertNotNull(genericReturnType);
     assertTrue("Got unexpected return type type " + genericReturnType.getClass(),
             genericReturnType instanceof MetaParameterizedType);
-    MetaParameterizedType mpReturnType = (MetaParameterizedType) genericReturnType;
+    final MetaParameterizedType mpReturnType = (MetaParameterizedType) genericReturnType;
     assertEquals(1, mpReturnType.getTypeParameters().length);
 
     // Sole type parameter should be <? extends String>
     assertTrue(mpReturnType.getTypeParameters()[0] instanceof MetaWildcardType);
-    MetaWildcardType typeParam = (MetaWildcardType) mpReturnType.getTypeParameters()[0];
+    final MetaWildcardType typeParam = (MetaWildcardType) mpReturnType.getTypeParameters()[0];
     assertArrayEquals(new MetaType[] {}, typeParam.getLowerBounds());
     assertArrayEquals(new MetaType[] { getMetaClass(String.class) }, typeParam.getUpperBounds());
   }
@@ -644,22 +640,22 @@ public abstract class AbstractMetaClassTest {
   @Test
   public void testMethodReturnTypeWithLowerBoundedWildcardParameter() {
     final MetaClass c = getMetaClass(ClassWithGenericMethods.class);
-    MetaMethod method = c.getMethod("methodReturningLowerBoundedWildcardCollection", new Class[] {});
+    final MetaMethod method = c.getMethod("methodReturningLowerBoundedWildcardCollection", new Class[] {});
 
     // TODO (ERRAI-459) decide whether it's correct to have the type param present or not
     // then adjust this assertion to strict equality rather than startsWith()
     assertTrue(method.getReturnType().getFullyQualifiedNameWithTypeParms().startsWith("java.util.Collection"));
 
-    MetaType genericReturnType = method.getGenericReturnType();
+    final MetaType genericReturnType = method.getGenericReturnType();
     assertNotNull(genericReturnType);
     assertTrue("Got unexpected return type type " + genericReturnType.getClass(),
             genericReturnType instanceof MetaParameterizedType);
-    MetaParameterizedType mpReturnType = (MetaParameterizedType) genericReturnType;
+    final MetaParameterizedType mpReturnType = (MetaParameterizedType) genericReturnType;
     assertEquals(1, mpReturnType.getTypeParameters().length);
 
     // Sole type parameter should be <? extends String>
     assertTrue(mpReturnType.getTypeParameters()[0] instanceof MetaWildcardType);
-    MetaWildcardType typeParam = (MetaWildcardType) mpReturnType.getTypeParameters()[0];
+    final MetaWildcardType typeParam = (MetaWildcardType) mpReturnType.getTypeParameters()[0];
     assertArrayEquals(new MetaType[] { getMetaClass(String.class) }, typeParam.getLowerBounds());
     assertArrayEquals(new MetaType[] { getMetaClass(Object.class)}, typeParam.getUpperBounds());
   }
@@ -667,16 +663,16 @@ public abstract class AbstractMetaClassTest {
   @Test
   public void testGetMethods() {
     final MetaClass c = getMetaClass(Child.class);
-    MetaMethod[] methods = c.getMethods();
+    final MetaMethod[] methods = c.getMethods();
 
     assertNotNull(methods);
 
-    List<String> methodSignatures = new ArrayList<String>();
-    for(MetaMethod m : methods) {
+    final List<String> methodSignatures = new ArrayList<>();
+    for(final MetaMethod m : methods) {
       methodSignatures.add(GenUtil.getMethodString(m));
     }
 
-    List<String> expectedMethods = new ArrayList<String>();
+    final List<String> expectedMethods = new ArrayList<>();
     expectedMethods.add("protectedMethod([])");
     expectedMethods.add("interfaceMethodOverriddenMultipleTimes([])");
     expectedMethods.add("packagePrivateMethod([])");
@@ -705,8 +701,8 @@ public abstract class AbstractMetaClassTest {
     expectedFields.add(Child.class.getCanonicalName() + "." + "childPublic");
     expectedFields.add(Parent.class.getCanonicalName() + "." + "parentPublic");
 
-    final ArrayList<String> actualFields = new ArrayList<String>();
-    for (MetaField field : getMetaClass(Child.class).getFields()) {
+    final ArrayList<String> actualFields = new ArrayList<>();
+    for (final MetaField field : getMetaClass(Child.class).getFields()) {
       actualFields.add(field.getDeclaringClass().getCanonicalName() + "." + field.getName());
     }
 
@@ -724,8 +720,8 @@ public abstract class AbstractMetaClassTest {
     expectedFields.add(Child.class.getCanonicalName() + "." + "childProtected");
     expectedFields.add(Child.class.getCanonicalName() + "." + "childPublic");
 
-    final ArrayList<String> actualFields = new ArrayList<String>();
-    for (MetaField field : getMetaClass(Child.class).getDeclaredFields()) {
+    final ArrayList<String> actualFields = new ArrayList<>();
+    for (final MetaField field : getMetaClass(Child.class).getDeclaredFields()) {
       actualFields.add(field.getDeclaringClass().getCanonicalName() + "." + field.getName());
     }
 
@@ -733,6 +729,38 @@ public abstract class AbstractMetaClassTest {
     Collections.sort(actualFields);
 
     assertEquals(expectedFields.toString(), actualFields.toString());
+  }
+
+  @Test
+  public void testGetConstructors() throws Exception {
+    final MetaClass mc = getMetaClass(HasManyConstructors.class);
+    final MetaConstructor[] ctors = mc.getConstructors();
+    assertEquals("Expected only a single visible constructor to be returned.", 1, ctors.length);
+  }
+
+  @Test
+  public void testGetConstructorOnlyFindsPublicConstructor() throws Exception {
+    final MetaClass mc = getMetaClass(HasManyConstructors.class);
+    assertNotNull(mc.getConstructor(new Class[0]));
+    assertNull(mc.getConstructor(new Class[] {int.class}));
+    assertNull(mc.getConstructor(new Class[] {String.class}));
+    assertNull(mc.getConstructor(new Class[] {double.class}));
+  }
+
+  @Test
+  public void testGetDeclaredConstructors() throws Exception {
+    final MetaClass mc = getMetaClass(HasManyConstructors.class);
+    final MetaConstructor[] ctors = mc.getDeclaredConstructors();
+    assertEquals("Not all constructors were returned.", 4, ctors.length);
+  }
+
+  @Test
+  public void testGetDeclaredConstructorFindsAllConstructors() throws Exception {
+    final MetaClass mc = getMetaClass(HasManyConstructors.class);
+    assertNotNull(mc.getDeclaredConstructor(new Class[0]));
+    assertNotNull(mc.getDeclaredConstructor(new Class[] {int.class}));
+    assertNotNull(mc.getDeclaredConstructor(new Class[] {String.class}));
+    assertNotNull(mc.getDeclaredConstructor(new Class[] {double.class}));
   }
 
 }

@@ -51,7 +51,7 @@ public class JavaReflectionConstructor extends MetaConstructor {
       final Class<?>[] parmTypes = constructor.getParameterTypes();
       final Type[] genParmTypes = constructor.getGenericParameterTypes();
       final Annotation[][] parmAnnos = constructor.getParameterAnnotations();
-      final List<MetaParameter> parmList = new ArrayList<MetaParameter>(parmTypes.length);
+      final List<MetaParameter> parmList = new ArrayList<>(parmTypes.length);
 
       for (int i = 0; i < parmTypes.length; i++) {
         final MetaClass mcParm = MetaClassFactory.get(parmTypes[i], genParmTypes[i]);
@@ -76,7 +76,7 @@ public class JavaReflectionConstructor extends MetaConstructor {
   public String getDeclaringClassName() {
     return getDeclaringClass().getName();
   }
-  
+
   private MetaType[] _genericParameterTypes;
 
   @Override
@@ -100,12 +100,12 @@ public class JavaReflectionConstructor extends MetaConstructor {
 
   @Override
   public MetaClass getReturnType() {
-    return declaringClass;
+    return getDeclaringClass();
   }
 
   @Override
   public MetaType getGenericReturnType() {
-    return declaringClass;
+    return getDeclaringClass();
   }
 
   @Override
