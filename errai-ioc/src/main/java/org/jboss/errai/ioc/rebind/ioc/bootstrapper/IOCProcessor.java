@@ -168,7 +168,6 @@ public class IOCProcessor {
     this.qualFactory = injectionContext.getQualifierFactory();
 
     nonSimpletonTypeAnnotations.add(IOCProvider.class);
-    nonSimpletonTypeAnnotations.add(JsType.class);
     nonSimpletonTypeAnnotations.add(Specializes.class);
     nonSimpletonTypeAnnotations.add(LoadAsync.class);
     nonSimpletonTypeAnnotations.add(EnabledByProperty.class);
@@ -767,7 +766,9 @@ public class IOCProcessor {
 
   private boolean isSimpleton(final MetaClass type) {
     for (final Annotation anno : type.getAnnotations()) {
-      if (nonSimpletonTypeAnnotations.contains(anno.annotationType()) || anno.annotationType().isAnnotationPresent(Stereotype.class)) {
+      if (nonSimpletonTypeAnnotations.contains(anno.annotationType())
+              || isStereotype(anno)
+              || isNonNativeJsTypeAnnotation(anno)) {
         return false;
       }
     }
@@ -801,6 +802,14 @@ public class IOCProcessor {
 
     final MetaConstructor noArgConstructor = type.getDeclaredConstructor(new MetaClass[0]);
     return noArgConstructor != null && (noArgConstructor.isPublic() || !isJavaScriptObject(type));
+  }
+
+  private boolean isNonNativeJsTypeAnnotation(final Annotation anno) {
+    return JsType.class.equals(anno.annotationType()) && !((JsType) anno).isNative();
+  }
+
+  private boolean isStereotype(final Annotation anno) {
+    return anno.annotationType().isAnnotationPresent(Stereotype.class);
   }
 
   private WiringElementType[] getWiringTypes(final MetaClass type, final Class<? extends Annotation> directScope) {
