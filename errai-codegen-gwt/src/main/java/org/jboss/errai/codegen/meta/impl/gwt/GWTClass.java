@@ -86,7 +86,7 @@ public class GWTClass extends AbstractMetaClass<JType> {
 
     if (classType.getQualifiedSourceName().contains(" ")
             || classType.getQualifiedSourceName().contains("?")) {
-      throw new IllegalArgumentException("Cannot represent \"" + classType + "\" as a class. Try a different meta type such as GWTWildcardType or GWTTypeVaraible.");
+      throw new IllegalArgumentException("Cannot represent \"" + classType + "\" as a class. Try a different meta type such as GWTWildcardType or GWTTypeVariable.");
     }
 
     final JParameterizedType parameterizedType = classType.isParameterized();
