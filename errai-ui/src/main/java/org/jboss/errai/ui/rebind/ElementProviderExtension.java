@@ -95,22 +95,27 @@ public class ElementProviderExtension implements IOCExtensionConfigurator {
 
       @Override
       public void callback(final MetaClass type) {
-        final Element elementAnno;
-        final JsType jsTypeAnno;
+        try {
+          final Element elementAnno;
+          final JsType jsTypeAnno;
 
-        if (type.isAssignableTo(gwtElement)) {
-          final TagName gwtTagNameAnno;
-          if ((gwtTagNameAnno = type.getAnnotation(TagName.class)) != null) {
-            processGwtUserElement(injectionContext, type, gwtTagNameAnno);
+          if (type.isAssignableTo(gwtElement)) {
+            final TagName gwtTagNameAnno;
+            if ((gwtTagNameAnno = type.getAnnotation(TagName.class)) != null) {
+              processGwtUserElement(injectionContext, type, gwtTagNameAnno);
+            }
           }
-        }
-        else if ((elementAnno = type.getAnnotation(Element.class)) != null) {
-          if ((jsTypeAnno = type.getAnnotation(JsType.class)) == null || !jsTypeAnno.isNative()) {
-            throw new RuntimeException(
-                    Element.class.getSimpleName() + " is only valid on native " + JsType.class.getSimpleName() + "s.");
-          }
+          else if ((elementAnno = type.getAnnotation(Element.class)) != null) {
+            if ((jsTypeAnno = type.getAnnotation(JsType.class)) == null || !jsTypeAnno.isNative()) {
+              throw new RuntimeException(
+                      Element.class.getSimpleName() + " is only valid on native " + JsType.class.getSimpleName() + "s.");
+            }
 
-          processJsTypeElement(injectionContext, type, elementAnno);
+            processJsTypeElement(injectionContext, type, elementAnno);
+          }
+        } catch (final Throwable t) {
+          throw new RuntimeException(String.format("Error occurred while processing [%s] in %s.",
+                  type.getFullyQualifiedName(), ElementProviderExtension.class.getSimpleName()), t);
         }
       }
     });
