@@ -16,7 +16,13 @@
 
 package org.jboss.errai.codegen.test.meta;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -33,6 +39,7 @@ import org.jboss.errai.codegen.meta.MetaParameterizedType;
 import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.meta.MetaTypeVariable;
 import org.jboss.errai.codegen.meta.MetaWildcardType;
+import org.jboss.errai.codegen.test.model.ClassWithArrayGenerics;
 import org.jboss.errai.codegen.test.model.ClassWithGenericCollections;
 import org.jboss.errai.codegen.test.model.ClassWithGenericMethods;
 import org.jboss.errai.codegen.test.model.HasManyConstructors;
@@ -761,6 +768,20 @@ public abstract class AbstractMetaClassTest {
     assertNotNull(mc.getDeclaredConstructor(new Class[] {int.class}));
     assertNotNull(mc.getDeclaredConstructor(new Class[] {String.class}));
     assertNotNull(mc.getDeclaredConstructor(new Class[] {double.class}));
+  }
+
+  @Test
+  public void testHashCodeErrorWithGenericHavingArrayUpperBound() throws Exception {
+    final MetaClass mc = getMetaClass(ClassWithArrayGenerics.class).getField("field").getType();
+    // Precondition
+    assertNotNull("Failed to find field with type under test.", mc);
+    assertNotNull("Type should be parameterized", mc.getParameterizedType());
+    final MetaClass superClassWithProblematicBound = mc.getSuperClass();
+    try {
+      superClassWithProblematicBound.hashCode();
+    } catch (final Throwable t) {
+      throw new AssertionError("An error occurred.", t);
+    }
   }
 
 }

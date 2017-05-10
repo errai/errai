@@ -22,8 +22,10 @@ import java.util.List;
 import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.meta.impl.AbstractMetaParameterizedType;
 
+import com.google.gwt.core.ext.typeinfo.JArrayType;
 import com.google.gwt.core.ext.typeinfo.JClassType;
 import com.google.gwt.core.ext.typeinfo.JParameterizedType;
+import com.google.gwt.core.ext.typeinfo.JType;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
 
 /**
@@ -40,7 +42,7 @@ public class GWTParameterizedType extends AbstractMetaParameterizedType {
 
   @Override
   public MetaType[] getTypeParameters() {
-    final List<MetaType> types = new ArrayList<MetaType>();
+    final List<MetaType> types = new ArrayList<>();
     for (final JClassType parm : parameterizedType.getTypeArgs()) {
       if (parm.isWildcard() != null) {
         types.add(new GWTWildcardType(oracle, parm.isWildcard()));
@@ -49,7 +51,7 @@ public class GWTParameterizedType extends AbstractMetaParameterizedType {
         types.add(new GWTTypeVariable(oracle, parm.isTypeParameter()));
       }
       else if (parm.isArray() != null
-              && parm.isArray().getComponentType().isTypeParameter() != null) {
+              && isInnerMostComponentTypeParameter(parm.isArray())) {
         // is generic array. Erase to Object[]
         types.add(GWTClass.newInstance(oracle, parm.isArray().getErasedType()));
       }
@@ -66,6 +68,16 @@ public class GWTParameterizedType extends AbstractMetaParameterizedType {
       }
     }
     return types.toArray(new MetaType[types.size()]);
+  }
+
+  private boolean isInnerMostComponentTypeParameter(final JArrayType parm) {
+    final JType componentType = parm.isArray().getComponentType();
+    if (componentType.isArray() != null) {
+      return isInnerMostComponentTypeParameter(componentType.isArray());
+    }
+    else {
+      return componentType.isTypeParameter() != null;
+    }
   }
 
   @Override
