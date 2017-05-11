@@ -64,6 +64,9 @@
     <version.javax.validation>1.0.0.GA</version.javax.validation>
     <version.org.glassfish.javax.el>3.0.0</version.org.glassfish.javax.el>
     <version.org.lesscss>1.7.0.1.1</version.org.lesscss>
+    <!-- The version of xercesImpl in the ip-bom is not published on Maven Central.
+         Removing this override breaks Errai apps that don't have the JBoss nexus repository configured. -->
+    <version.xerces.xercesImpl>2.11.0</version.xerces.xercesImpl>
   </properties>
 
   <scm>
@@ -375,6 +378,12 @@
         <groupId>org.lesscss</groupId>
         <artifactId>lesscss</artifactId>
         <version>${version.org.lesscss}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>xerces</groupId>
+        <artifactId>xercesImpl</artifactId>
+        <version>${version.xerces.xercesImpl}</version>
       </dependency>
 
     </dependencies>
