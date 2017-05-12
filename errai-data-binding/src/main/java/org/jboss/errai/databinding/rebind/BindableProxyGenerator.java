@@ -64,6 +64,7 @@ import org.jboss.errai.databinding.client.HasProperties;
 import org.jboss.errai.databinding.client.NonExistingPropertyException;
 import org.jboss.errai.databinding.client.PropertyType;
 import org.jboss.errai.databinding.client.api.Bindable;
+import org.jboss.errai.databinding.client.api.IgnoreBinding;
 import org.jboss.errai.databinding.client.api.StateSync;
 import org.jboss.errai.databinding.client.api.handler.property.PropertyChangeEvent;
 import org.jboss.errai.databinding.client.api.handler.property.PropertyChangeHandler;
@@ -238,6 +239,10 @@ public class BindableProxyGenerator {
       final BlockBuilder<?> getMethod) {
 
     final MetaMethod getterMethod = bindable.getBeanDescriptor().getReadMethodForProperty(property);
+    if(isToBeIgnored(getterMethod)){
+    	return;
+    }
+    
     if (getterMethod != null && !getterMethod.isFinal()) {
       getMethod.append(
           If.objEquals(Stmt.loadVariable("property"), property)
@@ -253,6 +258,10 @@ public class BindableProxyGenerator {
     }
   }
 
+  private boolean isToBeIgnored(final MetaMethod method) {
+    return method != null && method.isAnnotationPresent(IgnoreBinding.class);
+  }
+
   /**
    * Generates a setter method for the provided property plus the corresponding code for the
    * implementation of {@link HasProperties#set(String, Object)}.
@@ -260,6 +269,11 @@ public class BindableProxyGenerator {
   private void generateSetter(final ClassStructureBuilder<?> classBuilder, final String property, final BlockBuilder<?> setMethod) {
     final MetaMethod getterMethod = bindable.getBeanDescriptor().getReadMethodForProperty(property);
     final MetaMethod setterMethod = bindable.getBeanDescriptor().getWriteMethodForProperty(property);
+    
+    if(isToBeIgnored(setterMethod)){
+    	return;
+    }
+    
     if (getterMethod != null && setterMethod != null && !setterMethod.isFinal()) {
       setMethod.append(
           If.cond(Stmt.loadVariable("property").invoke("equals", property))
@@ -337,7 +351,7 @@ public class BindableProxyGenerator {
       final String methodName = method.getName();
       if (!proxiedAccessorMethods.contains(method)
           && !methodName.equals("hashCode") && !methodName.equals("equals") && !methodName.equals("toString")
-          && method.isPublic() && !method.isFinal() && !method.isStatic()) {
+          && method.isPublic() && !method.isFinal() && !method.isStatic() && !isToBeIgnored(method)) {
 
         final Parameter[] parms = DefParameters.from(method).getParameters().toArray(new Parameter[0]);
         final List<Statement> parmVars = new ArrayList<>();
@@ -354,7 +368,7 @@ public class BindableProxyGenerator {
 
         final MetaClass returnType = getTypeOrFirstUpperBound(method.getGenericReturnType(), method);
         if (returnType == null)
-          return;
+            return;
 
         if (!returnType.equals(MetaClassFactory.get(void.class))) {
           callOnTarget = Stmt.declareFinalVariable(returnValName,
@@ -383,7 +397,7 @@ public class BindableProxyGenerator {
     final BlockStatement block = new BlockStatement();
     for (final String property : bindable.getBeanDescriptor().getProperties()) {
       final MetaMethod readMethod = bindable.getBeanDescriptor().getReadMethodForProperty(property);
-      if (readMethod != null && !readMethod.isFinal()) {
+      if (readMethod != null && !readMethod.isFinal() && !isToBeIgnored(readMethod)) {
         final MetaClass propertyType = readMethod.getReturnType();
         block.addStatement(agent("propertyTypes").invoke(
             "put",
