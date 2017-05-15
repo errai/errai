@@ -5061,26 +5061,34 @@ Bindings can be created by calling the [code]+bind+ method on a [code]+DataBinde
 [source, java]
 ----
 public class CustomerView {
-  @Inject
-  private DataBinder<Customer> dataBinder;
+  @Inject private DataBinder<Customer> dataBinder;
 
-  private Customer customer;
-  private TextBox nameTextBox = new TextBox();
-  // more UI widgets...
+  @Inject private TextInput nameText; <1>
+  @Inject private NumberInput ageInput; <2>
+  // more fields...
 
   @PostConstruct
   private void init() {
-    customer = dataBinder
-        .bind(nameTextBox, "name")
-        .bind(idLabel, "id")
+    Customer customer = dataBinder
+        .bind(nameTextBox, "name") <1>
+        .bind(ageInput, "age") <2>
         .getModel();
   }
 }
 ----
 
+[NOTE]
+.Native DOM wrappers
+====
+`TextInput` and `NumberInput` are native DOM wrappers provided by Errai. A DOM wrapper is a `@JsType(isNative=true)` interface for a DOM element. You can learn more about DOM wrappers in the <<Errai UI>> section.
+====
+
+<1> As `TextInput` is a wrapper for an `input[type='text']` element, Errai will correctly infer that it stores a String.
+<2> `NumberInput` is a wrapper for an `input[type='number']` element. Errai will also be able to infer that this stores a number.
+
 After the call to [code]+dataBinder.bind()+ in the example above, the customer object's name property and the [code]+nameTextBox+ are kept in sync until either the [code]+dataBinder.unbind()+ method is called or the [code]+CustomerView+ bean is destroyed.
 
-That means that a call to [code]+customer.setName()+ will automatically update the value of the TextBox and any change to the TextBox's value in the browser will update the customer object's name property. So, [code]+customer.getName()+ will always reflect the currently displayed value of the [code]+TextBox+.
+That means that a call to [code]+customer.setName()+ will automatically update the value of the TextBox and any change to the TextBox's value in the browser will update the customer object's name property. So, [code]+customer.getName()+ will always reflect the currently displayed value of the [code]+TextInput+.
 
 [NOTE]
 ====
@@ -5110,8 +5118,18 @@ public class MyCustomDateConverter implements Converter<Date, String> {
   private static final String DATE_FORMAT = "YY_DD_MM";
 
   @Override
+  public Class<Date> getModelType() {
+    return Date.class;
+  }
+
+  @Override
   public Date toModelValue(String widgetValue) {
     return DateTimeFormat.getFormat(DATE_FORMAT).parse(widgetValue);
+  }
+
+  @Override
+  public Class<String> getComponentType() {
+    return String.class;
   }
 
   @Override
@@ -5135,7 +5153,33 @@ Alternatively, converter instances can be passed to the [code]+dataBinder.bind()
 dataBinder.bind(textBox, "name", customConverter);
 ----
 
-Converters specified on the binding level take precedence over global default converters with matching types.
+Converters specified on the binding level take precedence over global default converters with matching types. Errai will validate that the converter model type matches the actual type of the bound property. If Errai is able to infer the value type in the bound UI component, it will also validate that it matches the component type of the converter.
+
+==== Errai UI Value Inference
+
+For many kinds of DOM elements and Widgets Errai can correctly infer the type of value stored. When Errai cannot infer the component type, it will fallback to the component type of any specified converters. If no converters are specified, Errai assumes the UI component stores a String.
+
+==== UI Component Values
+
+Originally, Errai only supported binding with Widgets implementing `com.google.gwt.user.client.TakesValue`. Now that Errai supports binding with DOM elements directly here are all the binding rules:
+
+* As before, if a component implements `com.google.gwt.user.client.TakesValue` or `com.google.gwt.user.client.ui.HasValue`, it is bound using that interface. The type can only be inferred at runtime for Widgets in gwt-user.
+
+* If a component implements `com.google.gwt.user.client.ui.HasText` it is bound using that interface. The value type can only be `String`.
+
+* If a component is a native DOM element (via JS interop or a `JavaScriptObject`), it is bound by the following rules:
+
+** An `InputElement` stores the bound value in its `value` attribute. The type of the value is determined by the element's `type` attribute (`text` has type `String`, `number` has type `Double`, `checkbox` has type `Boolean`, etc.).
+
+** All other elements store bound values as text content (i.e. the value between the HTML tags). The content is presumed to be a strings.
+
+* If a component implements `org.jboss.errai.common.client.api.IsElement`, binding is performed on the DOM element returned by `IsElement.getElement()` with the above specified rules.
+
+[NOTE]
+.Inference at Run-Time versus Inference at Compile-Time
+====
+The above rules for inferring values are those used when you directly use the data-binding API. Using the declarative API it is possible create custom JS interop interfaces for DOM elements where you can specify how values are bound to the element (see <<Customizing Element Binding Behaviour>>).
+====
 
 [[sid-51282340_DataBinding-PropertyChangeHandlers]]
 
@@ -5183,7 +5227,7 @@ public class CustomerView {
   private Customer customer;
 
   @Inject @Bound
-  private InputElement name;
+  private TextInput name;
 
   @Bound
   private Label id = new Label();
@@ -5202,7 +5246,7 @@ public class CustomerView {
   private DataBinder<Customer> customerBinder;
 
   @Inject @Bound
-  private InputElement name;
+  private TextInput name;
 
   @Bound
   private Label id = new Label();
@@ -5212,6 +5256,49 @@ public class CustomerView {
 ----
 
 In both examples above an instance of the [code]+Customer+ model is automatically bound to the corresponding UI components based on matching field names. The model object and the UI fields will automatically be kept in sync. UI components from all enclosing fields and methods annotated with [code]+@Bound+, of the class that defines the [code]+@AutoBound DataBinder+ or [code]+@Model+ and all its super classes, are used.
+
+==== Customizing Element Binding Behaviour
+
+Since Widget bindings can use the `HasValue` or `TakesValue` interfaces at runtime, these can obviously be used to add customized binding behaviour. But you might well be wondering how this is done when binding directly to elements.
+
+Custom element binding behaviour can be achieved by creating your own element wrappers with JS interop.
+
+[source, java]
+----
+@JsType(isNative=true) <1>
+public interface IntegerLabel extends org.jboss.errai.common.client.dom.Label, <2>
+                                      org.jboss.errai.common.client.ui.HasValue<Integer> <3>
+{
+  @JsOverlay <4>
+  default Integer getValue() {
+    return Integer.valueOf(getTextContent());
+  }
+
+  @JsOverlay <4>
+  default void setValue(Integer content) {
+    setTextContent(content.toString());
+  }
+}
+----
+
+<1> In the JS interop API, native JS types are thin wrappers around JavaScript objects.
+<2> The type inherits JS interop mappings for the `HTMLElement` API from the label element interface in Errai.
+<3> This `HasValue` interface is analogous to the on in gwt-user, but it is *only meant for native JS types*.
+<4> The overridden methods of `HasValue` are `@JsOverlay` methods. Even though `IntegerLabel` wil be a native JavaScript object at runtime, we can add `@JsOverlay` methods to add some behaviour on top of the JavaScript API.
+
+Using declarative binding, you can bind an integer value to this `IntegerLabel`, and Errai will use the `@JsOverlay` implementations of `getValue`/`setValue` to manipulate the value in the underlying label element.
+
+[NOTE]
+.HasValue and other JS interop mappings
+====
+At `@JsOverlay` is the most powerful way to define custom binding behaviour, but in some cases it can be more convenient to use `@JsProperty` or `@JsMethod` to map the `HasValue` methods to properties or member functions on the underlying JavaScript object.
+====
+
+[WARNING]
+.Only supported via declarative API
+====
+Because of limitations on native JS types, this approach using the native `HasValue` interface only works with declarative binding.
+====
 
 [[sid-51282340_DataBinding-Default%2CSimple%2CandChainedPropertyBindings]]
 
@@ -5274,7 +5361,7 @@ private TextBox date;
 
 By default, Errai DataBinding updates model values when the corresponding Widget fires a ValueChangeEvent. For text-based widgets, this means that the model values are updated only once the widget loses focus. However in some cases, you may also need to update a model's value as soon as the text changes in the Widget.
 
-Errai allows you to do this by setting the [code]+onKeyUp+ flag in the [code]+@Bound+ annotation. *_Note that this parameter can only be used on Widgets that extend GWT's ValueBoxBase widget_*. Setting this parameter to [code]+true+ will cause the model value to update on a KeyUpEvent as well as the default ValueChangeEvent. This will result in the model object being updated as soon as any text is entered/removed from the Widget. You can specify this as follows:
+Errai allows you to do this by setting the [code]+onKeyUp+ flag in the [code]+@Bound+ annotation. *_Note that this parameter can only be used on Widgets that extend GWT's ValueBoxBase widget or DOM wrappers backed by input elements_*. Setting this parameter to [code]+true+ will cause the model value to update on a KeyUpEvent as well as the default ValueChangeEvent. This will result in the model object being updated as soon as any text is entered/removed from the Widget. You can specify this as follows:
 
 [source, java]
 ----
