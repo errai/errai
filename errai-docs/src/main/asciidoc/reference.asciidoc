@@ -2461,16 +2461,13 @@ Beans that are deployed to a CDI container will automatically be registered with
 
 Errai CDI based applications use the same annotation-driven programming model as server-side CDI components, with some notable limitations. Many of these limitations will be addressed in future releases.
 
-. There is no support for CDI interceptors in the client. Although this is planned in a future release.
+. There is no support for CDI interceptors in the client.
 
 
 . Passivating scopes are not supported.
 
 
 . The JSR-299 SPI is not supported for client side code. Although writing extensions for the client side container is possible via the Errai IOC Extensions API.
-
-
-. The [code]+@Typed+ annotation is unsupported.
 
 
 . The [code]+@Interceptor+ annotation is unsupported.
@@ -2561,6 +2558,21 @@ public class AccountService {
  }
 }
 ----
+
+====
+
+[IMPORTANT]
+.Dependent-scope observers work differently in Errai
+====
+When an event is observed in a full CDI implementation (such as Weld), the container:
+
+. Obtains an instance of the bean from the active context
+
+. Invokes the observer method
+
+For dependent-scoped beans, there is no "active-context", so the container *creates a new bean that is destroyed immediately after the observer method is invoked*.
+
+Errai does not behave this way with client-side, dependent-scoped observers. Instead when an event is fired, Errai will invoke the relevant observer method on *every dependent-scoped bean that has already been instantiated* (i.e. zero or more observers can be invoked).
 
 ====
 
@@ -6003,7 +6015,7 @@ Now, when we run our application, we will be able to interact with these fields 
 
 Three things are merged or modified when Errai UI creates a new component instance:
 
-. Element attributes are merged from the template to the templated bean +@DataFields+
+. By default, element attributes are merged from the template to the templated bean +@DataFields+ (this behaviour can be configured with attributes of the `@DataField` annotation -- see the javadoc for details).
 
 . Template element inner text and inner HTML are preserved when the given [code]+@DataField+ is a [code]+Widget+ that implements [code]+HasText+ or [code]+HasHTML+
 or if it is a DOM element that has no children.
@@ -6059,14 +6071,19 @@ but once you understand why these things occur you will find these mechanisms ex
 
 ==== Element attributes (template wins)
 
-When styling your templates, you should keep in mind that all attributes defined in the template file will take precedence over any preset attributes in your [code]+@DataFields+.
+When styling your templates, you should keep in mind that, by default, all attributes defined in the template file will take precedence over any preset attributes in your [code]+@DataFields+.
 This "attribute merge" occurs only when the components are instantiated; subsequent changes to any attributes after construction will function normally.
 In the example we defined a component that applied several styles to a child Widget in its constructor, but we can see from the output that the styles from the template have overridden them.
-If styles must be applied in Java instead of in the template, [code]+@PostConstruct+ or other methods should be favored over constructors to apply styles to fully-constructed components.
+
+If styles must be applied in Java instead of in the template, there are two options:
+
+* Programmatically update the component in a `@PostConstruct` method.
+
+* Change the attribute merging strategy with attributes of the `@DataField` annotation (see javadoc for details).
 
 ==== DOM Elements (templated bean field wins)
 
-Element composition, however, functions inversely from attribute merging, and the [code]+<span>+ defined in our template is actually replaced by the [code]+<div>+
+Element composition, however, functions inversely from the attribute merging default behaviour, and the [code]+<span>+ defined in our template is actually replaced by the [code]+<div>+
 because of the Div in our component field. This does not, however, change the behavior of the attribute merge - the new [code]+<div>+ was still be rendered inline,
 because we have specified this style in our template, and the template always wins in competition with attributes set programatically before composition occurs.
 It is this rule that allows nesting of Errai UI components, since the markup of an Errai UI component +A+ used as a +@DataField+ in component +B+ will override
