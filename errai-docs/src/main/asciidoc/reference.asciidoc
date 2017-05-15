@@ -5080,7 +5080,7 @@ public class CustomerView {
 [NOTE]
 .Native DOM wrappers
 ====
-`TextInput` and `NumberInput` are native DOM wrappers provided by Errai. A DOM wrapper is a `@JsType(isNative=true)` interface for a DOM element. You can learn more about DOM wrappers in the <<Errai UI>> section.
+`TextInput` and `NumberInput` are native DOM wrappers provided by Errai. A DOM wrapper is a `@JsType(isNative=true)` interface for a DOM element. You can learn more about DOM wrappers in the <<sid-51806600,Errai UI>> section.
 ====
 
 <1> As `TextInput` is a wrapper for an `input[type='text']` element, Errai will correctly infer that it stores a String.
@@ -5178,7 +5178,7 @@ Originally, Errai only supported binding with Widgets implementing `com.google.g
 [NOTE]
 .Inference at Run-Time versus Inference at Compile-Time
 ====
-The above rules for inferring values are those used when you directly use the data-binding API. Using the declarative API it is possible create custom JS interop interfaces for DOM elements where you can specify how values are bound to the element (see <<Customizing Element Binding Behaviour>>).
+The above rules for inferring values are those used when you directly use the data-binding API. Using the declarative API it is possible create custom JS interop interfaces for DOM elements where you can specify how values are bound to the element (see <<Customizing-Element-Binding-Behaviour,Customizing Element Binding Behaviour>>).
 ====
 
 [[sid-51282340_DataBinding-PropertyChangeHandlers]]
@@ -5256,6 +5256,8 @@ public class CustomerView {
 ----
 
 In both examples above an instance of the [code]+Customer+ model is automatically bound to the corresponding UI components based on matching field names. The model object and the UI fields will automatically be kept in sync. UI components from all enclosing fields and methods annotated with [code]+@Bound+, of the class that defines the [code]+@AutoBound DataBinder+ or [code]+@Model+ and all its super classes, are used.
+
+[[Customizing-Element-Binding-Behaviour]]
 
 ==== Customizing Element Binding Behaviour
 
