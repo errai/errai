@@ -5557,67 +5557,10 @@ An Errai UI component consists of a Java class (the _templated bean_), an HTML f
 The template and template stylesheet describe the look of your component. The templated bean uses the `@org.jboss.errai.ui.shared.api.annotations.DataField` annotation
 to declare mappings between fields in the templated bean and elements in the template.
 
-==== Using a single component instance
-As with most other features of Errai, dependency injection with CDI is the programming model of choice, so when interacting with components defined using Errai UI,
-you should always [code]+@Inject+ references to your Composite components.
+=== Creating a component
 
-In this example we use a single Errai UI component by injecting it and adding it to the DOM.
-
-[source, java]
-----
-@EntryPoint
-public class Application {
-   /*
-    * This type (org.jboss.errai.common.client.dom.Document) is a thin wrapper
-    * around the DOM document provided by Errai. More on this later.
-    */
-   @Inject
-   private Document document;
-
-   @Inject
-   private TemplatedBean component;
-
-   @PostConstruct
-   public void init() {
-     documnet.getBody().appendChild(component.getElement());
-   }
-}
-----
-
-==== Using multiple instances (for iteration)
-
-In some cases you may need to display multiple instances of a component.
-Here we create and add many components to the DOM using an injected [code]+org.jboss.errai.ioc.client.api.ManagedInstance<T>+.
-
-[source, java]
-----
-@EntryPoint
-public class Application {
-   private String[] colors = new String[]{"Blue", "Yellow", "Red"};
-
-   @Inject
-   private ManagedInstance<ColorComponent> provider;
-
-   @Inject
-   private Document document;
-
-   @PostConstruct
-   public void init() {
-      for(String color: colors) {
-        // ColorComponent should be @Dependent
-        // so that this produces a new instance each time.
-        ColorComponent component = provider.get();
-        component.setColor(c);
-        document.getBody().appendChild(component.getElement());
-      }
-   }
-}
-----
-
-=== Creating your own component
-
-As previously mentioned, components in Errai UI consist of a Java class (the _templated bean_), an HTML file (the _template_),
-and an optional CSS file (the _template stylesheet_). A Java class is a templated bean if the type is annotated with +@Templated+.
+As previously mentioned, Errai UI components are built from a Java class (the _templated bean_), an HTML file (the _template_),
+and an optional CSS file (the _template stylesheet_). A Java class is a templated bean if the class is annotated with +@Templated+.
 
 ==== Basic templated bean
 
@@ -5630,12 +5573,18 @@ Here is a basic templated bean with no Java fields mapped to UI elements.
 [source, java]
 ----
 @Templated
-public class LoginForm {
+public class LoginForm implements IsElement {
 }
 ----
 
 Annotating the type with +@Templated+ and no argument declares that this bean should have a template file +LoginForm.html+
 and optionally a stylesheet +LoginForm.css+ in the same package as +LoginForm.java+.
+
+[NOTE]
+.Optionally implement IsElement for easy access to the component root
+====
+Implementing `org.jboss.errai.ui.client.local.api.IsElement` is optional, but we will use it in all of our examples. The interface contains a single default method, `getElement`, that returns the root element of the template, allowing us to programmatically attach a component to the DOM. Later on we will discuss alternative methods of accessing a component's root element.
+====
 
 ==== Custom template names
 
@@ -5647,7 +5596,7 @@ But +@Templated+ accepts an argument to define an alternatively named or located
 [source, java]
 ----
 @Templated("my-template.html")
-public class LoginForm {
+public class LoginForm implements IsElement {
    /* Looks for my-template.html in LoginForm's package */
 }
 ----
@@ -5658,7 +5607,7 @@ Fully qualified template paths are also supported, but must begin with a leading
 [source, java]
 ----
 @Templated("/org/example/my-template.html")
-public class LoginForm {
+public class LoginForm implements IsElement {
    /* Looks for my-template.html in package org.example */
 }
 ----
@@ -5670,7 +5619,7 @@ The previous examples specify template files at compile time, but it is possible
 [source, java]
 ----
 @Templated(value="home.html", provider=ServerTemplateProvider.class)
-public class LoginForm {
+public class LoginForm implements IsElement {
   /* Makes an HTTP request for the relative path "home.html" */
 }
 ----
@@ -5680,7 +5629,7 @@ Custom implementations can also be used.
 [source, java]
 ----
 @Templated(provider=MyTemplateProvider.class)
-public class LoginForm {
+public class LoginForm implements IsElement {
   /* Makes an HTTP request for the relative path "home.html" */
 }
 
@@ -5738,7 +5687,7 @@ You can also use a full HTML document that is more easily previewed during desig
 [source, java]
 ----
 @Templated("my-template.html#login-form")
-public class LoginForm {
+public class LoginForm implements IsElement {
    /* Specifies that <... id="login-form"> be used as the root Element of this component */
 }
 ----
@@ -5795,10 +5744,67 @@ For example, the component below also uses the same template file by referencing
 [source, java]
 ----
 @Templated("my-template.html#theme-footer")
-public class Footer {
+public class Footer implements IsElement {
    /* Specifies that <... id="theme-footer"> be used as the root Element of this Widget */
 }
 ----
+
+==== Using a single component instance
+As with most other features of Errai, dependency injection with CDI is the programming model of choice, so when interacting with components defined using Errai UI,
+you should always [code]+@Inject+ references to your components.
+
+In this example we use a single Errai UI component by injecting it and adding it to the DOM using Errai's DOM wrappers.
+
+[source, java]
+----
+@EntryPoint
+public class Application {
+   @Inject
+   private Document document; <1>
+
+   @Inject
+   private TemplatedBean component;
+
+   @PostConstruct
+   public void init() {
+     document.getBody().appendChild(component.getElement()); <2>
+   }
+}
+----
+
+<1> `org.jboss.errai.common.client.dom.Document` is a thin wrapper around the DOM document provided by Errai. More on this later.
+<2> This line assumes that `TemplatedBean` implements `org.jboss.errai.ui.client.local.api.IsElement`. The default implementation of `IsElement.getElement` returns the root element of the component as an Errai DOM wrapper, which is compatible with the injected `Document`.
+
+==== Using multiple instances (for iteration)
+
+In some cases you may need to display multiple instances of a component.
+Here we create and add many components to the DOM using an injected [code]+org.jboss.errai.ioc.client.api.ManagedInstance<T>+.
+
+[source, java]
+----
+@EntryPoint
+public class Application {
+   private String[] colors = new String[]{"Blue", "Yellow", "Red"};
+
+   @Inject
+   private ManagedInstance<ColorComponent> provider;
+
+   @Inject
+   private Document document;
+
+   @PostConstruct
+   public void init() {
+      for(String color: colors) {
+        ColorComponent component = provider.get(); <1>
+        component.setColor(c);
+        document.getBody().appendChild(component.getElement()); <2>
+      }
+   }
+}
+----
+
+<1> `ColorComponent` should be `@Dependent` so that this produces a new instance each time. If a `@Templated` bean has no explicit scope, it is `@Dependent` by default.
+<2> Again, we assume `ColorComponent` implements `org.jboss.errai.ui.client.local.api.IsElement`, where `getElement` is defined.
 
 === Adding behaviour to your components
 
@@ -5828,7 +5834,7 @@ It is still possible to use widgets in a +@DataField+ but this approach is not r
 * The root element has id, class, or data-field "form".
 */
 @Templated("#form")
-public class LoginForm {
+public class LoginForm implements IsElement {
    // This is the root element of the template, for adding this component to the DOM.
    @Inject
    @DataField
@@ -5896,11 +5902,13 @@ public class MyBean {
 }
 ----
 
-This method has the advantage that any valid @DataField type can be used.
+This method has the advantage that any valid @DataField type can be used (for example, you can expose your root element as a `com.google.gwt.dom.client.Element` or your own handwritten `@JsType` element wrapper).
 
 ===== Implement org.jboss.errai.ui.client.local.api.IsElement
 
-This interface provides a default implementation of [code]+org.jboss.errai.common.client.api.IsElement+ that works for any templated bean. For example:
+The interface [code]+org.jboss.errai.common.client.api.IsElement+ is analogous to `IsWidget`. It declares a single method `getElement` for accessing a type that is a UI component with a root element.
+
+The interface [code]+org.jboss.errai.ui.client.local.api.IsElement+ provides a default implementation of [code]+org.jboss.errai.common.client.api.IsElement+ that works for any templated bean. For example:
 
 ====== MyBean.html
 [source, html]
@@ -5913,8 +5921,10 @@ This interface provides a default implementation of [code]+org.jboss.errai.commo
 ====== MyBean.java
 [source, java]
 ----
+import org.jboss.errai.ui.client.local.api.IsElement;
+
 @Templated
-public class MyBean implements org.jboss.errai.ui.client.local.api.IsElement {
+public class MyBean implements IsElement {
 }
 ----
 

@@ -9,7 +9,7 @@
     <title>Errai Reference Guide</title>
     
     
-    <date>2017-05-15</date>
+    <date>2017-05-16</date>
     
     
     
@@ -5200,60 +5200,11 @@ Though components can still be built with and as widgets, we encourage users to 
 The template and template stylesheet describe the look of your component. The templated bean uses the <literal>@org.jboss.errai.ui.shared.api.annotations.DataField</literal> annotation
 to declare mappings between fields in the templated bean and elements in the template.</simpara>
 </section>
-<section id="_using_a_single_component_instance">
-<title>Using a single component instance</title>
-<simpara>As with most other features of Errai, dependency injection with CDI is the programming model of choice, so when interacting with components defined using Errai UI,
-you should always <literal><phrase role="code">@Inject</phrase></literal> references to your Composite components.</simpara>
-<simpara>In this example we use a single Errai UI component by injecting it and adding it to the DOM.</simpara>
-<programlisting language="java" linenumbering="unnumbered">@EntryPoint
-public class Application {
-   /*
-    * This type (org.jboss.errai.common.client.dom.Document) is a thin wrapper
-    * around the DOM document provided by Errai. More on this later.
-    */
-   @Inject
-   private Document document;
-
-   @Inject
-   private TemplatedBean component;
-
-   @PostConstruct
-   public void init() {
-     documnet.getBody().appendChild(component.getElement());
-   }
-}</programlisting>
 </section>
-<section id="_using_multiple_instances_for_iteration">
-<title>Using multiple instances (for iteration)</title>
-<simpara>In some cases you may need to display multiple instances of a component.
-Here we create and add many components to the DOM using an injected <literal><phrase role="code">org.jboss.errai.ioc.client.api.ManagedInstance&lt;T&gt;</phrase></literal>.</simpara>
-<programlisting language="java" linenumbering="unnumbered">@EntryPoint
-public class Application {
-   private String[] colors = new String[]{"Blue", "Yellow", "Red"};
-
-   @Inject
-   private ManagedInstance&lt;ColorComponent&gt; provider;
-
-   @Inject
-   private Document document;
-
-   @PostConstruct
-   public void init() {
-      for(String color: colors) {
-        // ColorComponent should be @Dependent
-        // so that this produces a new instance each time.
-        ColorComponent component = provider.get();
-        component.setColor(c);
-        document.getBody().appendChild(component.getElement());
-      }
-   }
-}</programlisting>
-</section>
-</section>
-<section id="_creating_your_own_component">
-<title>Creating your own component</title>
-<simpara>As previously mentioned, components in Errai UI consist of a Java class (the <emphasis>templated bean</emphasis>), an HTML file (the <emphasis>template</emphasis>),
-and an optional CSS file (the <emphasis>template stylesheet</emphasis>). A Java class is a templated bean if the type is annotated with <literal>@Templated</literal>.</simpara>
+<section id="_creating_a_component">
+<title>Creating a component</title>
+<simpara>As previously mentioned, Errai UI components are built from a Java class (the <emphasis>templated bean</emphasis>), an HTML file (the <emphasis>template</emphasis>),
+and an optional CSS file (the <emphasis>template stylesheet</emphasis>). A Java class is a templated bean if the class is annotated with <literal>@Templated</literal>.</simpara>
 <section id="_basic_templated_bean">
 <title>Basic templated bean</title>
 <simpara>Here is a basic templated bean with no Java fields mapped to UI elements.</simpara>
@@ -5264,7 +5215,7 @@ and an optional CSS file (the <emphasis>template stylesheet</emphasis>). A Java 
       <simpara>LoginForm.java</simpara>
       
 <programlisting language="java" linenumbering="unnumbered">@Templated
-public class LoginForm {
+public class LoginForm implements IsElement {
 }</programlisting>
 
       
@@ -5274,6 +5225,10 @@ public class LoginForm {
 
 <simpara>Annotating the type with <literal>@Templated</literal> and no argument declares that this bean should have a template file <literal>LoginForm.html</literal>
 and optionally a stylesheet <literal>LoginForm.css</literal> in the same package as <literal>LoginForm.java</literal>.</simpara>
+<note>
+<title>Optionally implement IsElement for easy access to the component root</title>
+<simpara>Implementing <literal>org.jboss.errai.ui.client.local.api.IsElement</literal> is optional, but we will use it in all of our examples. The interface contains a single default method, <literal>getElement</literal>, that returns the root element of the template, allowing us to programmatically attach a component to the DOM. Later on we will discuss alternative methods of accessing a component&#8217;s root element.</simpara>
+</note>
 </section>
 <section id="_custom_template_names">
 <title>Custom template names</title>
@@ -5281,12 +5236,12 @@ and optionally a stylesheet <literal>LoginForm.css</literal> in the same package
 the simple class name of the templated bean, suffixed with <literal>.html</literal>.
 But <literal>@Templated</literal> accepts an argument to define an alternatively named or located template, as in the proceeding example.</simpara>
 <programlisting language="java" linenumbering="unnumbered">@Templated("my-template.html")
-public class LoginForm {
+public class LoginForm implements IsElement {
    /* Looks for my-template.html in LoginForm's package */
 }</programlisting>
 <simpara>Fully qualified template paths are also supported, but must begin with a leading <emphasis>/</emphasis>:</simpara>
 <programlisting language="java" linenumbering="unnumbered">@Templated("/org/example/my-template.html")
-public class LoginForm {
+public class LoginForm implements IsElement {
    /* Looks for my-template.html in package org.example */
 }</programlisting>
 </section>
@@ -5294,12 +5249,12 @@ public class LoginForm {
 <title>Template providers</title>
 <simpara>The previous examples specify template files at compile time, but it is possible to use templates provided at runtime using a <literal>TemplateProvider</literal>. These providers run asynchronously so that it is possible to fetch templates via HTTP requests. In fact Errai UI contains an implementation, <literal>ServerTemplateProvider</literal>, that fetches templates using the <literal>@Templated</literal> value as a url.</simpara>
 <programlisting language="java" linenumbering="unnumbered">@Templated(value="home.html", provider=ServerTemplateProvider.class)
-public class LoginForm {
+public class LoginForm implements IsElement {
   /* Makes an HTTP request for the relative path "home.html" */
 }</programlisting>
 <simpara>Custom implementations can also be used.</simpara>
 <programlisting language="java" linenumbering="unnumbered">@Templated(provider=MyTemplateProvider.class)
-public class LoginForm {
+public class LoginForm implements IsElement {
   /* Makes an HTTP request for the relative path "home.html" */
 }
 
@@ -5350,7 +5305,7 @@ public class MyTemplateProvider implements TemplateProvider {
       <simpara>LoginForm.java</simpara>
       
 <programlisting language="java" linenumbering="unnumbered">@Templated("my-template.html#login-form")
-public class LoginForm {
+public class LoginForm implements IsElement {
    /* Specifies that &lt;... id="login-form"&gt; be used as the root Element of this component */
 }</programlisting>
 
@@ -5409,9 +5364,78 @@ there is no conflict because are each components instantiated with a unique copy
 (or from the root element if a fragment is not specified.)</simpara>
 <simpara>For example, the component below also uses the same template file by referencing the template name, and specifying a fragment.</simpara>
 <programlisting language="java" linenumbering="unnumbered">@Templated("my-template.html#theme-footer")
-public class Footer {
+public class Footer implements IsElement {
    /* Specifies that &lt;... id="theme-footer"&gt; be used as the root Element of this Widget */
 }</programlisting>
+</section>
+<section id="_using_a_single_component_instance">
+<title>Using a single component instance</title>
+<simpara>As with most other features of Errai, dependency injection with CDI is the programming model of choice, so when interacting with components defined using Errai UI,
+you should always <literal><phrase role="code">@Inject</phrase></literal> references to your components.</simpara>
+<simpara>In this example we use a single Errai UI component by injecting it and adding it to the DOM using Errai&#8217;s DOM wrappers.</simpara>
+<programlisting language="java" linenumbering="unnumbered">@EntryPoint
+public class Application {
+   @Inject
+   private Document document; <co id="CO4-1"/>
+
+   @Inject
+   private TemplatedBean component;
+
+   @PostConstruct
+   public void init() {
+     document.getBody().appendChild(component.getElement()); <co id="CO4-2"/>
+   }
+}</programlisting>
+<calloutlist>
+  
+  <callout arearefs="CO4-1">
+    <para><literal>org.jboss.errai.common.client.dom.Document</literal> is a thin wrapper around the DOM document provided by Errai. More on this later.</para>
+    
+  </callout>
+  
+  <callout arearefs="CO4-2">
+    <para>This line assumes that <literal>TemplatedBean</literal> implements <literal>org.jboss.errai.ui.client.local.api.IsElement</literal>. The default implementation of <literal>IsElement.getElement</literal> returns the root element of the component as an Errai DOM wrapper, which is compatible with the injected <literal>Document</literal>.</para>
+    
+  </callout>
+  
+</calloutlist>
+</section>
+<section id="_using_multiple_instances_for_iteration">
+<title>Using multiple instances (for iteration)</title>
+<simpara>In some cases you may need to display multiple instances of a component.
+Here we create and add many components to the DOM using an injected <literal><phrase role="code">org.jboss.errai.ioc.client.api.ManagedInstance&lt;T&gt;</phrase></literal>.</simpara>
+<programlisting language="java" linenumbering="unnumbered">@EntryPoint
+public class Application {
+   private String[] colors = new String[]{"Blue", "Yellow", "Red"};
+
+   @Inject
+   private ManagedInstance&lt;ColorComponent&gt; provider;
+
+   @Inject
+   private Document document;
+
+   @PostConstruct
+   public void init() {
+      for(String color: colors) {
+        ColorComponent component = provider.get(); <co id="CO5-1"/>
+        component.setColor(c);
+        document.getBody().appendChild(component.getElement()); <co id="CO5-2"/>
+      }
+   }
+}</programlisting>
+<calloutlist>
+  
+  <callout arearefs="CO5-1">
+    <para><literal>ColorComponent</literal> should be <literal>@Dependent</literal> so that this produces a new instance each time. If a <literal>@Templated</literal> bean has no explicit scope, it is <literal>@Dependent</literal> by default.</para>
+    
+  </callout>
+  
+  <callout arearefs="CO5-2">
+    <para>Again, we assume <literal>ColorComponent</literal> implements <literal>org.jboss.errai.ui.client.local.api.IsElement</literal>, where <literal>getElement</literal> is defined.</para>
+    
+  </callout>
+  
+</calloutlist>
 </section>
 </section>
 <section id="_adding_behaviour_to_your_components">
@@ -5435,7 +5459,7 @@ It is still possible to use widgets in a <literal>@DataField</literal> but this 
 * The root element has id, class, or data-field "form".
 */
 @Templated("#form")
-public class LoginForm {
+public class LoginForm implements IsElement {
    // This is the root element of the template, for adding this component to the DOM.
    @Inject
    @DataField
@@ -5511,12 +5535,13 @@ Here is a full list:</simpara>
 public class MyBean {
   @Inject @DataField Div root;
 }</programlisting>
-<simpara>This method has the advantage that any valid @DataField type can be used.</simpara>
+<simpara>This method has the advantage that any valid @DataField type can be used (for example, you can expose your root element as a <literal>com.google.gwt.dom.client.Element</literal> or your own handwritten <literal>@JsType</literal> element wrapper).</simpara>
 </section>
 </section>
 <section id="_implement_org_jboss_errai_ui_client_local_api_iselement">
 <title>Implement org.jboss.errai.ui.client.local.api.IsElement</title>
-<simpara>This interface provides a default implementation of <literal><phrase role="code">org.jboss.errai.common.client.api.IsElement</phrase></literal> that works for any templated bean. For example:</simpara>
+<simpara>The interface <literal><phrase role="code">org.jboss.errai.common.client.api.IsElement</phrase></literal> is analogous to <literal>IsWidget</literal>. It declares a single method <literal>getElement</literal> for accessing a type that is a UI component with a root element.</simpara>
+<simpara>The interface <literal><phrase role="code">org.jboss.errai.ui.client.local.api.IsElement</phrase></literal> provides a default implementation of <literal><phrase role="code">org.jboss.errai.common.client.api.IsElement</phrase></literal> that works for any templated bean. For example:</simpara>
 <section id="_mybean_html_2">
 <title>MyBean.html</title>
 <programlisting language="html" linenumbering="unnumbered">&lt;div class="root"&gt;
@@ -5525,8 +5550,10 @@ public class MyBean {
 </section>
 <section id="_mybean_java_2">
 <title>MyBean.java</title>
-<programlisting language="java" linenumbering="unnumbered">@Templated
-public class MyBean implements org.jboss.errai.ui.client.local.api.IsElement {
+<programlisting language="java" linenumbering="unnumbered">import org.jboss.errai.ui.client.local.api.IsElement;
+
+@Templated
+public class MyBean implements IsElement {
 }</programlisting>
 </section>
 <section id="_usage">
@@ -5958,7 +5985,7 @@ public class QuickHandlerComponent extends Composite {
 
 <programlisting language="java" linenumbering="unnumbered">@Dependent
 @Templated
-public class LoginForm extends AbstractForm { <co id="CO4-1"/>
+public class LoginForm extends AbstractForm { <co id="CO6-1"/>
 
   @Inject
   private Caller&lt;AuthenticationService&gt; authenticationServiceCaller;
@@ -5972,15 +5999,15 @@ public class LoginForm extends AbstractForm { <co id="CO4-1"/>
   private PasswordTextBox password;
 
   @DataField
-  private final FormElement form = DOM.createForm(); <co id="CO4-2"/>
+  private final FormElement form = DOM.createForm(); <co id="CO6-2"/>
 
   @Inject
   @DataField
-  private Button login; <co id="CO4-3"/>
+  private Button login; <co id="CO6-3"/>
 
   @Override
   protected FormElement getFormElement() {
-    return form; <co id="CO4-4"/>
+    return form; <co id="CO6-4"/>
   }
 
   @EventHandler("login")
@@ -5990,7 +6017,7 @@ public class LoginForm extends AbstractForm { <co id="CO4-1"/>
       @Override
       public void callback(User response) {
         // Now that we're logged in, submit the form
-        submit(); <co id="CO4-5"/>
+        submit(); <co id="CO6-5"/>
       }
     }).login(username.getText(), password.getText());
   }
@@ -5999,27 +6026,27 @@ public class LoginForm extends AbstractForm { <co id="CO4-1"/>
 <simpara>The key things that you should take from this example:</simpara>
 <calloutlist>
   
-  <callout arearefs="CO4-1">
+  <callout arearefs="CO6-1">
     <para>The class extends <literal>org.jboss.errai.ui.client.widget.AbstractForm</literal>.</para>
     
   </callout>
   
-  <callout arearefs="CO4-2">
+  <callout arearefs="CO6-2">
     <para>The <literal>form</literal> field is a <literal>@DataField</literal> but it is not injected.</para>
     
   </callout>
   
-  <callout arearefs="CO4-3">
+  <callout arearefs="CO6-3">
     <para>The login button is a regular button widget, with a click handling method below.</para>
     
   </callout>
   
-  <callout arearefs="CO4-4">
+  <callout arearefs="CO6-4">
     <para>The <literal>getFormElement</literal> method inherited from <literal>AbstractForm</literal> must return the <literal>FormElement</literal> that will be submitted.</para>
     
   </callout>
   
-  <callout arearefs="CO4-5">
+  <callout arearefs="CO6-5">
     <para>After the user has successfully logged in asynchronously we call <literal>submit()</literal>. This causes form submission to happen in a way that will not cause the page to refresh, but will still properly notify the browser of a form submission.</para>
     
   </callout>
@@ -6889,7 +6916,7 @@ public class NavigationErrorHandlerSetter {
       }
 
       @Override
-      public void handleError(Exception exception, Class&lt;? extends PageRole&gt; pageRole) { <co id="CO5-1"/>
+      public void handleError(Exception exception, Class&lt;? extends PageRole&gt; pageRole) { <co id="CO7-1"/>
         navigation.goTo("PageNotFound");
       }
     });
@@ -6898,7 +6925,7 @@ public class NavigationErrorHandlerSetter {
 }</programlisting>
 <calloutlist>
   
-  <callout arearefs="CO5-1">
+  <callout arearefs="CO7-1">
     <para>Note that this method signature is for errors that occur from calls to <literal>Navigation.goToWithRole(Class&lt;? extends UniquePageRole&gt;)</literal>. These kinds of errors can be avoided at compile-time by injecting <literal>TransitionToRole</literal> instances into your <literal>@Page</literal> classes instead of directly calling that method.</para>
     
   </callout>
@@ -7003,7 +7030,7 @@ public class NavigationErrorHandlerSetter {
 public class PicketLinkDefaultUsers {
 
   @Inject
-  private PartitionManager partitionManager; <co id="CO6-1"/>
+  private PartitionManager partitionManager; <co id="CO8-1"/>
 
   /**
    * &lt;p&gt;Loads some users during the first construction.&lt;/p&gt;
@@ -7025,7 +7052,7 @@ public class PicketLinkDefaultUsers {
     hacker.setFirstName("Hacker");
     hacker.setLastName("anonymous");
 
-    identityManager.add(john); <co id="CO6-2"/>
+    identityManager.add(john); <co id="CO8-2"/>
     identityManager.add(hacker);
     final Password defaultPassword = new Password("123");
     identityManager.updateCredential(john, defaultPassword);
@@ -7037,7 +7064,7 @@ public class PicketLinkDefaultUsers {
     identityManager.add(roleDeveloper);
     identityManager.add(roleAdmin);
 
-    relationshipManager.add(new Grant(john, roleDeveloper)); <co id="CO6-3"/>
+    relationshipManager.add(new Grant(john, roleDeveloper)); <co id="CO8-3"/>
     relationshipManager.add(new Grant(john, roleAdmin));
   }
 
@@ -7045,17 +7072,17 @@ public class PicketLinkDefaultUsers {
 <simpara>Here are the important things that are happening here:</simpara>
 <calloutlist>
   
-  <callout arearefs="CO6-1">
+  <callout arearefs="CO8-1">
     <para>PicketLink uses the concept of partitions, which are sections that can contain different users and roles. What we really need to make users and roles are the <literal>IdentityManager</literal> and <literal>RelationshipManager</literal>, but these objects are <literal>@RequestScoped</literal> so in order to access them when the application starts we must <literal>@Inject</literal> the <literal>PartitionManager</literal>.</para>
     
   </callout>
   
-  <callout arearefs="CO6-2">
+  <callout arearefs="CO8-2">
     <para>Here we add are new users to the <literal>IdentityManager</literal>. It is also used below to give passwords to the new users, and to add the <emphasis>simple</emphasis> and <emphasis>admin</emphasis> roles.</para>
     
   </callout>
   
-  <callout arearefs="CO6-3">
+  <callout arearefs="CO8-3">
     <para>The <literal>RelationshipManager</literal> defines relationships between entities. In this case, it is used to specify that a user belongs to a role.</para>
     
   </callout>
@@ -7150,13 +7177,13 @@ public class PicketLinkDefaultUsers {
 <title>Provided Roles</title>
 <simpara>Conceptually, a provided can be used to implement a more complex security system. In practice, a provided role is some concrete type that implements the <literal>Role</literal> interface and overrides <literal>Object.equals(Object)</literal>. Provided roles are declared on a resource by creating a <literal>RequiredRolesProvider</literal> that produces these roles and assigning the type to the <literal>providers</literal> parameter of <literal>@RestrictedAccess</literal>.</simpara>
 <simpara>Here is an sample of a <literal>RequireRolesProvider</literal> and its usage with <literal>@RestrictedAccess</literal>. This example defines equivalent roles to the above example using simple roles.</simpara>
-<programlisting language="java" linenumbering="unnumbered">@Dependent <co id="CO7-1"/>
+<programlisting language="java" linenumbering="unnumbered">@Dependent <co id="CO9-1"/>
 public class AdminRolesProvider implements RequiredRolesProvider {
 
   @Override
   public Set&lt;Role&gt; getRoles() {
     return new HashSet&lt;Role&gt;(Arrays.asList(
-      new RoleImpl("user"), <co id="CO7-2"/>
+      new RoleImpl("user"), <co id="CO9-2"/>
       new RoleImpl("admin")
     ));
   }
@@ -7164,12 +7191,12 @@ public class AdminRolesProvider implements RequiredRolesProvider {
 <programlisting language="java" linenumbering="unnumbered">@RestrictedAccess(providers = { AdminRolesProvider.class })</programlisting>
 <calloutlist>
   
-  <callout arearefs="CO7-1">
+  <callout arearefs="CO9-1">
     <para>The role provider implementation must be a CDI bean so that it can be looked up dynamically on the client and server.</para>
     
   </callout>
   
-  <callout arearefs="CO7-2">
+  <callout arearefs="CO9-2">
     <para><literal>RoleImpl</literal> is the internal implementation used for simple roles. A <literal>RoleImpl</literal> equals another role if they are both instances of <literal>RoleImpl</literal> and have matching names.</para>
     
   </callout>
@@ -7228,7 +7255,7 @@ public interface MixedService {
     public void callback(Void response) {
       // ...
     }
-  }, new ErrorCallback&lt;Message&gt;() { <co id="CO8-1"/>
+  }, new ErrorCallback&lt;Message&gt;() { <co id="CO10-1"/>
 
     @Override
     public boolean error(Message message, Throwable t) {
@@ -7248,7 +7275,7 @@ public interface MixedService {
   }, MixedService.class).adminService();</programlisting>
 <calloutlist>
   
-  <callout arearefs="CO8-1">
+  <callout arearefs="CO10-1">
     <para>This <literal>ErrorCallback</literal> is parameterized with the type <literal>Message</literal> because it is an Errai Bus RPC. In the next section we will demonstrate the use of a JAX-RS RPC.</para>
     
   </callout>
