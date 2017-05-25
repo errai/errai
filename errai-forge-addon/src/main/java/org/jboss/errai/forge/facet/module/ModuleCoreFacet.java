@@ -50,7 +50,7 @@ public class ModuleCoreFacet extends AbstractModuleFacet {
   final static String emptyModuleContents =
           "<?xml version='1.0' encoding='UTF-8'?>\n"
                   + "<!DOCTYPE module PUBLIC '-//Google Inc.//DTD Google Web Toolkit 2.8//EN'\n\t"
-                  + "'http://www.gwtproject.org/doctype/2.8.0/gwt-module.dtd'>\n"
+                  + "'http://www.gwtproject.org/doctype/2.8.1/gwt-module.dtd'>\n"
                   + "<module></module>\n";
 
   public ModuleCoreFacet() {
@@ -59,7 +59,7 @@ public class ModuleCoreFacet extends AbstractModuleFacet {
     });
     xmlProperties.setProperty(OutputKeys.DOCTYPE_PUBLIC, "-//Google Inc.//DTD Google Web Toolkit 2.8//EN");
     xmlProperties.setProperty(OutputKeys.DOCTYPE_SYSTEM,
-            "http://www.gwtproject.org/doctype/2.8.0/gwt-module.dtd");
+            "http://www.gwtproject.org/doctype/2.8.1/gwt-module.dtd");
   }
 
   @Override
