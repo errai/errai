@@ -38,7 +38,6 @@ import com.google.gwt.core.ext.ServletContainer;
 import com.google.gwt.core.ext.ServletContainerLauncher;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.TreeLogger.Type;
-import com.google.gwt.core.ext.UnableToCompleteException;
 
 /**
  * A {@link ServletContainerLauncher} controlling an embedded WildFly instance.
@@ -86,32 +85,26 @@ public class EmbeddedWildFlyLauncher extends ServletContainerLauncher {
   @Override
   public ServletContainer start(final TreeLogger treeLogger, final int port, final File appRootDir) throws BindException, Exception {
     logger = new StackTreeLogger(treeLogger);
-    try {
-      final String jbossHome = JBossUtil.getJBossHome(logger);
-      final String[] cmdArgs = JBossUtil.getCommandArguments(logger);
+    final String jbossHome = JBossUtil.getJBossHome(logger);
+    final String[] cmdArgs = JBossUtil.getCommandArguments(logger);
 
-      System.setProperty("jboss.http.port", "" + port);
+    System.setProperty("jboss.http.port", "" + port);
 
-      File cliConfigFile = new File(jbossHome, JBossUtil.CLI_CONFIGURATION_FILE);
-      if (cliConfigFile.exists()) {
-        System.setProperty("jboss.cli.config", cliConfigFile.getAbsolutePath());
-      }
-
-      final StandaloneServer embeddedWildFly = EmbeddedProcessFactory.createStandaloneServer(jbossHome, null,
-              new String[0], cmdArgs);
-      embeddedWildFly.start();
-
-      prepareBeansXml(appRootDir);
-      prepareUsersAndRoles(jbossHome);
-      JBossServletContainerAdaptor controller = new JBossServletContainerAdaptor(port, appRootDir,
-              JBossUtil.getDeploymentContext(), logger.peek(), null);
-
-      return controller;
+    File cliConfigFile = new File(jbossHome, JBossUtil.CLI_CONFIGURATION_FILE);
+    if (cliConfigFile.exists()) {
+      System.setProperty("jboss.cli.config", cliConfigFile.getAbsolutePath());
     }
-    catch (UnableToCompleteException e) {
-      logger.log(Type.ERROR, "Could not start servlet container controller", e);
-      throw new UnableToCompleteException();
-    }
+
+    final StandaloneServer embeddedWildFly = EmbeddedProcessFactory.createStandaloneServer(jbossHome, null,
+            new String[0], cmdArgs);
+    embeddedWildFly.start();
+
+    prepareBeansXml(appRootDir);
+    prepareUsersAndRoles(jbossHome);
+    JBossServletContainerAdaptor controller = new JBossServletContainerAdaptor(port, appRootDir,
+            JBossUtil.getDeploymentContext(), logger.peek(), null);
+
+    return controller;
   }
 
   /**

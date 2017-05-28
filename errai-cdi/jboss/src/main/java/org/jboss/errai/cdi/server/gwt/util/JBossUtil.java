@@ -42,13 +42,11 @@ public class JBossUtil {
     final String JBOSS_HOME = System.getProperty(JBOSS_HOME_PROPERTY);
 
     if (JBOSS_HOME == null || JBOSS_HOME.equals("")) {
-      logger.log(
-              Type.ERROR,
+      throw new IllegalStateException(
               String.format(
                       "No value for %s was given: The root directory of your Jboss installation must be "
-                      + "provided through the property %s in your pom.xml",
+                      + "provided through the property %s in your pom.xml.",
                       JBOSS_HOME_PROPERTY, JBOSS_HOME_PROPERTY));
-      throw new UnableToCompleteException();
     }
 
     /*
@@ -66,18 +64,18 @@ public class JBossUtil {
     }
 
     if (!isValid) {
-      logger.branch(Type.ERROR, String.format(
-              "The errai.jboss.home directory, %s, does not appear to be home to a Jboss or Wildfly instance.",
-              JBOSS_HOME));
+      StringBuilder s = new StringBuilder();
+      s.append(String.format(
+              "The %s directory (%s) does not appear to be home to a JBoss or Wildfly instance.\n",
+              JBOSS_HOME_PROPERTY, JBOSS_HOME));
 
       for (int i = 0; i < files.length; i++) {
         if (!files[i].exists()) {
-          logger.log(Type.ERROR, String.format("%s not found.", files[i].getAbsolutePath()));
+          s.append(String.format("  %s not found.\n", files[i].getAbsolutePath()));
         }
       }
-      logger.unbranch();
 
-      throw new UnableToCompleteException();
+      throw new IllegalStateException(s.toString());
     }
 
     return JBOSS_HOME;
