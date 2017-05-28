@@ -65,12 +65,12 @@ public class JBossServletContainerAdaptor extends ServletContainer {
    *          The deployment context for the app.
    * @param treeLogger
    *          For logging events from this container.
-   * @throws UnableToCompleteException
+   * @throws IllegalStateException
    *           Thrown if this container cannot properly connect or deploy.
-   */ 
+   */
   
   public JBossServletContainerAdaptor(int port, File appRootDir, String context, TreeLogger treeLogger,
-          Process jbossProcess) throws UnableToCompleteException {
+          Process jbossProcess) {
 	  this(port,appRootDir,context,treeLogger,jbossProcess,null, null);
   }
   
@@ -90,11 +90,11 @@ public class JBossServletContainerAdaptor extends ServletContainer {
    * @param nativeRemotingAddress
    * 		  If not null, overrides NATIVE_CONTROLLER_PATH property with the specified one.
    * 
-   * @throws UnableToCompleteException
+   * @throws IllegalStateException
    *           Thrown if this container cannot properly connect or deploy.
    */
   public JBossServletContainerAdaptor(int port, File appRootDir, String context, TreeLogger treeLogger,
-          Process jbossProcess,String httpRemotingAddress, String nativeRemotingAddress ) throws UnableToCompleteException {
+          Process jbossProcess,String httpRemotingAddress, String nativeRemotingAddress ) {
     this.port = port;
     logger = new StackTreeLogger(treeLogger);
     this.jbossProcess = jbossProcess;
@@ -126,8 +126,7 @@ public class JBossServletContainerAdaptor extends ServletContainer {
         logger.unbranch();
       }
       catch (CliInitializationException e) {
-        logger.branch(TreeLogger.Type.ERROR, "Could not initialize JBoss AS command context", e);
-        throw new UnableToCompleteException();
+        throw new IllegalStateException("Could not initialize JBoss AS command context", e);
       }
 
       attemptCommandContextConnection(MAX_RETRIES);
@@ -150,23 +149,21 @@ public class JBossServletContainerAdaptor extends ServletContainer {
         final ModelNode operation = getAddOperation(appRootDir.getAbsolutePath());
         final ModelNode result = ctx.getModelControllerClient().execute(operation);
         if (!Operations.isSuccessfulOutcome(result)) {
-          logger.log(Type.ERROR, String.format("Could not add deployment:\nInput:\n%s\nOutput:\n%s",
+          throw new IllegalStateException(String.format("Could not add deployment:\nInput:\n%s\nOutput:\n%s",
                   operation.toJSONString(false), result.toJSONString(false)));
-          throw new UnableToCompleteException();
         }
 
         logger.log(Type.INFO, "Deployment resource added");
         logger.unbranch();
       }
       catch (IOException e) {
-        logger.branch(Type.ERROR, String.format("Could not add deployment %s", getAppName()), e);
-        throw new UnableToCompleteException();
+        throw new IllegalStateException(String.format("Could not add deployment %s", getAppName()), e);
       }
 
       attemptDeploy();
 
     }
-    catch (UnableToCompleteException e) {
+    catch (IllegalStateException e) {
       logger.branch(Type.INFO, "Attempting to stop container...");
       stopHelper();
 
@@ -181,30 +178,26 @@ public class JBossServletContainerAdaptor extends ServletContainer {
   }
 
   @Override
-  public void refresh() throws UnableToCompleteException {
+  public void refresh() {
     attemptDeploymentRelatedOp(ClientConstants.DEPLOYMENT_REDEPLOY_OPERATION);
   }
 
   @Override
-  public void stop() throws UnableToCompleteException {
+  public void stop() {
     try {
       logger.branch(Type.INFO, String.format("Removing %s from deployments...", getAppName()));
 
       ModelNode result = removeDeployment();
       if (!Operations.isSuccessfulOutcome(result)) {
-        logger.log(
-                Type.ERROR,
-                String.format("Could not undeploy AS:\nInput:\n%s\nOutput:\n%s", getAppName(),
-                        result.toJSONString(false)));
-        throw new UnableToCompleteException();
+        throw new IllegalStateException(String.format("Could not undeploy AS:\nInput:\n%s\nOutput:\n%s", getAppName(),
+                result.toJSONString(false)));
       }
 
       logger.log(Type.INFO, String.format("%s removed", getAppName()));
       logger.unbranch();
     }
     catch (IOException e) {
-      logger.log(Type.ERROR, "Could not shutdown AS", e);
-      throw new UnableToCompleteException();
+      throw new IllegalStateException("Could not shutdown AS", e);
     }
     finally {
       stopHelper();
@@ -217,8 +210,7 @@ public class JBossServletContainerAdaptor extends ServletContainer {
     return ctx.getModelControllerClient().execute(operation);
   }
   
-  private void attemptCommandContextConnection(final int maxRetries)
-          throws UnableToCompleteException {
+  private void attemptCommandContextConnection(final int maxRetries) {
 
     String[] controllers = new String[] { httpControllerPath,  nativeControllerPath  };
     
@@ -261,8 +253,7 @@ public class JBossServletContainerAdaptor extends ServletContainer {
       }
     }
 
-    logger.log(Type.ERROR, "Could not connect to AS");
-    throw new UnableToCompleteException();
+    throw new IllegalStateException("Could not connect to AS in " + maxRetries + " retries.");
   }
 
   private void stopHelper() {
@@ -293,11 +284,11 @@ public class JBossServletContainerAdaptor extends ServletContainer {
     logger.unbranch();
   }
 
-  private void attemptDeploy() throws UnableToCompleteException {
+  private void attemptDeploy() {
     attemptDeploymentRelatedOp(ClientConstants.DEPLOYMENT_DEPLOY_OPERATION);
   }
 
-  private void attemptDeploymentRelatedOp(final String opName) throws UnableToCompleteException {
+  private void attemptDeploymentRelatedOp(final String opName) {
     try {
       logger.branch(Type.INFO, String.format("Deploying %s...", getAppName()));
 
@@ -306,19 +297,15 @@ public class JBossServletContainerAdaptor extends ServletContainer {
       final ModelNode result = ctx.getModelControllerClient().execute(operation);
 
       if (!Operations.isSuccessfulOutcome(result)) {
-        logger.log(
-                Type.ERROR,
-                String.format("Could not %s %s:\nInput:\n%s\nOutput:\n%s", opName, getAppName(),
-                        operation.toJSONString(false), result.toJSONString(false)));
-        throw new UnableToCompleteException();
+        throw new IllegalStateException(String.format("Could not %s %s:\nInput:\n%s\nOutput:\n%s", opName, getAppName(),
+                operation.toJSONString(false), result.toJSONString(false)));
       }
 
       logger.log(Type.INFO, String.format("%s %sed", getAppName(), opName));
       logger.unbranch();
     }
     catch (IOException e) {
-      logger.branch(Type.ERROR, String.format("Could not %s %s", opName, getAppName()), e);
-      throw new UnableToCompleteException();
+      throw new IllegalStateException(String.format("Could not %s %s", opName, getAppName()), e);
     }
   }
 

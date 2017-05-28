@@ -38,7 +38,6 @@ import com.google.gwt.core.ext.ServletContainer;
 import com.google.gwt.core.ext.ServletContainerLauncher;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.TreeLogger.Type;
-import com.google.gwt.core.ext.UnableToCompleteException;
 
 /**
  * For starting a {@link JBossServletContainerAdaptor} controlling a standalone
@@ -97,8 +96,7 @@ public class JBossLauncher extends ServletContainerLauncher {
       logger.branch(Type.INFO, String.format("Preparing JBoss AS instance (%s)", JBOSS_START));
       final File startScript = new File(JBOSS_START);
       if (!startScript.canExecute() && !startScript.setExecutable(true)) {
-        logger.log(Type.ERROR, "Can not execute " + JBOSS_START);
-        throw new UnableToCompleteException();
+        throw new IllegalStateException("Can not execute " + JBOSS_START);
       }
       ProcessBuilder builder = new ProcessBuilder(JBOSS_START, "-c", TMP_CONFIG_FILE);
 
@@ -121,9 +119,8 @@ public class JBossLauncher extends ServletContainerLauncher {
       logger.log(Type.INFO, "Executing AS instance...");
     }
     catch (IOException e) {
-      logger.log(TreeLogger.Type.ERROR, "Failed to start JBoss AS process", e);
       logger.unbranch();
-      throw new UnableToCompleteException();
+      throw new IllegalStateException("Failed to start JBoss AS process", e);
     }
 
     logger.unbranch();
@@ -138,36 +135,28 @@ public class JBossLauncher extends ServletContainerLauncher {
       logger.unbranch();
       return controller;
     }
-    catch (UnableToCompleteException e) {
-      logger.log(Type.ERROR, "Could not start servlet container controller", e);
-      throw new UnableToCompleteException();
+    catch (IllegalStateException e) {
+      throw new IllegalStateException("Could not start servlet container controller", e);
     }
   }
 
-  private void validateClassHidingJavaAgent(final String CLASS_HIDING_JAVA_AGENT) throws UnableToCompleteException {
+  private void validateClassHidingJavaAgent(final String CLASS_HIDING_JAVA_AGENT) {
     if (CLASS_HIDING_JAVA_AGENT == null) {
-      logger.log(
-              Type.ERROR,
-              String.format(
-                      "The local path to the artifact errai.org.jboss:class-local-class-hider:jar must be given as the property %s",
-                      CLASS_HIDING_JAVA_AGENT_PROPERTY));
-      throw new UnableToCompleteException();
+      throw new IllegalStateException(String.format(
+              "The local path to the artifact errai.org.jboss:class-local-class-hider:jar must be given as the property %s",
+              CLASS_HIDING_JAVA_AGENT_PROPERTY));
     }
   }
 
-  private void createTempConfigFile(String fromName, String toName, String jBossHome, int port) throws IOException,
-          UnableToCompleteException {
+  private void createTempConfigFile(String fromName, String toName, String jBossHome, int port) throws IOException {
     File configDir = new File(jBossHome, JBossUtil.STANDALONE_CONFIGURATION);
     File from = new File(configDir, fromName);
     File to = new File(configDir, toName);
 
     if (!from.exists()) {
-      logger.log(
-              Type.ERROR,
-              String.format(
-                      "Config file %s does not exit. It must be created or another one must be specified with the %s JVM property.",
-                      from.getAbsolutePath(), TEMPLATE_CONFIG_FILE_PROPERTY));
-      throw new UnableToCompleteException();
+      throw new IllegalStateException(String.format(
+              "Config file %s does not exit. It must be created or another one must be specified with the %s JVM property.",
+              from.getAbsolutePath(), TEMPLATE_CONFIG_FILE_PROPERTY));
     }
 
     if (to.exists()) {
@@ -192,8 +181,7 @@ public class JBossLauncher extends ServletContainerLauncher {
       trans.translate(inStream, outStream);
     }
     catch (XMLStreamException e) {
-      logger.log(Type.ERROR, "Could not create copy of configuration from " + from.getAbsolutePath(), e);
-      throw new UnableToCompleteException();
+      throw new IllegalStateException("Could not create copy of configuration from " + from.getAbsolutePath(), e);
     }
     finally {
       inStream.close();
