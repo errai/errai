@@ -28,6 +28,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.gwt.http.client.Header;
+import org.jboss.errai.bus.client.api.InvalidBusContentException;
 import org.jboss.errai.bus.client.api.RetryInfo;
 import org.jboss.errai.bus.client.api.base.DefaultErrorCallback;
 import org.jboss.errai.bus.client.api.base.TransportIOException;
@@ -340,6 +342,18 @@ public class HttpPollingHandler implements TransportHandler, TransportStatistics
   public void handleProtocolExtension(final Message message) {
   }
 
+  private static void validateContentType(final Response response) {
+    int statusCode = response.getStatusCode();
+    // in case the response is OK (200), then the content type always has to be 'application/json'
+    if (statusCode == 200) {
+      String contentType = response.getHeader("Content-Type");
+      if (!contentType.contains("application/json")) {
+        String content = response.getText();
+        throw new InvalidBusContentException(contentType, content);
+      }
+    }
+  }
+
   private class LongPollRequestCallback implements RequestCallback {
     /**
      * Subclasses MUST check this flag is still false before calling performPoll().
@@ -401,6 +415,7 @@ public class HttpPollingHandler implements TransportHandler, TransportStatistics
 
     @Override
     public void onResponseReceived(final Request request, final Response response) {
+      validateContentType(response);
       final int statusCode = response.getStatusCode();
       if (statusCode != 200) {
         switch (statusCode) {
@@ -412,9 +427,7 @@ public class HttpPollingHandler implements TransportHandler, TransportStatistics
           case 305:
           case 307:
             break;
-          case 401:
-            BusToolsCli.decodeToCallback(response.getText(), messageBus);
-            break;
+
           default:
             onError(request,
                 new TransportIOException("unexpected response code: " + statusCode, statusCode, response
@@ -710,6 +723,7 @@ public class HttpPollingHandler implements TransportHandler, TransportStatistics
 
     @Override
     public void onResponseReceived(final Request request, final Response response) {
+      validateContentType(response);
       txActive = false;
       statusCode = response.getStatusCode();
 
@@ -793,8 +807,10 @@ public class HttpPollingHandler implements TransportHandler, TransportStatistics
           messageBus.handleTransportError(transportError);
         }
       }
-
-      BusToolsCli.decodeToCallback(response.getText(), messageBus);
+      // do not decode the payload in case of server returning an error code
+      if (statusCode == 200) {
+        BusToolsCli.decodeToCallback(response.getText(), messageBus);
+      }
     }
 
     @Override
