@@ -382,6 +382,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       directSubscribe(BuiltInServices.ClientBus.name(), protocolCommandCallback, false);
     }
 
+    loadRpcProxies();
     // The purpose of this timer is to let the bus yield and give other modules a chance to register
     // services before we send our state synchronization message. This is not strictly necessary
     // but significantly decreases network chattiness since more (if not all known services)
@@ -389,7 +390,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     initialConnectTimer = new Timer() {
       @Override
       public void run() {
-        loadRpcProxies();
+        logger.debug("Bus initialization timer running...");
         sendInitialMessage();
       }
     };

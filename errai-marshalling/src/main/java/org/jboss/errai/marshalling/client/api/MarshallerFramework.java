@@ -26,6 +26,8 @@ import org.jboss.errai.marshalling.client.api.json.EJObject;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
 import org.jboss.errai.marshalling.client.api.json.impl.gwt.GWTJSON;
 import org.jboss.errai.marshalling.client.protocols.MarshallingSessionProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
@@ -36,8 +38,10 @@ import com.google.gwt.json.client.JSONParser;
  */
 public class MarshallerFramework implements EntryPoint {
   private static MarshallerFactory marshallerFactory;
+  private static Logger logger = LoggerFactory.getLogger(MarshallerFramework.class);
 
   static {
+    logger.debug("Initializing marshalling framework...");
     InitVotes.waitFor(MarshallerFramework.class);
     marshallerFactory = GWT.create(MarshallerFactory.class);
 
@@ -79,7 +83,7 @@ public class MarshallerFramework implements EntryPoint {
         }
 
         @Override
-        public void registerMarshaller(String fqcn, Marshaller m) {
+        public void registerMarshaller(final String fqcn, final Marshaller m) {
           MarshallerFramework.getMarshallerFactory().registerMarshaller(fqcn, m);
         }
       });

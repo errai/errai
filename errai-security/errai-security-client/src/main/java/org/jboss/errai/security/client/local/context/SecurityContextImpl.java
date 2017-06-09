@@ -112,11 +112,10 @@ public class SecurityContextImpl implements SecurityContext {
   @PostConstruct
   private void setup() {
     performLoginStatusChangeActions(userCache.getUser());
+    final User preloadedUser = userCache.getUser();
     InitVotes.waitFor(SecurityContext.class);
-    InitVotes.registerOneTimeDependencyCallback(ClientMessageBus.class, new Runnable() {
-
-      @Override
-      public void run() {
+    if (User.ANONYMOUS.equals(preloadedUser)) {
+      InitVotes.registerOneTimeDependencyCallback(ClientMessageBus.class, () -> {
         if (((ClientMessageBusImpl) ErraiBus.get()).getState() == BusState.CONNECTED) {
           initializeCacheFromServer();
         }
@@ -124,8 +123,11 @@ public class SecurityContextImpl implements SecurityContext {
           // Don't cause initialization to fail if remote communication is disabled
           InitVotes.voteFor(SecurityContext.class);
         }
-      }
-    });
+      });
+    }
+    else {
+      InitVotes.voteFor(SecurityContext.class);
+    }
   }
 
   private void initializeCacheFromServer() {

@@ -44,45 +44,10 @@ import com.google.gwt.core.client.GWT;
 public class CDIClientBootstrap implements EntryPoint {
   private static final Logger logger = LoggerFactory.getLogger(CDIClientBootstrap.class);
 
-  final static Runnable initRemoteCdiSubsystem = new Runnable() {
-    @Override
-    public void run() {
-      logger.info("CDI subsystem syncing with server ...");
-
-      BusErrorCallback serverDispatchErrorCallback = new BusErrorCallback() {
-        @Override
-        public boolean error(Message message, Throwable throwable) {
-          try {
-            throw throwable;
-          }
-          catch (NoSubscribersToDeliverTo e) {
-            logger.warn("Server did not subscribe to " + CDI.SERVER_DISPATCHER_SUBJECT +
-                ". To activate the full Errai CDI functionality, make sure that Errai's Weld " +
-                "integration module has been deployed on the server.");
-            CDI.activate();
-            return false;
-          }
-          catch (Throwable t) {
-            return true;
-          }
-        }
-      };
-
-      MessageBuilder.createMessage().toSubject(CDI.SERVER_DISPATCHER_SUBJECT)
-          .command(CDICommands.AttachRemote)
-          .errorsHandledBy(serverDispatchErrorCallback)
-          .sendNowWith(ErraiBus.get());
-
-      CDI.resendSubscriptionRequestForAllEventTypes();
-
-      CDI.fireEvent(new BusReadyEvent());
-    }
-
-    @Override
-    public String toString() {
-      return "BusReadyEvent";
-    }
-  };
+  /*
+   * These runnables must stay static so that they are not added multiple times to
+   * InitVotes in tests.
+   */
 
   final static Runnable declareServices = new Runnable() {
     @Override
@@ -112,8 +77,59 @@ public class CDIClientBootstrap implements EntryPoint {
     }
   };
 
+  final static Runnable busInitRunnable = new Runnable() {
+        private boolean firstRun = true;
+        @Override
+        public void run() {
+          // Ensure that CDI system works after bus reconnection
+          if (firstRun) {
+            firstRun = false;
+          }
+          else {
+            syncWithServer();
+          }
+          CDI.fireEvent(new BusReadyEvent());
+        }
+
+        @Override
+        public String toString() {
+          return "BusReadyEvent";
+        }
+      };
+
+  private static void syncWithServer() {
+    logger.info("CDI subsystem syncing with server ...");
+
+    final BusErrorCallback serverDispatchErrorCallback = new BusErrorCallback() {
+      @Override
+      public boolean error(final Message message, final Throwable throwable) {
+        try {
+          throw throwable;
+        }
+        catch (final NoSubscribersToDeliverTo e) {
+          logger.warn("Server did not subscribe to " + CDI.SERVER_DISPATCHER_SUBJECT +
+              ". To activate the full Errai CDI functionality, make sure that Errai's Weld " +
+              "integration module has been deployed on the server.");
+          CDI.activate();
+          return false;
+        }
+        catch (final Throwable t) {
+          return true;
+        }
+      }
+    };
+
+    MessageBuilder.createMessage().toSubject(CDI.SERVER_DISPATCHER_SUBJECT)
+        .command(CDICommands.AttachRemote)
+        .errorsHandledBy(serverDispatchErrorCallback)
+        .sendNowWith(ErraiBus.get());
+
+    CDI.resendSubscriptionRequestForAllEventTypes();
+  }
+
   @Override
   public void onModuleLoad() {
+    logger.debug("Starting CDI module...");
     if (!EventQualifierSerializer.isSet()) {
       EventQualifierSerializer.set(GWT.create(EventQualifierSerializer.class));
     }
@@ -121,7 +137,8 @@ public class CDIClientBootstrap implements EntryPoint {
     InitVotes.waitFor(CDI.class);
 
     if (BusToolsCli.isRemoteCommunicationEnabled()) {
-      InitVotes.registerPersistentDependencyCallback(ClientMessageBus.class, initRemoteCdiSubsystem);
+      syncWithServer();
+      InitVotes.registerPersistentDependencyCallback(ClientMessageBus.class, busInitRunnable);
     }
     else {
       CDI.activate();
