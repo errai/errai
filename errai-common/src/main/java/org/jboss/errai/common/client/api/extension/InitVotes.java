@@ -51,17 +51,17 @@ import com.google.gwt.core.client.GWT;
 public final class InitVotes {
   private InitVotes() {}
 
-  private static final List<Runnable> preInitCallbacks = new ArrayList<Runnable>();
-  private static final Map<String, List<Runnable>> dependencyCallbacks = new HashMap<String, List<Runnable>>();
-  private static final List<Runnable> initCallbacks = new ArrayList<Runnable>();
-  private static final List<InitFailureListener> initFailureListeners = new ArrayList<InitFailureListener>();
+  private static final List<Runnable> preInitCallbacks = new ArrayList<>();
+  private static final Map<String, List<Runnable>> dependencyCallbacks = new HashMap<>();
+  private static final List<Runnable> initCallbacks = new ArrayList<>();
+  private static final List<InitFailureListener> initFailureListeners = new ArrayList<>();
 
   private static boolean armed = false;
   private static boolean init = false;
-  private static final Set<String> waitForSet = new HashSet<String>();
+  private static final Set<String> waitForSet = new HashSet<>();
 
   // a list of both strings and runnable references that are marked done.
-  private static final Set<Object> completedSet = new HashSet<Object>();
+  private static final Set<Object> completedSet = new HashSet<>();
 
   private static int timeoutMillis = !GWT.isProdMode() ? 90000 : 45000;
 
@@ -194,17 +194,21 @@ public final class InitVotes {
   private static void scheduleFinish() {
     if (_initWait)
       return;
+
+    logger.debug("Scheduling finish.");
     _initWait = true;
 
     _scheduleFinish(new Runnable() {
       @Override
       public void run() {
+        logger.debug("Running finish timer...");
         if (armed && waitForSet.isEmpty()) {
           idempotentStopFailTimer();
           finishInit();
           _initWait = false;
         }
         else {
+          logger.debug("Rescheduling finish.");
           _scheduleFinish(this);
         }
       }
@@ -227,7 +231,7 @@ public final class InitVotes {
     synchronized (lock) {
       List<Runnable> callbacks = dependencyCallbacks.get(topic);
       if (callbacks == null) {
-        dependencyCallbacks.put(topic, callbacks = new ArrayList<Runnable>());
+        dependencyCallbacks.put(topic, callbacks = new ArrayList<>());
       }
       if (!callbacks.contains(runnable)) {
         callbacks.add(runnable);
@@ -308,6 +312,7 @@ public final class InitVotes {
       logger.warn("did not start polling. already armed.");
       return;
     }
+    logger.info("Starting init polling.");
     timeoutMillis = getConfiguredTimeoutOrElse(timeoutMillis);
     beginInit();
   }
@@ -331,7 +336,7 @@ public final class InitVotes {
 
             idempotentStopDelayTimer();
 
-            final Set<String> failedTopics = Collections.unmodifiableSet(new HashSet<String>(waitForSet));
+            final Set<String> failedTopics = Collections.unmodifiableSet(new HashSet<>(waitForSet));
             _fireFailedInit(failedTopics);
 
             logger.error("components failed to initialize");
@@ -354,6 +359,7 @@ public final class InitVotes {
 
   private static void finishInit() {
     synchronized (lock) {
+      logger.debug("Finishing initialization...");
       armed = false;
       init = true;
       idempotentStopFailTimer();
@@ -381,12 +387,12 @@ public final class InitVotes {
   private static void _runAllRunnables(final List<Runnable> runnables) {
     if (runnables == null || runnables.isEmpty())
       return;
-    _runAllRunnables(new ArrayList<Runnable>(runnables), runnables);
+    _runAllRunnables(new ArrayList<>(runnables), runnables);
 
   }
 
   private static void _runAllRunnables(final List<Runnable> curRunnables, final List<Runnable> allRunnables) {
-    for (Runnable runnable : curRunnables) {
+    for (final Runnable runnable : curRunnables) {
       if (completedSet.contains(runnable)) {
         continue;
       }
@@ -395,11 +401,11 @@ public final class InitVotes {
       if (runnable instanceof OneTimeRunnable) {
         allRunnables.remove(runnable);
       }
-      int expectedSize = allRunnables.size();
+      final int expectedSize = allRunnables.size();
       runnable.run();
       if (expectedSize < allRunnables.size()) {
         // this runnable added more runnables that need to be executed
-        List<Runnable> moreRunnables = new ArrayList<Runnable>(allRunnables).subList(expectedSize, allRunnables.size());
+        final List<Runnable> moreRunnables = new ArrayList<>(allRunnables).subList(expectedSize, allRunnables.size());
         _runAllRunnables(moreRunnables, allRunnables);
       }
     }
@@ -418,7 +424,7 @@ public final class InitVotes {
   private static class OneTimeRunnable implements Runnable {
     private final Runnable delegate;
 
-    private OneTimeRunnable(Runnable delegate) {
+    private OneTimeRunnable(final Runnable delegate) {
       this.delegate = delegate;
     }
 

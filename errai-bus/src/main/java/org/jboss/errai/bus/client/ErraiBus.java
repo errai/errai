@@ -31,6 +31,8 @@ import org.jboss.errai.bus.client.api.messaging.MessageBus;
 import org.jboss.errai.bus.client.api.messaging.MessageCallback;
 import org.jboss.errai.bus.client.api.messaging.RequestDispatcher;
 import org.jboss.errai.common.client.api.extension.InitVotes;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
@@ -41,67 +43,70 @@ import com.google.gwt.core.client.GWT;
  */
 public class ErraiBus implements EntryPoint {
   private static ClientMessageBus bus;
+  private static Logger logger = LoggerFactory.getLogger(ErraiBus.class);
 
   static {
     if (GWT.isClient()) {
+      logger.debug("Creating client message bus");
       bus = GWT.create(MessageBus.class);
     }
     else {
 
+      logger.debug("Creating simulated client message bus");
       // edge case: in simulated client mode, client code runs in an environment where GWT.isClient() returns false
       // obviously, this code will not be able to contact the server, but framework code still assumes bus != null
       bus = new ClientMessageBus() {
         @Override
-        public void sendGlobal(Message message) {
+        public void sendGlobal(final Message message) {
 
         }
 
         @Override
-        public void send(Message message) {
+        public void send(final Message message) {
         }
 
         @Override
-        public void send(Message message, boolean fireListeners) {
+        public void send(final Message message, final boolean fireListeners) {
         }
 
         @Override
-        public void sendLocal(Message message) {
+        public void sendLocal(final Message message) {
         }
 
         @Override
-        public Subscription subscribe(String subject, MessageCallback receiver) {
+        public Subscription subscribe(final String subject, final MessageCallback receiver) {
           return null;
         }
 
         @Override
-        public Subscription subscribeLocal(String subject, MessageCallback receiver) {
+        public Subscription subscribeLocal(final String subject, final MessageCallback receiver) {
           return null;
         }
 
         @Override
-        public Subscription subscribeShadow(String subject, MessageCallback callback) {
+        public Subscription subscribeShadow(final String subject, final MessageCallback callback) {
           return null;
         }
 
         @Override
-        public void unsubscribeAll(String subject) {
+        public void unsubscribeAll(final String subject) {
         }
 
         @Override
-        public boolean isSubscribed(String subject) {
+        public boolean isSubscribed(final String subject) {
           return false;
         }
 
         @Override
-        public void addSubscribeListener(SubscribeListener listener) {
+        public void addSubscribeListener(final SubscribeListener listener) {
         }
 
         @Override
-        public void addUnsubscribeListener(UnsubscribeListener listener) {
+        public void addUnsubscribeListener(final UnsubscribeListener listener) {
         }
 
         @Override
-        public void attachMonitor(BusMonitor monitor) {
+        public void attachMonitor(final BusMonitor monitor) {
         }
 
         @Override
@@ -109,7 +114,7 @@ public class ErraiBus implements EntryPoint {
         }
 
         @Override
-        public void stop(boolean sendDisconnectToServer) {
+        public void stop(final boolean sendDisconnectToServer) {
         }
 
         @Override
@@ -118,23 +123,23 @@ public class ErraiBus implements EntryPoint {
         }
 
         @Override
-        public void addTransportErrorHandler(TransportErrorHandler errorHandler) {
+        public void addTransportErrorHandler(final TransportErrorHandler errorHandler) {
         }
 
         @Override
-        public void removeTransportErrorHandler(TransportErrorHandler errorHandler) {
+        public void removeTransportErrorHandler(final TransportErrorHandler errorHandler) {
         }
 
         @Override
-        public void addLifecycleListener(BusLifecycleListener l) {
+        public void addLifecycleListener(final BusLifecycleListener l) {
         }
 
         @Override
-        public void removeLifecycleListener(BusLifecycleListener l) {
+        public void removeLifecycleListener(final BusLifecycleListener l) {
         }
 
         @Override
-        public void setProperty(String name, String value) {
+        public void setProperty(final String name, final String value) {
         }
 
         @Override
@@ -156,6 +161,7 @@ public class ErraiBus implements EntryPoint {
     InitVotes.registerPersistentPreInitCallback(new Runnable() {
       @Override
       public void run() {
+        logger.debug("Initializing client message bus.");
         bus.init();
       }
     });
@@ -172,12 +178,12 @@ public class ErraiBus implements EntryPoint {
 
   private static RequestDispatcher DISPATCHER_INST = new RequestDispatcher() {
     @Override
-    public void dispatchGlobal(Message message) {
+    public void dispatchGlobal(final Message message) {
       get().sendGlobal(message);
     }
 
     @Override
-    public void dispatch(Message message) {
+    public void dispatch(final Message message) {
       get().send(message);
     }
   };

@@ -91,17 +91,48 @@ public class SyncBeanManagerImpl implements SyncBeanManager, BeanManagerSetup {
   }
 
   private void init() {
+    final Collection<FactoryHandle> eager = addFactories();
+    initializeEagerBeans(eager);
+  }
+
+  private void initializeEagerBeans(final Collection<FactoryHandle> eager) {
+    logger.debug("Initializing eager beans...");
+    final long start = System.currentTimeMillis();
+    if (logger.isTraceEnabled()) {
+      for (final FactoryHandle handle : eager) {
+        logger.trace("Initializing {}...", handle);
+        final long beanStart = System.currentTimeMillis();
+        contextManager.getEagerInstance(handle.getFactoryName());
+        final long duration = System.currentTimeMillis() - beanStart;
+        logger.trace("Finished initializing in {}ms.", duration);
+      }
+    }
+    else {
+      for (final FactoryHandle handle : eager) {
+        contextManager.getEagerInstance(handle.getFactoryName());
+      }
+    }
+    final long duration = System.currentTimeMillis() - start;
+    logger.debug("Initialized {} eager beans in {}ms.", eager.size(), duration);
+  }
+
+  private Collection<FactoryHandle> addFactories() {
     final Collection<FactoryHandle> eager = new ArrayList<>();
-    for (final FactoryHandle handle : contextManager.getAllFactoryHandles()) {
+    logger.debug("Adding factories...");
+    final long start = System.currentTimeMillis();
+    final Collection<FactoryHandle> allFactoryHandles = contextManager.getAllFactoryHandles();
+
+    for (final FactoryHandle handle : allFactoryHandles) {
       if (handle.isEager()) {
         eager.add(handle);
       }
       addFactory(handle);
     }
 
-    for (final FactoryHandle handle : eager) {
-      contextManager.getEagerInstance(handle.getFactoryName());
-    }
+    final long duration = System.currentTimeMillis() - start;
+    logger.debug("Added {} factories in {}ms.", allFactoryHandles.size(), duration);
+
+    return eager;
   }
 
   private void addFactory(final FactoryHandle handle) {

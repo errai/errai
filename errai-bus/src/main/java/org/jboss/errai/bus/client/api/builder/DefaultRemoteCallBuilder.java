@@ -34,6 +34,8 @@ import org.jboss.errai.common.client.framework.ProxyFactory;
 import org.jboss.errai.common.client.framework.RemoteServiceProxyFactory;
 import org.jboss.errai.common.client.framework.RpcStub;
 import org.jboss.errai.common.client.protocols.MessageParts;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Facilitates the building of a remote call. Ensures that the remote call is constructed properly.
@@ -41,6 +43,7 @@ import org.jboss.errai.common.client.protocols.MessageParts;
  * Part of the fluent API centered around {@link MessageBuilder}.
  */
 public class DefaultRemoteCallBuilder {
+  private static Logger logger = LoggerFactory.getLogger(DefaultRemoteCallBuilder.class);
   private static ProxyFactory proxyFactory = new RemoteServiceProxyFactory();
 
   /* Used to generate a unique number */
@@ -52,7 +55,7 @@ public class DefaultRemoteCallBuilder {
   /* The type of response that is expected by the callback */
   private Class<Object> responseType = Object.class;
 
-  public DefaultRemoteCallBuilder(Message message) {
+  public DefaultRemoteCallBuilder(final Message message) {
     this.message = message;
   }
 
@@ -89,17 +92,19 @@ public class DefaultRemoteCallBuilder {
       public void sendNowWith(final MessageBus bus) {
         final Integer id;
 
+        final String rpcMethod = message.getCommandType();
         final String replyTo =
-            message.getSubject() + "." + message.getCommandType() + ":" + (id = uniqueNumber()) + ":RespondTo:RPC";
+            message.getSubject() + "." + rpcMethod + ":" + (id = uniqueNumber()) + ":RespondTo:RPC";
 
         final String errorTo =
-            message.getSubject() + "." + message.getCommandType() + ":" + id + ":Errors:RPC";
+            message.getSubject() + "." + rpcMethod + ":" + id + ":Errors:RPC";
 
         if (remoteCallback != null) {
           bus.subscribe(replyTo,
               new MessageCallback() {
                 @Override
-                public void callback(Message message) {
+                public void callback(final Message message) {
+                  logger.debug("Received RPC response: [service={}, endpoint={}]", serviceName, rpcMethod);
                   bus.unsubscribeAll(replyTo);
                   if (DefaultRemoteCallBuilder.this.message.getErrorCallback() != null) {
                     bus.unsubscribeAll(errorTo);
@@ -115,7 +120,8 @@ public class DefaultRemoteCallBuilder {
           bus.subscribe(errorTo,
               new MessageCallback() {
                 @Override
-                public void callback(Message m) {
+                public void callback(final Message m) {
+                  logger.debug("Received RPC error: [service={}, endpoint={}]", serviceName, rpcMethod);
                   bus.unsubscribeAll(errorTo);
                   if (remoteCallback != null) {
                     bus.unsubscribeAll(replyTo);
@@ -133,13 +139,14 @@ public class DefaultRemoteCallBuilder {
           message.set(MessageParts.ErrorTo, errorTo);
         }
 
+        logger.debug("Sending RPC request: [service={}, endpoint={}]", serviceName, rpcMethod);
         message.sendNowWith(bus);
       }
     };
 
     final RemoteCallErrorDef errorDef = new RemoteCallErrorDef() {
       @Override
-      public RemoteCallSendable errorsHandledBy(@SuppressWarnings("rawtypes") ErrorCallback errorCallback) {
+      public RemoteCallSendable errorsHandledBy(@SuppressWarnings("rawtypes") final ErrorCallback errorCallback) {
         if (errorCallback != null) {
           message.errorsCall(errorCallback);
         }
@@ -155,7 +162,7 @@ public class DefaultRemoteCallBuilder {
     final RemoteCallResponseDef respondDef = new RemoteCallResponseDef() {
       @Override
       @SuppressWarnings("unchecked")
-      public <T> RemoteCallErrorDef respondTo(Class<T> returnType, RemoteCallback<T> callback) {
+      public <T> RemoteCallErrorDef respondTo(final Class<T> returnType, final RemoteCallback<T> callback) {
         responseType = (Class<Object>) returnType;
         remoteCallback = (RemoteCallback<Object>) callback;
         return errorDef;
@@ -164,17 +171,17 @@ public class DefaultRemoteCallBuilder {
 
     return new RemoteCallEndpointDef() {
       @Override
-      public RemoteCallResponseDef endpoint(String endPointName) {
+      public RemoteCallResponseDef endpoint(final String endPointName) {
         message.command(endPointName);
         return respondDef;
       }
 
       @Override
-      public RemoteCallResponseDef endpoint(String endPointName, Annotation[] qualifiers, Object[] args) {
+      public RemoteCallResponseDef endpoint(final String endPointName, final Annotation[] qualifiers, final Object[] args) {
         message.command(endPointName);
 
         if (qualifiers != null) {
-          final List<String> qualNames = new ArrayList<String>(qualifiers.length);
+          final List<String> qualNames = new ArrayList<>(qualifiers.length);
           for (final Annotation a : qualifiers) {
             qualNames.add(a.annotationType().getName());
           }
@@ -188,7 +195,7 @@ public class DefaultRemoteCallBuilder {
       }
 
       @Override
-      public RemoteCallResponseDef endpoint(String endPointName, Object[] args) {
+      public RemoteCallResponseDef endpoint(final String endPointName, final Object[] args) {
         message.command(endPointName);
         if (args != null)
           message.set("MethodParms", Arrays.asList(args));
@@ -209,7 +216,7 @@ public class DefaultRemoteCallBuilder {
    * @param provider
    *     The ProxyProvider that provides RPC proxies to message builders. Not null.
    */
-  public static void setProxyFactory(ProxyFactory provider) {
+  public static void setProxyFactory(final ProxyFactory provider) {
     proxyFactory = Assert.notNull(provider);
   }
 
