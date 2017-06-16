@@ -22,7 +22,9 @@ import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Properties;
 
 import javax.inject.Inject;
 
@@ -52,8 +54,23 @@ public abstract class ForgeTest {
 
   public static final String DEPENDENCY = "org.jboss.errai.forge:errai-forge-addon";
   public static final String ADDON_GROUP = "org.jboss.forge.addon";
-  // TODO Programmatically lookup the Errai version this test is running in.
-  public static final String ERRAI_TEST_VERSION = "4.0.0-SNAPSHOT";
+  public static final String ERRAI_TEST_VERSION;
+
+  static {
+    String erraiVersion = null;
+    try (InputStream is = ForgeTest.class.getClassLoader().getResourceAsStream("versions.properties")) {
+      final Properties versions = new Properties();
+      versions.load(is);
+      erraiVersion = versions.getProperty("erraiVersion");
+      if (erraiVersion == null) {
+        throw new NullPointerException("The \"erraiVersion\" property was null.");
+      }
+    } catch (IOException | NullPointerException e) {
+      throw new IllegalStateException("Unable to lookup Errai version for Forge tests.", e);
+    } finally {
+      ERRAI_TEST_VERSION = erraiVersion;
+    }
+  }
 
   @Inject
   protected ProjectFactory projectFactory;

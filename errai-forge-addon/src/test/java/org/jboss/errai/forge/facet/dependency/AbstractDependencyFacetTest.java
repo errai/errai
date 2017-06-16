@@ -42,7 +42,7 @@ public class AbstractDependencyFacetTest extends ForgeTest {
     public NoProfileDependencyFacet() {
       coreDependencies = Arrays.asList(new DependencyBuilder[] { DependencyBuilder
               .create(DependencyArtifact.ErraiCommon.toString()) });
-      profileDependencies = new HashMap<String, Collection<DependencyBuilder>>();
+      profileDependencies = new HashMap<>();
     }
   }
 
@@ -50,7 +50,7 @@ public class AbstractDependencyFacetTest extends ForgeTest {
   public static class ProfileDependencyFacet extends AbstractDependencyFacet {
     public ProfileDependencyFacet() {
       coreDependencies = Arrays.asList(new DependencyBuilder[0]);
-      profileDependencies = new HashMap<String, Collection<DependencyBuilder>>();
+      profileDependencies = new HashMap<>();
       profileDependencies.put("myProfile", Arrays.asList(new DependencyBuilder[] { DependencyBuilder
               .create(DependencyArtifact.ErraiCommon.toString()) }));
     }
@@ -64,15 +64,15 @@ public class AbstractDependencyFacetTest extends ForgeTest {
     }
     // Allows dependencies to be set from this class.
     @Override
-    public void setCoreDependencies(DependencyBuilder... deps) {
+    public void setCoreDependencies(final DependencyBuilder... deps) {
       super.setCoreDependencies(deps);
     }
     @Override
-    public void setProfileDependencies(String name, DependencyBuilder... deps) {
+    public void setProfileDependencies(final String name, final DependencyBuilder... deps) {
       super.setProfileDependencies(name, deps);
     }
   }
- 
+
   @Test
   public void testNoProfileEmptyInstall() throws Exception {
     final Project project = initializeJavaProject();
@@ -94,7 +94,7 @@ public class AbstractDependencyFacetTest extends ForgeTest {
     facetFactory.install(project, ProfileDependencyFacet.class);
 
     assertTrue(project.hasFacet(ProfileDependencyFacet.class.asSubclass(ProjectFacet.class)));
-    List<Profile> profiles = project.getFacet(MavenFacet.class).getModel().getProfiles();
+    final List<Profile> profiles = project.getFacet(MavenFacet.class).getModel().getProfiles();
     assertEquals(1, profiles.size());
     assertEquals("myProfile", profiles.get(0).getId());
     assertEquals(1, profiles.get(0).getDependencies().size());
@@ -105,21 +105,21 @@ public class AbstractDependencyFacetTest extends ForgeTest {
   @Test
   public void testProfileExistingProfile() throws Exception {
     final Project project = initializeJavaProject();
-    MavenFacet coreFacet = project.getFacet(MavenFacet.class);
+    final MavenFacet coreFacet = project.getFacet(MavenFacet.class);
     prepareProjectPom(project);
 
     final Profile profile = new Profile();
     profile.setId("myProfile");
     profile.addDependency(MavenConverter.convert(DependencyBuilder.create("org.jboss.errai:errai-ui")));
 
-    Model pom = coreFacet.getModel();
+    final Model pom = coreFacet.getModel();
     pom.addProfile(profile);
     coreFacet.setModel(pom);
 
     facetFactory.install(project, ProfileDependencyFacet.class);
 
     assertTrue(project.hasFacet(ProfileDependencyFacet.class.asSubclass(ProjectFacet.class)));
-    List<Profile> profiles = coreFacet.getModel().getProfiles();
+    final List<Profile> profiles = coreFacet.getModel().getProfiles();
     assertEquals(1, profiles.size());
     assertEquals("myProfile", profiles.get(0).getId());
     assertEquals(2, profiles.get(0).getDependencies().size());
@@ -132,20 +132,20 @@ public class AbstractDependencyFacetTest extends ForgeTest {
   public void testProfileInstallNoDuplication() throws Exception {
     final Project project = initializeJavaProject();
     prepareProjectPom(project);
-    MavenFacet coreFacet = project.getFacet(MavenFacet.class);
+    final MavenFacet coreFacet = project.getFacet(MavenFacet.class);
 
     final Profile profile = new Profile();
     profile.setId("myProfile");
     profile.addDependency(MavenConverter.convert(DependencyBuilder.create(DependencyArtifact.ErraiCommon.toString())));
 
-    Model pom = coreFacet.getModel();
+    final Model pom = coreFacet.getModel();
     pom.addProfile(profile);
     coreFacet.setModel(pom);
 
     facetFactory.install(project, ProfileDependencyFacet.class);
 
     assertTrue(project.hasFacet(ProfileDependencyFacet.class.asSubclass(ProjectFacet.class)));
-    List<Profile> profiles = coreFacet.getModel().getProfiles();
+    final List<Profile> profiles = coreFacet.getModel().getProfiles();
     assertEquals(1, profiles.size());
     assertEquals("myProfile", profiles.get(0).getId());
     assertEquals(1, profiles.get(0).getDependencies().size());
@@ -252,7 +252,7 @@ public class AbstractDependencyFacetTest extends ForgeTest {
     facetFactory.install(project, ProfileDependencyFacet.class);
 
     assertTrue(project.hasFacet(ProfileDependencyFacet.class.asSubclass(ProjectFacet.class)));
-    List<Profile> profiles = project.getFacet(MavenFacet.class).getModel().getProfiles();
+    final List<Profile> profiles = project.getFacet(MavenFacet.class).getModel().getProfiles();
     assertEquals("Precondition failed.", 1, profiles.size());
     assertEquals("Precondition failed.", "myProfile", profiles.get(0).getId());
     assertEquals("Precondition failed.", 1, profiles.get(0).getDependencies().size());
@@ -466,7 +466,7 @@ public class AbstractDependencyFacetTest extends ForgeTest {
 
     assertFalse(testFacet.isInstalled());
   }
-  
+
   @Test
   public void testBlacklistedDependencyIsRemovedOnUninstall() throws Exception {
     final Project project = initializeJavaProject();
@@ -503,16 +503,16 @@ public class AbstractDependencyFacetTest extends ForgeTest {
     blacklistedFacet.uninstall();
     pom = coreFacet.getModel();
     providedClassifiers = getProvidedClassifiers(pom);
-    
+
     assertEquals(Collections.emptySet(), providedClassifiers);
     assertFalse(depFacet.hasEffectiveDependency(DependencyBuilder.create(DependencyArtifact.Hsq.toString())));
   }
-  
+
   private Set<String> getProvidedClassifiers(final Model pom) {
-    final Set<String> providedClassifiers = new HashSet<String>();
+    final Set<String> providedClassifiers = new HashSet<>();
     for (final Dependency provided : pom.getProfiles().get(0).getDependencies())
       providedClassifiers.add(provided.getGroupId() + ":" + provided.getArtifactId());
-    
+
     return providedClassifiers;
   }
 
@@ -525,6 +525,8 @@ public class AbstractDependencyFacetTest extends ForgeTest {
     coreFacet.setModel(pom);
 
     depFacet.addDirectManagedDependency(DependencyBuilder.create("org.jboss.errai.bom:errai-bom")
+            .setVersion(Property.ErraiVersion.invoke()).setScopeType("import").setPackaging("pom"));
+    depFacet.addDirectManagedDependency(DependencyBuilder.create("org.jboss.errai.bom:errai-internal-bom")
             .setVersion(Property.ErraiVersion.invoke()).setScopeType("import").setPackaging("pom"));
     depFacet.addDirectManagedDependency(DependencyBuilder.create(DependencyArtifact.ErraiJboss.toString())
             .setVersion(Property.ErraiVersion.invoke()));

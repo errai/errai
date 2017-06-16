@@ -143,6 +143,13 @@
   </repositories>
   <build>
     <finalName>errai-forge-addon</finalName>
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+        <!-- DO NOT REMOVE: filter Errai version in versions.properties used by tests. -->
+        <filtering>true</filtering>
+      </resource>
+    </resources>
     <plugins>
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
