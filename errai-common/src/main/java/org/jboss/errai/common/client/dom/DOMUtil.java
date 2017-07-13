@@ -317,9 +317,9 @@ public abstract class DOMUtil {
     if (child.isAttached()) {
       child.removeFromParent();
     }
-    onAttach(child);
     RootPanel.detachOnWindowClose(child);
     parent.appendChild(nativeCast(child.getElement()));
+    onAttach(child);
   }
 
   /**
