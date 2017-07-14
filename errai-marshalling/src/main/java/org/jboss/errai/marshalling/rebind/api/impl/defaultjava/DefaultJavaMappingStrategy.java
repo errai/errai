@@ -278,7 +278,8 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
                                      loadVariable("key").invoke("equals", SerializationParts.OBJECT_ID)))
                         .append(Stmt.continue_()).finish())
             // objVal assignment in each switch's case clause leads to excessively large resulting js size!
-            .append(Stmt.declareVariable("objVal", EJValue.class, extractJSONObjectProperty(loadVariable("key"), EJObject.class, "getIfNotNull")))
+            .append(Stmt.declareVariable("objVal", EJValue.class, extractJSONObjectProperty(loadVariable("key"), 
+                    EJObject.class, "getIfNotNull")))
             .append(Stmt.if_(Bool.isNull(loadVariable("objVal"))).append(Stmt.continue_()).finish())
             .append(switchBlock = Stmt.switch_(loadVariable("key")))
             .finish());
@@ -470,11 +471,13 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
     return extractJSONObjectProperty(fieldName, fromType, "get");
   }
   
-  public Statement extractJSONObjectProperty(final Statement fieldName, final Class fromType, final String getterName) {
+  public Statement extractJSONObjectProperty(final Statement fieldName, final Class fromType, 
+                                             final String getterName) {
     return extractJSONObjectProperty(fieldName, MetaClassFactory.get(fromType), getterName);
   }
 
-  public Statement extractJSONObjectProperty(final Statement fieldName, final MetaClass fromType, final String getterName) {
+  public Statement extractJSONObjectProperty(final Statement fieldName, final MetaClass fromType, 
+                                             final String getterName) {
     if (fromType.getFullyQualifiedName().equals(EJObject.class.getName())) {
       return loadVariable("obj").invoke(getterName, fieldName);
     }
@@ -714,14 +717,17 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
   
   public TernaryStatement marshallEnum(final Statement valueStatement, final MetaClass toType) {
 
-    final Implementations.StringBuilderBuilder internalSBB = Implementations.newStringBuilder()
-            .append("{\"").append(SerializationParts.ENCODED_TYPE)
-            .append( "\":\"").append( toType.getFullyQualifiedName()).append("\",\"")
-            .append(SerializationParts.ENUM_STRING_VALUE).append("\":\"")
-            .append(Stmt.nestedCall(valueStatement).invoke("name")).append("\"}");
+    StringExpression s = Str.expr("{\"", StringOperator.Concat, SerializationParts.ENCODED_TYPE);
+    s = Str.expr(s, StringOperator.Concat, "\":\"");
+    s = Str.expr(s, StringOperator.Concat, toType.getFullyQualifiedName());
+    s = Str.expr(s, StringOperator.Concat, "\",\"");
+    s = Str.expr(s, StringOperator.Concat, SerializationParts.ENUM_STRING_VALUE);
+    s = Str.expr(s, StringOperator.Concat, "\":\"");
+    s = Str.expr(s, StringOperator.Concat, Stmt.nestedCall(valueStatement).invoke("name"));
+    s = Str.expr(s, StringOperator.Concat, "\"}");
 
     final TernaryStatement ternaryStatement = new TernaryStatement(
-        Bool.isNotNull(valueStatement), Stmt.load(internalSBB).invoke("toString"), Stmt.load("null"));
+        Bool.isNotNull(valueStatement), Stmt.load(s), Stmt.load("null"));
 
     return ternaryStatement;
   }
