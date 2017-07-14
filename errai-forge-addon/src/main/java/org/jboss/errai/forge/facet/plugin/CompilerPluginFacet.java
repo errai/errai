@@ -40,8 +40,8 @@ public class CompilerPluginFacet extends AbstractPluginFacet {
     dependencies = new ArrayList<DependencyBuilder>(0);
     executions = new ArrayList<Execution>(0);
     configurations = Arrays.asList(new ConfigurationElement[] {
-            ConfigurationElementBuilder.create().setName("source").setText("1.6"),
-            ConfigurationElementBuilder.create().setName("target").setText("1.6")
+            ConfigurationElementBuilder.create().setName("source").setText("1.7"),
+            ConfigurationElementBuilder.create().setName("target").setText("1.7")
     });
   }
   

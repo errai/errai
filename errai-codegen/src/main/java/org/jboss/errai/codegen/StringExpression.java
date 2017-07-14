@@ -14,17 +14,13 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.marshalling.client.api.json;
-
-import java.util.Set;
+package org.jboss.errai.codegen;
 
 /**
- * @author Mike Brock
+ * Represents an arithmetic expression. 
+ * 
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
-public interface EJObject {
-  public EJValue get(String name);
-  public EJValue getIfNotNull(String name);
-  public Set<String> keySet();
-  public boolean containsKey(String name);
-  public int size();
+public interface StringExpression extends Expression<StringOperator>, Statement {
+  
 }

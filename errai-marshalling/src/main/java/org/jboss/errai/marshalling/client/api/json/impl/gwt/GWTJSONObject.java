@@ -16,6 +16,7 @@
 
 package org.jboss.errai.marshalling.client.api.json.impl.gwt;
 
+import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.json.client.JSONObject;
 import org.jboss.errai.marshalling.client.api.json.EJObject;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
@@ -35,6 +36,12 @@ public class GWTJSONObject implements EJObject {
   @Override
   public EJValue get(final String name) {
     return new GWTJSONValue(obj.get(name));
+  }
+  
+  @Override
+  public EJValue getIfNotNull(final String name) {
+    JSONValue v = obj.get(name);
+    return v == null || v.isNull() != null ? null : new GWTJSONValue(v);
   }
 
   @Override

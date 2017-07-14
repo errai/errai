@@ -32,6 +32,7 @@ import org.jboss.errai.codegen.literal.IntValue;
 import org.jboss.errai.codegen.literal.LiteralFactory;
 import org.jboss.errai.codegen.literal.LiteralValue;
 import org.jboss.errai.codegen.literal.ShortValue;
+import org.jboss.errai.codegen.literal.StringLiteral;
 
 /**
  * StatementBuilder to generate switch blocks.
@@ -93,6 +94,13 @@ public class SwitchBlockBuilderImpl extends AbstractStatementBuilder implements 
   public BlockBuilder<CaseBlockBuilder> case_(char value) {
     final CharValue val = (CharValue) LiteralFactory.getLiteral(value);
     return case_(val);
+  }
+  
+  @Override
+  public BlockBuilder<CaseBlockBuilder> case_(String value) {
+    StringLiteral val = (StringLiteral) LiteralFactory.getLiteral(value);
+    switchBlock.addCase(val);
+    return caseBlock(val);
   }
 
   @Override
