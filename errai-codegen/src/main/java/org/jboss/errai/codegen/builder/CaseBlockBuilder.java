@@ -31,6 +31,7 @@ public interface CaseBlockBuilder extends Statement, Builder {
   BlockBuilder<CaseBlockBuilder> case_(byte value);
   BlockBuilder<CaseBlockBuilder> case_(short value);
   BlockBuilder<CaseBlockBuilder> case_(char value);
+  BlockBuilder<CaseBlockBuilder> case_(String value);
   BlockBuilder<CaseBlockBuilder> case_(Enum<?> value);
   
   BlockBuilder<CaseBlockBuilder> case_(IntValue value);
