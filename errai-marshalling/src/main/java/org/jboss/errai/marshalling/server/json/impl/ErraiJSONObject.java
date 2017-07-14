@@ -36,6 +36,12 @@ public class ErraiJSONObject implements EJObject {
   public EJValue get(final String name) {
     return new ErraiJSONValue(oMap.get(name));
   }
+  
+  @Override
+  public EJValue getIfNotNull(final String name) {
+    Object v = oMap.get(name);
+    return v == null ? null : new ErraiJSONValue(v);
+  }
 
   @Override
   public Set<String> keySet() {

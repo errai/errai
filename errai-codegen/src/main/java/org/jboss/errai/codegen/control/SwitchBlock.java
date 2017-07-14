@@ -36,7 +36,7 @@ import org.jboss.errai.codegen.meta.MetaClassFactory;
 public class SwitchBlock extends AbstractStatement {
   private static final List<Class<?>> supportedTypes; 
   static {
-    supportedTypes = new ArrayList<Class<?>>(Arrays.asList(Integer.class, Character.class, Short.class, Byte.class, Enum.class));
+    supportedTypes = new ArrayList<Class<?>>(Arrays.asList(Integer.class, Character.class, Short.class, Byte.class, Enum.class, String.class));
   }
 
   private Statement switchExprStmt;

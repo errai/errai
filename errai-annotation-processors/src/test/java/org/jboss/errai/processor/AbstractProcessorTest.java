@@ -62,7 +62,7 @@ public abstract class AbstractProcessorTest {
    */
   private final Set<String> ignorableWarnings = new HashSet<>(
           Arrays.asList(
-                  "bootstrap class path not set in conjunction with -source 1.6",
+                  "bootstrap class path not set in conjunction with -source 1.7",
                   "Implicitly compiled files were not subject to annotation processing."));
 
   /**
