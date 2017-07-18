@@ -16,6 +16,32 @@
 
 package org.jboss.errai.marshalling.tests;
 
+import junit.framework.Assert;
+import org.jboss.errai.marshalling.client.MarshallingSessionProviderFactory;
+import org.jboss.errai.marshalling.client.api.Marshaller;
+import org.jboss.errai.marshalling.client.api.MarshallingSession;
+import org.jboss.errai.marshalling.client.api.ParserFactory;
+import org.jboss.errai.marshalling.client.api.json.EJValue;
+import org.jboss.errai.marshalling.server.MappingContextSingleton;
+import org.jboss.errai.marshalling.server.ServerMarshalling;
+import org.jboss.errai.marshalling.tests.res.AImpl1;
+import org.jboss.errai.marshalling.tests.res.AImpl2;
+import org.jboss.errai.marshalling.tests.res.EntityWithInheritedTypeVariable;
+import org.jboss.errai.marshalling.tests.res.EntityWithInterfaceArray;
+import org.jboss.errai.marshalling.tests.res.EnumContainer;
+import org.jboss.errai.marshalling.tests.res.EnumContainerContainer;
+import org.jboss.errai.marshalling.tests.res.EnumTestA;
+import org.jboss.errai.marshalling.tests.res.EnumWithAbstractMethod;
+import org.jboss.errai.marshalling.tests.res.EnumWithState;
+import org.jboss.errai.marshalling.tests.res.ImmutableEnumContainer;
+import org.jboss.errai.marshalling.tests.res.InterfaceA;
+import org.jboss.errai.marshalling.tests.res.Outer;
+import org.jboss.errai.marshalling.tests.res.Outer2;
+import org.jboss.errai.marshalling.tests.res.SType;
+import org.jboss.errai.marshalling.tests.res.shared.Role;
+import org.jboss.errai.marshalling.tests.res.shared.User;
+import org.junit.Test;
+
 import java.io.File;
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
@@ -26,33 +52,11 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
-
-import junit.framework.Assert;
-
-import org.jboss.errai.marshalling.client.MarshallingSessionProviderFactory;
-import org.jboss.errai.marshalling.client.api.Marshaller;
-import org.jboss.errai.marshalling.client.api.MarshallingSession;
-import org.jboss.errai.marshalling.client.api.ParserFactory;
-import org.jboss.errai.marshalling.client.api.json.EJValue;
-import org.jboss.errai.marshalling.server.MappingContextSingleton;
-import org.jboss.errai.marshalling.server.ServerMarshalling;
-import org.jboss.errai.marshalling.tests.res.EntityWithInheritedTypeVariable;
-import org.jboss.errai.marshalling.tests.res.EnumContainer;
-import org.jboss.errai.marshalling.tests.res.EnumContainerContainer;
-import org.jboss.errai.marshalling.tests.res.EnumTestA;
-import org.jboss.errai.marshalling.tests.res.EnumWithAbstractMethod;
-import org.jboss.errai.marshalling.tests.res.EnumWithState;
-import org.jboss.errai.marshalling.tests.res.ImmutableEnumContainer;
-import org.jboss.errai.marshalling.tests.res.Outer;
-import org.jboss.errai.marshalling.tests.res.Outer2;
-import org.jboss.errai.marshalling.tests.res.SType;
-import org.jboss.errai.marshalling.tests.res.shared.Role;
-import org.jboss.errai.marshalling.tests.res.shared.User;
-import org.junit.Test;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -456,6 +460,47 @@ public class ServerMarshallingTest {
     user.setRoles(roles);
 
     testEncodeDecodeDynamic(user);
+  }
+
+  @Test
+  public void testEmptyOptional() {
+    testEncodeDecodeDynamic(Optional.empty());
+  }
+
+  @Test
+  public void testNonEmptyOptionalString() {
+    testEncodeDecodeDynamic(Optional.of("foo"));
+  }
+
+  @Test
+  public void testNonEmptyOptionalPrimitive() {
+    testEncodeDecodeDynamic(Optional.of(1));
+  }
+
+  @Test
+  public void testOptionalEmptyList() {
+    testEncodeDecodeDynamic(Optional.of(Collections.emptyList()));
+  }
+
+  @Test
+  public void testOptionalList() {
+    testEncodeDecodeDynamic(Optional.of(Collections.singletonList("foo")));
+  }
+
+  @Test
+  public void testOptionalEntityWithInterfaceArrayEmpty() {
+    final EntityWithInterfaceArray entity = new EntityWithInterfaceArray();
+    entity.setA(new InterfaceA[0]);
+
+    testEncodeDecodeDynamic(Optional.of(entity));
+  }
+
+  @Test
+  public void testOptionalEntityWithInterfaceArrayNotEmpty() {
+    final EntityWithInterfaceArray entity = new EntityWithInterfaceArray();
+    entity.setA(new InterfaceA[] { new AImpl1(1), new AImpl2("foo") });
+
+    testEncodeDecodeDynamic(Optional.of(entity));
   }
 
   class ServerRandomProvider implements RandomProvider {

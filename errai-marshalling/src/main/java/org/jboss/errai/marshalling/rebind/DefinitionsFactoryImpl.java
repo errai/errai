@@ -62,6 +62,7 @@ import org.jboss.errai.marshalling.client.marshallers.ListMarshaller;
 import org.jboss.errai.marshalling.client.marshallers.LongMarshaller;
 import org.jboss.errai.marshalling.client.marshallers.MapMarshaller;
 import org.jboss.errai.marshalling.client.marshallers.ObjectMarshaller;
+import org.jboss.errai.marshalling.client.marshallers.OptionalMarshaller;
 import org.jboss.errai.marshalling.client.marshallers.PriorityQueueMarshaller;
 import org.jboss.errai.marshalling.client.marshallers.QueueMarshaller;
 import org.jboss.errai.marshalling.client.marshallers.SQLDateMarshaller;
@@ -509,6 +510,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
       serverMarshallers.add(TimeMarshaller.class);
       serverMarshallers.add(TimestampMarshaller.class);
       serverMarshallers.add(ServerClassMarshaller.class);
+      serverMarshallers.add(OptionalMarshaller.class);
     }
     return serverMarshallers;
   }
