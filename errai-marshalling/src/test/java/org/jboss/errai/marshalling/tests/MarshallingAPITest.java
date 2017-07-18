@@ -16,15 +16,6 @@
 
 package org.jboss.errai.marshalling.tests;
 
-import static org.junit.Assert.*;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
 import org.jboss.errai.marshalling.client.Marshalling;
 import org.jboss.errai.marshalling.server.MappingContextSingleton;
 import org.jboss.errai.marshalling.server.ServerMarshalling;
@@ -52,6 +43,17 @@ import org.jboss.errai.marshalling.tests.res.shared.User;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Mike Brock
@@ -306,4 +308,58 @@ public class MarshallingAPITest {
     assertTrue(Marshalling.canHandle(SomeInterface.class));
   }
 
+  @Test
+  public void testEmptyOptional() {
+    testEncodeDecode(Optional.empty());
+  }
+
+  @Test
+  public void testNonEmptyOptionalString() {
+    testEncodeDecode(Optional.of("foo"));
+  }
+
+  @Test
+  public void testNonEmptyOptionalPrimitive() {
+    testEncodeDecode(Optional.of(1));
+  }
+
+  @Test
+  public void testOptionalEmptyList() {
+    testEncodeDecode(Optional.of(Collections.emptyList()));
+  }
+
+  @Test
+  public void testOptionalList() {
+    testEncodeDecode(Optional.of(Collections.singletonList("foo")));
+  }
+
+  @Test
+  public void testOptionalEntityWithInterfaceArrayEmpty() {
+    final EntityWithInterfaceArray entity = new EntityWithInterfaceArray();
+    entity.setA(new InterfaceA[0]);
+
+    testEncodeDecode(Optional.of(entity));
+  }
+
+  @Test
+  public void testOptionalEntityWithInterfaceArrayNotEmpty() {
+    final EntityWithInterfaceArray entity = new EntityWithInterfaceArray();
+    entity.setA(new InterfaceA[] { new AImpl1(1), new AImpl2("foo") });
+
+    testEncodeDecode(Optional.of(entity));
+  }
+
+  @Test
+  public void testOptionalUserEntity() {
+    final User user = new User();
+    user.setUserName("foo");
+    user.setPassword("bar");
+
+    final Set<Role> roles = new HashSet<>();
+    roles.add(new Role("admin"));
+    roles.add(new Role("users"));
+
+    user.setRoles(roles);
+    testEncodeDecode(Optional.of(user));
+  }
 }
