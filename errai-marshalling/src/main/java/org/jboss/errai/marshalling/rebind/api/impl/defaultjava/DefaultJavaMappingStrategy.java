@@ -23,6 +23,7 @@ import static org.jboss.errai.codegen.util.Stmt.loadVariable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import javax.enterprise.util.TypeLiteral;
 
 import org.jboss.errai.codegen.Cast;
 import org.jboss.errai.codegen.InnerClass;
@@ -270,19 +271,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
               loadVariable("objId"), loadVariable("entity")));
         }
         
-        CaseBlockBuilder switchBlock;
-        builder.append(StatementBuilder.create()
-            .loadVariable("obj").invoke("keySet")
-            .foreach("key", String.class)
-            .append(Stmt.if_(Bool.or(loadVariable("key").invoke("equals", SerializationParts.ENCODED_TYPE), 
-                                     loadVariable("key").invoke("equals", SerializationParts.OBJECT_ID)))
-                        .append(Stmt.continue_()).finish())
-            // objVal assignment in each switch's case clause leads to excessively large resulting js size!
-            .append(Stmt.declareVariable("objVal", EJValue.class, extractJSONObjectProperty(loadVariable("key"), 
-                    EJObject.class, "getIfNotNull")))
-            .append(Stmt.if_(Bool.isNull(loadVariable("objVal"))).append(Stmt.continue_()).finish())
-            .append(switchBlock = Stmt.switch_(loadVariable("key")))
-            .finish());
+        CaseBlockBuilder switchBlock = null;
 
         /**
          *
@@ -292,6 +281,24 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
         for (final MemberMapping memberMapping : mappingDefinition.getMemberMappings()) {
           if (!memberMapping.canWrite())
             continue;
+        
+          if (switchBlock == null) {
+            builder.append(Stmt.declareFinalVariable("keys", new TypeLiteral<Set<String>>() {}, 
+                                                     loadVariable("obj").invoke("keySet")));
+            builder.append(StatementBuilder.create()
+                .loadVariable("keys")
+                .foreach("key", String.class)
+                .append(Stmt.if_(Bool.or(loadVariable("key").invoke("equals", SerializationParts.ENCODED_TYPE), 
+                                         loadVariable("key").invoke("equals", SerializationParts.OBJECT_ID)))
+                            .append(Stmt.continue_()).finish())
+                // objVal assignment in each switch's case clause leads to excessively large resulting js size!
+                .append(Stmt.declareVariable("objVal", EJValue.class, extractJSONObjectProperty(loadVariable("key"),
+                        EJObject.class, "getIfNotNull")))
+                .append(Stmt.if_(Bool.isNull(loadVariable("objVal"))).append(Stmt.continue_()).finish())
+                .append(switchBlock = Stmt.switch_(loadVariable("key")))
+                .finish());
+          }
+        
           if (memberMapping.getTargetType().isConcrete() && !context.isRendered(memberMapping.getTargetType())) {
             context.getMarshallerGeneratorFactory().addMarshaller(memberMapping.getTargetType());
           }
@@ -536,15 +543,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
     final int bufSize = calcBufferSize(new ArrayList<MappingDefinition>(), definition);
 
     if (toMap.isEnum()) {
-      builder.append(
-          Stmt.declareFinalVariable(
-              "json",
-              StringBuilder.class,
-              Stmt.newObject(StringBuilder.class))
-          );
-      final ContextualStatementBuilder csb = Stmt.loadVariable("json");
-      marshallEnum(csb, Stmt.loadVariable("a0"), toMap);
-      builder.append(csb.invoke("toString").returnValue());
+      builder.append(Stmt.load(marshallEnum(loadVariable("a0"), toMap)).returnValue());
       return;
     }
 
