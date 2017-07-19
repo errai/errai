@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 Red Hat, Inc. and/or its affiliates.
+ * Copyright (C) 2017 Red Hat, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ package org.jboss.errai.codegen;
 import org.jboss.errai.codegen.meta.MetaClass;
 
 /**
- * @author Christian Sadilek <csadilek@redhat.com>
+ * @author Slava Pankov
  */
 public enum StringOperator implements Operator {
 
