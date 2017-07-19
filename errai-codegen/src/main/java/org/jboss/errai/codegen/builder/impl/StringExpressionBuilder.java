@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 Red Hat, Inc. and/or its affiliates.
+ * Copyright (C) 2017 Red Hat, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 
 /**
- * @author Christian Sadilek <csadilek@redhat.com>
+ * @author Slava Pankov
  */
 public class StringExpressionBuilder extends ExpressionBuilder<StringOperator> implements StringExpression {
 

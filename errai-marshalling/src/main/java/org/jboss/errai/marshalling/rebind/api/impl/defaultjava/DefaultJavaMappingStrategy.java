@@ -333,7 +333,9 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
 
             // handle long case -- GWT does not support long in JSNI
             if (field.isPublic()) {
-              builder.append(loadVariable("entity").loadField(field.getName()).assignValue(val));
+              BlockBuilder<CaseBlockBuilder> caseBlock = switchBlock.case_(memberMapping.getKey());
+              caseBlock.append(loadVariable("entity").loadField(field.getName()).assignValue(val))
+                  .append(Stmt.break_()).finish();
               continue;
             }
             else {
