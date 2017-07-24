@@ -75,7 +75,7 @@ public class CSRFTokenFilter implements Filter {
 
       final byte[] bytes;
       final String responseContentType = responseWrapper.getContentType();
-      if (session != null && responseContentType != null && responseContentType.equalsIgnoreCase("text/html")) {
+      if (session != null && responseContentType != null && responseContentType.toLowerCase().startsWith("text/html")) {
         CSRFTokenCheck.INSTANCE.prepareSession(session, log);
         final Document document = Jsoup.parse(responseWrapper.toString());
         document.head().prepend("<script>var " + ERRAI_CSRF_TOKEN_VAR + " = '" + CSRFTokenCheck.getToken(session) + "';</script>");
