@@ -43,7 +43,8 @@ import org.junit.runners.Suite;
     PathParamIntegrationTest.class,
     PlainMethodIntegrationTest.class,
     QueryParamIntegrationTest.class,
-    ErraiProviderIntegrationTest.class })
+    ErraiProviderIntegrationTest.class,
+    CustomMarshallersIntegrationTest.class})
 public class AllJaxrsTests {
 
 }
