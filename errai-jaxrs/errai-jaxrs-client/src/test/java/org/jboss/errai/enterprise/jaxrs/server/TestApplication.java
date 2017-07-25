@@ -47,7 +47,8 @@ public class TestApplication extends Application {
                 PathParamTestServiceImpl.class,
                 PlainMethodTestServiceImpl.class,
                 QueryParamTestServiceImpl.class,
-                RestServiceUsingIfaceImpl.class
+                RestServiceUsingIfaceImpl.class,
+                CustomMarshallerServiceImpl.class
         ));
     }
 }

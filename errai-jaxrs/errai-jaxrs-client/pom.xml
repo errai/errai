@@ -11,6 +11,7 @@
   <artifactId>errai-jaxrs-client</artifactId>
   <name>Errai::JAX-RS::Client</name>
 
+
   <build>
     <testOutputDirectory>war/WEB-INF/classes</testOutputDirectory>
     <resources>
