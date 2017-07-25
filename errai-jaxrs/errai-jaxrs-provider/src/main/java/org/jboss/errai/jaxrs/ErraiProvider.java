@@ -76,6 +76,10 @@ public class ErraiProvider implements MessageBodyReader<Object>, MessageBodyWrit
   public Object readFrom(final Class<Object> type, final Type genericType, final Annotation[] annotations, final MediaType mediaType,
       final MultivaluedMap<String, String> httpHeaders, final InputStream entityStream) throws IOException, WebApplicationException {
 
-    return ServerMarshalling.fromJSON(entityStream);
+    if (type.isInterface()) {
+      return ServerMarshalling.fromJSON(entityStream);
+    }
+
+    return ServerMarshalling.fromJSON(entityStream, type);
   }
 }
