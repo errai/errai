@@ -277,6 +277,9 @@ public abstract class EnvUtil {
     final Set<String> patterns = new LinkedHashSet<>();
     for (final String s : value.split(" ")) {
       final String singleValue = s.trim();
+      if (singleValue.isEmpty()){
+        continue;
+      }
       if (singleValue.endsWith("*")) {
         patterns.add(singleValue);
       }
