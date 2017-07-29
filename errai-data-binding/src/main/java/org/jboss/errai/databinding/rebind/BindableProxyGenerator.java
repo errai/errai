@@ -202,9 +202,19 @@ public class BindableProxyGenerator {
             Parameter.of(Object.class, "value"));
 
     for (final String property : bindable.getBeanDescriptor().getProperties()) {
-      generateGetter(classBuilder, property, getMethod);
-      generateSetter(classBuilder, property, setMethod);
+      MetaMethod getterMethod = bindable.getBeanDescriptor().getReadMethodForProperty(property);
+	  
+      if(isBindableMethod(getterMethod)) {
+        // Instead of looking up the getter in this method and checking for existence, just pass it in
+        generateGetter(classBuilder, getterMethod, property, getMethod);
+        
+        MetaMethod setterMethod = bindable.getBeanDescriptor().getWriteMethodForProperty(property);
+        if (isBindableMethod(setterMethod)) {
+          generateSetter(classBuilder, setterMethod, getterMethod, property, setMethod);
+        }
+      }
     }
+    
     getMethod.append(
         If.objEquals(Stmt.loadVariable("property"), "this")
             .append(target().returnValue())
@@ -235,15 +245,9 @@ public class BindableProxyGenerator {
    * Generates a getter method for the provided property plus the corresponding code for the
    * implementation of {@link HasProperties#get(String)}.
    */
-  private void generateGetter(final ClassStructureBuilder<?> classBuilder, final String property,
-      final BlockBuilder<?> getMethod) {
-
-    final MetaMethod getterMethod = bindable.getBeanDescriptor().getReadMethodForProperty(property);
-    if(isToBeIgnored(getterMethod)){
-    	return;
-    }
+  private void generateGetter(final ClassStructureBuilder<?> classBuilder, final MetaMethod getterMethod,
+      String property, final BlockBuilder<?> getMethod) {
     
-    if (getterMethod != null && !getterMethod.isFinal()) {
       getMethod.append(
           If.objEquals(Stmt.loadVariable("property"), property)
               .append(Stmt.loadVariable("this").invoke(getterMethod.getName()).returnValue())
@@ -255,27 +259,21 @@ public class BindableProxyGenerator {
           .finish();
 
       proxiedAccessorMethods.add(getterMethod);
-    }
   }
 
-  private boolean isToBeIgnored(final MetaMethod method) {
-    return method != null && method.isAnnotationPresent(IgnoreBinding.class);
+  private boolean isBindableMethod(final MetaMethod method) {
+    return method != null && !method.isFinal() 
+            && !method.isAnnotationPresent(IgnoreBinding.class);
   }
 
   /**
    * Generates a setter method for the provided property plus the corresponding code for the
    * implementation of {@link HasProperties#set(String, Object)}.
    */
-  private void generateSetter(final ClassStructureBuilder<?> classBuilder, final String property, final BlockBuilder<?> setMethod) {
-    final MetaMethod getterMethod = bindable.getBeanDescriptor().getReadMethodForProperty(property);
-    final MetaMethod setterMethod = bindable.getBeanDescriptor().getWriteMethodForProperty(property);
+  private void generateSetter(final ClassStructureBuilder<?> classBuilder, final MetaMethod setterMethod, 
+		  final MetaMethod getterMethod, String property, final BlockBuilder<?> setMethod) {
     
-    if(isToBeIgnored(setterMethod)){
-    	return;
-    }
-    
-    if (getterMethod != null && setterMethod != null && !setterMethod.isFinal()) {
-      setMethod.append(
+	setMethod.append(
           If.cond(Stmt.loadVariable("property").invoke("equals", property))
               .append(
                   target().invoke(setterMethod.getName(),
@@ -337,7 +335,6 @@ public class BindableProxyGenerator {
           .finish();
 
       proxiedAccessorMethods.add(setterMethod);
-    }
   }
 
   /**
@@ -351,7 +348,7 @@ public class BindableProxyGenerator {
       final String methodName = method.getName();
       if (!proxiedAccessorMethods.contains(method)
           && !methodName.equals("hashCode") && !methodName.equals("equals") && !methodName.equals("toString")
-          && method.isPublic() && !method.isFinal() && !method.isStatic() && !isToBeIgnored(method)) {
+          && method.isPublic() && !method.isStatic() && isBindableMethod(method)) {
 
         final Parameter[] parms = DefParameters.from(method).getParameters().toArray(new Parameter[0]);
         final List<Statement> parmVars = new ArrayList<>();
@@ -397,7 +394,7 @@ public class BindableProxyGenerator {
     final BlockStatement block = new BlockStatement();
     for (final String property : bindable.getBeanDescriptor().getProperties()) {
       final MetaMethod readMethod = bindable.getBeanDescriptor().getReadMethodForProperty(property);
-      if (readMethod != null && !readMethod.isFinal() && !isToBeIgnored(readMethod)) {
+      if (isBindableMethod(readMethod)) {
         final MetaClass propertyType = readMethod.getReturnType();
         block.addStatement(agent("propertyTypes").invoke(
             "put",

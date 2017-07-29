@@ -121,9 +121,14 @@ public class HasPropertiesIntegrationTest extends AbstractErraiIOCTest {
     
     final Map<String, PropertyType> properties = model.getBeanProperties();
     final Set<String> actualProperties = properties.keySet();
-    final Set<String> expectedProperties = new HashSet<String>(Arrays.asList("propertyNames", "properties"));
+    final Set<String> expectedProperties = new HashSet<String>(Arrays.asList("properties", "name", "age"));
     
     assertEquals(expectedProperties, actualProperties);
+    
+    try {
+    	model.set("name", "Test");
+    	fail("Setter should not be present");
+    } catch(NonExistingPropertyException ex) { }
   }
   
 
