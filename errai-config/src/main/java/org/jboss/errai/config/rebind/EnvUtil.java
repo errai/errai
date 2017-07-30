@@ -296,7 +296,7 @@ public abstract class EnvUtil {
       MetaClassFactory
         .getAllCachedClasses()
         .stream()
-        .filter(mc -> filter.apply(mc.getFullyQualifiedName()))
+        .filter(mc -> filter.apply(mc.getFullyQualifiedName()) && !mc.isInterface() && (!mc.isAbstract() || mc.isEnum()))
         .collect(toCollection(() -> exposedClasses));
     }
   }

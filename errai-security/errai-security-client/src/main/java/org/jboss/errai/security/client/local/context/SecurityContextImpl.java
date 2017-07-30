@@ -32,6 +32,7 @@ import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.common.client.dom.Div;
 import org.jboss.errai.common.client.dom.HTMLElement;
 import org.jboss.errai.ioc.client.api.EntryPoint;
+import org.jboss.errai.ioc.client.container.Factory;
 import org.jboss.errai.security.client.local.api.SecurityContext;
 import org.jboss.errai.security.client.local.spi.ActiveUserCache;
 import org.jboss.errai.security.shared.api.identity.User;
@@ -111,6 +112,7 @@ public class SecurityContextImpl implements SecurityContext {
 
   @PostConstruct
   private void setup() {
+    userCache = Factory.maybeUnwrapProxy(userCache);
     performLoginStatusChangeActions(userCache.getUser());
     final User preloadedUser = userCache.getUser();
     InitVotes.waitFor(SecurityContext.class);
