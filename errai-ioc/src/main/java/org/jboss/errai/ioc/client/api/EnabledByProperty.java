@@ -35,12 +35,28 @@ public @interface EnabledByProperty {
    * The name of the system property that enables or disables this bean.
    */
   String value();
-  
+
   /**
-   * Normally, the target bean is enabled if and only if the specified system
-   * property exists and has the value {@code "true"}. If {@code negated} is
-   * {@code true} then this sense is reversed: the bean is disabled if and only
-   * if the specified system property exists and has the value {@code "true"}.
+   * Normally, the target bean is enabled if the specified system property exists and
+   * matches the declared {@code matchValue}. If {@code negated} is {@code true}
+   * then this sense is reversed: the bean is disabled if the specified system property
+   * equals the {@code matchValue}.
    */
   boolean negated() default false;
+
+  /**
+   * When enabled, the matchValue is used as the default value in case the system property is not set.
+   */
+  boolean matchByDefault() default false;
+
+  /**
+   * Whether it should consider case sensitive when comparing the match value.
+   */
+  boolean caseSensitive() default false;
+
+  /**
+   * Expected property value to match for considering this bean enabled
+   */
+  String matchValue() default "true";
+
 }
