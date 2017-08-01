@@ -66,7 +66,7 @@ public class JbossVFsTypeHandler implements Vfs.UrlType {
 
   public Vfs.Dir createDir(final URL url) {
     // Create non VFS Url
-    final File deployment = PackagingUtil.identifyDeployment(url);
+    final File deployment = DeploymentContextUtil.identifyDeployment(url);
     if (null == deployment)
       throw new RuntimeException("Unable identify deployment file for: " + url);
 

@@ -30,7 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * DeploymentContext and {@link PackagingUtil}
+ * DeploymentContext and {@link DeploymentContextUtil}
  * identify and unpack nested subdeployments (i.e. WAR inside EAR) before passing the resulting URL's to
  * the Reflections implementation.
  * <p/>
@@ -39,38 +39,42 @@ import org.slf4j.LoggerFactory;
  *
  * @author Heiko Braun <hbraun@redhat.com>
  */
-public class DeploymentContext {
+class DeploymentContext {
   private final List<URL> configUrls;
-  private final Map<String, File> subContexts = new HashMap<String, File>();
-  private final Set<String> processedUrls = new HashSet<String>();
-  private final Set<File> createdTmpFiles = new HashSet<File>();
+  private final Map<String, File> subContexts = new HashMap<>();
+  private final Set<String> processedUrls = new HashSet<>();
+  private final Set<File> createdTmpFiles = new HashSet<>();
 
   private final Logger log = LoggerFactory.getLogger(DeploymentContext.class);
 
-  public DeploymentContext(List<URL> configUrls) {
+  DeploymentContext(List<URL> configUrls) {
     this.configUrls = configUrls;
   }
 
-  public List<URL> getConfigUrls() {
+  List<URL> getConfigUrls() {
     return configUrls;
   }
 
-  public Map<String, File> getSubContexts() {
+  Map<String, File> getSubContexts() {
     return subContexts;
   }
 
-  public boolean hasProcessed(File file) {
+  boolean hasProcessed(File file) {
     return processedUrls.contains(file.getAbsolutePath());
   }
 
-  public void markProcessed(File file) {
+  void markProcessed(File file) {
     processedUrls.add(file.getAbsolutePath());
   }
 
-  public List<URL> process() {
-    PackagingUtil.process(this);
+  void markTmpFile(File file) {
+    createdTmpFiles.add(file);
+  }
 
-    final List<URL> superAndSubContexts = new ArrayList<URL>();
+  List<URL> process() {
+    DeploymentContextUtil.process(this);
+
+    final List<URL> superAndSubContexts = new ArrayList<>();
 
     for (final Map.Entry<String, File> entry : subContexts.entrySet()) {
       final File unzipped = entry.getValue();
@@ -87,11 +91,7 @@ public class DeploymentContext {
     return superAndSubContexts;
   }
 
-  public void markTmpFile(File file) {
-    createdTmpFiles.add(file);
-  }
-
-  public void close() {
+  void close() {
     for (final File f : createdTmpFiles) {
       final boolean deleted = deleteDirectory(f);
       if (!deleted) {
@@ -101,7 +101,7 @@ public class DeploymentContext {
     }
   }
 
-  static public boolean deleteDirectory(File path) {
+  private static boolean deleteDirectory(File path) {
     if (path.exists()) {
       final File[] files = path.listFiles();
       if (files != null) {
