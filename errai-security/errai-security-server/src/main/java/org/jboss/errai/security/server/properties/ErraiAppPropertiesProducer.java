@@ -16,17 +16,17 @@
 
 package org.jboss.errai.security.server.properties;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Properties;
-
-import javax.enterprise.inject.Produces;
-
+import org.jboss.errai.common.metadata.ErraiAppPropertiesFiles;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.enterprise.inject.Produces;
+import java.io.IOException;
+import java.net.URL;
+import java.util.Properties;
+
 /**
- * Creates {@link Properties} instance from the ErraiApp.properties resource.
+ * Creates {@link Properties} instance from the ErraiApp.properties and/or META-INF ErraiApp.properties resource.
  *
  * @author Max Barkley <mbarkley@redhat.com>
  */
@@ -38,16 +38,21 @@ public class ErraiAppPropertiesProducer {
   @ErraiAppProperties
   public Properties getErraiAppProperties() {
     final Properties properties = new Properties();
-    
-    final InputStream erraiAppPropertiesStream = 
-            getClass().getClassLoader().getResourceAsStream("ErraiApp.properties");
+
+    ErraiAppPropertiesFiles.getUrls(getClass().getClassLoader())
+            .stream()
+            .map(this::loadUrlStreamToProperties)
+            .forEach(properties::putAll);
+
+    return properties;
+  }
+
+  private Properties loadUrlStreamToProperties(final URL url) {
+    final Properties properties = new Properties();
+
     try {
-      if (erraiAppPropertiesStream != null) {
-        properties.load(erraiAppPropertiesStream);
-        erraiAppPropertiesStream.close();
-      }
-    }
-    catch (IOException e) {
+      properties.load(url.openStream());
+    } catch (IOException e) {
       logger.warn("An error occurred reading the ErraiApp.properties stream.", e);
     }
 

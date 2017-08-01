@@ -1644,7 +1644,7 @@ Dependency injection (DI) allows for cleaner and more modular code, by permittin
 ====
 Errai only scans the contents of classpath locations (JARs and directories) that have <<sid-5931354,
           a file called
-          ErraiApp.properties>> at their root. If dependency injection is not working for you, double-check that you have an [code]+ErraiApp.properties+ in every JAR and directory that contains classes Errai should know about.
+          ErraiApp.properties>> at their META-INF directory. If dependency injection is not working for you, double-check that you have an [code]+ErraiApp.properties+ in every JAR and directory that contains classes Errai should know about.
 ====
 
 A simple example:
@@ -2450,7 +2450,7 @@ Errai CDI is implemented as an extension on top of the Errai IOC Framework (see 
 ====
 Errai CDI only scans the contents of classpath locations (JARs and directories) that have <<sid-5931354,
           a file called
-          ErraiApp.properties>> at their root. If CDI features such as dependency injection, event observation, and [code]+@PostConstruct+ are not working for your classes, double-check that you have an [code]+ErraiApp.properties+ at the root of every JAR and directory tree that contains classes Errai should know about.
+          ErraiApp.properties>> at their META-INF directory. If CDI features such as dependency injection, event observation, and [code]+@PostConstruct+ are not working for your classes, double-check that you have an [code]+ErraiApp.properties+ at the META-INF directory of every JAR and directory tree that contains classes Errai should know about.
 ====
 
 [[sid-5931498]]
@@ -8576,7 +8576,7 @@ ErraiApp.properties acts both as a marker file for JARs that contain Errai-enabl
 
 ==== As a Marker File
 
-_An_ [code]++ErraiApp.properties++ _file must appear at the root of each classpath location that contains an Errai module._ The contents of JAR and directory classpath entries that do not contain an [code]+ErraiApp.properties+ are effectively invisible to Errai's classpath scanner.
+_An_ [code]++ErraiApp.properties++ _file must appear at the META-INF directory of each classpath location that contains an Errai module._ The contents of JAR and directory classpath entries that do not contain an [code]+ErraiApp.properties+ are effectively invisible to Errai's classpath scanner. . (Placing ErraiApp.properties in the root of the classpath is still supported for compatibility reasons but may not be in future versions.)
 
 [[sid-5931354_ErraiApp.properties-AsaConfigurationFile]]
 

@@ -16,6 +16,22 @@
 
 package org.jboss.errai.common.metadata;
 
+import com.google.common.io.Files;
+import com.google.gwt.core.ext.GeneratorContext;
+import com.google.gwt.core.ext.typeinfo.JPackage;
+import com.google.gwt.dev.cfg.ModuleDef;
+import com.google.gwt.dev.javac.StandardGeneratorContext;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -42,24 +58,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
-
-import com.google.common.io.Files;
-import com.google.gwt.core.ext.GeneratorContext;
-import com.google.gwt.core.ext.typeinfo.JPackage;
-import com.google.gwt.dev.cfg.ModuleDef;
-import com.google.gwt.dev.javac.StandardGeneratorContext;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -168,14 +166,6 @@ public class RebindUtils {
     // noinspection ResultOfMethodCallIgnored
     fileCacheDir.mkdirs();
     return fileCacheDir;
-  }
-
-  public static File getCacheFile(final String name) {
-    return new File(getErraiCacheDir(), name).getAbsoluteFile();
-  }
-
-  public static boolean cacheFileExists(final String name) {
-    return getCacheFile(name).exists();
   }
 
   private static volatile Boolean _hasClasspathChanged;
@@ -326,7 +316,7 @@ public class RebindUtils {
       return new File("").getAbsolutePath() + "/";
     }
     try {
-      final List<URL> configUrls = MetaDataScanner.getConfigUrls();
+      final List<URL> configUrls = ErraiAppPropertiesFiles.getModulesUrls();
       final Set<String> candidateRoots = new HashSet<String>();
       final String workingDir = new File("").getAbsolutePath();
 
