@@ -19,6 +19,7 @@ package org.jboss.errai.bus.tests;
 import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -114,9 +115,7 @@ public class PackageScanTest extends TestCase {
 
     URL warUrl = new URL(warBaseDir.toURI().toURL() + "/WEB-INF/classes");
 
-    List<URL> urlList = new ArrayList<URL>();
-    urlList.add(warUrl);
-    MetaDataScanner scanner = createScanner(urlList);
+    MetaDataScanner scanner = createScanner(Collections.singletonList(warUrl));
 
     String annotationToSearchFor = Local.class.getName();
     Set<String> annotated = scanner.getStore().getTypesAnnotatedWith(annotationToSearchFor);
@@ -127,7 +126,7 @@ public class PackageScanTest extends TestCase {
 
   private MetaDataScanner createScanner(List<URL> urlList) {
     long s0 = System.currentTimeMillis();
-    MetaDataScanner scanner = MetaDataScanner.createInstance(urlList, null);
+    MetaDataScanner scanner = MetaDataScanner.createInstance(urlList);
     System.out.println("Scan time: " + (System.currentTimeMillis() - s0));
     return scanner;
 

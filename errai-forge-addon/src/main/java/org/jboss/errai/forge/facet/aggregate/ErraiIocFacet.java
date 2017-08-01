@@ -23,7 +23,7 @@ import org.jboss.forge.addon.facets.constraints.FacetConstraint;
 
 /**
  * Aggregator facet for Errai IOC. Adds errai-ioc dependency and ensures
- * ErraiApp.properties is in resources folder.
+ * ErraiApp.properties is in resources/META-INF folder.
  * 
  * @author Max Barkley <mbarkley@redhat.com>
  */

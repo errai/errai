@@ -16,32 +16,13 @@
 
 package org.jboss.errai.ui.rebind;
 
-import java.io.File;
-import java.io.InputStream;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
-import java.net.URI;
-import java.net.URL;
-import java.net.URLDecoder;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
-
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.ext.GeneratorContext;
+import com.google.gwt.core.ext.TreeLogger;
+import com.google.gwt.core.ext.UnableToCompleteException;
+import com.google.gwt.resources.client.ClientBundle;
+import com.google.gwt.resources.client.ClientBundle.Source;
+import com.google.gwt.resources.client.TextResource;
 import org.apache.commons.io.IOUtils;
 import org.codehaus.jackson.JsonEncoding;
 import org.codehaus.jackson.JsonFactory;
@@ -59,7 +40,7 @@ import org.jboss.errai.codegen.meta.impl.build.BuildMetaClass;
 import org.jboss.errai.codegen.util.Implementations;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.client.api.Assert;
-import org.jboss.errai.common.metadata.MetaDataScanner;
+import org.jboss.errai.common.metadata.ErraiAppPropertiesFiles;
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.config.rebind.AbstractAsyncGenerator;
 import org.jboss.errai.config.rebind.GenerateAsync;
@@ -83,13 +64,30 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.core.ext.GeneratorContext;
-import com.google.gwt.core.ext.TreeLogger;
-import com.google.gwt.core.ext.UnableToCompleteException;
-import com.google.gwt.resources.client.ClientBundle;
-import com.google.gwt.resources.client.ClientBundle.Source;
-import com.google.gwt.resources.client.TextResource;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
+import java.io.File;
+import java.io.InputStream;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
+import java.net.URI;
+import java.net.URL;
+import java.net.URLDecoder;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * Generates a concrete subclass of {@link TranslationService}. This class is responsible for
@@ -254,13 +252,13 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
     final Collection<URL> urls = new HashSet<>();
 
     addUrlsFromBundleAnnotations(bundleAnnotatedClasses, urls);
-    addUrlsFromErraiAppProperties(urls);
+    addErraiAppPropertiesModulesUrls(urls);
 
     return urls;
   }
 
-  private void addUrlsFromErraiAppProperties(final Collection<URL> urls) {
-    urls.addAll(MetaDataScanner.getConfigUrls());
+  private void addErraiAppPropertiesModulesUrls(final Collection<URL> urls) {
+    urls.addAll(ErraiAppPropertiesFiles.getModulesUrls());
   }
 
   private void addUrlsFromBundleAnnotations(final Collection<MetaClass> bundleAnnotatedClasses, final Collection<URL> urls) {

@@ -16,8 +16,14 @@
 
 package org.jboss.errai.codegen.util;
 
-import static org.slf4j.LoggerFactory.getLogger;
+import org.eclipse.jdt.core.compiler.CompilationProgress;
+import org.eclipse.jdt.core.compiler.batch.BatchCompiler;
+import org.jboss.errai.common.metadata.ErraiAppPropertiesFiles;
+import org.jboss.errai.common.metadata.RebindUtils;
+import org.slf4j.Logger;
 
+import javax.tools.JavaCompiler;
+import javax.tools.ToolProvider;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -36,14 +42,7 @@ import java.util.Set;
 import java.util.jar.JarFile;
 import java.util.regex.Pattern;
 
-import javax.tools.JavaCompiler;
-import javax.tools.ToolProvider;
-
-import org.eclipse.jdt.core.compiler.CompilationProgress;
-import org.eclipse.jdt.core.compiler.batch.BatchCompiler;
-import org.jboss.errai.common.metadata.MetaDataScanner;
-import org.jboss.errai.common.metadata.RebindUtils;
-import org.slf4j.Logger;
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * @author Mike Brock
@@ -188,18 +187,18 @@ public class ClassChangeUtil {
       }
 
       final StringBuilder sb = new StringBuilder(4096);
-      final List<URL> configUrls = MetaDataScanner.getConfigUrls();
-      final List<File> classpathElements = new ArrayList<File>(configUrls.size());
+      final List<URL> moduleUrls = ErraiAppPropertiesFiles.getModulesUrls();
+      final List<File> classpathElements = new ArrayList<>(moduleUrls.size());
       classpathElements.add(new File(outputPath));
 
-      log.debug(">>> Searching for all jars using " + MetaDataScanner.ERRAI_CONFIG_STUB_NAME);
-      for (final URL url : configUrls) {
+      log.debug(">>> Searching for all jars");
+      for (final URL url : moduleUrls) {
         final File file = getFileIfExists(url.getFile());
         if (file != null) {
           classpathElements.add(file);
         }
       }
-      log.debug("<<< Done searching for all jars using " + MetaDataScanner.ERRAI_CONFIG_STUB_NAME);
+      log.debug("<<< Done searching for all jars");
 
       for (final File file : classpathElements) {
         sb.append(file.getAbsolutePath()).append(File.pathSeparator);

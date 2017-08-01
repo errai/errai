@@ -16,26 +16,26 @@
 
 package org.jboss.errai.common.metadata;
 
-import com.google.common.base.Predicate;
 import com.google.common.collect.Multimap;
 import org.jboss.errai.reflections.scanners.AbstractScanner;
 import org.jboss.errai.reflections.vfs.Vfs;
 
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.function.Predicate;
 
 public class ErraiPropertyScanner extends AbstractScanner {
-  Predicate<String> predicate;
 
-  public ErraiPropertyScanner(final Predicate<String> predicate) {
+  private final Predicate<String> predicate;
+
+  ErraiPropertyScanner(final Predicate<String> predicate) {
     this.predicate = predicate;
   }
 
   public boolean acceptsInput(final String file) {
-    return predicate.apply(file);
+    return predicate.test(file);
   }
 
   public void scan(final Vfs.File file) {

@@ -16,7 +16,9 @@
 
 package org.jboss.errai.common.metadata;
 
-import java.util.concurrent.Callable;
+import org.jboss.errai.reflections.ReflectionsException;
+
+import java.io.File;
 import java.util.concurrent.FutureTask;
 
 /**
@@ -26,27 +28,32 @@ import java.util.concurrent.FutureTask;
  * @author Mike Brock
  */
 public class ScannerSingleton {
+
   private static volatile MetaDataScanner scanner;
 
-  private static final FutureTask<MetaDataScanner> future = new FutureTask<MetaDataScanner>(
-      new Callable<MetaDataScanner>() {
-        @Override
-        public MetaDataScanner call() throws Exception {
-          if (Boolean.getBoolean("errai.reflections.cache")
-              && RebindUtils.cacheFileExists(RebindUtils.getClasspathHash() + ".cache.xml")) {
-              return MetaDataScanner.createInstanceFromCache();
-          }
+  private static final String ERRAI_REFLECTIONS_CACHE_PROPERTY = "errai.reflections.cache";
+  private static final String CACHE_FILE_NAME = RebindUtils.getClasspathHash() + ".cache.xml";
 
-          return MetaDataScanner.createInstance();
-        }
+  private static final Object lock = new Object();
+
+  private static final FutureTask<MetaDataScanner> future = new FutureTask<>(() -> {
+
+    if (erraiReflectionsCacheIsEnabled() && cacheFileExists()) {
+      try {
+        return MetaDataScanner.createInstance(getCacheFile());
+      } catch (final ReflectionsException e) {
+        e.printStackTrace();
       }
-  );
+    }
+
+    return MetaDataScanner.createInstance();
+  });
+
 
   static {
     new Thread(future).start();
   }
 
-  private static final Object lock = new Object();
 
   public static MetaDataScanner getOrCreateInstance() {
     synchronized (lock) {
@@ -54,8 +61,8 @@ public class ScannerSingleton {
         try {
           scanner = future.get();
 
-          if (scanner != null && Boolean.getBoolean("errai.reflections.cache") ) {
-            scanner.save(RebindUtils.getCacheFile(RebindUtils.getClasspathHash() + ".cache.xml").getAbsolutePath());
+          if (scanner != null && erraiReflectionsCacheIsEnabled()) {
+            scanner.save(getCacheFile().getAbsolutePath());
           }
         }
         catch (Throwable t) {
@@ -65,5 +72,17 @@ public class ScannerSingleton {
       }
       return scanner;
     }
+  }
+
+  private static boolean erraiReflectionsCacheIsEnabled() {
+    return Boolean.getBoolean(ERRAI_REFLECTIONS_CACHE_PROPERTY);
+  }
+
+  private static File getCacheFile() {
+    return new File(RebindUtils.getErraiCacheDir(), CACHE_FILE_NAME).getAbsoluteFile();
+  }
+
+  private static boolean cacheFileExists() {
+    return getCacheFile().exists();
   }
 }

@@ -16,14 +16,25 @@
 
 package org.jboss.errai.config.rebind;
 
-import static java.util.stream.Collectors.toCollection;
+import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaClassFactory;
+import org.jboss.errai.common.client.api.annotations.LocalEvent;
+import org.jboss.errai.common.client.api.annotations.NonPortable;
+import org.jboss.errai.common.client.api.annotations.Portable;
+import org.jboss.errai.common.client.types.TypeHandlerFactory;
+import org.jboss.errai.common.metadata.ErraiAppPropertiesFiles;
+import org.jboss.errai.common.metadata.ScannerSingleton;
+import org.jboss.errai.common.rebind.CacheStore;
+import org.jboss.errai.common.rebind.CacheUtil;
+import org.jboss.errai.config.util.ClassScanner;
+import org.jboss.errai.reflections.util.SimplePackageFilter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -33,19 +44,7 @@ import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.jboss.errai.codegen.meta.MetaClass;
-import org.jboss.errai.codegen.meta.MetaClassFactory;
-import org.jboss.errai.common.client.api.annotations.LocalEvent;
-import org.jboss.errai.common.client.api.annotations.NonPortable;
-import org.jboss.errai.common.client.api.annotations.Portable;
-import org.jboss.errai.common.client.types.TypeHandlerFactory;
-import org.jboss.errai.common.metadata.ScannerSingleton;
-import org.jboss.errai.common.rebind.CacheStore;
-import org.jboss.errai.common.rebind.CacheUtil;
-import org.jboss.errai.config.util.ClassScanner;
-import org.jboss.errai.reflections.util.SimplePackageFilter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static java.util.stream.Collectors.toCollection;
 
 /**
  * @author Mike Brock
@@ -139,9 +138,7 @@ public abstract class EnvUtil {
     addExposedInnerClasses(exposedClasses, exposedFromScanner);
     exposedClasses.addAll(exposedFromScanner);
 
-    final Collection<URL> erraiAppProperties = getErraiAppProperties();
-
-    processErraiAppPropertiesUrls(frameworkProps, mappingAliases, exposedClasses, nonportableClasses, explicitTypes, erraiAppProperties);
+    processErraiAppPropertiesFiles(frameworkProps, mappingAliases, exposedClasses, nonportableClasses, explicitTypes);
     processEnvironmentConfigExtensions(exposedClasses);
 
     // must do this before filling in interfaces and supertypes!
@@ -174,10 +171,9 @@ public abstract class EnvUtil {
     }
   }
 
-  private static void processErraiAppPropertiesUrls(final Map<String, String> frameworkProps, final Map<String, String> mappingAliases,
-          final Set<MetaClass> exposedClasses, final Set<MetaClass> nonportableClasses, final Set<String> explicitTypes,
-          final Collection<URL> erraiAppProperties) {
-    for (final URL url : erraiAppProperties) {
+  private static void processErraiAppPropertiesFiles(final Map<String, String> frameworkProps, final Map<String, String> mappingAliases,
+          final Set<MetaClass> exposedClasses, final Set<MetaClass> nonportableClasses, final Set<String> explicitTypes) {
+    for (final URL url : getErraiAppPropertiesFilesUrls()) {
       InputStream inputStream = null;
       try {
         log.debug("checking " + url.getFile() + " for configured types ...");
@@ -205,6 +201,7 @@ public abstract class EnvUtil {
   private static void processErraiAppPropertiesBundle(final Map<String, String> frameworkProps, final Map<String, String> mappingAliases,
           final Set<MetaClass> exposedClasses, final Set<MetaClass> nonportableClasses, final Set<String> explicitTypes,
           final ResourceBundle props) {
+
     for (final String key : props.keySet()) {
       final String value = props.getString(key);
       updateFrameworkProperties(frameworkProps, key, value);
@@ -337,22 +334,11 @@ public abstract class EnvUtil {
     }
   }
 
-  public static Collection<URL> getErraiAppProperties() {
-    try {
-      final Set<URL> urlList = new HashSet<>();
-      for (final ClassLoader classLoader : Arrays.asList(Thread.currentThread().getContextClassLoader(),
-              EnvUtil.class.getClassLoader())) {
+  public static Collection<URL> getErraiAppPropertiesFilesUrls() {
+    final ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
+    final ClassLoader envUtilClassLoader = EnvUtil.class.getClassLoader();
 
-        final Enumeration<URL> resources = classLoader.getResources("ErraiApp.properties");
-        while (resources.hasMoreElements()) {
-          urlList.add(resources.nextElement());
-        }
-      }
-      return urlList;
-    }
-    catch (final IOException e) {
-      throw new RuntimeException("failed to load ErraiApp.properties from classloader", e);
-    }
+    return ErraiAppPropertiesFiles.getUrls(contextClassLoader, envUtilClassLoader);
   }
 
   private static void fillInInterfacesAndSuperTypes(final Set<MetaClass> set, final MetaClass type) {

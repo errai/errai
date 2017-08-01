@@ -31,19 +31,19 @@ import java.util.zip.ZipInputStream;
  * A set of utilities for processing a {@link DeploymentContext}
  *
  * @author Heiko Braun <hbraun@redhat.com>
-\ */
-public class PackagingUtil {
+ */
+class DeploymentContextUtil {
   private static final Logger log = LoggerFactory.getLogger("ClasspathScanning");
 
-  public static File identifyDeployment(final URL url) {
+  static File identifyDeployment(final URL url) {
     String actualFilePath = url.getPath();
     if (actualFilePath.startsWith("file:")) {
       actualFilePath = actualFilePath.substring(5);
     }
 
-    final int nestedSeperator = actualFilePath.indexOf('!');
-    if (nestedSeperator != -1) {
-      actualFilePath = actualFilePath.substring(0, nestedSeperator);
+    final int nestedSeparator = actualFilePath.indexOf('!');
+    if (nestedSeparator != -1) {
+      actualFilePath = actualFilePath.substring(0, nestedSeparator);
     }
 
     log.debug("scanning inside: " + actualFilePath);
@@ -51,7 +51,24 @@ public class PackagingUtil {
     return findActualDeploymentFile(new File(actualFilePath));
   }
 
-  static File findActualDeploymentFile(File start) {
+  static void process(final DeploymentContext ctx) {
+    for (final URL url : ctx.getConfigUrls()) {
+      final File file = DeploymentContextUtil.identifyDeployment(url);
+
+      /*
+       * several config urls may derive from the same archive
+       * don't process them twice
+       */
+      if (!ctx.hasProcessed(file)) {
+        ctx.markProcessed(file);
+        if (file.getName().endsWith(".ear")){
+          DeploymentContextUtil.processNestedZip(file, ctx);
+        }
+      }
+    }
+  }
+
+  private static File findActualDeploymentFile(File start) {
     int pivotPoint;
     String rootPath = start.getPath();
 
@@ -62,23 +79,6 @@ public class PackagingUtil {
     while (!start.exists() && pivotPoint > 0);
 
     return start;
-  }
-
-  static void process(final DeploymentContext ctx) {
-    for (final URL url : ctx.getConfigUrls()) {
-      final File file = PackagingUtil.identifyDeployment(url);
-
-      /**
-       * several config urls may derive from the same archive
-       * don't process them twice
-       */
-      if (!ctx.hasProcessed(file)) {
-        ctx.markProcessed(file);
-        if (file.getName().endsWith(".ear")){
-          PackagingUtil.processNestedZip(file, ctx);
-        }
-      }
-    }
   }
 
   private static void processNestedZip(final File file, final DeploymentContext ctx) {
@@ -113,7 +113,7 @@ public class PackagingUtil {
     }
   }
 
-  protected static File expandZipEntry(final ZipInputStream stream, final ZipEntry entry, final DeploymentContext ctx) {
+  private static File expandZipEntry(final ZipInputStream stream, final ZipEntry entry, final DeploymentContext ctx) {
     final String tmpUUID = "erraiBootstrap_" + UUID.randomUUID().toString().replaceAll("\\-", "_");
     final String tmpDir = System.getProperty("java.io.tmpdir") + "/" + tmpUUID;
     final int idx = entry.getName().lastIndexOf('/');

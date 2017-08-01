@@ -415,8 +415,8 @@ public class DataBindingUtil {
 
   private static Set<MetaClass> findConfiguredBindableTypes() {
     final Set<MetaClass> bindableTypes = new HashSet<>();
-    final Collection<URL> erraiAppProperties = EnvUtil.getErraiAppProperties();
-    for (final URL url : erraiAppProperties) {
+
+    for (final URL url : EnvUtil.getErraiAppPropertiesFilesUrls()) {
       InputStream inputStream = null;
       try {
         log.debug("Checking " + url.getFile() + " for bindable types...");
