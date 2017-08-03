@@ -1315,22 +1315,17 @@ public class IOCProcessor {
 
   private boolean isEnabledByProperty(final MetaClass type) {
     final EnabledByProperty anno = type.getAnnotation(EnabledByProperty.class);
-    final boolean propValue = getPropertyValue(anno.value());
+    final boolean propValue = getPropertyValue(anno.value(), anno.matchValue(), anno.defaultValue());
     final boolean negated = anno.negated();
 
     return propValue ^ negated;
   }
 
-  private boolean getPropertyValue(final String propName) {
+  protected boolean getPropertyValue(final String propName,
+                                     final String matchValue,
+                                     final String defaultValue) {
     final String propertyValue = EnvUtil.getEnvironmentConfig().getFrameworkOrSystemProperty(propName);
-    if (propertyValue == null) {
-      return false;
-    }
-    try {
-      return Boolean.parseBoolean(propertyValue);
-    } catch (final Throwable t) {
-      throw new RuntimeException("Could not parse " + propName + " value, " + propertyValue + ", to boolean.", t);
-    }
+    return propertyValue == null ? defaultValue.equals(matchValue) : propertyValue.equals(matchValue);
   }
 
   private boolean hasEnablingProperty(final MetaClass type) {

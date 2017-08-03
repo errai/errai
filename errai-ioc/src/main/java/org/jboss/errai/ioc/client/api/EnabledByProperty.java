@@ -43,4 +43,15 @@ public @interface EnabledByProperty {
    * if the specified system property exists and has the value {@code "true"}.
    */
   boolean negated() default false;
+
+  /**
+   * Default value in case the system property is not set at all.
+   */
+  String defaultValue() default "";
+
+  /**
+   * Expected property value to match for considering this bean enabled
+   */
+  String matchValue() default "true";
+
 }
