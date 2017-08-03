@@ -296,9 +296,17 @@ public abstract class EnvUtil {
       MetaClassFactory
         .getAllCachedClasses()
         .stream()
-        .filter(mc -> filter.apply(mc.getFullyQualifiedName()) && !mc.isInterface() && (!mc.isAbstract() || mc.isEnum()))
+        .filter(mc -> filter.apply(mc.getFullyQualifiedName()) && validateWildcardSerializable(mc))
         .collect(toCollection(() -> exposedClasses));
     }
+  }
+
+  private static boolean validateWildcardSerializable(MetaClass mc) {
+    if(mc.isInterface() || (mc.isAbstract() && !mc.isEnum())) {
+      log.info("Serializable types cannot be an interface or abstract, ignoring: " + mc.getFullyQualifiedName());
+      return false;
+    }
+    return true;
   }
 
   private static void updateFrameworkProperties(final Map<String, String> frameworkProps, final String key, final String value) {

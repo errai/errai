@@ -395,9 +395,9 @@ public class DataBindingUtil {
    */
   public static Set<MetaClass> getConfiguredBindableTypes() {
     if (configuredBindableTypes != null) {
-        configuredBindableTypes = refreshConfiguredBindableTypes();
+      configuredBindableTypes = refreshConfiguredBindableTypes();
     } else {
-        configuredBindableTypes = findConfiguredBindableTypes();
+      configuredBindableTypes = findConfiguredBindableTypes();
     }
 
     return configuredBindableTypes;
@@ -446,7 +446,7 @@ public class DataBindingUtil {
               MetaClassFactory
                   .getAllCachedClasses()
                   .stream()
-                  .filter(mc -> filter.apply(mc.getFullyQualifiedName()))
+                  .filter(mc -> filter.apply(mc.getFullyQualifiedName()) && validateWildcard(mc))
                   .collect(toCollection(() -> bindableTypes));
             }
             break;
@@ -466,5 +466,13 @@ public class DataBindingUtil {
     }
 
     return bindableTypes;
+  }
+
+  private static boolean validateWildcard(MetaClass bindable) {
+    if(bindable.isFinal()) {
+      log.info("@Bindable types cannot be final, ignoring: " + bindable.getFullyQualifiedName());
+      return false;
+    }
+    return true;
   }
 }
