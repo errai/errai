@@ -31,6 +31,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javax.enterprise.util.TypeLiteral;
 
 import org.jboss.errai.codegen.BlockStatement;
 import org.jboss.errai.codegen.Cast;
@@ -40,6 +41,7 @@ import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.Variable;
 import org.jboss.errai.codegen.builder.BlockBuilder;
+import org.jboss.errai.codegen.builder.CaseBlockBuilder;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.ContextualStatementBuilder;
 import org.jboss.errai.codegen.builder.ElseBlockBuilder;
@@ -80,12 +82,14 @@ import com.google.gwt.core.ext.TreeLogger;
 public class BindableProxyGenerator {
   private final MetaClass bindable;
   private final String agentField;
+  private final String targetField;
   private final TreeLogger logger;
   private final Set<MetaMethod> proxiedAccessorMethods;
 
   public BindableProxyGenerator(final MetaClass bindable, final TreeLogger logger) {
     this.bindable = bindable;
-    this.agentField = inferSafeAgentFieldName();
+    this.agentField = inferSafeFieldName("agent");
+    this.targetField = inferSafeFieldName("target");
     this.logger = logger;
     this.proxiedAccessorMethods = new HashSet<>();
   }
@@ -100,13 +104,16 @@ public class BindableProxyGenerator {
     classBuilder
         .privateField(agentField, parameterizedAs(BindableProxyAgent.class, typeParametersOf(bindable)))
         .finish()
+        .privateField(targetField, bindable)
+        .finish()
         .publicConstructor()
         .callThis(Stmt.newObject(bindable))
         .finish()
-        .publicConstructor(Parameter.of(bindable, "target"))
+        .publicConstructor(Parameter.of(bindable, "targetVal"))
         .append(Stmt.loadVariable(agentField).assignValue(
             Stmt.newObject(parameterizedAs(BindableProxyAgent.class, typeParametersOf(bindable)),
-                Variable.get("this"), Variable.get("target"))))
+                Variable.get("this"), Variable.get("targetVal"))))
+        .append(Stmt.loadVariable(targetField).assignValue(Variable.get("targetVal")))
         .append(generatePropertiesMap())
         .append(agent().invoke("copyValues"))
         .appendAll(registerDeclarativeHandlers(bindable))
@@ -138,6 +145,7 @@ public class BindableProxyGenerator {
         .append(target().invoke("toString").returnValue())
         .finish();
 
+    generateCommonSetter(classBuilder);
     generateAccessorMethods(classBuilder);
     generateNonAccessorMethods(classBuilder);
 
@@ -199,35 +207,46 @@ public class BindableProxyGenerator {
     final BlockBuilder<?> setMethod = classBuilder.publicMethod(void.class, "set",
             Parameter.of(String.class, "property"),
             Parameter.of(Object.class, "value"));
-
+    
+    CaseBlockBuilder getSwitchBlock = Stmt.switch_(loadVariable("property"));
+    CaseBlockBuilder setSwitchBlock = Stmt.switch_(loadVariable("property"));
+    
     for (final String property : bindable.getBeanDescriptor().getProperties()) {
-      generateGetter(classBuilder, property, getMethod);
-      generateSetter(classBuilder, property, setMethod);
+      generateGetter(classBuilder, property, getSwitchBlock);
+      generateSetter(classBuilder, property, setSwitchBlock);
     }
-    getMethod.append(
-        If.objEquals(Stmt.loadVariable("property"), "this")
-            .append(target().returnValue())
-            .finish()
-        );
-    setMethod.append(
-        If.cond(Stmt.loadVariable("property").invoke("equals", "this"))
-            .append(agent().loadField("target").assignValue(
-                    Stmt.castTo(bindable, Stmt.loadVariable("value"))))
-            .append(
-                Stmt.returnVoid())
-            .finish()
-        );
-
+    getSwitchBlock.case_("this").append(target().returnValue()).finish();
+    setSwitchBlock.case_("this")
+        .append(Stmt.loadClassMember(targetField).assignValue(Stmt.castTo(bindable, Stmt.loadVariable("value"))))    
+        .append(agent().loadField("target").assignValue(Stmt.loadClassMember(targetField)))
+        .append(Stmt.break_())
+        .finish();
+    
     final Statement nonExistingPropertyException = Stmt.throw_(NonExistingPropertyException.class,
             Stmt.loadLiteral(bindable.getName()), Variable.get("property"));
-    getMethod.append(nonExistingPropertyException).finish();
-    setMethod.append(nonExistingPropertyException).finish();
+    getSwitchBlock.default_().append(nonExistingPropertyException).finish();
+    setSwitchBlock.default_().append(nonExistingPropertyException).finish();
+    getMethod.append(getSwitchBlock).finish();
+    setMethod.append(setSwitchBlock).finish();
 
     classBuilder.publicMethod(Map.class, "getBeanProperties")
-      .append(Stmt.declareFinalVariable("props", Map.class, ObjectBuilder.newInstanceOf(HashMap.class).withParameters(agent().loadField("propertyTypes"))))
+      .append(Stmt.declareFinalVariable("props", Map.class, ObjectBuilder.newInstanceOf(HashMap.class)
+              .withParameters(agent().loadField("propertyTypes"))))
       .append(Stmt.loadVariable("props").invoke("remove", "this"))
       .append(Stmt.invokeStatic(Collections.class, "unmodifiableMap", Stmt.loadVariable("props")).returnValue())
     .finish();
+  }
+  
+  private void generateCommonSetter(final ClassStructureBuilder<?> classBuilder) {
+      classBuilder.privateMethod(void.class, "changeAndFire", 
+              Parameter.of(String.class, "property"),
+              Parameter.of(Object.class, "value"))
+      .append(Stmt.declareFinalVariable("oldValue", Object.class, 
+              Stmt.loadVariable("this").invoke("get", loadVariable("property"))))
+      .append(Stmt.loadVariable("this").invoke("set", loadVariable("property"), loadVariable("value"))) 
+      .append(agent().invoke("updateWidgetsAndFireEvent", false, loadVariable("property"), 
+              Variable.get("oldValue"), loadVariable("value")))
+      .finish();
   }
 
   /**
@@ -235,16 +254,12 @@ public class BindableProxyGenerator {
    * implementation of {@link HasProperties#get(String)}.
    */
   private void generateGetter(final ClassStructureBuilder<?> classBuilder, final String property,
-      final BlockBuilder<?> getMethod) {
+                              final CaseBlockBuilder switchBlock) {
 
     final MetaMethod getterMethod = bindable.getBeanDescriptor().getReadMethodForProperty(property);
     if (getterMethod != null && !getterMethod.isFinal()) {
-      getMethod.append(
-          If.objEquals(Stmt.loadVariable("property"), property)
-              .append(Stmt.loadVariable("this").invoke(getterMethod.getName()).returnValue())
-              .finish()
-          );
-
+      BlockBuilder<CaseBlockBuilder> caseBlock = switchBlock.case_(property);
+      caseBlock.append(Stmt.loadVariable("this").invoke(getterMethod.getName()).returnValue()).finish();
       classBuilder.publicMethod(getterMethod.getReturnType(), getterMethod.getName())
           .append(target().invoke(getterMethod.getName()).returnValue())
           .finish();
@@ -257,19 +272,17 @@ public class BindableProxyGenerator {
    * Generates a setter method for the provided property plus the corresponding code for the
    * implementation of {@link HasProperties#set(String, Object)}.
    */
-  private void generateSetter(final ClassStructureBuilder<?> classBuilder, final String property, final BlockBuilder<?> setMethod) {
+  private void generateSetter(final ClassStructureBuilder<?> classBuilder, final String property, 
+                              final CaseBlockBuilder switchBlock) {
     final MetaMethod getterMethod = bindable.getBeanDescriptor().getReadMethodForProperty(property);
     final MetaMethod setterMethod = bindable.getBeanDescriptor().getWriteMethodForProperty(property);
     if (getterMethod != null && setterMethod != null && !setterMethod.isFinal()) {
-      setMethod.append(
-          If.cond(Stmt.loadVariable("property").invoke("equals", property))
-              .append(
-                  target().invoke(setterMethod.getName(),
-                      Cast.to(setterMethod.getParameters()[0].getType().asBoxed(), Variable.get("value"))))
-              .append(
-                  Stmt.returnVoid())
-              .finish()
-          );
+      BlockBuilder<CaseBlockBuilder> caseBlock = switchBlock.case_(property);
+      caseBlock
+          .append(target().invoke(setterMethod.getName(),
+                  Cast.to(setterMethod.getParameters()[0].getType().asBoxed(), Variable.get("value"))))
+          .append(Stmt.break_())
+          .finish();
 
       final MetaClass paramType = setterMethod.getParameters()[0].getType();
 
@@ -309,19 +322,28 @@ public class BindableProxyGenerator {
       }
 
       final String oldValName = ensureSafeLocalVariableName("oldValue", setterMethod);
-      final boolean propertyIsList = bindable.getBeanDescriptor().getPropertyType(property).getFullyQualifiedName().equals(List.class.getName());
-      classBuilder.publicMethod(setterMethod.getReturnType(), setterMethod.getName(),
-          Parameter.of(paramType, property))
-          .append(updateNestedProxy)
-          .append(
-              Stmt.declareVariable(oldValName, paramType, target().invoke(getterMethod.getName())))
-          .append(wrappedListProperty)
-          .append(callSetterOnTarget)
-          .append(
-              agent().invoke("updateWidgetsAndFireEvent", propertyIsList, property, Variable.get(oldValName), Variable.get(property)))
-          .append(returnValueOfSetter)
-          .finish();
-
+      final boolean propertyIsList = bindable.getBeanDescriptor().getPropertyType(property)
+                                         .getFullyQualifiedName().equals(List.class.getName());
+      
+      if (propertyIsList || returnValueOfSetter != EmptyStatement.INSTANCE) {
+        classBuilder.publicMethod(setterMethod.getReturnType(), setterMethod.getName(), 
+                                  Parameter.of(paramType, property))
+            .append(updateNestedProxy)
+            .append(Stmt.declareVariable(oldValName, paramType, target().invoke(getterMethod.getName())))
+            .append(wrappedListProperty)
+            .append(callSetterOnTarget)
+            .append(agent().invoke("updateWidgetsAndFireEvent", propertyIsList, property, 
+                                   Variable.get(oldValName), Variable.get(property)))
+            .append(returnValueOfSetter)
+            .finish();
+      } else {
+        classBuilder.publicMethod(setterMethod.getReturnType(), setterMethod.getName(),
+                                  Parameter.of(paramType, property))
+            .append(updateNestedProxy)
+            .append(wrappedListProperty)
+            .append(loadVariable("this").invoke("changeAndFire", property, Variable.get(property)))
+            .finish();  
+      }
       proxiedAccessorMethods.add(setterMethod);
     }
   }
@@ -381,11 +403,14 @@ public class BindableProxyGenerator {
    */
   private Statement generatePropertiesMap() {
     final BlockStatement block = new BlockStatement();
+    block.addStatement(Stmt.declareFinalVariable("p", new TypeLiteral<Map<String, PropertyType>>() {},
+                                                 agent("propertyTypes")));
+    
     for (final String property : bindable.getBeanDescriptor().getProperties()) {
       final MetaMethod readMethod = bindable.getBeanDescriptor().getReadMethodForProperty(property);
       if (readMethod != null && !readMethod.isFinal()) {
         final MetaClass propertyType = readMethod.getReturnType();
-        block.addStatement(agent("propertyTypes").invoke(
+        block.addStatement(loadVariable("p").invoke(
             "put",
             property,
             Stmt.newObject(PropertyType.class, loadLiteral(propertyType.asBoxed()),
@@ -395,7 +420,7 @@ public class BindableProxyGenerator {
         );
       }
     }
-    block.addStatement(agent("propertyTypes").invoke(
+    block.addStatement(loadVariable("p").invoke(
         "put",
         "this",
         Stmt.newObject(PropertyType.class, loadLiteral(bindable.asBoxed()),
@@ -411,8 +436,10 @@ public class BindableProxyGenerator {
    */
   private Statement generateDeepUnwrapMethodBody(final String methodName) {
     final String cloneVar = "clone";
+    final String targetVar = "t";
     final BlockStatement block = new BlockStatement();
     block.addStatement(Stmt.declareFinalVariable(cloneVar, bindable, Stmt.newObject(bindable)));
+    block.addStatement(Stmt.declareFinalVariable(targetVar, bindable, Stmt.loadVariable("this").invoke("unwrap")));
 
     for (final String property : bindable.getBeanDescriptor().getProperties()) {
       final MetaMethod readMethod = bindable.getBeanDescriptor().getReadMethodForProperty(property);
@@ -426,7 +453,8 @@ public class BindableProxyGenerator {
             final String colVarName = property + "Clone";
             final String elemVarName = property + "Elem";
 
-            final BlockBuilder<ElseBlockBuilder> colBlock = If.isNotNull(Stmt.nestedCall(target().invoke(readMethod)));
+            final BlockBuilder<ElseBlockBuilder> colBlock = If.isNotNull(Stmt.nestedCall(
+                loadVariable(targetVar).invoke(readMethod)));
 
             if ((type.isInterface() || type.isAbstract()) &&
                     (type.isAssignableTo(List.class) || type.isAssignableTo(Set.class))) {
@@ -446,7 +474,7 @@ public class BindableProxyGenerator {
             }
             // Check if the collection element is proxied and unwrap if necessary
             colBlock.append(
-              Stmt.nestedCall(target().invoke(readMethod)).foreach(elemVarName, Object.class)
+              Stmt.nestedCall(loadVariable(targetVar).invoke(readMethod)).foreach(elemVarName, Object.class)
                .append (
                  If.instanceOf(Refs.get(elemVarName), BindableProxy.class)
                   .append (Stmt.loadVariable(colVarName)
@@ -463,12 +491,13 @@ public class BindableProxyGenerator {
             block.addStatement(colBlock.finish());
           }
           else {
-            block.addStatement(Stmt.loadVariable(cloneVar).invoke(writeMethod,target().invoke(readMethod)));
+            block.addStatement(Stmt.loadVariable(cloneVar).invoke(writeMethod, 
+                loadVariable(targetVar).invoke(readMethod)));
           }
         }
         // Found a bindable property: Generate code to unwrap for the case the instance is proxied
         else {
-          final Statement field = target().invoke(readMethod);
+          final Statement field = loadVariable(targetVar).invoke(readMethod);
           block.addStatement (
             If.instanceOf(field, BindableProxy.class)
               .append(Stmt.loadVariable(cloneVar).invoke(writeMethod,
@@ -479,18 +508,19 @@ public class BindableProxyGenerator {
                     )
                 )
               .finish()
-              .elseif_(Stmt.invokeStatic(BindableProxyFactory.class, "isBindableType", target().invoke(readMethod)))
+              .elseif_(Stmt.invokeStatic(BindableProxyFactory.class, "isBindableType", 
+                  loadVariable(targetVar).invoke(readMethod)))
               .append(Stmt.loadVariable(cloneVar).invoke(writeMethod,
                       Cast.to (
                           readMethod.getReturnType(),
                           Stmt.castTo(BindableProxy.class, Stmt.invokeStatic(BindableProxyFactory.class,
-                                  "getBindableProxy", target().invoke(readMethod))).invoke(methodName)
+                                  "getBindableProxy", loadVariable(targetVar).invoke(readMethod))).invoke(methodName)
                       )
                   )
               )
               .finish()
               .else_()
-                .append(Stmt.loadVariable(cloneVar).invoke(writeMethod, target().invoke(readMethod)))
+                .append(Stmt.loadVariable(cloneVar).invoke(writeMethod, loadVariable(targetVar).invoke(readMethod)))
               .finish()
           );
         }
@@ -502,8 +532,7 @@ public class BindableProxyGenerator {
     return block;
   }
 
-  private String inferSafeAgentFieldName() {
-    String fieldName = "agent";
+  private String inferSafeFieldName(String fieldName) {
     while (bindable.getInheritedField(fieldName) != null) {
       fieldName = "_" + fieldName;
     }
@@ -530,19 +559,9 @@ public class BindableProxyGenerator {
   private ContextualStatementBuilder agent() {
     return Stmt.loadClassMember(agentField);
   }
-
+  
   private ContextualStatementBuilder target() {
-    return Stmt.nestedCall(new Statement() {
-      @Override
-      public String generate(final Context context) {
-        return agent().loadField("target").generate(context);
-      }
-
-      @Override
-      public MetaClass getType() {
-        return bindable;
-      }
-    });
+      return Stmt.loadClassMember(targetField);
   }
 
   private MetaClass getTypeOrFirstUpperBound(MetaType clazz, final MetaMethod method) {
