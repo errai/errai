@@ -469,8 +469,8 @@ public class DataBindingUtil {
   }
 
   private static boolean validateWildcard(MetaClass bindable) {
-    if(bindable.isFinal()) {
-      log.info("@Bindable types cannot be final, ignoring: " + bindable.getFullyQualifiedName());
+    if (bindable.isFinal()) {
+      log.debug("@Bindable types cannot be final, ignoring: {}", bindable.getFullyQualifiedName());
       return false;
     }
     return true;

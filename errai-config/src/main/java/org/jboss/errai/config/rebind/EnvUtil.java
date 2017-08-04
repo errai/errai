@@ -302,8 +302,8 @@ public abstract class EnvUtil {
   }
 
   private static boolean validateWildcardSerializable(MetaClass mc) {
-    if(mc.isInterface() || (mc.isAbstract() && !mc.isEnum())) {
-      log.info("Serializable types cannot be an interface or abstract, ignoring: " + mc.getFullyQualifiedName());
+    if (mc.isInterface() || (mc.isAbstract() && !mc.isEnum())) {
+      log.debug("Serializable types cannot be an interface or abstract, ignoring: {}", mc.getFullyQualifiedName());
       return false;
     }
     return true;
