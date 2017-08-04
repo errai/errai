@@ -17,10 +17,10 @@
 package org.jboss.errai.security.client.local.context;
 
 import javax.annotation.PostConstruct;
-import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import org.jboss.errai.common.client.api.Assert;
 import org.jboss.errai.security.client.local.spi.ActiveUserCache;
@@ -31,7 +31,7 @@ import org.slf4j.Logger;
 /**
  * @author Max Barkley <mbarkley@redhat.com>
  */
-@ApplicationScoped
+@Singleton
 public class BasicUserCacheImpl implements ActiveUserCache {
 
   @Inject
