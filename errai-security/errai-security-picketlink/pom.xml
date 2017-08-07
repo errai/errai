@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.jboss.errai</groupId>
     <artifactId>errai-security</artifactId>
-    <version>4.0.2.Final</version>
+    <version>4.0.3-SNAPSHOT</version>
   </parent>
   <artifactId>errai-security-picketlink</artifactId>
   <name>Errai::Security::PicketLink</name>

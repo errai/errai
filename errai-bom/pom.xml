@@ -12,7 +12,7 @@
 
   <groupId>org.jboss.errai.bom</groupId>
   <artifactId>errai-bom</artifactId>
-  <version>4.0.2.Final</version>
+  <version>4.0.3-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>JBoss Errai BOM</name>
 
