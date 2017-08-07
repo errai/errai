@@ -9,7 +9,7 @@
     <title>Errai Reference Guide</title>
     
     
-    <date>2017-05-16</date>
+    <date>2017-08-04</date>
     
     
     
@@ -1929,7 +1929,7 @@ public class SignupServiceShadow implements SignupService {
 <important>
 <title>Classpath Scanning and ErraiApp.properties</title>
 <simpara>Errai only scans the contents of classpath locations (JARs and directories) that have <link linkend="sid-5931354">a file called
-          ErraiApp.properties</link> at their root. If dependency injection is not working for you, double-check that you have an <literal><phrase role="code">ErraiApp.properties</phrase></literal> in every JAR and directory that contains classes Errai should know about.</simpara>
+          ErraiApp.properties</link> at their META-INF directory. If dependency injection is not working for you, double-check that you have an <literal><phrase role="code">ErraiApp.properties</phrase></literal> in every JAR and directory that contains classes Errai should know about.</simpara>
 </important>
 <simpara>A simple example:</simpara>
 <programlisting language="java" linenumbering="unnumbered">public class MyLittleClass {
@@ -2488,7 +2488,7 @@ public class SimpleBean {
 <note>
 <title>Classpath Scanning and ErraiApp.properties</title>
 <simpara>Errai CDI only scans the contents of classpath locations (JARs and directories) that have <link linkend="sid-5931354">a file called
-          ErraiApp.properties</link> at their root. If CDI features such as dependency injection, event observation, and <literal><phrase role="code">@PostConstruct</phrase></literal> are not working for your classes, double-check that you have an <literal><phrase role="code">ErraiApp.properties</phrase></literal> at the root of every JAR and directory tree that contains classes Errai should know about.</simpara>
+          ErraiApp.properties</link> at their META-INF directory. If CDI features such as dependency injection, event observation, and <literal><phrase role="code">@PostConstruct</phrase></literal> are not working for your classes, double-check that you have an <literal><phrase role="code">ErraiApp.properties</phrase></literal> at the META-INF directory of every JAR and directory tree that contains classes Errai should know about.</simpara>
 </note>
 <section id="sid-5931498">
 <title>Features and Limitations</title>
@@ -8165,7 +8165,7 @@ public class MyCacheManifestLinker extends DefaultCacheManifestLinker {
 <simpara>ErraiApp.properties acts both as a marker file for JARs that contain Errai-enabled GWT modules, and as a place to put configuration settings for those modules in the rare case that non-default configuration is necessary.</simpara>
 <section id="sid-5931354_ErraiApp.properties-AsaMarkerFile">
 <title>As a Marker File</title>
-<simpara><emphasis>An</emphasis> <literal><phrase role="code">ErraiApp.properties</phrase></literal> <emphasis>file must appear at the root of each classpath location that contains an Errai module.</emphasis> The contents of JAR and directory classpath entries that do not contain an <literal><phrase role="code">ErraiApp.properties</phrase></literal> are effectively invisible to Errai&#8217;s classpath scanner.</simpara>
+<simpara><emphasis>An</emphasis> <literal><phrase role="code">ErraiApp.properties</phrase></literal> <emphasis>file must appear at the META-INF directory of each classpath location that contains an Errai module.</emphasis> The contents of JAR and directory classpath entries that do not contain an <literal><phrase role="code">ErraiApp.properties</phrase></literal> are effectively invisible to Errai&#8217;s classpath scanner. . (Placing ErraiApp.properties in the root of the classpath is still supported for compatibility reasons but may not be in future versions.)</simpara>
 </section>
 <section id="sid-5931354_ErraiApp.properties-AsaConfigurationFile">
 <title>As a Configuration File</title>
