@@ -67,6 +67,7 @@
     <!-- The version of xercesImpl in the ip-bom is not published on Maven Central.
          Removing this override breaks Errai apps that don't have the JBoss nexus repository configured. -->
     <version.xerces.xercesImpl>2.11.0</version.xerces.xercesImpl>
+    <version.com.google.elemental2>1.0.0-beta-1</version.com.google.elemental2>
   </properties>
 
   <scm>
@@ -384,6 +385,12 @@
         <groupId>xerces</groupId>
         <artifactId>xercesImpl</artifactId>
         <version>${version.xerces.xercesImpl}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.google.elemental2</groupId>
+        <artifactId>elemental2-dom</artifactId>
+        <version>${version.com.google.elemental2}</version>
       </dependency>
 
     </dependencies>
