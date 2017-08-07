@@ -25,6 +25,7 @@ import org.jboss.errai.databinding.client.HasProperties;
 import org.jboss.errai.databinding.client.NonExistingPropertyException;
 import org.jboss.errai.databinding.client.PropertyType;
 import org.jboss.errai.databinding.client.TestModel;
+import org.jboss.errai.databinding.client.TestModelWithIgnoreAnnotation;
 import org.jboss.errai.databinding.client.api.Convert;
 import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.ioc.client.test.AbstractErraiIOCTest;
@@ -112,5 +113,23 @@ public class HasPropertiesIntegrationTest extends AbstractErraiIOCTest {
       assertTrue("Entity type was not mentioned in error message: " + ex.getMessage(), ex.getMessage().contains("TestModel"));
     }
   }
+  
+  
+  @Test
+  public void testIgnoredMethods() {
+    final HasProperties model = (HasProperties) DataBinder.forType(TestModelWithIgnoreAnnotation.class).getModel();
+    
+    final Map<String, PropertyType> properties = model.getBeanProperties();
+    final Set<String> actualProperties = properties.keySet();
+    final Set<String> expectedProperties = new HashSet<String>(Arrays.asList("properties", "name", "age"));
+    
+    assertEquals(expectedProperties, actualProperties);
+    
+    try {
+    	model.set("name", "Test");
+    	fail("Setter should not be present");
+    } catch(NonExistingPropertyException ex) { }
+  }
+  
 
 }
