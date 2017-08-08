@@ -30,7 +30,6 @@ import jsinterop.annotations.JsType;
  */
 @JsType(isNative = true)
 @Element({"th", "td"})
-@Deprecated
 public interface TableCell extends HTMLElement {
   @JsProperty int getCellIndex();
 

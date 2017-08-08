@@ -22,7 +22,7 @@ import org.jboss.errai.codegen.util.CDIAnnotationUtils;
 import javax.inject.Named;
 import java.lang.annotation.Annotation;
 
-/*
+/**
  * @author Tiago Bento <tfernand@redhat.com>
  */
 class HasNamedAnnotation implements HasAnnotations {

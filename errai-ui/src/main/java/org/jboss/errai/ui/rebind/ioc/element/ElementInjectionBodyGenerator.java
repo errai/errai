@@ -52,7 +52,7 @@ import static org.jboss.errai.codegen.util.Stmt.loadLiteral;
 import static org.jboss.errai.codegen.util.Stmt.loadStatic;
 import static org.jboss.errai.codegen.util.Stmt.loadVariable;
 
-/*
+/**
  * @author Tiago Bento <tfernand@redhat.com>
  */
 class ElementInjectionBodyGenerator extends AbstractBodyGenerator {
@@ -104,10 +104,21 @@ class ElementInjectionBodyGenerator extends AbstractBodyGenerator {
     return stmts;
   }
 
-  /*
-     * If a type uses @JsOverlay or @JsProperty on overrides of HasValue methods, then we must generate
-     * an invocation so the GWT compiler uses the correct JS invocation at runtime.
-     */
+  protected ContextualStatementBuilder elementInitialization() {
+    return loadStatic(DomGlobal.class, "document").invoke("createElement", tagName);
+  }
+
+  protected Class<?> elementClass() {
+    return Element.class;
+  }
+
+  /**
+   * If a type uses @JsOverlay or @JsProperty on overrides of HasValue methods, then we must generate
+   * an invocation so the GWT compiler uses the correct JS invocation at runtime.
+   *
+   * @deprecated This code is only necessary for deprecated use of Errai DOM wrappers and GWT elements.
+   */
+  @Deprecated
   private static boolean implementsNativeHasValueAndRequiresGeneratedInvocation(final MetaClass type) {
     if (type.isAssignableTo(HasValue.class)) {
       final MetaClass hasValue = MetaClassFactory.get(HasValue.class);
@@ -137,6 +148,10 @@ class ElementInjectionBodyGenerator extends AbstractBodyGenerator {
     return false;
   }
 
+  /**
+   * @deprecated This code is only necessary for deprecated use of Errai DOM wrappers and GWT elements.
+   */
+  @Deprecated
   private static Object createAccessorImpl(final MetaClass type, final String varName) {
     final MetaClass propertyType = type.getMethod("getValue", new Class[0]).getReturnType();
 
@@ -149,13 +164,5 @@ class ElementInjectionBodyGenerator extends AbstractBodyGenerator {
             .append(loadVariable(varName).invoke("setValue", castTo(propertyType, loadVariable("value"))))
             .finish()
             .finish();
-  }
-
-  protected ContextualStatementBuilder elementInitialization() {
-    return loadStatic(DomGlobal.class, "document").invoke("createElement", tagName);
-  }
-
-  protected Class<?> elementClass() {
-    return Element.class;
   }
 }
