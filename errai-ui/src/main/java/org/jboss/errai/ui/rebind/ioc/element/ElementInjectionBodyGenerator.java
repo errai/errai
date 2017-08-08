@@ -64,13 +64,16 @@ class ElementInjectionBodyGenerator extends AbstractBodyGenerator {
   private final Set<Property> properties;
 
   ElementInjectionBodyGenerator(final MetaClass type, String tagName) {
-    this(type, tagName, Collections.emptySet());
+    this.type = type;
+    this.tagName = tagName;
+    this.properties = Collections.emptySet();
   }
 
+  @Deprecated
   ElementInjectionBodyGenerator(final MetaClass type, String tagName, final Set<Property> properties) {
     this.type = type;
-    this.properties = properties;
     this.tagName = tagName;
+    this.properties = properties;
   }
 
   @Override
