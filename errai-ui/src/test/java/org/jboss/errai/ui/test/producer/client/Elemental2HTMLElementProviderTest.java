@@ -32,11 +32,14 @@ public class Elemental2HTMLElementProviderTest extends AbstractErraiCDITest {
 
 
   @Test
-  public void testinho() {
+  public void testElementInjection() {
     Elemental2InjectionApp instance = IOC.getBeanManager().lookupBean(Elemental2InjectionApp.class).getInstance();
-    assertNotNull(instance.htmlElementSpan);
-    assertNotNull(instance.htmlElementB);
-    assertNotNull(instance.htmlDivElement);
+    assertNotNull(instance.elemental2HtmlElementSpan);
+    assertNotNull(instance.elemental2HtmlElementDiv);
+    assertNotNull(instance.elemental2HtmlDivElement);
+    assertNotNull(instance.gwtElementDiv);
+    assertNotNull(instance.erraiDomWrapperHTMLElementDiv);
+    assertNotNull(instance.erraiDomWrapperDiv);
   }
 }
 
