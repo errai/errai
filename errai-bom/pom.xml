@@ -41,7 +41,7 @@
     <guava.version>20.0</guava.version>
     <guice.version>3.0</guice.version>
     <gwt.phonegap.version>3.5.0.1</gwt.phonegap.version>
-    <gwt.version>2.8.0</gwt.version>
+    <gwt.version>2.8.1</gwt.version>
     <!-- TODO test with 2.x version in ip-bom -->
     <hsqldb.version>1.8.0.7</hsqldb.version>
     <javaee.api.version>7.0</javaee.api.version>

@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ui.client.local.producer;
+package org.jboss.errai.ui.test.producer;
 
 import java.lang.annotation.Annotation;
 
 import javax.inject.Named;
+import javax.inject.Singleton;
 
 import org.jboss.errai.common.client.dom.HTMLElement;
 import org.jboss.errai.common.client.dom.Window;
@@ -30,6 +31,7 @@ import org.jboss.errai.ioc.client.api.IOCProvider;
  * @author Max Barkley <mbarkley@redhat.com>
  */
 @IOCProvider
+@Deprecated
 public class HTMLElementProvider implements ContextualTypeProvider<HTMLElement> {
 
   @Override
