@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ui.test.producer;
+package org.jboss.errai.ui.client.local.producer;
 
 import elemental2.dom.DomGlobal;
 import elemental2.dom.Element;
