@@ -101,7 +101,6 @@ class Elemental2TagMapping {
   static {
     TAG_NAMES_BY_DOM_INTERFACE = ImmutableMultimap.<Class<?>, String>builder()
 
-            .put(HTMLElement.class, "span") //FIXME: should be HTMLSpanElement
             .put(HTMLAnchorElement.class, "a")
             .put(HTMLAppletElement.class, "applet")
             .put(HTMLAreaElement.class, "area")
@@ -118,12 +117,6 @@ class Elemental2TagMapping {
             .put(HTMLDirectoryElement.class, "dir")
             .put(HTMLDivElement.class, "div")
             .put(HTMLDListElement.class, "dl")
-            .put(HTMLElement.class, "b")
-            .put(HTMLElement.class, "center")
-            .put(HTMLElement.class, "head")
-            .put(HTMLElement.class, "i")
-            .put(HTMLElement.class, "s")
-            .put(HTMLElement.class, "u")
             .put(HTMLEmbedElement.class, "embed")
             .put(HTMLFieldSetElement.class, "fieldset")
             .put(HTMLFontElement.class, "font")

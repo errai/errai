@@ -17,16 +17,12 @@
 package org.jboss.errai.ui.client.local.producer;
 
 import elemental2.dom.DomGlobal;
-import elemental2.dom.Element;
 import elemental2.dom.HTMLElement;
 import org.jboss.errai.ioc.client.api.ContextualTypeProvider;
 import org.jboss.errai.ioc.client.api.IOCProvider;
-import org.jboss.errai.ui.rebind.ioc.element.Elemental2TagMapping;
 
 import javax.inject.Named;
-import javax.inject.Singleton;
 import java.lang.annotation.Annotation;
-import java.util.Collection;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
@@ -35,8 +31,8 @@ import java.util.Collection;
 public class Elemental2HTMLElementProvider implements ContextualTypeProvider<HTMLElement> {
 
   @Override
-  @SuppressWarnings("unchecked")
   public HTMLElement provide(final Class<?>[] classes, final Annotation[] qualifiers) {
+
     for (final Annotation annotation : qualifiers) {
       if (annotation.annotationType().equals(Named.class)) {
         final String tagName = ((Named) annotation).value();
