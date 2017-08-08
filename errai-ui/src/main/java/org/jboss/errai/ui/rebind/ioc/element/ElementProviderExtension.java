@@ -16,34 +16,42 @@
 
 package org.jboss.errai.ui.rebind.ioc.element;
 
+import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.TagName;
 import jsinterop.annotations.JsType;
+import org.jboss.errai.codegen.builder.ContextualStatementBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
+import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.client.api.annotations.Element;
+import org.jboss.errai.common.client.api.annotations.Properties;
+import org.jboss.errai.common.client.api.annotations.Property;
 import org.jboss.errai.ioc.client.api.IOCExtension;
+import org.jboss.errai.ioc.rebind.ioc.bootstrapper.AbstractBodyGenerator;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCExtensionConfigurator;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.Qualifier;
 import org.jboss.errai.ioc.rebind.ioc.graph.impl.InjectableHandle;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
-import org.jboss.errai.ui.rebind.ioc.element.elemental.Elemental2InjectionBodyGenerator;
-import org.jboss.errai.ui.rebind.ioc.element.elemental.Elemental2Mapping;
-import org.jboss.errai.ui.rebind.ioc.element.gwt.GwtElementInjectionBodyGenerator;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Optional;
-import java.util.function.Function;
+import java.util.Set;
 
 /**
  * Satisfies injection points for DOM elements.
  *
  * @author Max Barkley <mbarkley@redhat.com>
+ * @author Tiago Bento <tfernand@redhat.com>
  */
 @IOCExtension
 public class ElementProviderExtension implements IOCExtensionConfigurator {
 
-  private static final MetaClass GWT_ELEMENT_META_CLASS = MetaClassFactory.get(com.google.gwt.dom.client.Element.class);
   private static final MetaClass ELEMENTAL_ELEMENT_META_CLASS = MetaClassFactory.get(elemental2.dom.Element.class);
+
+  @Deprecated
+  private static final MetaClass GWT_ELEMENT_META_CLASS = MetaClassFactory.get(com.google.gwt.dom.client.Element.class);
 
   @Override
   public void configure(final IOCProcessingContext context, final InjectionContext injectionContext) {
@@ -51,68 +59,139 @@ public class ElementProviderExtension implements IOCExtensionConfigurator {
 
   @Override
   public void afterInitialization(final IOCProcessingContext context, final InjectionContext injectionContext) {
-    injectionContext.registerExtensionTypeCallback(type -> extensionCallback(injectionContext, type));
-  }
+    injectionContext.registerExtensionTypeCallback(type -> {
+      try {
 
-  private void extensionCallback(final InjectionContext injectionContext, final MetaClass type) {
-    try {
-      final Element elementAnno;
-
-      if (type.isAssignableTo(ELEMENTAL_ELEMENT_META_CLASS)) {
-        processElementalElement(injectionContext, type);
-      } else if (type.isAssignableTo(GWT_ELEMENT_META_CLASS)) {
-        processGwtUserElement(injectionContext, type);
-      } else if ((elementAnno = type.getAnnotation(Element.class)) != null) {
-        final JsType jsTypeAnno;
-        if ((jsTypeAnno = type.getAnnotation(JsType.class)) == null || !jsTypeAnno.isNative()) {
-          throw new RuntimeException(
-                  Element.class.getSimpleName() + " is only valid on native " + JsType.class.getSimpleName() + "s.");
+        if (type.isAssignableTo(ELEMENTAL_ELEMENT_META_CLASS)) {
+          processElemental2Element(injectionContext, type);
+        } else if (type.isAssignableTo(GWT_ELEMENT_META_CLASS)) {
+          processGwtUserElement(injectionContext, type);
+        } else {
+          processJsTypeElement(injectionContext, type);
         }
 
-        processJsTypeElement(injectionContext, type, elementAnno);
+      } catch (final Throwable t) {
+        final String typeName = type.getFullyQualifiedName();
+        final String className = ElementProviderExtension.class.getSimpleName();
+        final String msg = String.format("Error occurred while processing [%s] in %s.", typeName, className);
+        throw new RuntimeException(msg, t);
       }
-    } catch (final Throwable t) {
-      final String typeName = type.getFullyQualifiedName();
-      final String className = ElementProviderExtension.class.getSimpleName();
-      throw new RuntimeException(String.format("Error occurred while processing [%s] in %s.", typeName, className), t);
+    });
+  }
+
+  private static void processElemental2Element(final InjectionContext injectionContext, final MetaClass type) {
+
+    final Optional<String[]> mappedTags = Elemental2Mapping.tagsFor(type.asClass());
+
+    if (mappedTags.isPresent()) {
+      Arrays.stream(mappedTags.get())
+              .map(tag -> exactTypeInjectableProvider(injectionContext, type, tag))
+              .forEach(e -> registerExactTypeInjectableProvider(injectionContext, e));
     }
   }
 
-  private static void processElementalElement(final InjectionContext injectionContext, final MetaClass type) {
-    Optional<String[]> mappedTags = Elemental2Mapping.tagsFor(type.asClass());
-    mappedTags.ifPresent(tags -> registerInjectableProvider(injectionContext, type,
-            tagName -> new Elemental2InjectionBodyGenerator(tagName, type), tags));
+  private static ExactTypeInjectableProvider exactTypeInjectableProvider(
+          final InjectionContext injectionContext, final MetaClass type, final String tagName) {
 
-    //FIXME: tiago: leave it noop?
+    final Qualifier qualifier = injectionContext.getQualifierFactory().forSource(new HasNamedAnnotation(tagName));
+    final InjectableHandle handle = new InjectableHandle(type, qualifier);
+
+    final AbstractBodyGenerator injectionBodyGenerator = new ElementInjectionBodyGenerator(type, tagName);
+    final ElementProvider elementProvider = new ElementProvider(handle, injectionBodyGenerator);
+
+    return new ExactTypeInjectableProvider(handle, elementProvider);
   }
 
-  private static void processJsTypeElement(final InjectionContext injectionContext, final MetaClass type,
-          final Element elementAnnotation) {
-    registerInjectableProvider(injectionContext, type, tagName -> new GwtElementInjectionBodyGenerator(tagName, type),
-            elementAnnotation.value());
+  private static void registerExactTypeInjectableProvider(final InjectionContext injectionContext,
+          final ExactTypeInjectableProvider exactTypeInjectableProvider) {
+
+    final InjectableHandle handle = exactTypeInjectableProvider.handle;
+    final ElementProvider elementProvider = exactTypeInjectableProvider.elementProvider;
+
+    injectionContext.registerExactTypeInjectableProvider(handle, elementProvider);
   }
 
+  private static class ExactTypeInjectableProvider {
+
+    private final InjectableHandle handle;
+    private final ElementProvider elementProvider;
+
+    private ExactTypeInjectableProvider(InjectableHandle handle, ElementProvider elementProvider) {
+      this.handle = handle;
+      this.elementProvider = elementProvider;
+    }
+  }
+
+  @Deprecated
+  private static void processJsTypeElement(final InjectionContext injectionContext, final MetaClass type) {
+
+    final Element elementAnnotation = type.getAnnotation(Element.class);
+
+    if (elementAnnotation != null) {
+
+      final JsType jsTypeAnnotation = type.getAnnotation(JsType.class);
+      if (jsTypeAnnotation == null || !jsTypeAnnotation.isNative()) {
+        final String element = Element.class.getSimpleName();
+        final String jsType = JsType.class.getSimpleName();
+        throw new RuntimeException(element + " is only valid on native " + jsType + "s.");
+      }
+
+      Arrays.stream(elementAnnotation.value())
+              .map(tagName -> gwtExactTypeInjectableProvider(injectionContext, type, tagName))
+              .forEach(e -> registerExactTypeInjectableProvider(injectionContext, e));
+    }
+  }
+
+  @Deprecated
   private static void processGwtUserElement(final InjectionContext injectionContext, final MetaClass type) {
     final TagName gwtTagNameAnnotation = type.getAnnotation(TagName.class);
     if (gwtTagNameAnnotation != null) {
-      registerInjectableProvider(injectionContext, type, tagName -> new GwtElementInjectionBodyGenerator(tagName, type),
-              gwtTagNameAnnotation.value());
+      Arrays.stream(gwtTagNameAnnotation.value())
+              .map(tagName -> gwtExactTypeInjectableProvider(injectionContext, type, tagName))
+              .forEach(e -> registerExactTypeInjectableProvider(injectionContext, e));
     }
   }
 
-  private static void registerInjectableProvider(final InjectionContext injectionContext, final MetaClass type,
-          final Function<String, ElementInjectionBodyGenerator> elementInjectionBodyGeneratorProducer,
-          final String... tagNames) {
+  @Deprecated
+  private static ExactTypeInjectableProvider gwtExactTypeInjectableProvider(final InjectionContext injectionContext,
+          final MetaClass type, final String tagName) {
 
-    for (final String tagName : tagNames) {
-      final Qualifier qualifier = injectionContext.getQualifierFactory().forSource(new HasNamedAnnotation(tagName));
-      final InjectableHandle handle = new InjectableHandle(type, qualifier);
+    final Qualifier qualifier = injectionContext.getQualifierFactory().forSource(new HasNamedAnnotation(tagName));
+    final InjectableHandle handle = new InjectableHandle(type, qualifier);
 
-      final ElementProvider elementProvider = new ElementProvider(handle,
-              elementInjectionBodyGeneratorProducer.apply(tagName));
+    final ElementProvider elementProvider = new ElementProvider(handle,
+            new ElementInjectionBodyGenerator(type, tagName, getProperties(type)) {
 
-      injectionContext.registerExactTypeInjectableProvider(handle, elementProvider);
-    }
+              @Override
+              protected ContextualStatementBuilder elementInitialization() {
+                return Stmt.invokeStatic(Document.class, "get").invoke("createElement", Stmt.loadLiteral(tagName));
+              }
+
+              @Override
+              protected Class<?> elementClass() {
+                return com.google.gwt.dom.client.Element.class;
+              }
+
+            });
+
+    return new ExactTypeInjectableProvider(handle, elementProvider);
   }
 
+  @Deprecated
+  private static Set<Property> getProperties(final MetaClass type) {
+    final Set<Property> properties = new HashSet<>();
+
+    final Property declaredProperty = type.getAnnotation(Property.class);
+    final Properties declaredProperties = type.getAnnotation(Properties.class);
+
+    if (declaredProperty != null) {
+      properties.add(declaredProperty);
+    }
+
+    if (declaredProperties != null) {
+      properties.addAll(Arrays.asList(declaredProperties.value()));
+    }
+
+    return properties;
+  }
 }
