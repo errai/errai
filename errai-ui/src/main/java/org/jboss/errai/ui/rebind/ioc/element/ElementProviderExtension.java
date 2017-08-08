@@ -36,7 +36,6 @@ import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -80,18 +79,14 @@ public class ElementProviderExtension implements IOCExtensionConfigurator {
   }
 
   private static void processElemental2Element(final InjectionContext injectionContext, final MetaClass type) {
-
-    final Optional<String[]> mappedTags = Elemental2Mapping.tagsFor(type.asClass());
-
-    if (mappedTags.isPresent()) {
-      Arrays.stream(mappedTags.get())
-              .map(tag -> exactTypeInjectableProvider(injectionContext, type, tag))
-              .forEach(e -> registerExactTypeInjectableProvider(injectionContext, e));
-    }
+    Elemental2TagMapping.getTags(type.asClass())
+            .stream()
+            .map(tag -> exactTypeInjectableProvider(injectionContext, type, tag))
+            .forEach(e -> registerExactTypeInjectableProvider(injectionContext, e));
   }
 
-  private static ExactTypeInjectableProvider exactTypeInjectableProvider(
-          final InjectionContext injectionContext, final MetaClass type, final String tagName) {
+  private static ExactTypeInjectableProvider exactTypeInjectableProvider(final InjectionContext injectionContext,
+          final MetaClass type, final String tagName) {
 
     final Qualifier qualifier = injectionContext.getQualifierFactory().forSource(new HasNamedAnnotation(tagName));
     final InjectableHandle handle = new InjectableHandle(type, qualifier);
@@ -122,6 +117,9 @@ public class ElementProviderExtension implements IOCExtensionConfigurator {
     }
   }
 
+  /**
+   * @deprecated This code is only necessary for deprecated use of Errai DOM wrappers and GWT elements.
+   */
   @Deprecated
   private static void processJsTypeElement(final InjectionContext injectionContext, final MetaClass type) {
 
@@ -142,6 +140,9 @@ public class ElementProviderExtension implements IOCExtensionConfigurator {
     }
   }
 
+  /**
+   * @deprecated This code is only necessary for deprecated use of Errai DOM wrappers and GWT elements.
+   */
   @Deprecated
   private static void processGwtUserElement(final InjectionContext injectionContext, final MetaClass type) {
     final TagName gwtTagNameAnnotation = type.getAnnotation(TagName.class);
@@ -152,6 +153,9 @@ public class ElementProviderExtension implements IOCExtensionConfigurator {
     }
   }
 
+  /**
+   * @deprecated This code is only necessary for deprecated use of Errai DOM wrappers and GWT elements.
+   */
   @Deprecated
   private static ExactTypeInjectableProvider gwtExactTypeInjectableProvider(final InjectionContext injectionContext,
           final MetaClass type, final String tagName) {
@@ -177,6 +181,9 @@ public class ElementProviderExtension implements IOCExtensionConfigurator {
     return new ExactTypeInjectableProvider(handle, elementProvider);
   }
 
+  /**
+   * @deprecated This code is only necessary for deprecated use of Errai DOM wrappers and GWT elements.
+   */
   @Deprecated
   private static Set<Property> getProperties(final MetaClass type) {
     final Set<Property> properties = new HashSet<>();

@@ -32,7 +32,7 @@ import static java.util.Collections.singletonList;
 import static org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraphBuilder.InjectableType.ExtensionProvided;
 import static org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType.DependentBean;
 
-/*
+/**
  * @author Tiago Bento <tfernand@redhat.com>
  */
 class ElementProvider implements InjectableProvider {
