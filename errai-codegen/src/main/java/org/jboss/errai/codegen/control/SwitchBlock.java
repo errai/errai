@@ -28,6 +28,7 @@ import org.jboss.errai.codegen.Context;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.exception.InvalidTypeException;
 import org.jboss.errai.codegen.literal.LiteralValue;
+import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 
 /**
@@ -86,16 +87,20 @@ public class SwitchBlock extends AbstractStatement {
     checkSwitchExprType();
 
     if (!caseBlocks.isEmpty()) {
+      final MetaClass switchExprMetaClass = switchExprStmt.getType().getErased().asBoxed();
+      final boolean isStringSwitch = switchExprMetaClass.asClass().equals(String.class);
       for (final LiteralValue<?> value : caseBlocks.keySet()) {
-        if (!switchExprStmt.getType().getErased().asBoxed().isAssignableFrom(value.getType().getErased())) {
+        if (!switchExprMetaClass.isAssignableFrom(value.getType().getErased())) {
           throw new InvalidTypeException(
               value.generate(context) + " is not a valid value for " + switchExprStmt.getType().getFullyQualifiedName());
         }
-        // case labels must be unqualified
         String val = value.generate(context);
-        final int idx = val.lastIndexOf('.');
-        if (idx != -1) {
-          val = val.substring(idx + 1);
+        if (!isStringSwitch) {
+          // case labels must be unqualified
+          final int idx = val.lastIndexOf('.');
+          if (idx != -1) {
+            val = val.substring(idx + 1);
+          }
         }
         buf.append("case ").append(val).append(": ").append(getCaseBlock(value).generate(Context.create(context)))
             .append("\n");
