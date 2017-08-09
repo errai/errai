@@ -231,6 +231,14 @@
               </systemProperties>
             </configuration>
           </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-failsafe-plugin</artifactId>
+            <version>2.19.1</version>
+            <configuration>
+              <enableAssertions>false</enableAssertions>
+            </configuration>
+          </plugin>
         </plugins>
       </build>
     </profile>
