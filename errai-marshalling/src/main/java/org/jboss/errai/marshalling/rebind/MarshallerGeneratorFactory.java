@@ -42,11 +42,13 @@ import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.StringStatement;
 import org.jboss.errai.codegen.builder.BlockBuilder;
+import org.jboss.errai.codegen.builder.CaseBlockBuilder;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.ConstructorBlockBuilder;
 import org.jboss.errai.codegen.builder.ElseBlockBuilder;
 import org.jboss.errai.codegen.builder.StatementEnd;
 import org.jboss.errai.codegen.builder.impl.ClassBuilder;
+import org.jboss.errai.codegen.literal.LiteralFactory; 
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.impl.build.BuildMetaClass;
@@ -126,7 +128,7 @@ public class MarshallerGeneratorFactory {
   private static final String MARSHALLERS_VAR = "marshallers";
   private static final boolean VERY_SHORT_MARSHALLER_NAMES = Boolean.parseBoolean(System.getProperty(MarshallingGenUtil.USE_VERY_SHORT_IMPL_NAMES, "false"));
   private static final boolean SHORT_MARSHALLER_NAMES = Boolean.parseBoolean(System.getProperty(MarshallingGenUtil.USE_SHORT_IMPL_NAMES, "true"));
-  private static final int MARSHALLER_HELPER_METHOD_SIZE = 100;
+  private static final int MARSHALLER_HELPER_METHOD_SIZE = 500;
 
   private final MarshallerOutputTarget target;
 
@@ -231,10 +233,11 @@ public class MarshallerGeneratorFactory {
   }
 
   private ElseBlockBuilder generateGetMarshallerHelperMethods() {
-    createPutIfNotNullMethod();
-    BlockBuilder<ElseBlockBuilder> getMarshallerConditionalBlock = If.isNotNull(Stmt.loadVariable("m")).append(Stmt.loadVariable("m").returnValue());
+    createPutMarshallerMethod();
+    BlockBuilder<ElseBlockBuilder> getMarshallerConditionalBlock = If.isNotNull(Stmt.loadVariable("m"))
+        .append(Stmt.loadVariable("m").returnValue());
     int methodIndex = 0, typeIndex = 0;
-    ElseBlockBuilder elseBlockBuilder = null;
+    CaseBlockBuilder switchBlock = null;
     final Iterator<Entry<String, Statement>> iter = putStatementsByTypeName.entrySet().iterator();
     while (iter.hasNext()) {
       final Entry<String, Statement> entry = iter.next();
@@ -243,40 +246,37 @@ public class MarshallerGeneratorFactory {
 
       if (typeIndex % MARSHALLER_HELPER_METHOD_SIZE == 0) {
         if (typeIndex != 0) {
-          getMarshallerConditionalBlock = addLoadMarshallerMethod(getMarshallerConditionalBlock, methodIndex, elseBlockBuilder);
+          switchBlock.default_().append(Stmt.loadLiteral(false).returnValue()).finish();
+          getMarshallerConditionalBlock = addLoadMarshallerMethod(getMarshallerConditionalBlock, methodIndex, switchBlock);
           methodIndex++;
         }
-        elseBlockBuilder = If.objEquals(Stmt.loadLiteral(typeName), Stmt.loadVariable("a0")).append(stmt).finish();
+        switchBlock = Stmt.switch_(Stmt.loadVariable("a0"));
       }
-      else {
-        elseBlockBuilder = elseBlockBuilder.elseif_(Stmt.loadLiteral(typeName).invoke("equals",
-                Stmt.loadVariable("a0"))).append(stmt).finish();
-      }
-
+      BlockBuilder<CaseBlockBuilder> caseBlock = switchBlock.case_(typeName);
+      caseBlock
+        .append(Stmt.loadVariable("this").invoke("putMarshaller", Stmt.loadVariable("a0"), stmt).returnValue())
+        .finish();
       typeIndex += 1;
     }
     if (typeIndex % MARSHALLER_HELPER_METHOD_SIZE != 1) {
-      getMarshallerConditionalBlock = addLoadMarshallerMethod(getMarshallerConditionalBlock, methodIndex, elseBlockBuilder);
+      switchBlock.default_().append(Stmt.loadLiteral(false).returnValue()).finish();
+      getMarshallerConditionalBlock = addLoadMarshallerMethod(getMarshallerConditionalBlock, methodIndex, switchBlock);
     }
 
     return getMarshallerConditionalBlock.finish();
   }
-
-  private void createPutIfNotNullMethod() {
+  
+  private void createPutMarshallerMethod() {
     classStructureBuilder
-      .privateMethod(boolean.class, "putIfNotNull", Parameter.of(String.class, "fqcn"), Parameter.of(Marshaller.class, "m"))
-      .append(If.isNotNull(Stmt.loadVariable("m"))
-                .append(Stmt.loadVariable(MARSHALLERS_VAR).invoke("put", Stmt.loadVariable("fqcn"), Stmt.loadVariable("m")))
-                .append(Stmt.loadLiteral(true).returnValue())
-              .finish()
-              .else_()
-                .append(Stmt.loadLiteral(false).returnValue())
-              .finish())
+      .privateMethod(boolean.class, "putMarshaller", Parameter.of(String.class, "fqcn"), Parameter.of(Marshaller.class, "m"))
+      .append(Stmt.loadVariable(MARSHALLERS_VAR).invoke("put", Stmt.loadVariable("fqcn"), Stmt.loadVariable("m")))
+      .append(Stmt.loadLiteral(true).returnValue())
       .finish();
   }
 
-  private BlockBuilder<ElseBlockBuilder> addLoadMarshallerMethod(BlockBuilder<ElseBlockBuilder> getMarshallerConditionalBlock,
-          final int methodIndex, final ElseBlockBuilder elseBlockBuilder) {
+  private BlockBuilder<ElseBlockBuilder> addLoadMarshallerMethod(
+          BlockBuilder<ElseBlockBuilder> getMarshallerConditionalBlock,
+          final int methodIndex, final CaseBlockBuilder switchBlock) {
     final String helperMethodName = "loadMarshaller" + methodIndex;
     /*
      * Using the StringStatement is a workaround because the following line exposes a codegen bug,
@@ -284,7 +284,7 @@ public class MarshallerGeneratorFactory {
      *    Stmt.loadVariable("this").invoke(helperMethodName, Stmt.loadVariable("a0"))
      */
     getMarshallerConditionalBlock = updateGetMarshallerConditionalBlock(getMarshallerConditionalBlock, helperMethodName);
-    addLoadMarshallerMethod(elseBlockBuilder, helperMethodName);
+    addLoadMarshallerMethod(switchBlock, helperMethodName);
     return getMarshallerConditionalBlock;
   }
 
@@ -295,15 +295,13 @@ public class MarshallerGeneratorFactory {
     return getMarshallerConditionalBlock;
   }
 
-  private void addLoadMarshallerMethod(final ElseBlockBuilder elseBlockBuilder, final String helperMethodName) {
+  private void addLoadMarshallerMethod(final CaseBlockBuilder switchBlock, final String helperMethodName) {
     classStructureBuilder
-    .privateMethod(boolean.class, helperMethodName)
-    .parameters(String.class)
-    .body()
-    .append(Stmt.declareVariable("m", Marshaller.class, Stmt.loadLiteral(null)))
-    .append(elseBlockBuilder)
-    .append(Stmt.loadVariable("this").invoke("putIfNotNull", Stmt.loadVariable("a0"), Stmt.loadVariable("m")).returnValue())
-    .finish();
+      .privateMethod(boolean.class, helperMethodName)
+      .parameters(String.class)
+      .body()
+      .append(switchBlock)
+      .finish();
   }
 
   private void processExposedClasses(final ConstructorBlockBuilder<?> constructor) {
@@ -433,24 +431,24 @@ public class MarshallerGeneratorFactory {
       if (type.isAnnotationPresent(AlwaysQualify.class)) {
         addConditionalAssignment(
             type,
-            Stmt.loadVariable("m").assignValue(Stmt.nestedCall(
+            Stmt.nestedCall(
                 Stmt.newObject(QualifyingMarshallerWrapper.class,
-                    Stmt.castTo(Marshaller.class, Stmt.invokeStatic(GWT.class, "create", marshaller)), type))));
+                    Stmt.castTo(Marshaller.class, Stmt.invokeStatic(GWT.class, "create", marshaller)), type)));
       }
       else {
         addConditionalAssignment(
             type,
-            Stmt.loadVariable("m").assignValue(Stmt.invokeStatic(GWT.class, "create", marshaller)));
+            Stmt.invokeStatic(GWT.class, "create", marshaller));
       }
     }
     else {
       if (type.isAnnotationPresent(AlwaysQualify.class)) {
         addConditionalAssignment(
               type,
-              Stmt.loadVariable("m").assignValue(Stmt.newObject(QualifyingMarshallerWrapper.class, marshaller, type)));
+              Stmt.newObject(QualifyingMarshallerWrapper.class, marshaller, type));
       }
       else {
-        addConditionalAssignment(type, Stmt.loadVariable("m").assignValue(Stmt.newObject(marshaller)));
+        addConditionalAssignment(type, Stmt.newObject(marshaller));
       }
     }
 
@@ -474,9 +472,9 @@ public class MarshallerGeneratorFactory {
       final InnerClass arrayMarshaller = new InnerClass(generateArrayMarshaller(type, marshallerClassName, gwtTarget));
       classStructureBuilder.declaresInnerClass(arrayMarshaller);
 
-      addConditionalAssignment(type, Stmt.loadVariable("m").assignValue(
+      addConditionalAssignment(type, 
           Stmt.newObject(QualifyingMarshallerWrapper.class, Stmt.newObject(arrayMarshaller.getType()), type
-              .asClass())));
+              .asClass()));
     }
     arrayMarshallers.add(varName);
 
@@ -661,7 +659,7 @@ public class MarshallerGeneratorFactory {
     return arrayMarshaller;
   }
 
-  private void addConditionalAssignment(final MetaClass type, final StatementEnd assignment) {
+  private void addConditionalAssignment(final MetaClass type, final Statement assignment) {
     putStatementsByTypeName.put(type.getFullyQualifiedName(), assignment);
   }
 }
