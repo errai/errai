@@ -16,31 +16,8 @@
 
 package org.jboss.errai.ioc.rebind.ioc.bootstrapper;
 
-import static org.jboss.errai.codegen.util.PrivateAccessUtil.getPrivateFieldAccessorName;
-import static org.jboss.errai.codegen.util.PrivateAccessUtil.getPrivateMethodName;
-import static org.jboss.errai.codegen.util.Stmt.castTo;
-import static org.jboss.errai.codegen.util.Stmt.declareFinalVariable;
-import static org.jboss.errai.codegen.util.Stmt.loadLiteral;
-import static org.jboss.errai.codegen.util.Stmt.loadVariable;
-import static org.jboss.errai.codegen.util.Stmt.newObject;
-import static org.jboss.errai.ioc.rebind.ioc.bootstrapper.FactoryGenerator.getLocalVariableName;
-
-import java.lang.annotation.Annotation;
-import java.lang.annotation.ElementType;
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Deque;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
-import java.util.Set;
-
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-
+import com.google.common.collect.Multimap;
+import jsinterop.base.Js;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.ContextualStatementBuilder;
@@ -64,7 +41,29 @@ import org.jboss.errai.ioc.rebind.ioc.injector.api.Decorable;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
 
-import com.google.common.collect.Multimap;
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import java.lang.annotation.Annotation;
+import java.lang.annotation.ElementType;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Deque;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
+import java.util.Set;
+
+import static org.jboss.errai.codegen.util.PrivateAccessUtil.getPrivateFieldAccessorName;
+import static org.jboss.errai.codegen.util.PrivateAccessUtil.getPrivateMethodName;
+import static org.jboss.errai.codegen.util.Stmt.declareFinalVariable;
+import static org.jboss.errai.codegen.util.Stmt.invokeStatic;
+import static org.jboss.errai.codegen.util.Stmt.loadLiteral;
+import static org.jboss.errai.codegen.util.Stmt.loadVariable;
+import static org.jboss.errai.codegen.util.Stmt.newObject;
+import static org.jboss.errai.ioc.rebind.ioc.bootstrapper.FactoryGenerator.getLocalVariableName;
 
 /**
  * Generate factories for type injectable beans. Generates code to support
@@ -325,11 +324,9 @@ class TypeFactoryBodyGenerator extends AbstractBodyGenerator {
       if (depInjectable.isContextual()) {
         final MetaClass[] typeArgsClasses = getTypeArguments(field.getType());
         final Annotation[] qualifiers = getQualifiers(field).toArray(new Annotation[0]);
-        injectedValue = castTo(depInjectable.getInjectedType(),
-                loadVariable("contextManager").invoke("getContextualInstance", loadLiteral(depInjectable.getFactoryName()), typeArgsClasses, qualifiers));
+        injectedValue = uncheckedCast(loadVariable("contextManager").invoke("getContextualInstance", loadLiteral(depInjectable.getFactoryName()), typeArgsClasses, qualifiers));
       } else {
-        injectedValue = castTo(depInjectable.getInjectedType(),
-                loadVariable("contextManager").invoke("getInstance", loadLiteral(depInjectable.getFactoryName())));
+        injectedValue = uncheckedCast(loadVariable("contextManager").invoke("getInstance", loadLiteral(depInjectable.getFactoryName())));
       }
 
       final String fieldDepVarName = field.getDeclaringClassName().replace('.', '_').replace('$', '_') + "_" + field.getName();
@@ -361,10 +358,9 @@ class TypeFactoryBodyGenerator extends AbstractBodyGenerator {
       if (depInjectable.isContextual()) {
         final MetaClass[] typeArgsClasses = getTypeArguments(setter.getParameters()[0].getType());
         final Annotation[] qualifiers = getQualifiers(setter).toArray(new Annotation[0]);
-        injectedValue = castTo(depInjectable.getInjectedType(), loadVariable("contextManager")
-                .invoke("getContextualInstance", loadLiteral(depInjectable.getFactoryName()), typeArgsClasses, qualifiers));
+        injectedValue = uncheckedCast(loadVariable("contextManager").invoke("getContextualInstance", loadLiteral(depInjectable.getFactoryName()), typeArgsClasses, qualifiers));
       } else {
-        injectedValue = castTo(depInjectable.getInjectedType(), loadVariable("contextManager").invoke("getInstance", loadLiteral(depInjectable.getFactoryName())));
+        injectedValue = uncheckedCast(loadVariable("contextManager").invoke("getInstance", loadLiteral(depInjectable.getFactoryName())));
       }
       final MetaParameter param = setter.getParameters()[0];
       final String paramLocalVarName = getLocalVariableName(param);
@@ -438,18 +434,24 @@ class TypeFactoryBodyGenerator extends AbstractBodyGenerator {
     constructorParameterStatements[paramDep.getParamIndex()] = loadVariable(paramLocalVarName);
   }
 
-  private ContextualStatementBuilder getInjectedValue(final Injectable depInjectable, final ParamDependency paramDep) {
+  private ContextualStatementBuilder getInjectedValue(Injectable depInjectable, ParamDependency paramDep) {
     final ContextualStatementBuilder injectedValue;
+
     if (depInjectable.isContextual()) {
-    final MetaClass[] typeArgsClasses = getTypeArguments(paramDep.getParameter().getType());
-    final Annotation[] qualifiers = getQualifiers(paramDep.getParameter()).toArray(new Annotation[0]);
-      injectedValue = castTo(depInjectable.getInjectedType(),
-              loadVariable("contextManager").invoke("getContextualInstance", loadLiteral(depInjectable.getFactoryName()), typeArgsClasses, qualifiers));
+      final MetaClass[] typeArgsClasses = getTypeArguments(paramDep.getParameter().getType());
+      final Annotation[] qualifiers = getQualifiers(paramDep.getParameter()).toArray(new Annotation[0]);
+
+      injectedValue = uncheckedCast(loadVariable("contextManager").invoke("getContextualInstance", loadLiteral(
+              depInjectable.getFactoryName()), typeArgsClasses, qualifiers));
     } else {
-      injectedValue = castTo(depInjectable.getInjectedType(),
-              loadVariable("contextManager").invoke("getInstance", loadLiteral(depInjectable.getFactoryName())));
+      injectedValue = uncheckedCast(loadVariable("contextManager").invoke("getInstance", loadLiteral(depInjectable.getFactoryName())));
     }
+
     return injectedValue;
+  }
+
+  private static ContextualStatementBuilder uncheckedCast(Object stmt) {
+      return invokeStatic(Js.class, "uncheckedCast", stmt);
   }
 
 }
