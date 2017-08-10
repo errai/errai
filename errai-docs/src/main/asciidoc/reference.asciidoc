@@ -84,6 +84,12 @@ Simply download and unzip this link:$$https://github.com/errai/errai-tutorial/ar
 
 ===== Starting with the Errai Forge Addon
 
+[WARNING]
+.Deprecated
+====
+The Errai Forge Addon is deprecated. It is no longer being updated and will be removed in a future release.
+====
+
 Another way to start a new project with Errai is to use Forge and the Errai Forge Addon. To use this method, follow the instructions link:$$https://github.com/errai/errai/blob/master/errai-forge-addon/README.asciidoc$$[here] to install the Errai Forge Addon and create a new project.
 
 
@@ -110,12 +116,6 @@ public class App {
 For this code to run properly, you must use the Errai Forge Addon _Add Errai Features_ command to install _Errai IOC_.
 
 Create new subfolder, _client/local_, under the folder containing your GWT module file. Then create a file, _App.java_, in this new package and copy the above sample code (making sure to replace the top comment with the package declaration).
-
-[TIP]
-====
-.Plugin Tips
-Keep an eye out for tips in the proceeding sections on how you can use the Errai Forge plugin to configure other Errai features for your new project.
-====
 
 [[sid-54493220_GettingStartedwithErrai-RunningtheappinGWT]]
 ==== Running and Debugging with GWT's Super Dev mode
@@ -415,12 +415,6 @@ Now that you have everything set up, it's time to move on to coding!
 The project you created and setup in the previous two sections (ERRAI:Create your Project and ERRAI:Configuring your project for Eclipse) will be used as the basis for this section. So if you have not read them, do so now.
 ====
 
-[TIP]
-.Plugin Tip
-====
-Use the <<sid-54493220_GettingStartedwithErrai-ErraiForgeAddon,Errai Forge Addon>> _Add Errai Features_ command and select _Errai CDI_ to follow along with this section.
-====
-
 Errai CDI as its namesake implies is based on, and is in fact, a partial implementation of the CDI (Contexts and Dependency Injection) specification. Errai CDI covers _most_ of the programming model but omits the CDI SPI, instead replacing it with it a custom set of APIs which are more appropriate for the client programming model of Errai.
 
 These differences aside, using Errai CDI in conjunction with CDI on the server will provide you with a uniform programming model across the client and server code of your application.
@@ -567,12 +561,6 @@ It's important to understand the concept of how messaging works in ErraiBus. Her
 It can be tempting to think of ErraiBus simply as a client-server communication platform, but there is a plethora of possibilities for using ErraiBus purely within the GWT client context, such as a way to advertise and expose components dynamically, to get around the lack of reflection in GWT.
 
 So keep that in mind when you run up against problems in the client space that could benefit from runtime federation.
-
-[TIP]
-.Plugin Tip
-====
-Use the <<sid-54493220_GettingStartedwithErrai-ErraiForgeAddon,Errai Forge Addon>> _Add Errai Features_ command and select _Errai Messaging_ to follow along with this section.
-====
 
 [NOTE]
 .Manual Setup
@@ -1623,12 +1611,6 @@ The monitor allows you select individual messages, an view their individual part
 
 == Dependency Injection
 
-[TIP]
-.Plugin Tip
-====
-Use the <<sid-54493220_GettingStartedwithErrai-ErraiForgeAddon,Errai Forge Addon>> _Add Errai Features_ command and select _Errai IOC_ to follow along with this section.
-====
-
 [NOTE]
 .Manual Setup
 ====
@@ -2422,12 +2404,6 @@ public MyManagedBean {
 
 == Errai CDI
 
-[TIP]
-.Plugin Tip
-====
-Use the <<sid-54493220_GettingStartedwithErrai-ErraiForgeAddon,Errai Forge Addon>> _Add Errai Features_ command and select _Errai CDI_ to follow along with this section.
-====
-
 [NOTE]
 .Manual Setup
 ====
@@ -2878,12 +2854,6 @@ Typically a GWT application lifecycle begins in link:$$http://code.google.com/we
 
 What's different however is availability of the CDI container across the different runtimes. In GWT development mode and in a pure servlet environment you need to provide and bootstrap the CDI environment on your own. While any Java EE 6 Application Server already provides a preconfigured CDI container. To accomodate these differences, we need to do a little trickery when executing the GWT Development Mode and packaging our application for deployment.
 
-[TIP]
-.Plugin Tip
-====
-Use the <<sid-54493220_GettingStartedwithErrai-ErraiForgeAddon,Errai Forge Addon>> _Add Errai in Project_ command to setup development mode, usable for any Errai application, including one with Errai CDI.
-====
-
 [NOTE]
 .Manual Setup
 ====
@@ -2895,12 +2865,6 @@ Checkout the <<Manual-Setup-Section,Manual Setup Section>> for instructions on h
 == Marshalling
 
 Errai includes a comprehensive marshalling framework which permits the serialization of domain objects between the browser and the server. From the perspective of GWT, this is a complete replacement for the provided GWT serialization facilities and offers a great deal more flexibility. You can use it with your own application-specific domain models as well as preexisting models, including classes from third-party libraries using configuration files or the custom definitions API.
-
-[TIP]
-.Plugin Tip
-====
-If you used the <<sid-54493220_GettingStartedwithErrai-ErraiForgeAddon,Errai Forge Addon>> _Add Errai Features_ command to add _Errai Messaging_ or _Errai CDI_ then Marshalling is already available to you.
-====
 
 [[sid-5931328_Marshalling-MappingYourDomain]]
 
@@ -3338,12 +3302,6 @@ ErraiBus supports a high-level RPC layer to make typical client-server RPC commu
 
 Please note that this API has changed since version 1.0. RPC services provide a way of creating type-safe mechanisms to make client-to-server calls. Currently, this mechanism only support client-to-server calls, and not vice-versa.
 
-[TIP]
-.Plugin Tip
-====
-Using the <<sid-54493220_GettingStartedwithErrai-ErraiForgeAddon,Errai Forge Addon>> _Add Errai Features_ command, Errai RPC can be used if _Errai Messaging_ or _Errai CDI_ have been installed.
-====
-
 [NOTE]
 .Manual Setup
 ====
@@ -3717,12 +3675,6 @@ Errai's JAX-RS support consists of the following:
 * A code generator that runs at your project's build time, providing proxy implementations for each JAX-RS resource interfaces visible within the GWT module
 * Errai IoC and CDI providers that allow you to [code]+@Inject+ instances of [code]+Caller<T>+ (the same API used in Errai RPC)
 * Integration with either Errai Marshalling or Jackson to translate request and response data between Java object and a string-based wire format
-
-[TIP]
-.Plugin Tip
-====
-Use the <<sid-54493220_GettingStartedwithErrai-ErraiForgeAddon,Errai Forge Addon>> _Add Errai Features_ command and select _Errai JAXRS_ to follow along with this section.
-====
 
 [NOTE]
 .Manual Setup
@@ -4122,6 +4074,12 @@ Errai provides a filter for protecting REST endpoints from Cross Site Request Fo
 
 == Errai JPA
 
+[WARNING]
+.Deprecated
+====
+Errai JPA is deprecated. These features are no longer being updated and will be removed in a future release.
+====
+
 Starting with Errai 2.1, Errai implements a subset of JPA 2.0. With Errai JPA, you can store and retrieve entity objects on the client side, in the browser's local storage. This allows the reuse of JPA-related code (both entity class definitions and procedural logic that uses the EntityManager) between client and server.
 
 Errai JPA implements the following subset of JPA 2.0:
@@ -4166,12 +4124,6 @@ Errai JPA is a declarative, typesafe interface to the web browser's [code]+local
 [[sid-54493688_ErraiJPA-GettingStarted]]
 
 === Getting Started
-
-[TIP]
-.Plugin Tip
-====
-Use the <<sid-54493220_GettingStartedwithErrai-ErraiForgeAddon,Errai Forge Addon>> _Add Errai Features_ command and select _Errai JPA_ to follow along with this section.
-====
 
 [NOTE]
 .Manual Setup
@@ -4665,12 +4617,6 @@ This is where Errai JPA Data Sync comes in: it provides an easy mechanism for tw
 
 ==== How To Use It
 
-[TIP]
-.Plugin Tip
-====
-Use the <<sid-54493220_GettingStartedwithErrai-ErraiForgeAddon,Errai Forge Addon>> _Add Errai Features_ command and select _Errai JPA Datasync_ to follow along with this section.
-====
-
 [NOTE]
 .Manual Setup
 ====
@@ -4955,12 +4901,6 @@ Errai's data binding module provides the ability to bind model objects to UI com
 === Getting Started
 
 The data binding module is directly integrated with <<sid-51806600, Errai UI>> and <<sid-54493688, Errai JPA>> but can also be used as a standalone project in any GWT client application:
-
-[TIP]
-.Plugin Tip
-====
-Use the <<sid-54493220_GettingStartedwithErrai-ErraiForgeAddon,Errai Forge Addon>> _Add Errai Features_ command and select _Errai Data Binding_ to follow along with this section.
-====
 
 [NOTE]
 .Manual Setup
@@ -5528,12 +5468,6 @@ One of the primary complaints of GWT to date has been that it is difficult to us
 === Get started
 
 The Errai UI module is directly integrated with <<sid-51282340, Data Binding>> and Errai JPA but can also be used as a standalone project in any GWT client application by simply inheriting the Errai UI GWT module, and ensuring that you have properly using <<sid-19398999,Errai CDI's @Inject>> to instantiate your components:
-
-[TIP]
-.Plugin Tip
-====
-Use the <<sid-54493220_GettingStartedwithErrai-ErraiForgeAddon,Errai Forge Addon>> _Add Errai Features_ command and select _Errai UI_ to follow along with this section.
-====
 
 [[sid-51806600_ErraiUI-WorkingDemo]]
 
@@ -7100,12 +7034,6 @@ Starting in version 2.1, Errai offers a system for creating applications that ha
 
 === Getting Started
 
-[TIP]
-.Plugin Tip
-====
-Use the <<sid-54493220_GettingStartedwithErrai-ErraiForgeAddon,Errai Forge Addon>> _Add Errai Features_ command and select _Errai Navigation_ to follow along with this section.
-====
-
 [NOTE]
 .Manual Setup
 ====
@@ -7606,10 +7534,10 @@ In the rendered graph, the pages are nodes (text surrounded by an ellipse). The 
 
 Errai Security provides a lightweight security API for declaring RPC services and client-side UI elements which require authentication or authorization.
 
-[TIP]
-.Plugin Tip
+[WARNING]
+.PicketLink support deprecated
 ====
-Use the <<sid-54493220_GettingStartedwithErrai-ErraiForgeAddon,Errai Forge Addon>> _Add Errai Features_ command and select _Errai Security_ to follow along with this section.
+The Errai Security support for Picket Link is deprecated. Users should use Keycloak with Errai or provide their own implementations for Errai's AuthenticationService.
 ====
 
 [NOTE]
@@ -8449,7 +8377,7 @@ This section contains information on manually setting up Errai and describes add
 
 [[sid-5931501_DeployingErraiCDI-DeploymentinDevelopmentMode]]
 
-==== Deployment in Development Mode (JBossLauncher)
+==== Deployment in Development Mode
 
 In development mode we need to bootstrap the CDI environment on our own and make both Errai and CDI available through JNDI (common denominator across all runtimes). GWT by default uses Jetty, that only supports read only JNDI. The current solution for this is to use a custom launcher to control a JBoss AS 7 or Wildfly 8 instance instead of GWT's built-in Jetty.
 
@@ -8464,9 +8392,9 @@ To do this, requires the following configurations in the gwt-maven-plugin config
 
   <configuration>
   ...
-    <extraJvmArgs>-Derrai.jboss.home=$JBOSS_HOME -Derrai.jboss.javaagent.path=${settings.localRepository}/org/jboss/errai/errai-client-local-class-hider/$ERRAI_VERSION/errai-client-local-class-hider-$ERRAI_VERSION.jar</extraJvmArgs>
+    <extraJvmArgs>-Derrai.jboss.home=$JBOSS_HOME</extraJvmArgs>
     <noServer>false</noServer>
-    <server>org.jboss.errai.cdi.server.gwt.JBossLauncher</server>
+    <server>org.jboss.errai.cdi.server.gwt.EmbeddedWildFlyLauncher</server>
   </configuration>
   <executions>
   ...
@@ -8478,25 +8406,17 @@ What does all this mean?
 
 * `<noServer>false</noServer>`: Tells GWT to lauch a server for us.
 
-* `<server>org.jboss.errai.cdi.server.gwt.JBossLauncher</server>`: Tells GWT to use a custom launcher instead of it's default JettyLauncher.
+* `<server>org.jboss.errai.cdi.server.gwt.EmbeddedWildFlyLauncher</server>`: Tells GWT to use a custom launcher instead of it's default JettyLauncher.
 
-* `<extraJvmArgs>...</extraJvmArgs>`
+* `<extraJvmArgs>-Derrai.jboss.home=$JBOSS_HOME</extraJvmArgs>`: Tells the launcher the location of the Wildfly instance to use. Note that `$JBOSS_HOME` should be replaced with a literal path (or pom property) to a Wildfly instance you have installed.
 
-** `-Derrai.jboss.home=$JBOSS_HOME`: Tells the JBossLauncher the location of the JBoss or Wildfly instance to use. Note that `$JBOSS_HOME` should be replaced with a literal path (or pom property) to a JBoss or Wildfly instance you have installed.
-
-** `-Derrai.jboss.javaagent.path=${settings.localRepository}/org/jboss/errai/errai-client-local-class-hider/${ERRAI_VERSION}/errai-client-local-class-hider-${ERRAI_VERSION}.jar`: This scary looking line is necessary so that the JBoss instance does not see client-only dependencies. Note that `$ERRAI_VERSION` should be replaced with the literal version of Errai (or a pom property).
-
-==== Additional JBossLauncher Arguments
+==== Additional Launcher Arguments
 
 Here are some additional JVM arguments that can be passed to the JBossLauncher:
 
 * `errai.dev.context`: Sets the context under which your app will be deployed (defaults to "webapp").
 
-* `errai.jboss.debug.port`: Sets the port for debugging server-side code (defaults to 8001).
-
-* `errai.jboss.config.file`: Sets the configuration file (in `$JBOSS_HOME/configuration`) used by the JBoss/Wildfly instance (defaults to standalone-full.xml).
-
-* `errai.jboss.javaopts`: Sets additional java opts used by the JVM running JBoss/Wildfly.
+* `errai.jboss.args`: For supplying any command arguments for the WildFly instance being launched.
 
 [[sid-5931501_DeployingErraiCDI-DeploymenttoanApplicationServer]]
 

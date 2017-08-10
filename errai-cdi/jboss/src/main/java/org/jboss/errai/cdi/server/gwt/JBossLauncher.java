@@ -42,9 +42,11 @@ import com.google.gwt.core.ext.TreeLogger.Type;
 /**
  * For starting a {@link JBossServletContainerAdaptor} controlling a standalone
  * Jboss/Wildfly AS.
- * 
+ *
  * @author Max Barkley <mbarkley@redhat.com>
+ * @deprecated The JBossLauncher is deprecated. Please use the {@link EmbeddedWildFlyLauncher} instead.
  */
+@Deprecated
 public class JBossLauncher extends ServletContainerLauncher {
 
   // Property names

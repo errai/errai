@@ -53,9 +53,11 @@ import org.picketlink.idm.query.RelationshipQuery;
  * PicketLink version of the AuthenticationService and default implementation.
  *
  * @author edewit@redhat.com
+ * @deprecated The errai-security-picketlink module is no longer maintained and will be removed in a future release.
  */
 @Service
 @ApplicationScoped
+@Deprecated
 public class PicketLinkAuthenticationService implements AuthenticationService {
 
   @Inject

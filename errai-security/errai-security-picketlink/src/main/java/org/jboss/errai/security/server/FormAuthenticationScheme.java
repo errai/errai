@@ -30,6 +30,12 @@ import org.jboss.errai.marshalling.server.MappingContextSingleton;
 import org.picketlink.authentication.web.HTTPAuthenticationScheme;
 import org.picketlink.credential.DefaultLoginCredentials;
 
+/**
+ *
+ * @author Max Barkley <mbarkley@redhat.com>
+ * @deprecated The errai-security-picketlink module is no longer maintained and will be removed in a future release.
+ */
+@Deprecated
 @Dependent
 public class FormAuthenticationScheme implements HTTPAuthenticationScheme {
 
