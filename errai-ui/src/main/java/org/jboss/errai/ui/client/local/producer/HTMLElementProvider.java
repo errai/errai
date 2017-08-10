@@ -29,7 +29,6 @@ import java.lang.annotation.Annotation;
  * @author Max Barkley <mbarkley@redhat.com>
  */
 @IOCProvider
-@Deprecated
 public class HTMLElementProvider implements ContextualTypeProvider<HTMLElement> {
 
   @Override

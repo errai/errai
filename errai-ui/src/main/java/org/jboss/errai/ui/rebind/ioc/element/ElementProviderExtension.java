@@ -51,7 +51,6 @@ public class ElementProviderExtension implements IOCExtensionConfigurator {
 
   private static final MetaClass ELEMENTAL_ELEMENT_META_CLASS = MetaClassFactory.get(elemental2.dom.Element.class);
 
-  @Deprecated
   private static final MetaClass GWT_ELEMENT_META_CLASS = MetaClassFactory.get(com.google.gwt.dom.client.Element.class);
 
   @Override
@@ -145,20 +144,12 @@ public class ElementProviderExtension implements IOCExtensionConfigurator {
     }
   }
 
-  /**
-   * @deprecated This code is only necessary for deprecated use of Errai DOM wrappers and GWT elements.
-   */
-  @Deprecated
   private static void processJsTypeElement(final InjectionContext injectionContext, final MetaClass type) {
     getCustomElementTags(type).stream()
             .map(tagName -> gwtExactTypeInjectableProvider(injectionContext, type, tagName))
             .forEach(e -> registerExactTypeInjectableProvider(injectionContext, e));
   }
 
-  /**
-   * @deprecated This code is only necessary for deprecated use of Errai DOM wrappers and GWT elements.
-   */
-  @Deprecated
   private static void processGwtUserElement(final InjectionContext injectionContext, final MetaClass type) {
     final TagName gwtTagNameAnnotation = type.getAnnotation(TagName.class);
     if (gwtTagNameAnnotation != null) {
@@ -168,10 +159,6 @@ public class ElementProviderExtension implements IOCExtensionConfigurator {
     }
   }
 
-  /**
-   * @deprecated This code is only necessary for deprecated use of Errai DOM wrappers and GWT elements.
-   */
-  @Deprecated
   private static ExactTypeInjectableProvider gwtExactTypeInjectableProvider(final InjectionContext injectionContext,
           final MetaClass type, final String tagName) {
 
@@ -196,10 +183,6 @@ public class ElementProviderExtension implements IOCExtensionConfigurator {
     return new ExactTypeInjectableProvider(handle, elementProvider);
   }
 
-  /**
-   * @deprecated This code is only necessary for deprecated use of Errai DOM wrappers and GWT elements.
-   */
-  @Deprecated
   private static Set<Property> getProperties(final MetaClass type) {
     final Set<Property> properties = new HashSet<>();
 

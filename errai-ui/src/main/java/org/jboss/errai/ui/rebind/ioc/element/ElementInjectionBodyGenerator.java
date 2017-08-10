@@ -60,17 +60,12 @@ class ElementInjectionBodyGenerator extends AbstractBodyGenerator {
 
   private final MetaClass type;
   private final String tagName;
-
-  @Deprecated
   private final Set<Property> properties;
 
   ElementInjectionBodyGenerator(final MetaClass type, String tagName) {
-    this.type = type;
-    this.tagName = tagName;
-    this.properties = Collections.emptySet();
+    this(type, tagName, Collections.emptySet());
   }
 
-  @Deprecated
   ElementInjectionBodyGenerator(final MetaClass type, String tagName, final Set<Property> properties) {
     this.type = type;
     this.tagName = tagName;
@@ -115,10 +110,7 @@ class ElementInjectionBodyGenerator extends AbstractBodyGenerator {
   /**
    * If a type uses @JsOverlay or @JsProperty on overrides of HasValue methods, then we must generate
    * an invocation so the GWT compiler uses the correct JS invocation at runtime.
-   *
-   * @deprecated This code is only necessary for deprecated use of Errai DOM wrappers and GWT elements.
    */
-  @Deprecated
   private static boolean implementsNativeHasValueAndRequiresGeneratedInvocation(final MetaClass type) {
     if (type.isAssignableTo(HasValue.class)) {
       final MetaClass hasValue = MetaClassFactory.get(HasValue.class);
@@ -148,10 +140,6 @@ class ElementInjectionBodyGenerator extends AbstractBodyGenerator {
     return false;
   }
 
-  /**
-   * @deprecated This code is only necessary for deprecated use of Errai DOM wrappers and GWT elements.
-   */
-  @Deprecated
   private static Object createAccessorImpl(final MetaClass type, final String varName) {
     final MetaClass propertyType = type.getMethod("getValue", new Class[0]).getReturnType();
 
