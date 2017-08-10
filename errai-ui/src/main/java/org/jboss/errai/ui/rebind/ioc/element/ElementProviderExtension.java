@@ -35,6 +35,8 @@ import org.jboss.errai.ioc.rebind.ioc.graph.impl.InjectableHandle;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -79,10 +81,19 @@ public class ElementProviderExtension implements IOCExtensionConfigurator {
   }
 
   private static void processElemental2Element(final InjectionContext injectionContext, final MetaClass type) {
-    Elemental2TagMapping.getTags(type.asClass())
-            .stream()
+    elemental2ElementTags(type).stream()
             .map(tag -> exactTypeInjectableProvider(injectionContext, type, tag))
             .forEach(e -> registerExactTypeInjectableProvider(injectionContext, e));
+  }
+
+  private static Collection<String> elemental2ElementTags(final MetaClass type) {
+    final Collection<String> customElementTags = getCustomElementTags(type);
+
+    if (!customElementTags.isEmpty()) {
+      return customElementTags;
+    }
+
+    return Elemental2TagMapping.getTags(type.asClass());
   }
 
   private static ExactTypeInjectableProvider exactTypeInjectableProvider(final InjectionContext injectionContext,
@@ -106,6 +117,23 @@ public class ElementProviderExtension implements IOCExtensionConfigurator {
     injectionContext.registerExactTypeInjectableProvider(handle, elementProvider);
   }
 
+  private static Collection<String> getCustomElementTags(final MetaClass type) {
+
+    final Element elementAnnotation = type.getAnnotation(Element.class);
+    if (elementAnnotation == null) {
+      return Collections.emptyList();
+    }
+
+    final JsType jsTypeAnnotation = type.getAnnotation(JsType.class);
+    if (jsTypeAnnotation == null || !jsTypeAnnotation.isNative()) {
+      final String element = Element.class.getSimpleName();
+      final String jsType = JsType.class.getSimpleName();
+      throw new RuntimeException(element + " is only valid on native " + jsType + "s.");
+    }
+
+    return Arrays.asList(elementAnnotation.value());
+  }
+
   private static class ExactTypeInjectableProvider {
 
     private final InjectableHandle handle;
@@ -122,22 +150,9 @@ public class ElementProviderExtension implements IOCExtensionConfigurator {
    */
   @Deprecated
   private static void processJsTypeElement(final InjectionContext injectionContext, final MetaClass type) {
-
-    final Element elementAnnotation = type.getAnnotation(Element.class);
-
-    if (elementAnnotation != null) {
-
-      final JsType jsTypeAnnotation = type.getAnnotation(JsType.class);
-      if (jsTypeAnnotation == null || !jsTypeAnnotation.isNative()) {
-        final String element = Element.class.getSimpleName();
-        final String jsType = JsType.class.getSimpleName();
-        throw new RuntimeException(element + " is only valid on native " + jsType + "s.");
-      }
-
-      Arrays.stream(elementAnnotation.value())
-              .map(tagName -> gwtExactTypeInjectableProvider(injectionContext, type, tagName))
-              .forEach(e -> registerExactTypeInjectableProvider(injectionContext, e));
-    }
+    getCustomElementTags(type).stream()
+            .map(tagName -> gwtExactTypeInjectableProvider(injectionContext, type, tagName))
+            .forEach(e -> registerExactTypeInjectableProvider(injectionContext, e));
   }
 
   /**
