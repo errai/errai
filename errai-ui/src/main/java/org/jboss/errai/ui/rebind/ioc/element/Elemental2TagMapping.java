@@ -18,6 +18,7 @@ package org.jboss.errai.ui.rebind.ioc.element;
 
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
+import elemental2.dom.Element;
 import elemental2.dom.HTMLAnchorElement;
 import elemental2.dom.HTMLAppletElement;
 import elemental2.dom.HTMLAreaElement;
@@ -96,7 +97,7 @@ class Elemental2TagMapping {
 
   static Collection<String> getTags(final Class<?> elemental2ElementClass) {
 
-    if (elemental2ElementClass == null || elemental2.dom.Element.class.equals(elemental2ElementClass)) {
+    if (elemental2ElementClass == null || Element.class.equals(elemental2ElementClass)) {
       return Collections.emptyList();
     }
 
