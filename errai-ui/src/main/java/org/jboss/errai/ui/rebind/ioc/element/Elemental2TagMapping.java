@@ -18,7 +18,6 @@ package org.jboss.errai.ui.rebind.ioc.element;
 
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
-import elemental2.dom.Element;
 import elemental2.dom.HTMLAnchorElement;
 import elemental2.dom.HTMLAppletElement;
 import elemental2.dom.HTMLAreaElement;
@@ -84,7 +83,6 @@ import elemental2.dom.HTMLTitleElement;
 import elemental2.dom.HTMLTrackElement;
 import elemental2.dom.HTMLUListElement;
 import elemental2.dom.HTMLVideoElement;
-import org.jboss.errai.codegen.meta.MetaClass;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -96,16 +94,16 @@ class Elemental2TagMapping {
 
   private static final Multimap<Class<?>, String> TAG_NAMES_BY_DOM_INTERFACE;
 
-  static Collection<String> getTags(final Class<?> domInterface) {
+  static Collection<String> getTags(final Class<?> elemental2ElementClass) {
 
-    if (domInterface == null || Element.class.equals(domInterface)) {
+    if (elemental2ElementClass == null || elemental2.dom.Element.class.equals(elemental2ElementClass)) {
       return Collections.emptyList();
     }
 
-    final Collection<String> tags = TAG_NAMES_BY_DOM_INTERFACE.get(domInterface);
+    final Collection<String> tags = TAG_NAMES_BY_DOM_INTERFACE.get(elemental2ElementClass);
 
     if (tags.isEmpty()) {
-      return getTags(domInterface.getSuperclass());
+      return getTags(elemental2ElementClass.getSuperclass());
     }
 
     return tags;
