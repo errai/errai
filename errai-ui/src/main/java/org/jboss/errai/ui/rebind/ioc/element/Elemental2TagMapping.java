@@ -18,6 +18,7 @@ package org.jboss.errai.ui.rebind.ioc.element;
 
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
+import elemental2.dom.Element;
 import elemental2.dom.HTMLAnchorElement;
 import elemental2.dom.HTMLAppletElement;
 import elemental2.dom.HTMLAreaElement;
@@ -34,7 +35,6 @@ import elemental2.dom.HTMLDetailsElement;
 import elemental2.dom.HTMLDialogElement;
 import elemental2.dom.HTMLDirectoryElement;
 import elemental2.dom.HTMLDivElement;
-import elemental2.dom.HTMLElement;
 import elemental2.dom.HTMLEmbedElement;
 import elemental2.dom.HTMLFieldSetElement;
 import elemental2.dom.HTMLFontElement;
@@ -84,8 +84,10 @@ import elemental2.dom.HTMLTitleElement;
 import elemental2.dom.HTMLTrackElement;
 import elemental2.dom.HTMLUListElement;
 import elemental2.dom.HTMLVideoElement;
+import org.jboss.errai.codegen.meta.MetaClass;
 
 import java.util.Collection;
+import java.util.Collections;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
@@ -95,7 +97,18 @@ class Elemental2TagMapping {
   private static final Multimap<Class<?>, String> TAG_NAMES_BY_DOM_INTERFACE;
 
   static Collection<String> getTags(final Class<?> domInterface) {
-    return TAG_NAMES_BY_DOM_INTERFACE.get(domInterface);
+
+    if (domInterface == null || Element.class.equals(domInterface)) {
+      return Collections.emptyList();
+    }
+
+    final Collection<String> tags = TAG_NAMES_BY_DOM_INTERFACE.get(domInterface);
+
+    if (tags.isEmpty()) {
+      return getTags(domInterface.getSuperclass());
+    }
+
+    return tags;
   }
 
   static {
@@ -179,5 +192,4 @@ class Elemental2TagMapping {
             .put(HTMLVideoElement.class, "video")
             .build();
   }
-
 }

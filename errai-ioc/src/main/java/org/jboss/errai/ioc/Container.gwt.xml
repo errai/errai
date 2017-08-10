@@ -22,6 +22,7 @@
   <inherits name="org.jboss.errai.common.Logging"/>
   <inherits name="javax.enterprise.Support"/>
   <inherits name="com.google.common.collect.Collect"/>
+  <inherits name="elemental2.dom.Dom"/>
 
   <entry-point class='org.jboss.errai.ioc.client.Container'/>
 

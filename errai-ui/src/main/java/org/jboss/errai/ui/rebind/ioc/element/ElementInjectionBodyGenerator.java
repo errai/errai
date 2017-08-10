@@ -18,6 +18,7 @@ package org.jboss.errai.ui.rebind.ioc.element;
 
 import elemental2.dom.DomGlobal;
 import elemental2.dom.Element;
+import jsinterop.base.Js;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.ContextualStatementBuilder;
@@ -92,8 +93,7 @@ class ElementInjectionBodyGenerator extends AbstractBodyGenerator {
 
     final String retValVar = "retVal";
 
-    stmts.add(declareFinalVariable(retValVar, type,
-            invokeStatic(TemplateUtil.class, "nativeCast", loadVariable(elementVar))));
+    stmts.add(declareFinalVariable(retValVar, type, invokeStatic(Js.class, "uncheckedCast", loadVariable(elementVar))));
 
     if (implementsNativeHasValueAndRequiresGeneratedInvocation(type)) {
       stmts.add(Stmt.invokeStatic(NativeHasValueAccessors.class, "registerAccessor", loadVariable(retValVar),
