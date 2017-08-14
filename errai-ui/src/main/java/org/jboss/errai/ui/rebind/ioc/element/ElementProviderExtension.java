@@ -85,7 +85,7 @@ public class ElementProviderExtension implements IOCExtensionConfigurator {
             .forEach(e -> registerExactTypeInjectableProvider(injectionContext, e));
   }
 
-  private static Collection<String> elemental2ElementTags(final MetaClass type) {
+  static Collection<String> elemental2ElementTags(final MetaClass type) {
     final Collection<String> customElementTags = getCustomElementTags(type);
 
     if (!customElementTags.isEmpty()) {

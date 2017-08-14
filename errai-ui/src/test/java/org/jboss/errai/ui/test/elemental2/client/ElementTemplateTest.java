@@ -70,9 +70,9 @@ public class ElementTemplateTest extends AbstractErraiCDITest {
 
   // Fires a left-click event on the given target (typically a DOM node).
   public static void click(final EventTarget target) {
-    final MouseEvent click = new MouseEvent("click");
-    click.initEvent("click", true, true);
-    target.dispatchEvent(click);
+    final MouseEvent mouseEvent = new MouseEvent("click");
+    mouseEvent.initEvent("click", true, true);
+    target.dispatchEvent(mouseEvent);
   }
 
 }
