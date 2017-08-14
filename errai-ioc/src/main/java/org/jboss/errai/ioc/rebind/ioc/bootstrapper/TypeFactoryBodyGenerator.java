@@ -440,7 +440,7 @@ class TypeFactoryBodyGenerator extends AbstractBodyGenerator {
     constructorParameterStatements[paramDep.getParamIndex()] = loadVariable(paramLocalVarName);
   }
 
-  private ContextualStatementBuilder getInjectedValue(Injectable depInjectable, ParamDependency paramDep) {
+  private ContextualStatementBuilder getInjectedValue(final Injectable depInjectable, final ParamDependency paramDep) {
     final ContextualStatementBuilder injectedValue;
 
     if (depInjectable.isContextual()) {
