@@ -39,6 +39,10 @@ public class NonCompositeElementFormComponent implements ElementFormComponent {
   @DataField
   private elemental2.dom.Element form = (elemental2.dom.Element) document.createElement("form");
 
+  @Inject
+  @DataField("help-email")
+  private Elemental2EmailAnchor helpEmail;
+
   @DataField
   private org.jboss.errai.ui.test.common.client.dom.Element username = Document.getDocument().createElement("input");
 
@@ -84,6 +88,11 @@ public class NonCompositeElementFormComponent implements ElementFormComponent {
   @Override
   public HTMLButtonElement getSubmit() {
     return submit;
+  }
+
+  @Override
+  public Elemental2EmailAnchor getHelpEmail() {
+    return helpEmail;
   }
 
   @Override

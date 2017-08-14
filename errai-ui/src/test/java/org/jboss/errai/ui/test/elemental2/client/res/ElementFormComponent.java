@@ -35,6 +35,8 @@ public interface ElementFormComponent {
 
   HTMLButtonElement getSubmit();
 
+  Elemental2EmailAnchor getHelpEmail();
+
   HTMLButtonElement getCancel();
 
   int getNumberOfTimesPressed();

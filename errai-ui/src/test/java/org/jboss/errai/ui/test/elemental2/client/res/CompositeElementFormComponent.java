@@ -41,6 +41,10 @@ public class CompositeElementFormComponent extends Composite implements ElementF
   @DataField
   private Element form = (Element) document.createElement("form");
 
+  @Inject
+  @DataField("help-email")
+  private Elemental2EmailAnchor helpEmail;
+
   @DataField
   private org.jboss.errai.ui.test.common.client.dom.Element username = Document.getDocument().createElement("input");
 
@@ -86,6 +90,11 @@ public class CompositeElementFormComponent extends Composite implements ElementF
   @Override
   public HTMLButtonElement getSubmit() {
     return submit;
+  }
+
+  @Override
+  public Elemental2EmailAnchor getHelpEmail() {
+    return helpEmail;
   }
 
   @Override
