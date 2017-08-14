@@ -406,6 +406,9 @@ public class Navigation {
       else if (unwrappedComponent instanceof IsElement) {
         widget = ElementWrapperWidget.getWidget(((IsElement) unwrappedComponent).getElement());
       }
+      else if (unwrappedComponent instanceof org.jboss.errai.common.client.api.elemental2.IsElement) {
+        widget = ElementWrapperWidget.getWidget(((org.jboss.errai.ui.client.local.api.elemental2.IsElement) unwrappedComponent).getElement(), null);
+      }
       else if (TemplateWidgetMapper.containsKey(unwrappedComponent)) {
         widget = TemplateWidgetMapper.get(unwrappedComponent);
       }
