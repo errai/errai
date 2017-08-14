@@ -229,13 +229,8 @@
                   <value>true</value>
                 </property>
               </systemProperties>
-            </configuration>
-          </plugin>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-failsafe-plugin</artifactId>
-            <version>2.19.1</version>
-            <configuration>
+
+              <!-- GWT 2.8.1 has an assertion that fails on tests and works in production -->
               <enableAssertions>false</enableAssertions>
             </configuration>
           </plugin>

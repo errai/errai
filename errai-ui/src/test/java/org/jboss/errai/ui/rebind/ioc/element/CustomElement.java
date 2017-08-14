@@ -17,12 +17,11 @@ class CustomElement extends HTMLDivElement {
 
     @Element("sub-foo")
     @JsType(isNative = true, namespace = JsPackage.GLOBAL)
-    static class ChildWithCustomTag extends WithCustomTag {
+    public static class ChildWithCustomTag extends WithCustomTag {
     }
 
-    static class Child extends WithCustomTag {
+    public static class ChildWithoutElementAnnotation extends WithCustomTag {
     }
 
   }
-
 }
