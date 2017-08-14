@@ -34,6 +34,7 @@ public class ElementProviderExtensionTest {
 
   @Test
   public void elemental2ElementTag_customElementWithCustomTagChild() {
+
     final Collection<String> tags = elemental2ElementTags(
             metaClass(CustomElement.WithCustomTag.ChildWithoutElementAnnotation.class));
 
@@ -46,6 +47,7 @@ public class ElementProviderExtensionTest {
     final Collection<String> tags = elemental2ElementTags(
             metaClass(CustomElement.WithCustomTag.ChildWithoutElementAnnotation.class));
 
+    //@Element annotation is not inherited
     assertEquals(emptyList(), tags);
   }
 
