@@ -746,23 +746,33 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
 
       if (component instanceof TakesValue) {
         updateComponentValue(newValue, (TakesValue) component, converter);
-      }
-      else if (component instanceof HasText) {
+      } else if (component instanceof HasText) {
         updateComponentValue(newValue, (HasText) component, converter);
-      }
-      else if (component instanceof IsElement || isElement(component)) {
-        final Element element = BoundUtil.asElement(component instanceof IsElement ? ((IsElement) component).getElement() : component);
+      } else if (component instanceof IsElement
+              || component instanceof org.jboss.errai.common.client.api.elemental2.IsElement || isElement(component)) {
+
+        final Element element = BoundUtil.asElement(getComponent(component));
         final ElementWrapperWidget<?> wrapper = ElementWrapperWidget.getWidget(element);
+
         if (wrapper instanceof TakesValue) {
           updateComponentValue(newValue, (TakesValue) wrapper, converter);
-        }
-        else if (wrapper instanceof HasText) {
+        } else if (wrapper instanceof HasText) {
           updateComponentValue(newValue, (HasText) wrapper, converter);
         }
       }
     }
 
     maybeFirePropertyChangeEvent(property, oldValue, newValue);
+  }
+
+  private Object getComponent(final Object component) {
+    if (component instanceof IsElement) {
+      return ((IsElement) component).getElement();
+    } else if (component instanceof org.jboss.errai.common.client.api.elemental2.IsElement) {
+      return ((org.jboss.errai.common.client.api.elemental2.IsElement) component).getElement();
+    } else {
+      return component;
+    }
   }
 
   private <P> void updateComponentValue(final P newValue, final HasText component, final Converter converter) {
