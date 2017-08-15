@@ -751,7 +751,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
       } else if (component instanceof IsElement
               || component instanceof org.jboss.errai.common.client.api.elemental2.IsElement || isElement(component)) {
 
-        final Element element = BoundUtil.asElement(getComponent(component));
+        final Element element = BoundUtil.asElement(getUIPart(component));
         final ElementWrapperWidget<?> wrapper = ElementWrapperWidget.getWidget(element);
 
         if (wrapper instanceof TakesValue) {
@@ -765,7 +765,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
     maybeFirePropertyChangeEvent(property, oldValue, newValue);
   }
 
-  private Object getComponent(final Object component) {
+  private Object getUIPart(final Object component) {
     if (component instanceof IsElement) {
       return ((IsElement) component).getElement();
     } else if (component instanceof org.jboss.errai.common.client.api.elemental2.IsElement) {

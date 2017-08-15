@@ -88,7 +88,7 @@ class ElementInjectionBodyGenerator extends AbstractBodyGenerator {
 
     final String retValVar = "retVal";
 
-    stmts.add(declareFinalVariable(retValVar, type, invokeStatic(Js.class, "uncheckedCast", loadVariable(elementVar))));
+    stmts.add(declareFinalVariable(retValVar, type, castTo(type, loadVariable(elementVar))));
 
     if (implementsNativeHasValueAndRequiresGeneratedInvocation(type)) {
       stmts.add(Stmt.invokeStatic(NativeHasValueAccessors.class, "registerAccessor", loadVariable(retValVar),
