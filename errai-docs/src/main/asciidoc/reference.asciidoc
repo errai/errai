@@ -5738,6 +5738,8 @@ Here we create and add many components to the DOM using an injected [code]+org.j
 
 [source, java]
 ----
+import static elemental2.dom.DomGlobal.document;
+
 @EntryPoint
 public class Application {
    private String[] colors = new String[]{"Blue", "Yellow", "Red"};
@@ -5753,14 +5755,13 @@ public class Application {
       for(String color: colors) {
         ColorComponent component = provider.get(); <1>
         component.setColor(c);
-        document.getBody().appendChild(component.getElement()); <2>
+        document.appendChild(component.getElement()); <1>
       }
    }
 }
 ----
 
-<1> `ColorComponent` should be `@Dependent` so that this produces a new instance each time. If a `@Templated` bean has no explicit scope, it is `@Dependent` by default.
-<2> Again, we assume `ColorComponent` implements `org.jboss.errai.ui.client.local.api.elemental2.IsElement`, where `getElement` is defined.
+<1> Again, we assume `ColorComponent` implements `org.jboss.errai.ui.client.local.api.elemental2.IsElement`, where `getElement` is defined.
 
 === Adding behaviour to your components
 
@@ -5776,10 +5777,9 @@ All replacements happen while the component is being constructed; thus, fields a
 or manually initialized when the templated bean is instantiated.
 
 [NOTE]
-.Uses DOM wrappers from Errai Common
+.Uses Elemental 2 API
 ====
-The +@DataField+ types used in this example are thin HTML wrappers found in the +org.jboss.errai.common.client.dom+ package of errai-common.
-It is still possible to use widgets in a +@DataField+ but this approach is not recommended.
+The +@DataField+ types used in this example are provided by Elemental 2 in the +elemental2.dom+ package. Using Errai DOM wrappers found in the +org.jboss.errai.common.client.dom+ package of errai-common or widgets in a +@DataField+ is still possible, but this approach is not recommended.
 ====
 
 
@@ -5789,27 +5789,33 @@ It is still possible to use widgets in a +@DataField+ but this approach is not r
 * Here the template file is implicitly LoginForm.html.
 * The root element has id, class, or data-field "form".
 */
+@Dependent
 @Templated("#form")
 public class LoginForm implements IsElement {
    // This is the root element of the template, for adding this component to the DOM.
    @Inject
    @DataField
-   private Form form;
+   private HTMLFormElement form;
 
    // If not otherwise specified, the name to match in the HTML template defaults
    // to the name of the field; in this case, the name would be "username"
    @Inject
    @DataField
-   private TextInput username;
+   private HTMLInputElement username;
 
    // The name to reference in the template can also be specified manually
    @Inject
    @DataField("pass")
-   private PasswordInput password;
+   private HTMLInputElement password;
 
    // We can also choose to instantiate our own data fields. Injection is not required.
    @DataField
-   private Button submit = (Button) Window.getDocument().createElement("button");
+   private HTMLButtonElement submit = (HTMLButtonElement) document.createElement("button");
+
+   @PostConstruct
+   public void init() {
+       password.type = "password";
+   }
 }
 ----
 
@@ -5820,10 +5826,10 @@ Field, method, and constructor injection are all supported by @DataField.
 
 ==== Allowed DataField types
 
-The previous [code]+LoginForm+ example uses HTML wrapper elements from Errai Common, but there are other types that can be used as [code]+@DataFields+.
+The previous [code]+LoginForm+ example uses HTML wrapper elements from Elemental 2, but there are other types that can be used as [code]+@DataFields+.
 Here is a full list:
 
-. Any native [code]+@JsType+ that is a wrapper for a DOM element (including those provided in errai-common).
+. Any native [code]+@JsType+ that is a wrapper for a DOM element (including those provided in errai-common). (_This approach is no longer recommended!_).
 
 . Any Errai UI component.
 
@@ -5856,7 +5862,7 @@ Errai UI supports injecting any element in a template html file as a DataField i
 ----
 @Templated
 public class MyBean {
-  @Inject @DataField Div root;
+  @Inject @DataField HTMLDivElement root;
 }
 ----
 
@@ -5897,14 +5903,13 @@ public class MyBean implements IsElement {
 @EntryPoint
 public class Setup {
   @Inject MyBean component;
-  @Inject Document doc;
 
   @PostConstruct
   public void attachBean() {
     // The default implementation automatically returns
     // the correct root element.
     HTMLElement rootElement = component.getElement();
-    doc.getBody().appendChild(rootElement);
+    document.body.appendChild(rootElement);
   }
 }
 ----
@@ -5951,6 +5956,7 @@ Once you've defined your element wrapper, using it as a [code]+@DataField+ works
 */
 @Templated("#form")
 public class LoginForm {
+
    // Now the root element is our custom JsType
    @Inject
    @DataField
@@ -5958,21 +5964,26 @@ public class LoginForm {
 
    @Inject
    @DataField
-   private TextInput username;
+   private HTMLInputElement username;
 
    @Inject
    @DataField("pass")
-   private PasswordInput password;
+   private HTMLInputElement password;
 
    @DataField
-   private Button submit = (Button) Window.getDocument().createElement("button");
+   private HTMLButtonElement submit = (HTMLButtonElement) document.createElement("button");
+
+   @PostConstruct
+   public void init() {
+      password.type = "password";
+   }
 }
 ----
 
 ==== Injecting JsTypes and Elements that have multiple tag names
 
 In our previous examples injecting [code]+Elements+ or native [code]+JsTypes+, we did so with types that had a single possible tag name.
-But consider the heading tags (h1, h2, ..., h6). In gwt-user and errai-common these are all represented by [code]+HeadingElement+.
+But consider the heading tags (h1, h2, ..., h6). In Elemental 2, these are all represented by [code]+HTMLHeadingElement+. In gwt-user and errai-common these are all represented by [code]+HeadingElement+.
 We might also wish to make our own [code]+@JsType+ wrapper to represent these tags:
 
 [source, java]
@@ -5991,11 +6002,17 @@ With the above definition, injecting a +NativeHeading+ is ambiguous. Fortunately
 ----
 @Templated
 public class Component {
-  // Injects a gwt-user HeadingElement with tag name "h1"
+  // Injects a Elemental 2 HTMLHeadingElement with tag name "h1"
   @Inject
   @Named("h1")
   @DataField
-  private HeadingElement h1;
+  private HTMLHeadingElement h1;
+
+  // Injects a gwt-user HeadingElement with tag name "h2"
+  @Inject
+  @Named("h2")
+  @DataField
+  private HeadingElement h2;
 
   // Injects a NativeHeading wrapper for an "h6" element
   @Inject
@@ -6041,10 +6058,10 @@ If more than one Java reference matches the same HTML element in the template, i
 @Templated
 public class ErroneousTemplate {
    @Inject @DataField
-   private Div eat;
+   private HTMLDivElement eat;
 
    @Inject @DataField
-   private Div drink;
+   private HTMLDivElement drink;
 }
 ----
 
@@ -6093,17 +6110,17 @@ or if it is a DOM element that has no children.
 ----
 @Templated
 public class StyledComponent implements IsElement {
-   @Inject
-   @DataField("field-1")
-   private Div div;
 
-   public StyledComponent() {
-      CSSStyleDeclaration style = div.getStyle();
-      style.setProperty("position", "fixed");
-      style.setProperty("top", "0");
-      style.setProperty("left", "0");
-      this.getElement().setId("outer-id");
-   }
+    @Inject
+    @DataField("field-1")
+    private HTMLDivElement div;
+
+    public StyledComponent() {
+      div.style.setProperty("position", "fixed");
+      div.style.setProperty("top", "0");
+      div.style.setProperty("left", "0");
+      this.getElement().id = "outer-id";
+    }
 }
 ----
 
@@ -6146,7 +6163,7 @@ If styles must be applied in Java instead of in the template, there are two opti
 ==== DOM Elements (templated bean field wins)
 
 Element composition, however, functions inversely from the attribute merging default behaviour, and the [code]+<span>+ defined in our template is actually replaced by the [code]+<div>+
-because of the Div in our component field. This does not, however, change the behavior of the attribute merge - the new [code]+<div>+ was still be rendered inline,
+because of the `HTMLDivElement` in our component field. This does not, however, change the behavior of the attribute merge - the new [code]+<div>+ was still be rendered inline,
 because we have specified this style in our template, and the template always wins in competition with attributes set programatically before composition occurs.
 It is this rule that allows nesting of Errai UI components, since the markup of an Errai UI component +A+ used as a +@DataField+ in component +B+ will override
 the markup in the +B+ template.
@@ -6154,7 +6171,7 @@ In short, whatever is inside the [code]+@DataField+ in your class will replace t
 
 ==== Inner text and inner HTML (preserved when component implements HasText or HasHTML)
 
-Additionally, because [code]+Div+ is a thin Element wrapper the contents of the <span> "field-1" Element in the template were preserved;
+Additionally, because [code]+HTMLDivElement+ is a thin Element wrapper, the contents of the <span> "field-1" Element in the template were preserved;
 however, this would not have been the case if the [code]+@DataField+ specified for the element was not an element wrapper (for example if it was another Errai UI component).
 In short, if you wish to preserve text or HTML contents of an element in your template, you can do one of two things: do not composite that Element with a [code]+@DataField+ reference,
 or ensure that the UI component being composited implements is a a DOM element with no children.
@@ -6163,7 +6180,7 @@ or ensure that the UI component being composited implements is a a DOM element w
 
 Dealing with User and DOM Events is a reality in rich web development, and Errai UI provides several approaches for dealing with all types of browser events using its "quick handler" functionality. It is possible to handle:
 
-. JS interop wrapped DOM events on Widgets and Elements
+. JS interop Elemental 2 or wrapped DOM events on Widgets and Elements
 
 . GWT events on Widgets (Deprecated)
 
@@ -6201,7 +6218,7 @@ public class ElementHandlerComponent {
 
    @Inject
    @DataField("b1")
-   private ButtonElement button;
+   private HTMLButtonElement button;
 
    @EventHandler("b1")
    public void doSomething(@ForEvent("click") Event e) {
@@ -6220,7 +6237,7 @@ public class ElementHandlerComponent {
 
    @Inject
    @DataField
-   private AnchorElement link;
+   private HTMLAnchorElement link;
 
    @EventHandler("link")
    public void doSomething(FocusEvent e) {
@@ -6238,10 +6255,10 @@ public class WidgetAndElementHandlerComponent {
 
    @Inject
    @DataField
-   private TextBox input;
+   private HTMLInputElement input;
 
    // Handles focus-related events on the
-   // underlying HTML element of the TextBox field.
+   // underlying HTML element of the HTMLInputElement field.
    @EventHandler("input")
    public void doSomething(FocusEvent e) {
      // do something
