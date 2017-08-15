@@ -29,7 +29,7 @@ import jsinterop.annotations.JsType;
  * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/HTMLTableCellElement">Web API</a>
  */
 @JsType(isNative = true)
-@Element({"tr", "td"})
+@Element({"th", "td"})
 @Deprecated
 public interface TableCell extends HTMLElement {
   @JsProperty int getCellIndex();
