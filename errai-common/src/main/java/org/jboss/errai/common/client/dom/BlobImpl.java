@@ -23,6 +23,9 @@ import jsinterop.annotations.JsProperty;
 import jsinterop.annotations.JsType;
 
 /**
+ *
+ * @deprecated Use Elemental 2 for new development
+ *
  * A JsInterop blob type implementation which provides
  * a public constructor.
  */

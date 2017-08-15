@@ -22,6 +22,8 @@ import org.jboss.errai.common.client.api.annotations.Property;
 
 /**
  *
+ * @deprecated Use Elemental 2 for new development
+ *
  * @author Max Barkley <mbarkley@redhat.com>
  * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/HTMLInputElement">Web API</a>
  */

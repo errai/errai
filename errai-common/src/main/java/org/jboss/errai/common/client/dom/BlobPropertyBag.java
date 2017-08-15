@@ -22,6 +22,9 @@ import jsinterop.annotations.JsProperty;
 import jsinterop.annotations.JsType;
 
 /**
+ *
+ * @deprecated Use Elemental 2 for new development
+ *
  * The Blob Property Bag.
  * @see <a href="https://www.w3.org/TR/2012/WD-FileAPI-20121025/#dfn-BlobPropertyBag">BlobPropertyBag</a>
  * <p>
