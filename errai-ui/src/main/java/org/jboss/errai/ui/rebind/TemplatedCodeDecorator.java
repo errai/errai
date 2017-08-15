@@ -120,6 +120,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 
 import jsinterop.annotations.JsType;
+import jsinterop.base.Js;
 
 /**
  * Generates the code required for {@link Templated} classes.
@@ -417,18 +418,25 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
           final Statement fieldsMap, final Statement instance, final Map<String, MetaClass> dataFieldTypes,
           final MetaClass declaringClass, final MetaMethod method, final String[] targetDataFieldNames,
           final MetaClass eventType, final FactoryController controller) {
+    // FIXME maybe throw an error if this array is length zero?
     final String[] browserEventTypes = Optional
       .ofNullable(method.getParameters()[0].getAnnotation(ForEvent.class))
       .map(anno -> anno.value())
       .filter(value -> value.length > 0)
-      .orElseGet(() -> eventType.getAnnotation(BrowserEvent.class).value());
+      .orElseGet(() -> Optional
+                        .ofNullable(eventType.getAnnotation(BrowserEvent.class))
+                        .map(anno -> anno.value())
+                        .orElseGet(() -> new String[0]));
 
     for (final String dataFieldName : targetDataFieldNames) {
       final ObjectBuilder listener = ObjectBuilder
         .newInstanceOf(org.jboss.errai.common.client.dom.EventListener.class)
         .extend()
         .publicOverridesMethod("call", Parameter.of(org.jboss.errai.common.client.dom.Event.class, "event"))
-          .append(InjectUtil.invokePublicOrPrivateMethod(controller, method, castTo(eventType, loadVariable("event"))))
+          .append(InjectUtil
+                  .invokePublicOrPrivateMethod(controller,
+                                               method,
+                                               invokeStatic(Js.class, "cast", loadVariable("event"))))
           .finish()
         .finish();
       final ContextualStatementBuilder elementStmt;
@@ -636,8 +644,7 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
       if (eventType.isAssignableTo(Event.class) || eventType.isAssignableTo(DomEvent.class)) {
         return eventType;
       }
-      else if (eventType.isAnnotationPresent(BrowserEvent.class) && Optional
-              .ofNullable(eventType.getAnnotation(JsType.class)).filter(anno -> anno.isNative()).isPresent()) {
+      else if (isAnnotatedBrowserEvent(eventType)) {
         final BrowserEvent eventTypeAnno = eventType.getAnnotation(BrowserEvent.class);
         final boolean eventTypeMatchesAll = eventTypeAnno.value().length == 0;
         final Optional<ForEvent> oParamAnno = Optional.ofNullable(method.getParameters()[0].getAnnotation(ForEvent.class)).filter(anno -> anno.value().length > 0);
@@ -657,12 +664,28 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
           throw new GenerationException(message);
         }
       }
+      else if (isElemental2Event(eventType)) {
+        return eventType;
+      }
     }
     throw new GenerationException(String.format(
             "@EventHandler method [%s] in class [%s] must have exactly one parameter of a type "
             + "annotated with @%s and @JsType(isNative=true) or extending either [%s] or [%s].",
             method.getName(), declaringClass.getFullyQualifiedName(), BrowserEvent.class.getSimpleName(),
             DomEvent.class.getName(), NativeEvent.class.getName()));
+  }
+
+  private boolean isElemental2Event(final MetaClass eventType) {
+    return eventType.isAssignableTo(elemental2.dom.Event.class) && isNativeJsType(eventType);
+  }
+
+  private boolean isAnnotatedBrowserEvent(final MetaClass eventType) {
+    return eventType.isAnnotationPresent(BrowserEvent.class) && isNativeJsType(eventType);
+  }
+
+  private boolean isNativeJsType(final MetaClass eventType) {
+    return Optional
+            .ofNullable(eventType.getAnnotation(JsType.class)).filter(anno -> anno.isNative()).isPresent();
   }
 
   private MetaClass getHandlerForEvent(final MetaClass eventType) {
