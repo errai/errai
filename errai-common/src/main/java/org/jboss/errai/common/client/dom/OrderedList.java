@@ -28,6 +28,7 @@ import jsinterop.annotations.JsType;
  */
 @JsType(isNative = true)
 @Element("ol")
+@Deprecated
 public interface OrderedList extends HTMLElement {
   @JsProperty boolean getCompact();
   @JsProperty void setCompact(boolean compact);

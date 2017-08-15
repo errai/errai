@@ -29,6 +29,7 @@ import jsinterop.annotations.JsType;
  */
 @BrowserEvent("wheel")
 @JsType(isNative = true)
+@Deprecated
 public interface WheelEvent extends MouseEvent {
 
   @JsOverlay static final int DOM_DELTA_PIXEL = 0;

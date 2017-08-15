@@ -28,6 +28,7 @@ import jsinterop.annotations.JsType;
  */
 @JsType(isNative = true)
 @Element({"thead", "tfoot", "tbody"})
+@Deprecated
 public interface TableSection extends HTMLElement {
   @JsProperty String getAlign();
   @JsProperty void setAlign(String align);

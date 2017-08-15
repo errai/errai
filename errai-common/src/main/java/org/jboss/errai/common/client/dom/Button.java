@@ -28,6 +28,7 @@ import jsinterop.annotations.JsType;
  */
 @JsType(isNative = true)
 @Element("button")
+@Deprecated
 public interface Button extends HTMLElement {
   @JsProperty Form getForm();
 

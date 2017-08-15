@@ -33,6 +33,7 @@ import jsinterop.annotations.JsType;
   "keyup"
 })
 @JsType(isNative = true)
+@Deprecated
 public interface KeyboardEvent extends UIEvent {
 
   @JsOverlay static final int DOM_KEY_LOCATION_STANDARD = 0;

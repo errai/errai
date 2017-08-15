@@ -26,6 +26,7 @@ import jsinterop.annotations.JsType;
  * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/CSSRule">Web API</a>
  */
 @JsType(isNative = true)
+@Deprecated
 public interface CSSRule {
   @JsOverlay static short UNKNOWN_RULE = 0;
   @JsOverlay static short STYLE_RULE = 1;

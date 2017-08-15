@@ -29,6 +29,7 @@ import jsinterop.annotations.JsType;
  */
 @JsType(isNative = true)
 @BrowserEvent
+@Deprecated
 public interface Event {
   @JsOverlay static final short NONE = 0;
   @JsOverlay static final short CAPTURING_PHASE = 1;

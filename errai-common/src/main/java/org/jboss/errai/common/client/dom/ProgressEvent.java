@@ -36,6 +36,7 @@ import jsinterop.annotations.JsType;
   "timeout"
 })
 @JsType(isNative = true)
+@Deprecated
 public interface ProgressEvent extends Event {
 
   @JsProperty(name = "lengthComputable") boolean isLengthComputable();

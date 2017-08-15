@@ -35,6 +35,7 @@ import jsinterop.annotations.JsType;
   "touchleave"
 })
 @JsType(isNative = true)
+@Deprecated
 public interface TouchEvent extends UIEvent {
 
   @JsProperty(name = "altKey") boolean isAltKey();

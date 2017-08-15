@@ -28,6 +28,7 @@ import jsinterop.annotations.JsType;
  */
 @JsType(isNative = true)
 @Element("form")
+@Deprecated
 public interface Form extends HTMLElement {
   @JsProperty HTMLCollection getElements();
   @JsProperty int getLength();

@@ -28,6 +28,7 @@ import jsinterop.annotations.JsType;
  */
 @BrowserEvent("storage")
 @JsType(isNative = true)
+@Deprecated
 public interface StorageEvent extends Event {
 
   @JsProperty String getKey();

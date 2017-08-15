@@ -41,6 +41,7 @@ import jsinterop.annotations.JsType;
   "show"
 })
 @JsType(isNative = true)
+@Deprecated
 public interface MouseEvent extends UIEvent {
 
   @JsOverlay static final int BUTTON_LEFT = 0;

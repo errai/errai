@@ -27,6 +27,7 @@ import jsinterop.annotations.JsType;
  */
 @BrowserEvent("beforeunload")
 @JsType(isNative = true)
+@Deprecated
 public interface BeforeUnloadEvent extends Event {
 
 }

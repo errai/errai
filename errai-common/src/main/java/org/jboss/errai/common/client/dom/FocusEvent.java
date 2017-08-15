@@ -33,6 +33,7 @@ import jsinterop.annotations.JsType;
   "focusout"
 })
 @JsType(isNative = true)
+@Deprecated
 public interface FocusEvent extends UIEvent {
 
   @JsProperty EventTarget getRelatedTarget();

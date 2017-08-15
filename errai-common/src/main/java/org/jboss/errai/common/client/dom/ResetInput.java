@@ -29,6 +29,7 @@ import jsinterop.annotations.JsType;
 @JsType(isNative = true)
 @Element("input")
 @Property(name = "type", value = "reset")
+@Deprecated
 public interface ResetInput extends Input {
 
 }

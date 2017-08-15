@@ -27,5 +27,6 @@ import jsinterop.annotations.JsType;
  */
 @JsType(isNative = true)
 @Element("span")
+@Deprecated
 public interface Span extends HTMLElement {
 }

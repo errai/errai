@@ -28,6 +28,7 @@ import jsinterop.annotations.JsType;
  */
 @JsType(isNative = true)
 @Element("input")
+@Deprecated
 public interface Input extends HTMLElement {
   @JsProperty String getDefaultValue();
   @JsProperty void setDefaultValue(String defaultValue);

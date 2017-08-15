@@ -28,6 +28,7 @@ import jsinterop.annotations.JsType;
  */
 @BrowserEvent("popstate")
 @JsType(isNative = true)
+@Deprecated
 public interface PopStateEvent extends Event {
 
   @JsProperty Object getState();

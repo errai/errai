@@ -24,6 +24,7 @@ import jsinterop.annotations.JsType;
  * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/EntityReference">Web API</a>
  */
 @JsType(isNative = true)
+@Deprecated
 public interface EntityReference extends Node {
 
 }

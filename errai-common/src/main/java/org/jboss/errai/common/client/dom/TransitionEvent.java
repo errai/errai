@@ -28,6 +28,7 @@ import jsinterop.annotations.JsType;
  */
 @BrowserEvent("transitionend")
 @JsType(isNative = true)
+@Deprecated
 public interface TransitionEvent extends Event {
 
   @JsProperty String getPropertyName();

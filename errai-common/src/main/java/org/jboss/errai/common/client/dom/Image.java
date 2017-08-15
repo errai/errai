@@ -28,6 +28,7 @@ import jsinterop.annotations.JsType;
  */
 @JsType(isNative = true)
 @Element("img")
+@Deprecated
 public interface Image extends HTMLElement {
   @JsProperty String getName();
   @JsProperty void setName(String name);

@@ -28,6 +28,7 @@ import jsinterop.annotations.JsType;
  */
 @BrowserEvent("hashchange")
 @JsType(isNative = true)
+@Deprecated
 public interface HashChangeEvent extends Event {
 
   @JsProperty String getOldURL();

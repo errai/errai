@@ -29,6 +29,7 @@ import jsinterop.annotations.JsType;
 @JsType(isNative = true)
 @Element("input")
 @Property(name = "type", value = "text")
+@Deprecated
 public interface PasswordInput extends Input {
 
 }

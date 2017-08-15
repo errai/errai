@@ -28,6 +28,7 @@ import jsinterop.annotations.JsType;
  */
 @JsType(isNative = true)
 @Element("a")
+@Deprecated
 public interface Anchor extends HTMLElement {
   @JsProperty String getCharset();
   @JsProperty void setCharset(String charset);

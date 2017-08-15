@@ -29,6 +29,7 @@ import jsinterop.annotations.JsType;
 @JsType(isNative = true)
 @Element("input")
 @Property(name = "type", value = "image")
+@Deprecated
 public interface ImageSubmitInput extends Input {
 
 }

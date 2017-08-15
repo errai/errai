@@ -25,6 +25,7 @@ import jsinterop.annotations.JsType;
  * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/HTMLBodyElement">Web API</a>
  */
 @JsType(isNative = true)
+@Deprecated
 public interface Body extends HTMLElement, WindowEventHandlers {
   @JsProperty String getALink();
   @JsProperty void setALink(String aLink);

@@ -28,6 +28,7 @@ import jsinterop.annotations.JsType;
  */
 @JsType(isNative = true)
 @Element("caption")
+@Deprecated
 public interface TableCaption extends HTMLElement {
   @JsProperty String getAlign();
   @JsProperty void setAlign(String align);

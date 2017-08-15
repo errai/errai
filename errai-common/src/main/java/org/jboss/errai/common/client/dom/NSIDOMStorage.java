@@ -25,6 +25,7 @@ import jsinterop.annotations.JsType;
  * @see <a href="https://developer.mozilla.org/en-US/docs/Mozilla/Tech/XPCOM/Reference/Interface/nsIDOMStorage">Web API</a>
  */
 @JsType(isNative = true)
+@Deprecated
 public interface NSIDOMStorage {
 
   void clear();

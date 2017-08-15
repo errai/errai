@@ -25,6 +25,7 @@ import jsinterop.annotations.JsFunction;
  */
 @FunctionalInterface
 @JsFunction
+@Deprecated
 public interface EventListener<E extends Event> {
 
   void call(E event);

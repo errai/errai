@@ -28,6 +28,7 @@ import jsinterop.annotations.JsType;
  */
 @JsType(isNative = true)
 @Element("div")
+@Deprecated
 public interface Div extends HTMLElement {
   @JsProperty String getAlign();
   @JsProperty void setAlign(String align);

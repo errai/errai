@@ -28,6 +28,7 @@ import jsinterop.annotations.JsType;
  */
 @JsType(isNative = true)
 @Element("textarea")
+@Deprecated
 public interface TextArea extends HTMLElement {
   @JsProperty String getDefaultValue();
   @JsProperty void setDefaultValue(String defaultValue);

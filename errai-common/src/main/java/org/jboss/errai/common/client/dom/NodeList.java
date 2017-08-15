@@ -25,6 +25,7 @@ import jsinterop.annotations.JsType;
  * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/NodeList">Web API</a>
  */
 @JsType(isNative = true)
+@Deprecated
 public interface NodeList {
   Node item(int index);
   @JsProperty int getLength();

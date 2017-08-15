@@ -24,6 +24,7 @@ import jsinterop.annotations.JsType;
  * @see <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date">Web API</a>
  */
 @JsType(isNative = true)
+@Deprecated
 public class Date {
 
   public Date() {}

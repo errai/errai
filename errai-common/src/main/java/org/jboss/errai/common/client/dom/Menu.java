@@ -25,6 +25,7 @@ import jsinterop.annotations.JsType;
  * @see <a href="https://developer.mozilla.org/en/docs/Web/HTML/Element/menu">Web API</a>
  */
 @JsType(isNative = true)
+@Deprecated
 public interface Menu extends HTMLElement {
   @JsProperty String getType();
   @JsProperty void setType(String type);

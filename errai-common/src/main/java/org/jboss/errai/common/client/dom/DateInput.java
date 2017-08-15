@@ -29,6 +29,7 @@ import jsinterop.annotations.JsType;
 @JsType(isNative = true)
 @Element("input")
 @Property(name = "type", value = "date")
+@Deprecated
 public interface DateInput extends Input {
 
 }

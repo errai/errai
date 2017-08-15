@@ -36,6 +36,7 @@ import jsinterop.annotations.JsType;
   "dragstart",
   "drop"
 })
+@Deprecated
 public interface DragEvent extends Event {
 
   @JsProperty DataTransfer getDataTransfer();

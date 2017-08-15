@@ -28,6 +28,7 @@ import org.jboss.errai.common.client.api.annotations.Property;
 @JsType(isNative = true)
 @Element("input")
 @Property(name = "type", value = "button")
+@Deprecated
 public interface ButtonInput extends Input {
 
 }

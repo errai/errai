@@ -28,6 +28,7 @@ import jsinterop.annotations.JsType;
  */
 @JsType(isNative = true)
 @Element("table")
+@Deprecated
 public interface Table extends HTMLElement {
   @JsProperty TableCaption getCaption();
   @JsProperty void setCaption(TableCaption caption);

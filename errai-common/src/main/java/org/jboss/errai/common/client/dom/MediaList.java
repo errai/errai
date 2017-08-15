@@ -25,6 +25,7 @@ import jsinterop.annotations.JsType;
  * @see <a href="https://www.w3.org/TR/cssom/#the-medialist-interface">Web API</a>
  */
 @JsType(isNative = true)
+@Deprecated
 public interface MediaList {
   @JsProperty String getMediaText();
   @JsProperty void setMediaText(String mediaText);

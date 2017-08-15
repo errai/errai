@@ -28,6 +28,7 @@ import jsinterop.annotations.JsType;
  */
 @JsType(isNative = true)
 @Element("tr")
+@Deprecated
 public interface TableRow extends HTMLElement {
   @JsProperty int getRowIndex();
   @JsProperty int getSectionRowIndex();

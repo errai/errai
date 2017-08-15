@@ -32,6 +32,7 @@ import com.google.gwt.user.client.ui.Widget;
  *
  * @author Max Barkley <mbarkley@redhat.com>
  */
+@Deprecated
 public abstract class DOMUtil {
   private DOMUtil() {}
 

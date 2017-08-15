@@ -28,6 +28,7 @@ import jsinterop.annotations.JsType;
  */
 @JsType(isNative = true)
 @Element("select")
+@Deprecated
 public interface Select extends HTMLElement {
   @JsProperty String getType();
 

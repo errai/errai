@@ -28,6 +28,7 @@ import jsinterop.annotations.JsType;
  */
 @JsType(isNative = true)
 @Element("li")
+@Deprecated
 public interface ListItem extends HTMLElement {
   @JsProperty String getType();
   @JsProperty void setType(String type);

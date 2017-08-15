@@ -30,6 +30,7 @@ import jsinterop.annotations.JsType;
  * an <code>Object</code> with a <code>type</code> property too.
  */
 @JsType(isNative = true, name = "Object", namespace = JsPackage.GLOBAL)
+@Deprecated
 public class BlobPropertyBag {
 
     @JsOverlay

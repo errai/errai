@@ -27,6 +27,7 @@ import jsinterop.annotations.JsType;
  */
 @JsType(isNative = true)
 @BrowserEvent({ "compositionstart", "compositionupdate", "compositionend" })
+@Deprecated
 public interface CompositionEvent extends UIEvent {
 
   @JsProperty String getData();

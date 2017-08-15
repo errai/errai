@@ -25,6 +25,7 @@ import org.jboss.errai.common.client.api.annotations.Element;
  */
 @JsType(isNative = true)
 @Element("label")
+@Deprecated
 public interface Label extends HTMLElement {
 
     @JsProperty

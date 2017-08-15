@@ -30,6 +30,7 @@ import com.google.gwt.user.client.ui.IsWidget;
  *
  * @author Max Barkley <mbarkley@redhat.com>
  */
+@Deprecated
 public interface IsElement {
 
   /**

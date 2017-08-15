@@ -28,6 +28,7 @@ import jsinterop.annotations.JsType;
  */
 @JsType(isNative = true)
 @Element("ul")
+@Deprecated
 public interface UnorderedList extends HTMLElement {
   @JsProperty boolean getCompact();
   @JsProperty void setCompact(boolean compact);

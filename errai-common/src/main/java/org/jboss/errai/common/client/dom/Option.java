@@ -28,6 +28,7 @@ import jsinterop.annotations.JsType;
  */
 @JsType(isNative = true)
 @Element("option")
+@Deprecated
 public interface Option extends HTMLElement {
   @JsProperty Form getForm();
 

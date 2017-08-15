@@ -36,6 +36,7 @@ import jsinterop.annotations.JsType;
   "unload"
 })
 @JsType(isNative = true)
+@Deprecated
 public interface UIEvent extends Event {
 
   @JsProperty(name = "cancelBubble") boolean isCancelBubble();

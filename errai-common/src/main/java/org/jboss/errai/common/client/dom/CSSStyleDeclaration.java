@@ -24,6 +24,7 @@ import jsinterop.annotations.JsType;
  * @author Max Barkley <mbarkley@redhat.com>
  */
 @JsType(isNative = true)
+@Deprecated
 public interface CSSStyleDeclaration {
   @JsProperty String getCssText();
   @JsProperty void setCssText(String cssText);

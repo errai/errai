@@ -31,6 +31,7 @@ import jsinterop.annotations.JsType;
   "pagehide"
 })
 @JsType(isNative = true)
+@Deprecated
 public interface PageTransitionEvent extends Event {
 
   @JsProperty(name = "persisted") boolean isPersisted();

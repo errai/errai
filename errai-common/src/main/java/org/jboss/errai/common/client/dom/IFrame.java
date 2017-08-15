@@ -25,6 +25,7 @@ import org.jboss.errai.common.client.api.annotations.Element;
  */
 @JsType(isNative = true)
 @Element("iframe")
+@Deprecated
 public interface IFrame extends HTMLElement {
 
   @JsProperty String getHeight();

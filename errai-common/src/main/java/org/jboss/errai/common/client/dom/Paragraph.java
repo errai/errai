@@ -25,6 +25,7 @@ import org.jboss.errai.common.client.api.annotations.Element;
  */
 @JsType(isNative = true)
 @Element("p")
+@Deprecated
 public interface Paragraph extends HTMLElement {
 
     @JsProperty

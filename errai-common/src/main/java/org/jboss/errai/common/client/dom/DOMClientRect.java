@@ -24,6 +24,7 @@ import jsinterop.annotations.JsType;
  * @see <a href="https://developer.mozilla.org/en-US/docs/Mozilla/Tech/XPCOM/Reference/Interface/nsIDOMClientRect">Web API</a>
  */
 @JsType( isNative = true )
+@Deprecated
 public interface DOMClientRect {
 
   @JsProperty Double getBottom();

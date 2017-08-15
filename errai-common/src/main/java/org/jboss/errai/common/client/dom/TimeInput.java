@@ -30,6 +30,7 @@ import jsinterop.annotations.JsType;
 @JsType(isNative = true)
 @Element("input")
 @Property(name = "type", value = "time")
+@Deprecated
 public interface TimeInput extends Input {
 
 }

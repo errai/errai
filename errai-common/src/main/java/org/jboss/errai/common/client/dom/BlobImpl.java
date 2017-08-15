@@ -27,6 +27,7 @@ import jsinterop.annotations.JsType;
  * a public constructor.
  */
 @JsType(isNative = true, name = "Blob", namespace = JsPackage.GLOBAL)
+@Deprecated
 public class BlobImpl implements Blob {
 
     /**

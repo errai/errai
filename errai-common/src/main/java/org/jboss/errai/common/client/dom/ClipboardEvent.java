@@ -32,6 +32,7 @@ import jsinterop.annotations.JsType;
   "paste"
 })
 @JsType(isNative = true)
+@Deprecated
 public interface ClipboardEvent extends Event {
 
   @JsProperty DataTransfer getClipboardData();

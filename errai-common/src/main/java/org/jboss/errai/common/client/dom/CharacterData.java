@@ -25,6 +25,7 @@ import jsinterop.annotations.JsType;
  * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/CharacterData">Web API</a>
  */
 @JsType(isNative = true)
+@Deprecated
 public interface CharacterData extends Node {
   @JsProperty String getData();
   @JsProperty void setData(String data);
