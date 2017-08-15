@@ -16,16 +16,20 @@
 
 package org.jboss.errai.ui.nav.client.local;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Queue;
-
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import javax.inject.Inject;
-
+import com.google.common.collect.ImmutableListMultimap;
+import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.Multimap;
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.logical.shared.AttachEvent;
+import com.google.gwt.event.logical.shared.AttachEvent.Handler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.IsWidget;
+import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.Widget;
+import com.google.web.bindery.event.shared.HandlerRegistration;
 import org.jboss.errai.common.client.api.IsElement;
 import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.common.client.ui.ElementWrapperWidget;
@@ -46,20 +50,14 @@ import org.jboss.errai.ui.nav.client.local.spi.PageNode;
 import org.jboss.errai.ui.shared.TemplateWidgetMapper;
 import org.slf4j.Logger;
 
-import com.google.common.collect.ImmutableListMultimap;
-import com.google.common.collect.ImmutableMultimap;
-import com.google.common.collect.Multimap;
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.logical.shared.AttachEvent;
-import com.google.gwt.event.logical.shared.AttachEvent.Handler;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.IsWidget;
-import com.google.gwt.user.client.ui.RootPanel;
-import com.google.gwt.user.client.ui.Widget;
-import com.google.web.bindery.event.shared.HandlerRegistration;
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.inject.Inject;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Queue;
 
 /**
  * Central control point for navigating between pages of the application.
@@ -407,7 +405,7 @@ public class Navigation {
         widget = ElementWrapperWidget.getWidget(((IsElement) unwrappedComponent).getElement());
       }
       else if (unwrappedComponent instanceof org.jboss.errai.common.client.api.elemental2.IsElement) {
-        widget = ElementWrapperWidget.getWidget(((org.jboss.errai.ui.client.local.api.elemental2.IsElement) unwrappedComponent).getElement(), null);
+        widget = ElementWrapperWidget.getWidget(((org.jboss.errai.common.client.api.elemental2.IsElement) unwrappedComponent).getElement(), null);
       }
       else if (TemplateWidgetMapper.containsKey(unwrappedComponent)) {
         widget = TemplateWidgetMapper.get(unwrappedComponent);
