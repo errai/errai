@@ -418,7 +418,6 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
           final Statement fieldsMap, final Statement instance, final Map<String, MetaClass> dataFieldTypes,
           final MetaClass declaringClass, final MetaMethod method, final String[] targetDataFieldNames,
           final MetaClass eventType, final FactoryController controller) {
-    // FIXME maybe throw an error if this array is length zero?
     final String[] browserEventTypes = Optional
       .ofNullable(method.getParameters()[0].getAnnotation(ForEvent.class))
       .map(anno -> anno.value())
@@ -426,7 +425,15 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
       .orElseGet(() -> Optional
                         .ofNullable(eventType.getAnnotation(BrowserEvent.class))
                         .map(anno -> anno.value())
-                        .orElseGet(() -> new String[0]));
+                        .orElseThrow(() ->
+                          new GenerationException(
+            String.format(
+                    "The event argument of %s.%s must specify event types "
+                    + "either with @%s on the call site or @%s on the event type.",
+                    declaringClass.getName(),
+                    method.getName(),
+                    ForEvent.class.getSimpleName(),
+                    BrowserEvent.class.getSimpleName()))));
 
     for (final String dataFieldName : targetDataFieldNames) {
       final ObjectBuilder listener = ObjectBuilder
