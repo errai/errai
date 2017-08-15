@@ -5115,6 +5115,8 @@ Originally, Errai only supported binding with Widgets implementing `com.google.g
 
 * If a component implements `org.jboss.errai.common.client.api.IsElement`, binding is performed on the DOM element returned by `IsElement.getElement()` with the above specified rules.
 
+* If a component implements `org.jboss.errai.common.client.api.elemental2.IsElement`, binding is performed on the DOM element returned by `IsElement.getElement()` with the above specified rules.
+
 [NOTE]
 .Inference at Run-Time versus Inference at Compile-Time
 ====
@@ -5517,7 +5519,7 @@ and optionally a stylesheet +LoginForm.css+ in the same package as +LoginForm.ja
 [NOTE]
 .Optionally implement IsElement for easy access to the component root
 ====
-Implementing `org.jboss.errai.ui.client.local.api.IsElement` is optional, but we will use it in all of our examples. The interface contains a single default method, `getElement`, that returns the root element of the template, allowing us to programmatically attach a component to the DOM. Later on we will discuss alternative methods of accessing a component's root element.
+Implementing `org.jboss.errai.ui.client.local.api.elemental2.IsElement` is optional, but we will use it in all of our examples. The interface contains a single default method, `getElement`, that returns the root element of the template, allowing us to programmatically attach a component to the DOM. Later on we will discuss alternative methods of accessing a component's root element.
 ====
 
 ==== Custom template names
@@ -5707,7 +5709,7 @@ public class Application {
 ----
 
 <1> `org.jboss.errai.common.client.dom.Document` is a thin wrapper around the DOM document provided by Errai. More on this later.
-<2> This line assumes that `TemplatedBean` implements `org.jboss.errai.ui.client.local.api.IsElement`. The default implementation of `IsElement.getElement` returns the root element of the component as an Errai DOM wrapper, which is compatible with the injected `Document`.
+<2> This line assumes that `TemplatedBean` implements `org.jboss.errai.ui.client.local.api.elemental2.IsElement`. The default implementation of `IsElement.getElement` returns the root element of the component as an Errai DOM wrapper, which is compatible with the injected `Document`.
 
 ==== Using multiple instances (for iteration)
 
@@ -5738,7 +5740,7 @@ public class Application {
 ----
 
 <1> `ColorComponent` should be `@Dependent` so that this produces a new instance each time. If a `@Templated` bean has no explicit scope, it is `@Dependent` by default.
-<2> Again, we assume `ColorComponent` implements `org.jboss.errai.ui.client.local.api.IsElement`, where `getElement` is defined.
+<2> Again, we assume `ColorComponent` implements `org.jboss.errai.ui.client.local.api.elemental2.IsElement`, where `getElement` is defined.
 
 === Adding behaviour to your components
 
@@ -5805,9 +5807,11 @@ Here is a full list:
 
 . Any Errai UI component.
 
-. Any [code]+com.google.gwt.dom.client.Element+ type.
+. Any [code]+com.google.gwt.dom.client.Element+ type. (_This approach is no longer recommended!_).
 
-. Any type implementing [code]+org.jboss.errai.common.client.api.IsElement+.
+. Any type implementing [code]+org.jboss.errai.common.client.api.IsElement+. (_This approach is no longer recommended!_).
+
+. Any type implementing [code]+org.jboss.errai.common.client.api.elemental2.IsElement+.
 
 . Any [code]+com.google.gwt.user.client.ui.Widget+ type. (_This approach is no longer recommended!_).
 
@@ -5838,11 +5842,16 @@ public class MyBean {
 
 This method has the advantage that any valid @DataField type can be used (for example, you can expose your root element as a `com.google.gwt.dom.client.Element` or your own handwritten `@JsType` element wrapper).
 
-===== Implement org.jboss.errai.ui.client.local.api.IsElement
+===== Implement org.jboss.errai.ui.client.local.api.elemental2.IsElement
 
-The interface [code]+org.jboss.errai.common.client.api.IsElement+ is analogous to `IsWidget`. It declares a single method `getElement` for accessing a type that is a UI component with a root element.
+The interface [code]+org.jboss.errai.common.client.api.elemental2.IsElement+ is analogous to `IsWidget`. It declares a single method `getElement` for accessing a type that is a UI component with a root element.
 
-The interface [code]+org.jboss.errai.ui.client.local.api.IsElement+ provides a default implementation of [code]+org.jboss.errai.common.client.api.IsElement+ that works for any templated bean. For example:
+The interface [code]+org.jboss.errai.ui.client.local.api.elemental2.IsElement+ provides a default implementation of [code]+org.jboss.errai.common.client.api.elemental2.IsElement+ that works for any templated bean. For example:
+
+[NOTE]
+====
+Although using [code]+org.jboss.errai.ui.client.local.api.elemental2.IsElement+ is the recomended approach, [code]+org.jboss.errai.ui.client.local.api.IsElement+ is still supported.
+====
 
 ====== MyBean.html
 [source, html]
@@ -5855,7 +5864,7 @@ The interface [code]+org.jboss.errai.ui.client.local.api.IsElement+ provides a d
 ====== MyBean.java
 [source, java]
 ----
-import org.jboss.errai.ui.client.local.api.IsElement;
+import org.jboss.errai.ui.client.local.api.elemental2.IsElement;
 
 @Templated
 public class MyBean implements IsElement {
