@@ -21,6 +21,7 @@
   <inherits name="com.google.gwt.resources.Resources" />
   <inherits name="org.jboss.errai.ioc.Container"/>
   <inherits name="org.jboss.errai.databinding.DataBinding" />
+  <inherits name="elemental2.dom.Dom" />
 
   <inherits name="org.w3c.dom.Dom"/>
 
