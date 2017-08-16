@@ -24,6 +24,8 @@ import jsinterop.annotations.JsType;
 
 /**
  *
+ * @deprecated Use Elemental 2 for new development
+ *
  * @author Max Barkley <mbarkley@redhat.com>
  * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent">Web API</a>
  */
@@ -41,6 +43,7 @@ import jsinterop.annotations.JsType;
   "show"
 })
 @JsType(isNative = true)
+@Deprecated
 public interface MouseEvent extends UIEvent {
 
   @JsOverlay static final int BUTTON_LEFT = 0;

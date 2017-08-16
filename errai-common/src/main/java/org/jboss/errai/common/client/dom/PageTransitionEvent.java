@@ -23,6 +23,8 @@ import jsinterop.annotations.JsType;
 
 /**
  *
+ * @deprecated Use Elemental 2 for new development
+ *
  * @author Max Barkley <mbarkley@redhat.com>
  * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/PageTransitionEvent">Web API</a>
  */
@@ -31,6 +33,7 @@ import jsinterop.annotations.JsType;
   "pagehide"
 })
 @JsType(isNative = true)
+@Deprecated
 public interface PageTransitionEvent extends Event {
 
   @JsProperty(name = "persisted") boolean isPersisted();

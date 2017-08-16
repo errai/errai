@@ -22,10 +22,13 @@ import jsinterop.annotations.JsType;
 
 /**
  *
+ * @deprecated Use Elemental 2 for new development
+ *
  * @author Max Barkley <mbarkley@redhat.com>
  * @see <a href="https://www.w3.org/TR/DOM-Level-2-Style/css.html#CSS-CSSValue">Web API</a>
  */
 @JsType(isNative = true)
+@Deprecated
 public interface CSSValue {
   @JsOverlay static short CSS_INHERIT = 0;
   @JsOverlay static short CSS_PRIMITIVE_VALUE = 1;

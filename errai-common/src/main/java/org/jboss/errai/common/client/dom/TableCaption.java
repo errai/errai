@@ -23,11 +23,14 @@ import jsinterop.annotations.JsType;
 
 /**
  *
+ * @deprecated Use Elemental 2 for new development
+ *
  * @author Max Barkley <mbarkley@redhat.com>
  * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/HTMLTableCaptionElement">Web API</a>
  */
 @JsType(isNative = true)
 @Element("caption")
+@Deprecated
 public interface TableCaption extends HTMLElement {
   @JsProperty String getAlign();
   @JsProperty void setAlign(String align);

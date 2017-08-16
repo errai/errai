@@ -23,11 +23,14 @@ import jsinterop.annotations.JsType;
 
 /**
  *
+ * @deprecated Use Elemental 2 for new development
+ *
  * @author Max Barkley <mbarkley@redhat.com>
  * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/HTMLInputElement">Web API</a>
  */
 @JsType(isNative = true)
 @Element("input")
+@Deprecated
 public interface Input extends HTMLElement {
   @JsProperty String getDefaultValue();
   @JsProperty void setDefaultValue(String defaultValue);

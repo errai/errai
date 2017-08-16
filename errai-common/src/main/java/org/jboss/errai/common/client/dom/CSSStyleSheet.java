@@ -21,10 +21,13 @@ import jsinterop.annotations.JsType;
 
 /**
  *
+ * @deprecated Use Elemental 2 for new development
+ *
  * @author Max Barkley <mbarkley@redhat.com>
  * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/CSSStyleSheet">Web API</a>
  */
 @JsType(isNative = true)
+@Deprecated
 public interface CSSStyleSheet extends StyleSheet {
   @JsProperty CSSRule getOwnerRule();
   @JsProperty CSSRuleList getCssRules();

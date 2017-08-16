@@ -23,11 +23,14 @@ import jsinterop.annotations.JsType;
 
 /**
  *
+ * @deprecated Use Elemental 2 for new development
+ *
  * @author Max Barkley <mbarkley@redhat.com>
  * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/StorageEvent">Web API</a>
  */
 @BrowserEvent("storage")
 @JsType(isNative = true)
+@Deprecated
 public interface StorageEvent extends Event {
 
   @JsProperty String getKey();

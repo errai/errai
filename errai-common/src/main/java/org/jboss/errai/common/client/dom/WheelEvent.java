@@ -24,11 +24,14 @@ import jsinterop.annotations.JsType;
 
 /**
  *
+ * @deprecated Use Elemental 2 for new development
+ *
  * @author Max Barkley <mbarkley@redhat.com>
  * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/WheelEvent">Web API</a>
  */
 @BrowserEvent("wheel")
 @JsType(isNative = true)
+@Deprecated
 public interface WheelEvent extends MouseEvent {
 
   @JsOverlay static final int DOM_DELTA_PIXEL = 0;

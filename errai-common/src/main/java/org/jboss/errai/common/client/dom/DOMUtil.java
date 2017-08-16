@@ -30,8 +30,11 @@ import com.google.gwt.user.client.ui.Widget;
 /**
  * Provides utility methods for interacting with the DOM.
  *
+ * @deprecated Use Elemental 2 for new development
+ *
  * @author Max Barkley <mbarkley@redhat.com>
  */
+@Deprecated
 public abstract class DOMUtil {
   private DOMUtil() {}
 

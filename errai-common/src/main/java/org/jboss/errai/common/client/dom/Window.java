@@ -23,10 +23,13 @@ import jsinterop.annotations.JsType;
 import org.jboss.errai.common.client.api.annotations.IOCProducer;
 
 /**
+ * @deprecated Use Elemental 2 for new development
+ *
  * @author Max Barkley <mbarkley@redhat.com>
  * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window">Web API</a>
  */
 @JsType(isNative = true)
+@Deprecated
 public abstract class Window {
 
     private Window() {

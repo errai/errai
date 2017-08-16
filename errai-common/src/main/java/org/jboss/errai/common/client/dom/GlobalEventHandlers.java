@@ -21,10 +21,13 @@ import jsinterop.annotations.JsType;
 
 /**
  *
+ * @deprecated Use Elemental 2 for new development
+ *
  * @author Max Barkley <mbarkley@redhat.com>
  * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/GlobalEventHandlers">Web API</a>
  */
 @JsType(isNative = true)
+@Deprecated
 public interface GlobalEventHandlers {
   @JsProperty EventListener<?> getOnabort();
   @JsProperty void setOnabort(EventListener<?> onabort);

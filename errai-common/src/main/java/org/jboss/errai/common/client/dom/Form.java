@@ -23,11 +23,14 @@ import jsinterop.annotations.JsType;
 
 /**
  *
+ * @deprecated Use Elemental 2 for new development
+ *
  * @author Max Barkley <mbarkley@redhat.com>
  * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/HTMLFormElement">Web API</a>
  */
 @JsType(isNative = true)
 @Element("form")
+@Deprecated
 public interface Form extends HTMLElement {
   @JsProperty HTMLCollection getElements();
   @JsProperty int getLength();

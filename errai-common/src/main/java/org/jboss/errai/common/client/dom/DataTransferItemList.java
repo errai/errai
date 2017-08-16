@@ -21,10 +21,13 @@ import jsinterop.annotations.JsProperty;
 import jsinterop.annotations.JsType;
 
 /**
+ * @deprecated Use Elemental 2 for new development
+ *
  * @author Max Barkley <mbarkley@redhat.com>
  * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/DataTransferItemList">Web API</a>
  */
 @JsType(isNative = true)
+@Deprecated
 public interface DataTransferItemList {
 
   @JsProperty int getLength();

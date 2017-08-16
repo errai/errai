@@ -21,9 +21,12 @@ import jsinterop.annotations.JsType;
 
 /**
  *
+ * @deprecated Use Elemental 2 for new development
+ *
  * @author Max Barkley <mbarkley@redhat.com>
  */
 @JsType(isNative = true)
+@Deprecated
 public interface DOMSettableTokenList extends DOMTokenList {
   @JsProperty String getValue();
   @JsProperty void setValue(String value);

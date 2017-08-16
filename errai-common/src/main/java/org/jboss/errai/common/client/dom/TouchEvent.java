@@ -23,6 +23,8 @@ import jsinterop.annotations.JsType;
 
 /**
  *
+ * @deprecated Use Elemental 2 for new development
+ *
  * @author Max Barkley <mbarkley@redhat.com>
  * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/TouchEvent">Web API</a>
  */
@@ -35,6 +37,7 @@ import jsinterop.annotations.JsType;
   "touchleave"
 })
 @JsType(isNative = true)
+@Deprecated
 public interface TouchEvent extends UIEvent {
 
   @JsProperty(name = "altKey") boolean isAltKey();

@@ -23,11 +23,14 @@ import jsinterop.annotations.JsType;
 
 /**
  *
+ * @deprecated Use Elemental 2 for new development
+ *
  * @author Max Barkley <mbarkley@redhat.com>
  * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/HTMLTableRowElement">Web API</a>
  */
 @JsType(isNative = true)
 @Element("tr")
+@Deprecated
 public interface TableRow extends HTMLElement {
   @JsProperty int getRowIndex();
   @JsProperty int getSectionRowIndex();

@@ -21,10 +21,14 @@ import jsinterop.annotations.JsType;
 import org.jboss.errai.common.client.api.annotations.Element;
 
 /**
+ *
+ * @deprecated Use Elemental 2 for new development
+ *
  * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/HTMLParagraphElement">Web API</a>
  */
 @JsType(isNative = true)
 @Element("p")
+@Deprecated
 public interface Paragraph extends HTMLElement {
 
     @JsProperty

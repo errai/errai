@@ -23,6 +23,8 @@ import jsinterop.annotations.JsType;
 
 /**
  *
+ * @deprecated Use Elemental 2 for new development
+ *
  * @author Max Barkley <mbarkley@redhat.com>
  * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/UIEvent">Web API</a>
  */
@@ -36,6 +38,7 @@ import jsinterop.annotations.JsType;
   "unload"
 })
 @JsType(isNative = true)
+@Deprecated
 public interface UIEvent extends Event {
 
   @JsProperty(name = "cancelBubble") boolean isCancelBubble();

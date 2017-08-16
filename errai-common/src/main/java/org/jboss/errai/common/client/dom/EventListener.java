@@ -20,11 +20,14 @@ import jsinterop.annotations.JsFunction;
 
 /**
  *
+ * @deprecated Use Elemental 2 for new development
+ *
  * @author Max Barkley <mbarkley@redhat.com>
  * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/EventListener">Web API</a>
  */
 @FunctionalInterface
 @JsFunction
+@Deprecated
 public interface EventListener<E extends Event> {
 
   void call(E event);

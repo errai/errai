@@ -22,10 +22,13 @@ import jsinterop.annotations.JsType;
 
 /**
  *
+ * @deprecated Use Elemental 2 for new development
+ *
  * @author Max Barkley <mbarkley@redhat.com>
  * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/HTMLSpanElement">Web API</a>
  */
 @JsType(isNative = true)
 @Element("span")
+@Deprecated
 public interface Span extends HTMLElement {
 }

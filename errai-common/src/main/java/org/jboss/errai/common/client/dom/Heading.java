@@ -23,11 +23,14 @@ import jsinterop.annotations.JsType;
 
 /**
  *
+ * @deprecated Use Elemental 2 for new development
+ *
  * @author Max Barkley <mbarkley@redhat.com>
  * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/HTMLHeadingElement">Web API</a>
  */
 @JsType(isNative = true)
 @Element({"h1", "h2", "h3", "h4", "h5", "h6"})
+@Deprecated
 public interface Heading extends HTMLElement {
   @JsProperty String getAlign();
   @JsProperty void setAlign(String align);

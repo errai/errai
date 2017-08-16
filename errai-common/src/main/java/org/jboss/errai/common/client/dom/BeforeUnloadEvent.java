@@ -22,11 +22,14 @@ import jsinterop.annotations.JsType;
 
 /**
  *
+ * @deprecated Use Elemental 2 for new development
+ *
  * @author Max Barkley <mbarkley@redhat.com>
  * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/BeforeUnloadEvent">Web API</a>
  */
 @BrowserEvent("beforeunload")
 @JsType(isNative = true)
+@Deprecated
 public interface BeforeUnloadEvent extends Event {
 
 }

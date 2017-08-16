@@ -24,6 +24,8 @@ import jsinterop.annotations.JsType;
 
 /**
  *
+ * @deprecated Use Elemental 2 for new development
+ *
  * @author Max Barkley <mbarkley@redhat.com>
  * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent">Web API</a>
  */
@@ -33,6 +35,7 @@ import jsinterop.annotations.JsType;
   "keyup"
 })
 @JsType(isNative = true)
+@Deprecated
 public interface KeyboardEvent extends UIEvent {
 
   @JsOverlay static final int DOM_KEY_LOCATION_STANDARD = 0;
