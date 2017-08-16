@@ -35,15 +35,18 @@ import org.jboss.errai.databinding.client.DeclarativeBindingModuleUsingBinder;
 import org.jboss.errai.databinding.client.DeclarativeBindingModuleUsingModel;
 import org.jboss.errai.databinding.client.DeclarativeBindingModuleUsingParams;
 import org.jboss.errai.databinding.client.DeclarativeBindingModuleWithKeyUpEvent;
+import org.jboss.errai.databinding.client.HasBoundElemental2IsElement;
 import org.jboss.errai.databinding.client.HasBoundIsElement;
 import org.jboss.errai.databinding.client.InjectedDataBinderModuleBoundOnKeyUp;
 import org.jboss.errai.databinding.client.ListOfStringWidget;
 import org.jboss.errai.databinding.client.ModuleWithInjectedBindable;
 import org.jboss.errai.databinding.client.ModuleWithInjectedDataBinder;
 import org.jboss.errai.databinding.client.NonExistingPropertyException;
+import org.jboss.errai.databinding.client.SimpleHTMLInputElementPresenter;
 import org.jboss.errai.databinding.client.SimpleTextInputPresenter;
 import org.jboss.errai.databinding.client.SingletonBindable;
 import org.jboss.errai.databinding.client.TakesValueCheckInputPresenter;
+import org.jboss.errai.databinding.client.TakesValueElemental2CheckInputPresenter;
 import org.jboss.errai.databinding.client.TestModel;
 import org.jboss.errai.databinding.client.TestModelTakesValueWidget;
 import org.jboss.errai.databinding.client.TestModelWidget;
@@ -1479,6 +1482,64 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
   public void testDeclarativeBindingToIsElementWithTakesValue() throws Exception {
     final HasBoundIsElement instance = IOC.getBeanManager().lookupBean(HasBoundIsElement.class).getInstance();
     final TakesValueCheckInputPresenter presenter = instance.getCheckPresenter();
+    final TestModel model = instance.getBinder().getModel();
+
+    assertFalse("Expected model.isActive() to start as false.", model.isActive());
+
+    presenter.setValue(true);
+    invokeEventListeners(presenter.getElement(), "change");
+    assertTrue("Model not properly updated", model.isActive());
+
+    model.setActive(false);
+    assertFalse("Component not properly updated", presenter.getValue());
+  }
+
+  @Test
+  public void testBindingToElemental2IsElement() throws Exception {
+    final SimpleHTMLInputElementPresenter presenter = new SimpleHTMLInputElementPresenter();
+    final TestModel model = DataBinder.forType(TestModel.class).bind(presenter, "value").getModel();
+
+    presenter.setValue("UI change");
+    invokeEventListeners(presenter.getElement(), "change");
+    assertEquals("Model not properly updated", "UI change", model.getValue());
+
+    model.setValue("model change");
+    assertEquals("Component not properly updated", "model change", presenter.getValue());
+  }
+
+  @Test
+  public void testBindingToElemental2IsElementWithTakesValue() throws Exception {
+    final TakesValueElemental2CheckInputPresenter presenter = new TakesValueElemental2CheckInputPresenter();
+    final TestModel model = DataBinder.forType(TestModel.class).bind(presenter, "active", Convert.identityConverter(Boolean.class)).getModel();
+
+    assertFalse("Expected model.isActive() to start as false.", model.isActive());
+
+    presenter.setValue(true);
+    invokeEventListeners(presenter.getElement(), "change");
+    assertTrue("Model not properly updated", model.isActive());
+
+    model.setActive(false);
+    assertFalse("Component not properly updated", presenter.getValue());
+  }
+
+  @Test
+  public void testDeclarativeBindingToElemental2IsElement() throws Exception {
+    final HasBoundElemental2IsElement instance = IOC.getBeanManager().lookupBean(HasBoundElemental2IsElement.class).getInstance();
+    final SimpleHTMLInputElementPresenter presenter = instance.getTextPresenter();
+    final TestModel model = instance.getBinder().getModel();
+
+    presenter.setValue("UI change");
+    invokeEventListeners(presenter.getElement(), "change");
+    assertEquals("Model not properly updated", "UI change", model.getValue());
+
+    model.setValue("model change");
+    assertEquals("Component not properly updated", "model change", presenter.getValue());
+  }
+
+  @Test
+  public void testDeclarativeBindingToElemental2IsElementWithTakesValue() throws Exception {
+    final HasBoundElemental2IsElement instance = IOC.getBeanManager().lookupBean(HasBoundElemental2IsElement.class).getInstance();
+    final TakesValueElemental2CheckInputPresenter presenter = instance.getCheckPresenter();
     final TestModel model = instance.getBinder().getModel();
 
     assertFalse("Expected model.isActive() to start as false.", model.isActive());
