@@ -774,13 +774,13 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
                                              final Statement fieldsMap,
                                              final Statement fieldsMetaMap) {
 
-    final boolean composite = decorable.getEnclosingInjectable().getInjectedType().isAssignableTo(Composite.class);
+    final boolean composite = decorable.getType().isAssignableTo(Composite.class);
 
     /*
      * Merge each field's Widget Element into the DOM in place of the
      * corresponding data-field
      */
-    final Map<String, Statement> dataFields = DataFieldCodeDecorator.aggregateDataFieldMap(decorable, decorable.getEnclosingInjectable().getInjectedType());
+    final Map<String, Statement> dataFields = DataFieldCodeDecorator.aggregateDataFieldMap(decorable, decorable.getType());
     for (final Entry<String, Statement> field : dataFields.entrySet()) {
       initStmts.add(invokeStatic(TemplateUtil.class, "compositeComponentReplace", decorable.getDecorableDeclaringType()
           .getFullyQualifiedName(), getTemplateFileName(decorable.getDecorableDeclaringType()), supplierOf(Cast.to(Widget.class, field.getValue())),
