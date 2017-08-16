@@ -137,11 +137,6 @@
       <artifactId>mockito-core</artifactId>      
       <scope>test</scope>
     </dependency>
-
-    <dependency>
-      <groupId>com.google.elemental2</groupId>
-      <artifactId>elemental2-dom</artifactId>
-    </dependency>
   </dependencies>
 
   <build>
@@ -229,9 +224,6 @@
                   <value>true</value>
                 </property>
               </systemProperties>
-
-              <!-- GWT 2.8.1 has an assertion that fails on tests and works in production -->
-              <enableAssertions>false</enableAssertions>
             </configuration>
           </plugin>
         </plugins>

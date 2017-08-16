@@ -18,9 +18,6 @@ package org.jboss.errai.common.client.api.annotations;
 
 import jsinterop.annotations.JsType;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-
 /**
  * Marks a native {@link JsType} as a wrapper for a DOM element. {@link Element#value()} are the tag names of the
  * element. Errai IoC will generate code calling {@code document.createElement} for injecting instances of types
@@ -29,7 +26,6 @@ import java.lang.annotation.RetentionPolicy;
  *
  * @author Max Barkley <mbarkley@redhat.com>
  */
-@Retention(RetentionPolicy.RUNTIME)
 public @interface Element {
 
   String[] value();

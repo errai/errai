@@ -16,6 +16,30 @@
 
 package org.jboss.errai.databinding.client;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
+
+import org.jboss.errai.common.client.api.Assert;
+import org.jboss.errai.common.client.api.IsElement;
+import org.jboss.errai.common.client.ui.ElementWrapperWidget;
+import org.jboss.errai.databinding.client.api.Convert;
+import org.jboss.errai.databinding.client.api.Converter;
+import org.jboss.errai.databinding.client.api.DataBinder;
+import org.jboss.errai.databinding.client.api.StateSync;
+import org.jboss.errai.databinding.client.api.handler.list.BindableListChangeHandler;
+import org.jboss.errai.databinding.client.api.handler.property.PropertyChangeEvent;
+import org.jboss.errai.databinding.client.api.handler.property.PropertyChangeHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.gwt.core.client.JavaScriptException;
@@ -36,29 +60,6 @@ import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.ValueBoxBase;
 import com.google.gwt.user.client.ui.Widget;
-import org.jboss.errai.common.client.api.Assert;
-import org.jboss.errai.common.client.api.IsElement;
-import org.jboss.errai.common.client.ui.ElementWrapperWidget;
-import org.jboss.errai.databinding.client.api.Convert;
-import org.jboss.errai.databinding.client.api.Converter;
-import org.jboss.errai.databinding.client.api.DataBinder;
-import org.jboss.errai.databinding.client.api.StateSync;
-import org.jboss.errai.databinding.client.api.handler.list.BindableListChangeHandler;
-import org.jboss.errai.databinding.client.api.handler.property.PropertyChangeEvent;
-import org.jboss.errai.databinding.client.api.handler.property.PropertyChangeHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Supplier;
 
 /**
  * Manages bindings and acts in behalf of a {@link BindableProxy} to keep the target model and bound widgets in sync.
@@ -184,9 +185,6 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
     }
     else if (component instanceof IsElement) {
       return maybeCreateElementValueGetter(BoundUtil.asElement(((IsElement) component).getElement()));
-    }
-    else if (component instanceof org.jboss.errai.common.client.api.elemental2.IsElement) {
-      return maybeCreateElementValueGetter(BoundUtil.asElement(((org.jboss.errai.common.client.api.elemental2.IsElement) component).getElement()));
     }
     else if (isElement(component)) {
       return maybeCreateElementValueGetter(BoundUtil.asElement(component));
@@ -424,16 +422,13 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
           final Consumer<Object> modelUpdater) {
     checkWidgetHasTextOrValue(component);
 
-    Supplier<Map<Class<? extends GwtEvent>, HandlerRegistration>> registrar = HashMap::new;
+    Supplier<Map<Class<? extends GwtEvent>, HandlerRegistration>> registrar = () -> new HashMap<>();
 
     if (component instanceof HasValue) {
       registrar = mergeHasValueChangeHandler(component, modelUpdater, registrar);
     }
     else if (component instanceof IsElement) {
       registrar = mergeNativeChangeEventListener(((IsElement) component).getElement(), uiGetter, modelUpdater, registrar);
-    }
-    else if (component instanceof org.jboss.errai.common.client.api.elemental2.IsElement) {
-      registrar = mergeNativeChangeEventListener(((org.jboss.errai.common.client.api.elemental2.IsElement) component).getElement(), uiGetter, modelUpdater, registrar);
     }
     else if (isElement(component)) {
       registrar = mergeNativeChangeEventListener(component, uiGetter, modelUpdater, registrar);
@@ -448,9 +443,6 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
       }
       else if (component instanceof IsElement) {
         registrar = mergeNativeKeyUpEventListener(((IsElement) component).getElement(), uiGetter, modelUpdater, registrar);
-      }
-      else if (component instanceof org.jboss.errai.common.client.api.elemental2.IsElement) {
-        registrar = mergeNativeKeyUpEventListener(((org.jboss.errai.common.client.api.elemental2.IsElement) component).getElement(), uiGetter, modelUpdater, registrar);
       }
       else if (isElement(component)) {
         registrar = mergeNativeKeyUpEventListener(component, uiGetter, modelUpdater, registrar);
@@ -641,7 +633,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
   /**
    * Unbinds the property with the given name.
    *
-   * @param binding
+   * @param property
    *          the name of the model property to unbind, must not be null.
    */
   public void unbind(final Binding binding) {
@@ -746,33 +738,23 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
 
       if (component instanceof TakesValue) {
         updateComponentValue(newValue, (TakesValue) component, converter);
-      } else if (component instanceof HasText) {
+      }
+      else if (component instanceof HasText) {
         updateComponentValue(newValue, (HasText) component, converter);
-      } else if (component instanceof IsElement
-              || component instanceof org.jboss.errai.common.client.api.elemental2.IsElement || isElement(component)) {
-
-        final Element element = BoundUtil.asElement(getUIPart(component));
+      }
+      else if (component instanceof IsElement || isElement(component)) {
+        final Element element = BoundUtil.asElement(component instanceof IsElement ? ((IsElement) component).getElement() : component);
         final ElementWrapperWidget<?> wrapper = ElementWrapperWidget.getWidget(element);
-
         if (wrapper instanceof TakesValue) {
           updateComponentValue(newValue, (TakesValue) wrapper, converter);
-        } else if (wrapper instanceof HasText) {
+        }
+        else if (wrapper instanceof HasText) {
           updateComponentValue(newValue, (HasText) wrapper, converter);
         }
       }
     }
 
     maybeFirePropertyChangeEvent(property, oldValue, newValue);
-  }
-
-  private Object getUIPart(final Object component) {
-    if (component instanceof IsElement) {
-      return ((IsElement) component).getElement();
-    } else if (component instanceof org.jboss.errai.common.client.api.elemental2.IsElement) {
-      return ((org.jboss.errai.common.client.api.elemental2.IsElement) component).getElement();
-    } else {
-      return component;
-    }
   }
 
   private <P> void updateComponentValue(final P newValue, final HasText component, final Converter converter) {

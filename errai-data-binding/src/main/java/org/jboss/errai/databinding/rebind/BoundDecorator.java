@@ -16,10 +16,22 @@
 
 package org.jboss.errai.databinding.rebind;
 
-import com.google.gwt.dom.client.Element;
-import com.google.gwt.user.client.TakesValue;
-import com.google.gwt.user.client.ui.Widget;
-import jsinterop.annotations.JsType;
+import static org.jboss.errai.codegen.util.Stmt.declareVariable;
+import static org.jboss.errai.codegen.util.Stmt.invokeStatic;
+import static org.jboss.errai.codegen.util.Stmt.loadLiteral;
+import static org.jboss.errai.codegen.util.Stmt.loadVariable;
+import static org.jboss.errai.codegen.util.Stmt.nestedCall;
+import static org.jboss.errai.codegen.util.Stmt.throw_;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+
+import javax.inject.Inject;
+
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.exception.GenerationException;
@@ -44,20 +56,11 @@ import org.jboss.errai.ioc.rebind.ioc.injector.api.Decorable.DecorableType;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.FactoryController;
 import org.jboss.errai.ui.shared.api.annotations.Bound;
 
-import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.user.client.TakesValue;
+import com.google.gwt.user.client.ui.Widget;
 
-import static org.jboss.errai.codegen.util.Stmt.declareVariable;
-import static org.jboss.errai.codegen.util.Stmt.invokeStatic;
-import static org.jboss.errai.codegen.util.Stmt.loadLiteral;
-import static org.jboss.errai.codegen.util.Stmt.loadVariable;
-import static org.jboss.errai.codegen.util.Stmt.nestedCall;
-import static org.jboss.errai.codegen.util.Stmt.throw_;
+import jsinterop.annotations.JsType;
 
 /**
  * Generates an {@link InitializationCallback} that contains automatic binding logic.
@@ -139,7 +142,6 @@ public class BoundDecorator extends IOCDecoratorExtension<Bound> {
               || componentType.isAssignableTo(BindableListChangeHandler.class)
               || componentType.isAssignableTo(Element.class)
               || componentType.isAnnotationPresent(JsType.class)
-              || componentType.isAssignableTo(org.jboss.errai.common.client.api.elemental2.IsElement.class)
               || componentType.isAssignableTo(IsElement.class))) {
         throw new GenerationException("@Bound field or method " + decorable.getName()
             + " in class " + targetClass
