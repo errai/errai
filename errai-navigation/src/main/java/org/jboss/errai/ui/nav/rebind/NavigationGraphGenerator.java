@@ -16,22 +16,14 @@
 
 package org.jboss.errai.ui.nav.rebind;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.PrintWriter;
-import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Singleton;
-
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
+import com.google.common.collect.Multimap;
+import com.google.gwt.core.ext.GeneratorContext;
+import com.google.gwt.core.ext.TreeLogger;
+import com.google.gwt.core.ext.UnableToCompleteException;
+import com.google.gwt.user.client.ui.IsWidget;
 import org.apache.commons.lang3.StringUtils;
 import org.jboss.errai.codegen.Modifier;
 import org.jboss.errai.codegen.Parameter;
@@ -88,14 +80,20 @@ import org.jboss.errai.ui.nav.client.local.spi.PageNode;
 import org.jboss.errai.ui.nav.client.shared.NavigationEvent;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
-import com.google.common.collect.Multimap;
-import com.google.gwt.core.ext.GeneratorContext;
-import com.google.gwt.core.ext.TreeLogger;
-import com.google.gwt.core.ext.UnableToCompleteException;
-import com.google.gwt.user.client.ui.IsWidget;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Singleton;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Generates the GeneratedNavigationGraph class based on {@code @Page} annotations.
@@ -144,7 +142,9 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
 
     if (hasNonBlacklistedPages) {
       for (MetaClass pageClass : pages) {
-        if (!(pageClass.isAssignableTo(IsWidget.class) || pageClass.isAssignableTo(IsElement.class)
+        if (!(pageClass.isAssignableTo(IsWidget.class)
+                || pageClass.isAssignableTo(IsElement.class)
+                || pageClass.isAssignableTo(org.jboss.errai.common.client.api.elemental2.IsElement.class)
                 || pageClass.isAnnotationPresent(Templated.class))) {
           throw new GenerationException("Class " + pageClass.getFullyQualifiedName()
                   + " is annotated with @Page, so it must implement IsWidget or be @Templated");

@@ -31,6 +31,7 @@ import org.jboss.errai.ui.nav.client.local.spi.PageNode;
 import org.jboss.errai.ui.nav.client.local.testpages.AppScopedPageWithNoLifecycleMethods;
 import org.jboss.errai.ui.nav.client.local.testpages.CircularRef1;
 import org.jboss.errai.ui.nav.client.local.testpages.CircularRef2;
+import org.jboss.errai.ui.nav.client.local.testpages.IsElementElemental2PageWithLeadingSlashPath;
 import org.jboss.errai.ui.nav.client.local.testpages.IsElementPageWithLeadingSlashPath;
 import org.jboss.errai.ui.nav.client.local.testpages.MissingPageRole;
 import org.jboss.errai.ui.nav.client.local.testpages.MissingUniquePageRole;
@@ -43,6 +44,7 @@ import org.jboss.errai.ui.nav.client.local.testpages.PageWithExtraState;
 import org.jboss.errai.ui.nav.client.local.testpages.PageWithLinkToIsWidget;
 import org.jboss.errai.ui.nav.client.local.testpages.PageWithNavigationControl;
 import org.jboss.errai.ui.nav.client.local.testpages.PageWithRole;
+import org.jboss.errai.ui.nav.client.local.testpages.PageWithTransitionToElemental2IsElement;
 import org.jboss.errai.ui.nav.client.local.testpages.PageWithTransitionToIsElement;
 import org.jboss.errai.ui.nav.client.local.testpages.PageWithTransitionToNonComposite;
 
@@ -310,6 +312,33 @@ public class NavigationTest extends AbstractErraiCDITest {
     }
 
     assertEquals("#" + IsElementPageWithLeadingSlashPath.IS_ELEMENT_PAGE, Location.getHash());
+  }
+
+  public void testTransitionToElemental2IsElementPage() throws Exception {
+    final PageWithTransitionToElemental2IsElement pageWithTransition = IOC.getBeanManager().lookupBean(PageWithTransitionToElemental2IsElement.class).getInstance();
+    navigation.goTo("");
+    assertFalse("Precondition failed: Should not start test on " + IsElementElemental2PageWithLeadingSlashPath.class.getSimpleName(),
+            navigation.currentPage.contentType().equals(IsElementElemental2PageWithLeadingSlashPath.class));
+    pageWithTransition.transition.go();
+    assertEquals("Should have navigated to " + IsElementElemental2PageWithLeadingSlashPath.class.getSimpleName(),
+            IsElementElemental2PageWithLeadingSlashPath.class, navigation.currentPage.contentType());
+
+  }
+
+  public void testTransitionToElemental2PageWithLeadingSlash() throws Exception {
+    final PageWithTransitionToElemental2IsElement pageWithTransition = IOC.getBeanManager().lookupBean(PageWithTransitionToElemental2IsElement.class).getInstance();
+    try {
+      navigation.goTo("");
+      assertFalse("Precondition failed: Should not start test on " + IsElementElemental2PageWithLeadingSlashPath.class.getSimpleName(),
+              navigation.currentPage.contentType().equals(IsElementElemental2PageWithLeadingSlashPath.class));
+      pageWithTransition.transition.go();
+      assertEquals("Should have navigated to " + IsElementElemental2PageWithLeadingSlashPath.class.getSimpleName(),
+              IsElementElemental2PageWithLeadingSlashPath.class, navigation.currentPage.contentType());
+    } catch (Exception e) {
+      throw new AssertionError("Precondition failed.", e);
+    }
+
+    assertEquals("#" + IsElementElemental2PageWithLeadingSlashPath.IS_ELEMENT_PAGE, Location.getHash());
   }
 
   public void testIsWidgetAnchorTransition() {
