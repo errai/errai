@@ -16,15 +16,6 @@
 
 package org.jboss.errai.ioc.rebind.ioc.extension.builtin;
 
-import static org.jboss.errai.codegen.util.Stmt.invokeStatic;
-
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.enterprise.context.Dependent;
-
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
@@ -51,6 +42,14 @@ import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.enterprise.context.Dependent;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static org.jboss.errai.codegen.util.Stmt.invokeStatic;
+
 @IOCExtension
 public class LoggerFactoryIOCExtension implements IOCExtensionConfigurator {
 
@@ -68,8 +67,8 @@ public class LoggerFactoryIOCExtension implements IOCExtensionConfigurator {
       @Override
       public CustomFactoryInjectable getInjectable(final InjectionSite injectionSite, final FactoryNameGenerator nameGenerator) {
         final String loggerName;
-        if (injectionSite.isAnnotationPresent(NamedLogger.class)) {
-          loggerName = injectionSite.getAnnotation(NamedLogger.class).value();
+        if (injectionSite.unsafeIsAnnotationPresent(NamedLogger.class)) {
+          loggerName = injectionSite.unsafeGetAnnotation(NamedLogger.class).value();
         }
         else {
           loggerName = injectionSite.getEnclosingType().getFullyQualifiedName();

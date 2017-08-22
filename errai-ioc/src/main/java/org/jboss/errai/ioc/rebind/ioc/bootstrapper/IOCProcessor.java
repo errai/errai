@@ -16,49 +16,9 @@
 
 package org.jboss.errai.ioc.rebind.ioc.bootstrapper;
 
-import static org.jboss.errai.codegen.Parameter.finalOf;
-import static org.jboss.errai.codegen.builder.impl.ObjectBuilder.newInstanceOf;
-import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
-import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
-import static org.jboss.errai.codegen.util.Stmt.castTo;
-import static org.jboss.errai.codegen.util.Stmt.declareFinalVariable;
-import static org.jboss.errai.codegen.util.Stmt.declareVariable;
-import static org.jboss.errai.codegen.util.Stmt.invokeStatic;
-import static org.jboss.errai.codegen.util.Stmt.loadLiteral;
-import static org.jboss.errai.codegen.util.Stmt.loadVariable;
-import static org.jboss.errai.ioc.rebind.ioc.bootstrapper.AbstractBodyGenerator.getAnnotationArrayStmt;
-import static org.jboss.errai.ioc.rebind.ioc.bootstrapper.AbstractBodyGenerator.getAssignableTypesArrayStmt;
-
-import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Optional;
-import java.util.PriorityQueue;
-import java.util.Set;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-
-import javax.annotation.PostConstruct;
-import javax.enterprise.context.Dependent;
-import javax.enterprise.context.NormalScope;
-import javax.enterprise.inject.Alternative;
-import javax.enterprise.inject.Disposes;
-import javax.enterprise.inject.Specializes;
-import javax.enterprise.inject.Stereotype;
-import javax.enterprise.inject.Typed;
-import javax.inject.Named;
-import javax.inject.Provider;
-import javax.inject.Scope;
-
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.JavaScriptObject;
+import jsinterop.annotations.JsType;
 import org.jboss.errai.codegen.ArithmeticExpression;
 import org.jboss.errai.codegen.ArithmeticOperator;
 import org.jboss.errai.codegen.InnerClass;
@@ -130,10 +90,47 @@ import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.core.client.JavaScriptObject;
+import javax.annotation.PostConstruct;
+import javax.enterprise.context.Dependent;
+import javax.enterprise.context.NormalScope;
+import javax.enterprise.inject.Alternative;
+import javax.enterprise.inject.Disposes;
+import javax.enterprise.inject.Specializes;
+import javax.enterprise.inject.Stereotype;
+import javax.enterprise.inject.Typed;
+import javax.inject.Named;
+import javax.inject.Provider;
+import javax.inject.Scope;
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
+import java.util.PriorityQueue;
+import java.util.Set;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
-import jsinterop.annotations.JsType;
+import static org.jboss.errai.codegen.Parameter.finalOf;
+import static org.jboss.errai.codegen.builder.impl.ObjectBuilder.newInstanceOf;
+import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
+import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
+import static org.jboss.errai.codegen.util.Stmt.castTo;
+import static org.jboss.errai.codegen.util.Stmt.declareFinalVariable;
+import static org.jboss.errai.codegen.util.Stmt.declareVariable;
+import static org.jboss.errai.codegen.util.Stmt.invokeStatic;
+import static org.jboss.errai.codegen.util.Stmt.loadLiteral;
+import static org.jboss.errai.codegen.util.Stmt.loadVariable;
+import static org.jboss.errai.ioc.rebind.ioc.bootstrapper.AbstractBodyGenerator.getAnnotationArrayStmt;
+import static org.jboss.errai.ioc.rebind.ioc.bootstrapper.AbstractBodyGenerator.getAssignableTypesArrayStmt;
 
 /**
  * Creates {@link DependencyGraph} by adding all types and dependencies to the
@@ -402,7 +399,7 @@ public class IOCProcessor {
   }
 
   private Class<?> getAsyncFragmentId(final Injectable injectable) {
-    final LoadAsync loadAsync = injectable.getInjectedType().getAnnotation(LoadAsync.class);
+    final LoadAsync loadAsync = injectable.getInjectedType().unsafeGetAnnotation(LoadAsync.class);
     if (loadAsync == null) {
       return LoadAsync.NO_FRAGMENT.class;
     } else {
@@ -444,7 +441,7 @@ public class IOCProcessor {
               injectable.getInjectedType().getFullyQualifiedName(), createJsTypeProviderFor(injectable)));
       for (final MetaClass mc : injectable.getInjectedType().getAllSuperTypesAndInterfaces()) {
         if (mc.isPublic() && !mc.equals(injectable.getInjectedType())
-                && !mc.getFullyQualifiedName().equals("java.lang.Object") && mc.isAnnotationPresent(JsType.class)) {
+                && !mc.getFullyQualifiedName().equals("java.lang.Object") && mc.unsafeIsAnnotationPresent(JsType.class)) {
           stmts.add(loadVariable("windowContext").invoke("addSuperTypeAlias",
                   mc.getFullyQualifiedName(), injectable.getInjectedType().getFullyQualifiedName()));
         }
@@ -485,7 +482,7 @@ public class IOCProcessor {
   }
 
   private String getBeanName(final Injectable injectable) {
-    final Named named = injectable.getInjectedType().getAnnotation(Named.class);
+    final Named named = injectable.getInjectedType().unsafeGetAnnotation(Named.class);
     return (named != null) ? named.value() : null;
   }
 
@@ -561,7 +558,7 @@ public class IOCProcessor {
         throw new RuntimeException("They type " + scopeContext.getFullyQualifiedName()
                 + " was annotated with @ScopeContext but does not implement " + Context.class.getName());
       }
-      final ScopeContext anno = scopeContext.getAnnotation(ScopeContext.class);
+      final ScopeContext anno = scopeContext.unsafeGetAnnotation(ScopeContext.class);
       for (final Class<? extends Annotation> scope : anno.value()) {
         annoToContextImpl.put(scope, scopeContext);
       }
@@ -656,7 +653,7 @@ public class IOCProcessor {
           maybeProcessAsStaticOnlyProducer(builder, type, problems);
         }
         if (isPublishableJsType(type)) {
-          final WiringElementType scopeWiringType = (type.isAnnotationPresent(SharedSingleton.class)
+          final WiringElementType scopeWiringType = (type.unsafeIsAnnotationPresent(SharedSingleton.class)
                   ? WiringElementType.SharedSingleton : WiringElementType.DependentBean);
           builder.addInjectable(type, qualFactory.forUniversallyQualified(), ANY, Dependent.class, InjectableType.JsType, scopeWiringType);
         }
@@ -667,8 +664,8 @@ public class IOCProcessor {
   }
 
   private Predicate<List<InjectableHandle>> getPathPredicate(final HasAnnotations annotated, final List<String> problems) {
-    if (annotated.isAnnotationPresent(Typed.class)) {
-      final Class<?>[] beanTypes = annotated.getAnnotation(Typed.class).value();
+    if (annotated.unsafeIsAnnotationPresent(Typed.class)) {
+      final Class<?>[] beanTypes = annotated.unsafeGetAnnotation(Typed.class).value();
       validateAssignableTypes(annotated, beanTypes, problems);
       return path -> Object.class.getName().equals(path.get(0)) || Arrays.stream(beanTypes)
               .anyMatch(beanType -> path.get(0).getType().getFullyQualifiedName().equals(beanType.getName()));
@@ -717,7 +714,7 @@ public class IOCProcessor {
   }
 
   private boolean isPublishableJsType(final MetaClass type) {
-    final JsType jsType = type.getAnnotation(JsType.class);
+    final JsType jsType = type.unsafeGetAnnotation(JsType.class);
 
     return jsType != null && !jsType.isNative();
   }
@@ -741,7 +738,7 @@ public class IOCProcessor {
     boolean isTopLevel;
     // Workaround for http://bugs.java.com/view_bug.do?bug_id=2210448
     try {
-      isTopLevel = (type.asClass() == null || type.asClass().getDeclaringClass() == null);
+      isTopLevel = (type.unsafeAsClass() == null || type.unsafeAsClass().getDeclaringClass() == null);
     } catch (final IncompatibleClassChangeError ex) {
       isTopLevel = false;
     }
@@ -753,7 +750,7 @@ public class IOCProcessor {
     Class<?> enclosing;
     // Workaround for http://bugs.java.com/view_bug.do?bug_id=2210448
     try {
-      enclosing = (type.asClass() == null ? null : type.asClass().getDeclaringClass());
+      enclosing = (type.unsafeAsClass() == null ? null : type.unsafeAsClass().getDeclaringClass());
       hasEnclosingClass = true;
     } catch (final IncompatibleClassChangeError ex) {
       enclosing = null;
@@ -765,7 +762,7 @@ public class IOCProcessor {
   }
 
   private boolean isSimpleton(final MetaClass type) {
-    for (final Annotation anno : type.getAnnotations()) {
+    for (final Annotation anno : type.unsafeGetAnnotations()) {
       if (nonSimpletonTypeAnnotations.contains(anno.annotationType())
               || isStereotype(anno)
               || isNonNativeJsTypeAnnotation(anno)) {
@@ -816,22 +813,22 @@ public class IOCProcessor {
     final List<WiringElementType> wiringTypes = new ArrayList<>();
     wiringTypes.addAll(getWiringTypesForScopeAnnotation(directScope));
 
-    if (type.isAnnotationPresent(Alternative.class)) {
+    if (type.unsafeIsAnnotationPresent(Alternative.class)) {
       wiringTypes.add(WiringElementType.AlternativeBean);
     }
 
     if (isPublishableJsType(type)) {
       wiringTypes.add(WiringElementType.JsType);
     }
-    if (type.isAnnotationPresent(SharedSingleton.class)) {
+    if (type.unsafeIsAnnotationPresent(SharedSingleton.class)) {
       wiringTypes.add(WiringElementType.SharedSingleton);
     }
 
-    if (type.isAnnotationPresent(Specializes.class)) {
+    if (type.unsafeIsAnnotationPresent(Specializes.class)) {
       wiringTypes.add(WiringElementType.Specialization);
     }
 
-    if (type.isAnnotationPresent(LoadAsync.class)) {
+    if (type.unsafeIsAnnotationPresent(LoadAsync.class)) {
       wiringTypes.add(WiringElementType.LoadAsync);
     }
 
@@ -844,7 +841,7 @@ public class IOCProcessor {
     final Collection<Class<? extends Annotation>> providerAnnotations = injectionContext
             .getAnnotationsForElementType(WiringElementType.Provider);
     for (final Class<? extends Annotation> anno : providerAnnotations) {
-      if (type.isAnnotationPresent(anno)) {
+      if (type.unsafeIsAnnotationPresent(anno)) {
         if (type.isAssignableTo(Provider.class)) {
           addProviderInjectable(typeInjectable, builder, enabled);
         }
@@ -909,7 +906,7 @@ public class IOCProcessor {
       return score2 - score1;
     });
 
-    for (final Annotation anno : annotated.getAnnotations()) {
+    for (final Annotation anno : annotated.unsafeGetAnnotations()) {
       final Class<? extends Annotation> annoType = anno.annotationType();
       if (scopeAnnoTypes.contains(annoType)) {
         pq.add(annoType);
@@ -1012,10 +1009,10 @@ public class IOCProcessor {
     final List<WiringElementType> wiringTypes = new ArrayList<>();
 
     wiringTypes.addAll(getWiringTypesForScopeAnnotation(directScope));
-    if (annotated.isAnnotationPresent(Specializes.class)) {
+    if (annotated.unsafeIsAnnotationPresent(Specializes.class)) {
       wiringTypes.add(WiringElementType.Specialization);
     }
-    if (enclosingClass.isAnnotationPresent(LoadAsync.class)) {
+    if (enclosingClass.unsafeIsAnnotationPresent(LoadAsync.class)) {
       wiringTypes.add(WiringElementType.LoadAsync);
     }
 
@@ -1071,7 +1068,7 @@ public class IOCProcessor {
 
   private void addDisposerDependencies(final Injectable producedInjectable, final MetaMethod disposer, final DependencyGraphBuilder builder) {
     for (final MetaParameter param : disposer.getParameters()) {
-      if (param.isAnnotationPresent(Disposes.class)) {
+      if (param.unsafeIsAnnotationPresent(Disposes.class)) {
         builder.addDisposesMethodDependency(producedInjectable, disposer.getDeclaringClass(), qualFactory.forSink(disposer.getDeclaringClass()), disposer);
       } else {
         builder.addDisposesParamDependency(producedInjectable, param.getType(), qualFactory.forSink(param), param.getIndex(), param);
@@ -1194,7 +1191,7 @@ public class IOCProcessor {
     final Collection<Class<? extends Annotation>> injectAnnotations = injectionContext.getAnnotationsForElementType(WiringElementType.InjectionPoint);
     for (final MetaConstructor con : type.getConstructors()) {
       for (final Class<? extends Annotation> anno : injectAnnotations) {
-        if (con.isAnnotationPresent(anno)) {
+        if (con.unsafeIsAnnotationPresent(anno)) {
           return con;
         }
       }
@@ -1261,8 +1258,8 @@ public class IOCProcessor {
   }
 
   private boolean isNativeJSType(final MetaClass type) {
-    final JsType anno = type.getAnnotation(JsType.class);
-    return type.getAnnotation(JsType.class) != null && anno.isNative();
+    final JsType anno = type.unsafeGetAnnotation(JsType.class);
+    return type.unsafeGetAnnotation(JsType.class) != null && anno.isNative();
   }
 
   private boolean scopeDoesNotRequireProxy(final MetaClass type) {
@@ -1276,7 +1273,7 @@ public class IOCProcessor {
     final List<MetaConstructor> cons = new ArrayList<>();
     for (final MetaConstructor con : type.getConstructors()) {
       for (final Class<? extends Annotation> anno : injectAnnotations) {
-        if (con.isAnnotationPresent(anno)) {
+        if (con.unsafeIsAnnotationPresent(anno)) {
           cons.add(con);
         }
       }
@@ -1293,7 +1290,7 @@ public class IOCProcessor {
   }
 
   private boolean isActive(final MetaClass type) {
-    if (type.isAnnotationPresent(Alternative.class)) {
+    if (type.unsafeIsAnnotationPresent(Alternative.class)) {
       return isAlternativeEnabled(type);
     } else {
       return true;
@@ -1314,7 +1311,7 @@ public class IOCProcessor {
   }
 
   private boolean isEnabledByProperty(final MetaClass type) {
-    final EnabledByProperty anno = type.getAnnotation(EnabledByProperty.class);
+    final EnabledByProperty anno = type.unsafeGetAnnotation(EnabledByProperty.class);
     final boolean propValue = getPropertyValue(anno.value(),
                                                anno.matchValue(),
                                                anno.matchByDefault(),
@@ -1337,7 +1334,7 @@ public class IOCProcessor {
   }
 
   private boolean hasEnablingProperty(final MetaClass type) {
-    return type.isAnnotationPresent(EnabledByProperty.class);
+    return type.unsafeIsAnnotationPresent(EnabledByProperty.class);
   }
 
   private static boolean exactTypePredicate(final List<InjectableHandle> path) {

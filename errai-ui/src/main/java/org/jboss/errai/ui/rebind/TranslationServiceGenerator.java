@@ -142,7 +142,7 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
         throw new GenerationException("Translation key fields must be of type java.lang.String: " + defaultName);
       }
       try {
-        final Class<?> asClass = metaField.getDeclaringClass().asClass();
+        final Class<?> asClass = metaField.getDeclaringClass().unsafeAsClass();
         final Field field = asClass.getField(fieldName);
         final Object fieldVal = field.get(null);
         if (fieldVal == null) {
@@ -156,7 +156,7 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
 
       // Figure out the translation key value (for the null locale).
       String value = null;
-      final TranslationKey annotation = metaField.getAnnotation(TranslationKey.class);
+      final TranslationKey annotation = metaField.unsafeGetAnnotation(TranslationKey.class);
       final String defaultValue = annotation.defaultValue();
       if (defaultValue != null) {
         value = defaultValue;
@@ -295,7 +295,7 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
 
   private String getPathRoot(final MetaClass bundleClass, final URL resource) {
     final String fullPath = resource.getPath();
-    final String resourcePath = bundleClass.getAnnotation(Bundle.class).value();
+    final String resourcePath = bundleClass.unsafeGetAnnotation(Bundle.class).value();
     final String protocol = resource.getProtocol();
 
     final String relativePath;
@@ -372,7 +372,7 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
    * @param bundleAnnotatedClass
    */
   private String getMessageBundlePath(final MetaClass bundleAnnotatedClass) {
-    final Bundle annotation = bundleAnnotatedClass.getAnnotation(Bundle.class);
+    final Bundle annotation = bundleAnnotatedClass.unsafeGetAnnotation(Bundle.class);
     final String name = annotation.value();
     if (name == null) {
       throw new GenerationException("@Bundle: bundle name must not be null].");
@@ -474,7 +474,7 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
     // Find all *usages* of translation keys by scanning and processing all templates.
     final Collection<MetaClass> templatedAnnotatedClasses = ClassScanner.getTypesAnnotatedWith(Templated.class);
     for (final MetaClass templatedAnnotatedClass : templatedAnnotatedClasses) {
-      if (!templatedAnnotatedClass.getAnnotation(Templated.class)
+      if (!templatedAnnotatedClass.unsafeGetAnnotation(Templated.class)
               .provider().equals(Templated.DEFAULT_PROVIDER.class))
         continue;
 

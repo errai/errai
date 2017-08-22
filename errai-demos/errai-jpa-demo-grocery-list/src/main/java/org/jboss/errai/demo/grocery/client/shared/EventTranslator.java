@@ -23,6 +23,7 @@ import javax.persistence.PostPersist;
 import javax.persistence.PostRemove;
 import javax.persistence.PostUpdate;
 
+import org.jboss.errai.common.apt.ErraiApp;
 import org.jboss.errai.demo.grocery.client.shared.qual.New;
 import org.jboss.errai.demo.grocery.client.shared.qual.Removed;
 import org.jboss.errai.demo.grocery.client.shared.qual.Updated;
@@ -36,7 +37,7 @@ import org.jboss.errai.ioc.client.api.EntryPoint;
  *
  * @author jfuerth
  */
-@EntryPoint
+@ErraiApp
 public class EventTranslator {
 
     private static EventTranslator INSTANCE;

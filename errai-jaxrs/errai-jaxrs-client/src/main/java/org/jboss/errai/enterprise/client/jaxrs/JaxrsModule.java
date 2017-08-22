@@ -16,6 +16,7 @@
 
 package org.jboss.errai.enterprise.client.jaxrs;
 
+import org.jboss.errai.enterprise.client.local.JaxrsProxyLoader;
 import org.jboss.errai.marshalling.client.api.MarshallerFramework;
 
 import com.google.gwt.core.client.EntryPoint;

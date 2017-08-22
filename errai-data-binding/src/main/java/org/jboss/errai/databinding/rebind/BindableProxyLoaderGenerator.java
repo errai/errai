@@ -149,7 +149,7 @@ public class BindableProxyLoaderGenerator extends AbstractAsyncGenerator {
 
   @Override
   protected boolean isRelevantClass(final MetaClass clazz) {
-    for (final Annotation anno : clazz.getAnnotations()) {
+    for (final Annotation anno : clazz.unsafeGetAnnotations()) {
       if (anno.annotationType().equals(Bindable.class) || anno.annotationType().equals(DefaultConverter.class)) {
         return true;
       }

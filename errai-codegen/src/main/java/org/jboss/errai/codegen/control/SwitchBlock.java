@@ -88,7 +88,7 @@ public class SwitchBlock extends AbstractStatement {
 
     if (!caseBlocks.isEmpty()) {
       final MetaClass switchExprMetaClass = switchExprStmt.getType().getErased().asBoxed();
-      final boolean isStringSwitch = switchExprMetaClass.asClass().equals(String.class);
+      final boolean isStringSwitch = switchExprMetaClass.unsafeAsClass().equals(String.class);
       for (final LiteralValue<?> value : caseBlocks.keySet()) {
         if (!switchExprMetaClass.isAssignableFrom(value.getType().getErased())) {
           throw new InvalidTypeException(

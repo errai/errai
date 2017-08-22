@@ -336,7 +336,7 @@ public final class SnapshotMaker {
           }
           try {
 
-            final Object retval = typeToExtend.asClass().getMethod(method.getName()).invoke(o);
+            final Object retval = typeToExtend.unsafeAsClass().getMethod(method.getName()).invoke(o);
             methodReturnVals.put(retval, method);
 
             if (logger.isDebugEnabled()) {

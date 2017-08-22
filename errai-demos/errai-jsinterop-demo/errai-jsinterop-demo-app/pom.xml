@@ -48,7 +48,8 @@
     <slf4j.version>1.5.11</slf4j.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <javaee.version>3.0.1.Final</javaee.version>
-    <errai.dev.context>${project.artifactId}</errai.dev.context>    
+    <errai.dev.context>${project.artifactId}</errai.dev.context>
+    <gwt.module.prefix> </gwt.module.prefix>
   </properties>
 
   <dependencies>
@@ -177,7 +178,7 @@
       </plugin>
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>2.3.2</version>
+        <version>3.6.2</version>
         <configuration>
           <source>1.8</source>
           <target>1.8</target>
@@ -231,15 +232,44 @@
           <hostedWebapp>src/main/webapp</hostedWebapp>
           <extraJvmArgs>-Xmx1G -XX:CompileThreshold=7000 -Derrai.jboss.home=${errai.jboss.home} -Derrai.dev.context=${errai.dev.context} -Derrai.ioc.jsinterop.support=true</extraJvmArgs>
           <generateJsInteropExports>true</generateJsInteropExports>
+          <module>org.jboss.errai.jsinterop.demo.${gwt.module.prefix}App</module>
         </configuration>
       </plugin>
     </plugins>
   </build>
+
   <profiles>
+
+    <profile>
+
+      <id>apt-generators</id>
+
+      <activation>
+        <property>
+          <name>apt-generators</name>
+        </property>
+      </activation>
+
+      <properties>
+        <gwt.module.prefix>AptGenerators_</gwt.module.prefix>
+      </properties>
+
+      <dependencies>
+        <dependency>
+          <groupId>org.jboss.errai</groupId>
+          <artifactId>errai-generators-apt</artifactId>
+          <scope>provided</scope>
+        </dependency>
+      </dependencies>
+
+    </profile>
+
     <profile>
       <id>wildfly</id>
       <activation>
-        <activeByDefault>true</activeByDefault>
+        <property>
+          <name>!skipDefaultProfile</name>
+        </property>
       </activation>
       <build>
         <plugins>

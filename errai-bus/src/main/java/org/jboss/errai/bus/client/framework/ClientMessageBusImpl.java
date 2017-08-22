@@ -56,6 +56,7 @@ import org.jboss.errai.bus.client.framework.transports.HttpPollingHandler;
 import org.jboss.errai.bus.client.framework.transports.SSEHandler;
 import org.jboss.errai.bus.client.framework.transports.TransportHandler;
 import org.jboss.errai.bus.client.framework.transports.WebsocketHandler;
+import org.jboss.errai.bus.client.local.RpcProxyLoader;
 import org.jboss.errai.bus.client.protocols.BusCommand;
 import org.jboss.errai.bus.client.util.BusToolsCli;
 import org.jboss.errai.bus.client.util.ManagementConsole;

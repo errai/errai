@@ -16,10 +16,6 @@
 
 package org.jboss.errai.security.rebind;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
@@ -32,6 +28,10 @@ import org.jboss.errai.security.client.local.nav.PageRoleLifecycleListener;
 import org.jboss.errai.security.client.local.roles.ClientRequiredRolesExtractorImpl;
 import org.jboss.errai.security.shared.api.annotation.RestrictedAccess;
 import org.jboss.errai.ui.nav.client.local.Page;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Register page lifecycle listeners when {@linkplain Page pages} are created.
@@ -49,8 +49,8 @@ public class PageSecurityCodeDecorator extends IOCDecoratorExtension<Page> {
   public void generateDecorator(final Decorable decorable, final FactoryController controller) {
     final List<Statement> statements = new ArrayList<Statement>();
 
-    if (decorable.getDecorableDeclaringType().isAnnotationPresent(RestrictedAccess.class)) {
-      final RestrictedAccess annotation = decorable.getDecorableDeclaringType().getAnnotation(RestrictedAccess.class);
+    if (decorable.getDecorableDeclaringType().unsafeIsAnnotationPresent(RestrictedAccess.class)) {
+      final RestrictedAccess annotation = decorable.getDecorableDeclaringType().unsafeGetAnnotation(RestrictedAccess.class);
       final String roleListenerVar = "roleListener";
 
       statements.add(controller.setReferenceStmt(roleListenerVar,

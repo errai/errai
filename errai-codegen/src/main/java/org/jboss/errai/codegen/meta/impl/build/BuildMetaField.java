@@ -78,7 +78,7 @@ public class BuildMetaField extends MetaField implements Builder {
   }
 
   @Override
-  public Annotation[] getAnnotations() {
+  public Annotation[] unsafeGetAnnotations() {
     return annotations.toArray(new Annotation[annotations.size()]);
   }
 
@@ -198,7 +198,7 @@ public class BuildMetaField extends MetaField implements Builder {
     }
 
     if (!annotations.isEmpty()) {
-      for (final Annotation a : getAnnotations()) {
+      for (final Annotation a : unsafeGetAnnotations()) {
         builder.append(new AnnotationLiteral(a).getCanonicalString(Context.create())).append(" ");
       }
     }

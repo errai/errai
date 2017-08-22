@@ -92,7 +92,7 @@ public class ElementProviderExtension implements IOCExtensionConfigurator {
       return customElementTags;
     }
 
-    return Elemental2TagMapping.getTags(type.asClass());
+    return Elemental2TagMapping.getTags(type.unsafeAsClass());
   }
 
   private static ExactTypeInjectableProvider exactTypeInjectableProvider(final InjectionContext injectionContext,
@@ -118,12 +118,12 @@ public class ElementProviderExtension implements IOCExtensionConfigurator {
 
   private static Collection<String> getCustomElementTags(final MetaClass type) {
 
-    final Element elementAnnotation = type.getAnnotation(Element.class);
+    final Element elementAnnotation = type.unsafeGetAnnotation(Element.class);
     if (elementAnnotation == null) {
       return Collections.emptyList();
     }
 
-    final JsType jsTypeAnnotation = type.getAnnotation(JsType.class);
+    final JsType jsTypeAnnotation = type.unsafeGetAnnotation(JsType.class);
     if (jsTypeAnnotation == null || !jsTypeAnnotation.isNative()) {
       final String element = Element.class.getSimpleName();
       final String jsType = JsType.class.getSimpleName();
@@ -151,7 +151,7 @@ public class ElementProviderExtension implements IOCExtensionConfigurator {
   }
 
   private static void processGwtUserElement(final InjectionContext injectionContext, final MetaClass type) {
-    final TagName gwtTagNameAnnotation = type.getAnnotation(TagName.class);
+    final TagName gwtTagNameAnnotation = type.unsafeGetAnnotation(TagName.class);
     if (gwtTagNameAnnotation != null) {
       Arrays.stream(gwtTagNameAnnotation.value())
               .map(tagName -> gwtExactTypeInjectableProvider(injectionContext, type, tagName))
@@ -186,8 +186,8 @@ public class ElementProviderExtension implements IOCExtensionConfigurator {
   private static Set<Property> getProperties(final MetaClass type) {
     final Set<Property> properties = new HashSet<>();
 
-    final Property declaredProperty = type.getAnnotation(Property.class);
-    final Properties declaredProperties = type.getAnnotation(Properties.class);
+    final Property declaredProperty = type.unsafeGetAnnotation(Property.class);
+    final Properties declaredProperties = type.unsafeGetAnnotation(Properties.class);
 
     if (declaredProperty != null) {
       properties.add(declaredProperty);

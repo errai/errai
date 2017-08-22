@@ -53,7 +53,7 @@ public class InjectUtil {
 
   public static List<Annotation> extractQualifiers(final HasAnnotations annotated) {
     final List<Annotation> qualifiers = new ArrayList<Annotation>();
-    for (final Annotation anno : annotated.getAnnotations()) {
+    for (final Annotation anno : annotated.unsafeGetAnnotations()) {
       if (anno.annotationType().isAnnotationPresent(Qualifier.class)) {
         qualifiers.add(anno);
       }

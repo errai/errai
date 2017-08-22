@@ -260,8 +260,8 @@ public class InjectionContext {
 
           for (final MetaClass annotationClazz : ClassScanner.getTypesAnnotatedWith(annotation,
                   processingContext.getGeneratorContext())) {
-            if (Annotation.class.isAssignableFrom(annotationClazz.asClass())) {
-              final Class<? extends Annotation> javaAnnoCls = annotationClazz.asClass().asSubclass(Annotation.class);
+            if (Annotation.class.isAssignableFrom(annotationClazz.unsafeAsClass())) {
+              final Class<? extends Annotation> javaAnnoCls = annotationClazz.unsafeAsClass().asSubclass(Annotation.class);
               decorators.get(javaAnnoCls).add(iocExtension);
 
               if (oneTarget) {
@@ -384,7 +384,7 @@ public class InjectionContext {
 
     final Collection<Class<? extends Annotation>> annotationsForElementType = getAnnotationsForElementType(type);
 
-    for (final Annotation a : hasAnnotations.getAnnotations()) {
+    for (final Annotation a : hasAnnotations.unsafeGetAnnotations()) {
       if (annotationsForElementType.contains(a.annotationType())) {
         return a;
       }
@@ -392,7 +392,7 @@ public class InjectionContext {
 
     final Set<Annotation> annotationSet = new HashSet<Annotation>();
 
-    fillInStereotypes(annotationSet, hasAnnotations.getAnnotations(), false);
+    fillInStereotypes(annotationSet, hasAnnotations.unsafeGetAnnotations(), false);
 
     for (final Annotation a : annotationSet) {
       if (annotationsForElementType.contains(a.annotationType())) {

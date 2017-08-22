@@ -384,7 +384,7 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
   }
 
   @Override
-  public Annotation[] getAnnotations() {
+  public Annotation[] unsafeGetAnnotations() {
     return annotations.toArray(new Annotation[annotations.size()]);
   }
 
@@ -585,7 +585,7 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
       context.addVariable(Variable.create(buildMetaField.getName(), buildMetaField.getType()));
     }
 
-    for (final Annotation a : getAnnotations()) {
+    for (final Annotation a : unsafeGetAnnotations()) {
       buf.append(new AnnotationLiteral(a).getCanonicalString(context));
       buf.append(" ");
     }

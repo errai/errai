@@ -62,7 +62,7 @@ public class GWTParameter extends MetaParameter {
   }
 
   @Override
-  public Annotation[] getAnnotations() {
+  public Annotation[] unsafeGetAnnotations() {
     return annotations;
   }
 

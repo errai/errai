@@ -18,11 +18,13 @@ package org.jboss.errai.codegen.literal;
 
 import org.jboss.errai.codegen.Context;
 import org.jboss.errai.codegen.builder.callstack.LoadClassReference;
+import org.jboss.errai.codegen.meta.MetaAnnotation;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.util.GenUtil;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
 import java.lang.reflect.Type;
 
@@ -55,6 +57,9 @@ public class ArrayLiteral extends LiteralValue<Object> {
     }
     else if (MetaType.class.isAssignableFrom(type)) {
       type = Type.class;
+    }
+    else if (MetaAnnotation.class.isAssignableFrom(type)) {
+      type = Annotation.class;
     }
     
     this.arrayType = type;

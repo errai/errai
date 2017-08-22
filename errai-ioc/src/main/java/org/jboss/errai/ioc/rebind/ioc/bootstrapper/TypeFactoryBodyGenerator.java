@@ -59,7 +59,6 @@ import static org.jboss.errai.codegen.util.PrivateAccessUtil.getPrivateFieldAcce
 import static org.jboss.errai.codegen.util.PrivateAccessUtil.getPrivateMethodName;
 import static org.jboss.errai.codegen.util.Stmt.castTo;
 import static org.jboss.errai.codegen.util.Stmt.declareFinalVariable;
-import static org.jboss.errai.codegen.util.Stmt.invokeStatic;
 import static org.jboss.errai.codegen.util.Stmt.loadLiteral;
 import static org.jboss.errai.codegen.util.Stmt.loadVariable;
 import static org.jboss.errai.codegen.util.Stmt.newObject;
@@ -186,7 +185,7 @@ class TypeFactoryBodyGenerator extends AbstractBodyGenerator {
           final DecoratorRunnable decoratorRunnable = new DecoratorRunnable(
                   decorator.getClass().getAnnotation(CodeDecorator.class).order(), elemType,
                   () -> {
-                    final Decorable decorable = new Decorable(annotated, annotated.getAnnotation(annoType),
+                    final Decorable decorable = new Decorable(annotated, annotated.unsafeGetAnnotation(annoType),
                             Decorable.DecorableType.fromElementType(elemType), injectionContext,
                             builder.getClassDefinition().getContext(), builder.getClassDefinition(), injectable);
                     if (isNonPublicField(annotated) && !createdAccessors.contains(annotated)) {
@@ -233,7 +232,7 @@ class TypeFactoryBodyGenerator extends AbstractBodyGenerator {
       annotatedItems = type.getParametersAnnotatedWith(annoType);
       break;
     case TYPE:
-      annotatedItems = (type.isAnnotationPresent(annoType)) ? Collections.singletonList(type) : Collections.emptyList();
+      annotatedItems = (type.unsafeIsAnnotationPresent(annoType)) ? Collections.singletonList(type) : Collections.emptyList();
       break;
     default:
       throw new RuntimeException("Not yet implemented.");

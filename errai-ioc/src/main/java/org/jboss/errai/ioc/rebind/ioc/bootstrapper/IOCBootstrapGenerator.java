@@ -295,7 +295,7 @@ public class IOCBootstrapGenerator {
 
     maybeLoadBootstrapClassCollection(context);
     for (final MetaClass clazz : bootstrapClassCollection) {
-      final IOCBootstrapTask task = clazz.getAnnotation(IOCBootstrapTask.class);
+      final IOCBootstrapTask task = clazz.unsafeGetAnnotation(IOCBootstrapTask.class);
       if (task.value() == TaskOrder.Before) {
         beforeTasks.add(clazz);
       }

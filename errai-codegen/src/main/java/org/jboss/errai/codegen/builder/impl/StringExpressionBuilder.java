@@ -61,11 +61,11 @@ public class StringExpressionBuilder extends ExpressionBuilder<StringOperator> i
   public MetaClass getType() {
     Class<?> lhsType = null;
     if (lhs != null) {
-      lhsType = lhs.getType().asUnboxed().asClass();
+      lhsType = lhs.getType().asUnboxed().unsafeAsClass();
     }
     Class<?> rhsType = null;
     if (rhs != null) {
-      rhsType = rhs.getType().asUnboxed().asClass();
+      rhsType = rhs.getType().asUnboxed().unsafeAsClass();
     }
     return MetaClassFactory.get(promote(lhsType, rhsType));
   }

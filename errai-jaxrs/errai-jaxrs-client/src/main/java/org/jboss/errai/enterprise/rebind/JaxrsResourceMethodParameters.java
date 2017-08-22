@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -38,6 +39,7 @@ import org.jboss.errai.codegen.Context;
 import org.jboss.errai.codegen.DefParameters;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
+import org.jboss.errai.codegen.meta.MetaAnnotation;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaMethod;
@@ -91,27 +93,29 @@ public class JaxrsResourceMethodParameters {
   public static JaxrsResourceMethodParameters fromMethod(MetaMethod method, List<? extends Statement> parameterValues) {
     final JaxrsResourceMethodParameters params = new JaxrsResourceMethodParameters();
     int i = 0;
+
+    // All these annotations have Strings as its values, so it's ok to use unsafe methods.
     for (final MetaParameter param : method.getParameters()) {
 
       final Statement paramValue = parameterValues.get(i++);
-      Annotation a = param.getAnnotation(PathParam.class);
-      if (a != null) {
-        params.add(PathParam.class, ((PathParam) a).value(), paramValue);
+      Optional<MetaAnnotation> a = param.getAnnotation(PathParam.class);
+      if (a.isPresent()) {
+        params.add(PathParam.class, a.get().value(), paramValue);
       }
-      else if ((a = param.getAnnotation(QueryParam.class)) != null) {
-        params.add(QueryParam.class, ((QueryParam) a).value(), paramValue);
+      else if ((a = param.getAnnotation(QueryParam.class)).isPresent()) {
+        params.add(QueryParam.class, a.get().value(), paramValue);
       }
-      else if ((a = param.getAnnotation(HeaderParam.class)) != null) {
-        params.add(HeaderParam.class, ((HeaderParam) a).value(), paramValue);
+      else if ((a = param.getAnnotation(HeaderParam.class)).isPresent()) {
+        params.add(HeaderParam.class, a.get().value(), paramValue);
       }
-      else if ((a = param.getAnnotation(MatrixParam.class)) != null) {
-        params.add(MatrixParam.class, ((MatrixParam) a).value(), paramValue);
+      else if ((a = param.getAnnotation(MatrixParam.class)).isPresent()) {
+        params.add(MatrixParam.class, a.get().value(), paramValue);
       }
-      else if ((a = param.getAnnotation(FormParam.class)) != null) {
-        params.add(FormParam.class, ((FormParam) a).value(), paramValue);
+      else if ((a = param.getAnnotation(FormParam.class)).isPresent()) {
+        params.add(FormParam.class, a.get().value(), paramValue);
       }
-      else if ((a = param.getAnnotation(CookieParam.class)) != null) {
-        params.add(CookieParam.class, ((CookieParam) a).value(), paramValue);
+      else if ((a = param.getAnnotation(CookieParam.class)).isPresent()) {
+        params.add(CookieParam.class, a.get().value(), paramValue);
       }
       else {
         params.setEntityParameter(paramValue, method);
@@ -122,12 +126,13 @@ public class JaxrsResourceMethodParameters {
   }
 
   private void add(Class<? extends Annotation> type, String name, Statement value) {
-    if (parameters == null)
-      parameters = new HashMap<Class<? extends Annotation>, MultivaluedMap<String, Statement>>();
+    if (parameters == null) {
+      parameters = new HashMap<>();
+    }
 
     MultivaluedMap<String, Statement> params = parameters.get(type);
     if (params == null) {
-      parameters.put(type, params = new MultivaluedMapImpl<String, Statement>());
+      parameters.put(type, params = new MultivaluedMapImpl<>());
     }
     params.add(name, value);
   }

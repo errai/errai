@@ -50,7 +50,7 @@ public class GWTField extends MetaField {
   }
 
   @Override
-  public Annotation[] getAnnotations() {
+  public Annotation[] unsafeGetAnnotations() {
     return annotations == null ? new Annotation[0] : annotations;
   }
 

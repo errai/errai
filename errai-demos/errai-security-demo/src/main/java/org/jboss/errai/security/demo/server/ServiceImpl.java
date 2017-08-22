@@ -16,16 +16,17 @@
 
 package org.jboss.errai.security.demo.server;
 
-import static org.jboss.errai.security.shared.api.identity.User.StandardUserProperties.*;
-
-import javax.enterprise.context.Dependent;
-import javax.inject.Inject;
-
 import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.security.demo.client.shared.AdminService;
 import org.jboss.errai.security.demo.client.shared.MessageService;
 import org.jboss.errai.security.shared.api.identity.User;
 import org.jboss.errai.security.shared.service.AuthenticationService;
+
+import javax.enterprise.context.Dependent;
+import javax.inject.Inject;
+
+import static org.jboss.errai.security.shared.api.identity.User.StandardUserProperties.FIRST_NAME;
+import static org.jboss.errai.security.shared.api.identity.User.StandardUserProperties.LAST_NAME;
 
 /**
  * The service implementation for {@link MessageService} and {@link AdminService}.

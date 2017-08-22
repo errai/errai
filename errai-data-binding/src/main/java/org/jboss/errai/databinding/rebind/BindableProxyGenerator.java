@@ -35,7 +35,6 @@ import javax.enterprise.util.TypeLiteral;
 
 import org.jboss.errai.codegen.BlockStatement;
 import org.jboss.errai.codegen.Cast;
-import org.jboss.errai.codegen.Context;
 import org.jboss.errai.codegen.DefParameters;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
@@ -160,7 +159,7 @@ public class BindableProxyGenerator {
     for (final MetaMethod method : handlerMethods) {
       if (method.getParameters().length == 1
               && method.getParameters()[0].getType().getFullyQualifiedName().equals(PropertyChangeEvent.class.getName())) {
-        final String property = method.getAnnotation(org.jboss.errai.ui.shared.api.annotations.PropertyChangeHandler.class).value();
+        final String property = method.unsafeGetAnnotation(org.jboss.errai.ui.shared.api.annotations.PropertyChangeHandler.class).value();
         if (!property.isEmpty()) validateProperty(bindable, property);
         final Object handler = createHandlerForMethod(method);
         final ContextualStatementBuilder subStmt = (property.isEmpty() ?

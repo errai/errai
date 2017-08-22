@@ -129,14 +129,14 @@ class GwtValidatorGenerator {
   private SetMultimap<MetaClass, Annotation> getValidationConfig(Collection<MetaClass> validationAnnotations, GeneratorContext context) {
     final SetMultimap<MetaClass, Annotation> beans = HashMultimap.create();
     for (final MetaClass annotation : validationAnnotations) {
-      for (final MetaField field : ClassScanner.getFieldsAnnotatedWith((Class<? extends Annotation>) annotation.asClass(), null, context)) {
-        beans.put(field.getDeclaringClass(), field.getAnnotation((Class<? extends Annotation>) annotation.asClass()));
+      for (final MetaField field : ClassScanner.getFieldsAnnotatedWith((Class<? extends Annotation>) annotation.unsafeAsClass(), null, context)) {
+        beans.put(field.getDeclaringClass(), field.unsafeGetAnnotation((Class<? extends Annotation>) annotation.unsafeAsClass()));
       }
-      for (final MetaMethod method : ClassScanner.getMethodsAnnotatedWith((Class<? extends Annotation>) annotation.asClass(), null, context)) {
-        beans.put(method.getDeclaringClass(), method.getAnnotation((Class<? extends Annotation>) annotation.asClass()));
+      for (final MetaMethod method : ClassScanner.getMethodsAnnotatedWith((Class<? extends Annotation>) annotation.unsafeAsClass(), null, context)) {
+        beans.put(method.getDeclaringClass(), method.unsafeGetAnnotation((Class<? extends Annotation>) annotation.unsafeAsClass()));
       }
-      for (final MetaClass type : ClassScanner.getTypesAnnotatedWith((Class<? extends Annotation>) annotation.asClass(), null, context)) {
-        beans.put(type, type.getAnnotation((Class<? extends Annotation>) annotation.asClass()));
+      for (final MetaClass type : ClassScanner.getTypesAnnotatedWith((Class<? extends Annotation>) annotation.unsafeAsClass(), null, context)) {
+        beans.put(type, type.unsafeGetAnnotation((Class<? extends Annotation>) annotation.unsafeAsClass()));
       }
     }
 
@@ -147,16 +147,16 @@ class GwtValidatorGenerator {
     final Set<Class<?>> allBeans = new HashSet<Class<?>>();
     
     for (final MetaClass bean : beans) {
-      allBeans.add(bean.asClass());
+      allBeans.add(bean.unsafeAsClass());
     }
     
     for (final MetaField field : ClassScanner.getFieldsAnnotatedWith(Valid.class, null, context)) {
-      allBeans.add(field.getDeclaringClass().asClass());
-      allBeans.add(field.getType().asClass());
+      allBeans.add(field.getDeclaringClass().unsafeAsClass());
+      allBeans.add(field.getType().unsafeAsClass());
     }
     for (final MetaMethod method : ClassScanner.getMethodsAnnotatedWith(Valid.class, null, context)) {
-      allBeans.add(method.getDeclaringClass().asClass());
-      allBeans.add(method.getReturnType().asClass());
+      allBeans.add(method.getDeclaringClass().unsafeAsClass());
+      allBeans.add(method.getReturnType().unsafeAsClass());
     }
     
     return allBeans;

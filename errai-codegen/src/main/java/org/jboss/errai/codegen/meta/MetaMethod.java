@@ -16,14 +16,14 @@
 
 package org.jboss.errai.codegen.meta;
 
+import org.jboss.errai.codegen.util.GenUtil;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import org.jboss.errai.codegen.util.GenUtil;
 
 public abstract class MetaMethod extends AbstractHasAnnotations implements MetaClassMember, MetaGenericDeclaration {
 
@@ -78,7 +78,7 @@ public abstract class MetaMethod extends AbstractHasAnnotations implements MetaC
 
   public List<MetaParameter> getParametersAnnotatedWith(final Class<? extends Annotation> annotation) {
     return Arrays.stream(getParameters())
-            .filter(p -> p.isAnnotationPresent(annotation))
+            .filter(p -> p.unsafeIsAnnotationPresent(annotation))
             .collect(Collectors.collectingAndThen(Collectors.toList(), l -> Collections.unmodifiableList(l)));
   }
 
@@ -102,7 +102,7 @@ public abstract class MetaMethod extends AbstractHasAnnotations implements MetaC
   @Override
   public String toString() {
     final StringBuilder sb = new StringBuilder();
-    final Annotation[] annos = getAnnotations();
+    final Annotation[] annos = unsafeGetAnnotations();
     if (annos != null) {
       for (final Annotation anno : annos) {
         sb.append(anno.toString()).append(" ");

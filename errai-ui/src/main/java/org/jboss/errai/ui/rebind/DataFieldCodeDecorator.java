@@ -63,7 +63,7 @@ public class DataFieldCodeDecorator extends IOCDecoratorExtension<DataField> {
     Statement instance = decorable.getAccessStatement();
     final String name = getTemplateDataFieldName((DataField) decorable.getAnnotation(), decorable.getName());
     final boolean isWidget = decorable.getType().isAssignableTo(Widget.class);
-    if (!isWidget && decorable.getType().isAnnotationPresent(Templated.class)) {
+    if (!isWidget && decorable.getType().unsafeIsAnnotationPresent(Templated.class)) {
       instance = Stmt.invokeStatic(TemplateWidgetMapper.class, "get", instance);
     } else if (decorable.getType().isAssignableTo(Element.class)) {
       instance = Stmt.invokeStatic(ElementWrapperWidget.class, "getWidget", instance);

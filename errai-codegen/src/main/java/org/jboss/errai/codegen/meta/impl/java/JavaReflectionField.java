@@ -45,7 +45,7 @@ public class JavaReflectionField extends MetaField {
   private volatile Annotation[] _annotationsCache;
 
   @Override
-  public synchronized Annotation[] getAnnotations() {
+  public synchronized Annotation[] unsafeGetAnnotations() {
     if (_annotationsCache != null) {
       return _annotationsCache;
     }

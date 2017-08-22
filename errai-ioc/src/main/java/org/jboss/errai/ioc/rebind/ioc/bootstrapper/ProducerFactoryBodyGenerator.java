@@ -141,7 +141,7 @@ public class ProducerFactoryBodyGenerator extends AbstractBodyGenerator {
     if (paramDep.getInjectable().isContextual()) {
       final MetaParameter param = paramDep.getParameter();
       final MetaClass[] typeArgs = getTypeArguments(param.getType());
-      final Annotation[] annotations = param.getAnnotations();
+      final Annotation[] annotations = param.unsafeGetAnnotations();
       producerParamCreationStmt = castTo(paramDep.getInjectable().getInjectedType(),
               loadVariable("contextManager").invoke("getContextualInstance", paramDep.getInjectable().getFactoryName(), typeArgs, annotations));
     }

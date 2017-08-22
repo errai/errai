@@ -16,19 +16,7 @@
 
 package org.jboss.errai.ui.nav.rebind;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.powermock.api.mockito.PowerMockito.when;
-
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
+import com.google.gwt.core.ext.GeneratorContext;
 import org.jboss.errai.codegen.exception.GenerationException;
 import org.jboss.errai.codegen.meta.HasAnnotations;
 import org.jboss.errai.codegen.meta.MetaClass;
@@ -59,7 +47,18 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import com.google.gwt.core.ext.GeneratorContext;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.powermock.api.mockito.PowerMockito.when;
 
 /**
  * @author edewit@redhat.com
@@ -113,10 +112,10 @@ public class ValidationRulesTest {
     when(toRoleAnno.annotationType()).thenReturn((Class) org.jboss.errai.ui.nav.client.local.api.TransitionToRole.class);
     when(qualFactory.forSource(Mockito.any())).then(invocation -> {
       final HasAnnotations hasAnno = (HasAnnotations) invocation.getArguments()[0];
-      if (hasAnno.isAnnotationPresent(org.jboss.errai.ui.nav.client.local.api.TransitionToRole.class)) {
+      if (hasAnno.unsafeIsAnnotationPresent(org.jboss.errai.ui.nav.client.local.api.TransitionToRole.class)) {
         return transitionToRole;
       }
-      else if (hasAnno.isAnnotationPresent(org.jboss.errai.ui.nav.client.local.api.TransitionTo.class)) {
+      else if (hasAnno.unsafeIsAnnotationPresent(org.jboss.errai.ui.nav.client.local.api.TransitionTo.class)) {
         return transitionTo;
       }
       else {
@@ -220,8 +219,8 @@ public class ValidationRulesTest {
     transitionProvider.afterInitialization(procContext, injContext);
 
     final InjectableProvider transitionToRoleProvider = getTransitionToRoleProvider();
-    when(injSite.isAnnotationPresent(org.jboss.errai.ui.nav.client.local.api.TransitionToRole.class)).thenReturn(true);
-    when(injSite.getAnnotation(org.jboss.errai.ui.nav.client.local.api.TransitionToRole.class)).thenReturn(toRoleAnno);
+    when(injSite.unsafeIsAnnotationPresent(org.jboss.errai.ui.nav.client.local.api.TransitionToRole.class)).thenReturn(true);
+    when(injSite.unsafeGetAnnotation(org.jboss.errai.ui.nav.client.local.api.TransitionToRole.class)).thenReturn(toRoleAnno);
     when(toRoleAnno.value()).thenReturn((Class) MyUniquePageRole.class);
 
     transitionToRoleProvider.getInjectable(injSite, nameGenerator);
@@ -234,8 +233,8 @@ public class ValidationRulesTest {
     transitionProvider.afterInitialization(procContext, injContext);
 
     final InjectableProvider transitionToRoleProvider = getTransitionToRoleProvider();
-    when(injSite.isAnnotationPresent(org.jboss.errai.ui.nav.client.local.api.TransitionToRole.class)).thenReturn(true);
-    when(injSite.getAnnotation(org.jboss.errai.ui.nav.client.local.api.TransitionToRole.class)).thenReturn(toRoleAnno);
+    when(injSite.unsafeIsAnnotationPresent(org.jboss.errai.ui.nav.client.local.api.TransitionToRole.class)).thenReturn(true);
+    when(injSite.unsafeGetAnnotation(org.jboss.errai.ui.nav.client.local.api.TransitionToRole.class)).thenReturn(toRoleAnno);
     when(toRoleAnno.value()).thenReturn((Class) MyUniquePageRole.class);
 
     transitionToRoleProvider.getInjectable(injSite, nameGenerator);

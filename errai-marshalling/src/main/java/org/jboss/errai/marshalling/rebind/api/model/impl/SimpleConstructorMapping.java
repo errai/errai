@@ -126,7 +126,7 @@ public class SimpleConstructorMapping implements ConstructorMapping {
     Class<?>[] sig = new Class<?>[ms.length];
     int i = 0;
     for (Mapping m : ms) {
-      sig[i++] = m.getTargetType().asClass();
+      sig[i++] = m.getTargetType().unsafeAsClass();
     }
     return _constructorSignature = sig;
   }

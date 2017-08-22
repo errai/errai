@@ -16,10 +16,10 @@
 
 package org.jboss.errai.codegen.meta;
 
+import org.jboss.errai.codegen.util.GenUtil;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-
-import org.jboss.errai.codegen.util.GenUtil;
 
 public abstract class MetaField extends AbstractHasAnnotations implements MetaClassMember {
 
@@ -62,7 +62,7 @@ public abstract class MetaField extends AbstractHasAnnotations implements MetaCl
    *         array.
    */
   @Override
-  public abstract Annotation[] getAnnotations();
+  public abstract Annotation[] unsafeGetAnnotations();
 
   /**
    * Returns a string which includes the declaring class's name and the field
@@ -76,7 +76,7 @@ public abstract class MetaField extends AbstractHasAnnotations implements MetaCl
     sb.append(MetaField.class.getName()).append(":");
     sb.append(getDeclaringClassName()).append(".");
 
-    Annotation[] annos = getAnnotations();
+    Annotation[] annos = unsafeGetAnnotations();
     if (annos != null) {
       for (Annotation anno : annos) {
         sb.append(anno.toString()).append(" ");
@@ -133,7 +133,7 @@ public abstract class MetaField extends AbstractHasAnnotations implements MetaCl
    */
   public Field asField() {
     try {
-      final Class<?> aClass = getDeclaringClass().asClass();
+      final Class<?> aClass = getDeclaringClass().unsafeAsClass();
       return aClass.getDeclaredField(getName());
     }
     catch (Throwable e) {
@@ -169,7 +169,7 @@ public abstract class MetaField extends AbstractHasAnnotations implements MetaCl
     }
 
     @Override
-    public Annotation[] getAnnotations() {
+    public Annotation[] unsafeGetAnnotations() {
       return new Annotation[0];
     }
 
@@ -234,12 +234,12 @@ public abstract class MetaField extends AbstractHasAnnotations implements MetaCl
     }
 
     @Override
-    public boolean isAnnotationPresent(Class<? extends Annotation> annotation) {
+    public boolean unsafeIsAnnotationPresent(Class<? extends Annotation> annotation) {
       return false;
     }
 
     @Override
-    public <A extends Annotation> A getAnnotation(Class<A> annotation) {
+    public <A extends Annotation> A unsafeGetAnnotation(Class<A> annotation) {
       return null;
     }
   }

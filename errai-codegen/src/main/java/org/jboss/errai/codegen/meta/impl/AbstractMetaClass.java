@@ -16,9 +16,20 @@
 
 package org.jboss.errai.codegen.meta.impl;
 
-import static java.util.stream.Collectors.collectingAndThen;
-import static org.jboss.errai.codegen.util.GenUtil.classToMeta;
-import static org.jboss.errai.codegen.util.GenUtil.getArrayDimensions;
+import org.jboss.errai.codegen.meta.BeanDescriptor;
+import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaClassFactory;
+import org.jboss.errai.codegen.meta.MetaConstructor;
+import org.jboss.errai.codegen.meta.MetaField;
+import org.jboss.errai.codegen.meta.MetaMethod;
+import org.jboss.errai.codegen.meta.MetaParameter;
+import org.jboss.errai.codegen.meta.MetaParameterizedType;
+import org.jboss.errai.codegen.meta.MetaType;
+import org.jboss.errai.codegen.meta.MetaTypeVariable;
+import org.jboss.errai.codegen.meta.MetaWildcardType;
+import org.jboss.errai.codegen.util.GenUtil;
+import org.mvel2.util.NullType;
+import org.mvel2.util.ReflectionUtil;
 
 import java.beans.Introspector;
 import java.lang.annotation.Annotation;
@@ -34,20 +45,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.jboss.errai.codegen.meta.BeanDescriptor;
-import org.jboss.errai.codegen.meta.MetaClass;
-import org.jboss.errai.codegen.meta.MetaClassFactory;
-import org.jboss.errai.codegen.meta.MetaConstructor;
-import org.jboss.errai.codegen.meta.MetaField;
-import org.jboss.errai.codegen.meta.MetaMethod;
-import org.jboss.errai.codegen.meta.MetaParameter;
-import org.jboss.errai.codegen.meta.MetaParameterizedType;
-import org.jboss.errai.codegen.meta.MetaType;
-import org.jboss.errai.codegen.meta.MetaTypeVariable;
-import org.jboss.errai.codegen.meta.MetaWildcardType;
-import org.jboss.errai.codegen.util.GenUtil;
-import org.mvel2.util.NullType;
-import org.mvel2.util.ReflectionUtil;
+import static java.util.stream.Collectors.collectingAndThen;
+import static org.jboss.errai.codegen.util.GenUtil.classToMeta;
+import static org.jboss.errai.codegen.util.GenUtil.getArrayDimensions;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -341,7 +341,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     MetaClass scanTarget = this;
     while (scanTarget != null) {
       for (final MetaMethod m : scanTarget.getDeclaredMethods()) {
-        if (m.isAnnotationPresent(annotation)) {
+        if (m.unsafeIsAnnotationPresent(annotation)) {
           final List<MetaMethod> methods = methodsByName.computeIfAbsent(m.getName(), k -> new ArrayList<>());
           if (isNotOverriden(m, methods)) {
             methods.add(m);
@@ -382,7 +382,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
   @Override
   public List<MetaMethod> getDeclaredMethodsAnnotatedWith(final Class<? extends Annotation> annotation) {
     return Arrays.stream(getDeclaredMethods())
-      .filter(m -> m.isAnnotationPresent(annotation))
+      .filter(m -> m.unsafeIsAnnotationPresent(annotation))
       .collect(collectingAndThen(Collectors.toList(), l -> Collections.unmodifiableList(l)));
   }
 
@@ -392,7 +392,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     MetaClass scanTarget = this;
     while (scanTarget != null) {
       for (final MetaMethod m : scanTarget.getDeclaredMethods()) {
-        for (final Annotation a : m.getAnnotations()) {
+        for (final Annotation a : m.unsafeGetAnnotations()) {
           if (_findMetaAnnotation(a.annotationType(), annotation)) {
             methods.add(m);
           }
@@ -420,7 +420,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     MetaClass scanTarget = this;
     while (scanTarget != null) {
       for (final MetaField m : scanTarget.getDeclaredFields()) {
-        if (m.isAnnotationPresent(annotation)) {
+        if (m.unsafeIsAnnotationPresent(annotation)) {
           fields.add(m);
         }
       }
@@ -435,7 +435,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     MetaClass scanTarget = this;
     while (scanTarget != null) {
       for (final MetaField m : scanTarget.getDeclaredFields()) {
-        for (final Annotation a : m.getAnnotations()) {
+        for (final Annotation a : m.unsafeGetAnnotations()) {
           if (_findMetaAnnotation(a.annotationType(), annotation)) {
             methods.add(m);
           }
@@ -589,7 +589,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
   }
 
   @Override
-  public synchronized Class<?> asClass() {
+  public synchronized Class<?> unsafeAsClass() {
     if (_asClassCache != null) {
       return _asClassCache;
     }
@@ -790,8 +790,8 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
   public int hashContent() {
     if (contentString == null) {
       final StringBuilder sb = new StringBuilder();
-      if (getAnnotations() != null) {
-        for (final Annotation a : getAnnotations()) {
+      if (unsafeGetAnnotations() != null) {
+        for (final Annotation a : unsafeGetAnnotations()) {
           sb.append(a.toString());
         }
       }

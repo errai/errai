@@ -109,7 +109,7 @@ public class JavaReflectionConstructor extends MetaConstructor {
   }
 
   @Override
-  public synchronized Annotation[] getAnnotations() {
+  public synchronized Annotation[] unsafeGetAnnotations() {
     if (annotationsCache == null) {
       annotationsCache = constructor.getAnnotations();
     }

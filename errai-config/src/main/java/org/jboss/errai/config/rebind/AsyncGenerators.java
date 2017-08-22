@@ -150,6 +150,8 @@ public final class AsyncGenerators {
             final AsyncCodeGenerator asyncCodeGenerator
                 = cls.asSubclass(AsyncCodeGenerator.class).newInstance();
 
+
+
             final GenerateAsync generateAsync = cls.getAnnotation(GenerateAsync.class);
 
             try {

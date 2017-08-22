@@ -116,7 +116,7 @@ public class BoundDecorator extends IOCDecoratorExtension<Bound> {
       MetaClass componentType = decorable.getType();
       if (componentType.isAssignableTo(Widget.class)) {
         // Ensure @Bound widget field is initialized
-        if (!decorable.get().isAnnotationPresent(Inject.class) && decorable.decorableType().equals(DecorableType.FIELD) && componentType.isDefaultInstantiable()) {
+        if (!decorable.get().unsafeIsAnnotationPresent(Inject.class) && decorable.decorableType().equals(DecorableType.FIELD) && componentType.isDefaultInstantiable()) {
           Statement widgetInit = Stmt.loadVariable("this").invoke(
               PrivateAccessUtil.getPrivateFieldAccessorName(decorable.getAsField()),
               Refs.get("instance"),
@@ -125,7 +125,7 @@ public class BoundDecorator extends IOCDecoratorExtension<Bound> {
           statements.add(If.isNull(component).append(widgetInit).finish());
         }
       }
-      else if (componentType.isAnnotationPresent(JsType.class)) {
+      else if (componentType.unsafeIsAnnotationPresent(JsType.class)) {
         if (componentType.isAssignableTo(HasValue.class)) {
           final MetaClass valueType = componentType.getMethod("getValue", new Class[0]).getReturnType();
           component = Stmt.invokeStatic(ElementWrapperWidget.class, "getWidget",
@@ -138,7 +138,7 @@ public class BoundDecorator extends IOCDecoratorExtension<Bound> {
       else if (!(componentType.isAssignableTo(TakesValue.class)
               || componentType.isAssignableTo(BindableListChangeHandler.class)
               || componentType.isAssignableTo(Element.class)
-              || componentType.isAnnotationPresent(JsType.class)
+              || componentType.unsafeIsAnnotationPresent(JsType.class)
               || componentType.isAssignableTo(org.jboss.errai.common.client.api.elemental2.IsElement.class)
               || componentType.isAssignableTo(IsElement.class))) {
         throw new GenerationException("@Bound field or method " + decorable.getName()

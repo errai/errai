@@ -61,7 +61,8 @@
     <argLine></argLine>
     <wildfly.version>10.0.0.Final</wildfly.version>
     <errai.dev.context>${project.artifactId}</errai.dev.context>
-    <errai.jboss.home>${project.build.directory}/wildfly-${wildfly.version}</errai.jboss.home>    
+    <errai.jboss.home>${project.build.directory}/wildfly-${wildfly.version}</errai.jboss.home>
+    <gwt.module.prefix> </gwt.module.prefix>
   </properties>
 
   <repositories>
@@ -376,7 +377,7 @@
       </plugin>
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>2.3.2</version>
+        <version>3.6.2</version>
         <configuration>
           <source>1.8</source>
           <target>1.8</target>
@@ -412,15 +413,32 @@
           <soyc>false</soyc>
           <hostedWebapp>src/main/webapp</hostedWebapp>
           <extraJvmArgs>-Xmx712m -XX:CompileThreshold=7000 -Derrai.jboss.home=${errai.jboss.home} -Derrai.dev.context=${errai.dev.context}</extraJvmArgs>
+          <module>org.jboss.errai.demo.todo.${gwt.module.prefix}TodoList</module>
         </configuration>
       </plugin>
     </plugins>
   </build>
+
+
   <profiles>
+
+    <profile>
+      <id>apt-generators</id>
+      <dependencies>
+        <dependency>
+          <groupId>org.jboss.errai</groupId>
+          <artifactId>errai-generators-apt</artifactId>
+          <scope>provided</scope>
+        </dependency>
+      </dependencies>
+    </profile>
+
     <profile>
       <id>wildfly</id>
       <activation>
-        <activeByDefault>true</activeByDefault>
+        <property>
+          <name>!skipDefaultProfile</name>
+        </property>
       </activation>
       <build>
         <plugins>

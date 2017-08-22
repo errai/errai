@@ -19,6 +19,7 @@ package org.jboss.errai.demo.grocery.client.local;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import org.jboss.errai.common.apt.ErraiApp;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 import org.jboss.errai.ui.nav.client.local.Navigation;
 import org.jboss.errai.ui.shared.api.annotations.Bundle;
@@ -36,6 +37,7 @@ import com.google.gwt.user.client.ui.SimplePanel;
  * token in the page URL.
  */
 @Templated("#body")
+@ErraiApp
 @EntryPoint
 @Bundle("GroceryListTranslation.json")
 public class GroceryListClient extends Composite {

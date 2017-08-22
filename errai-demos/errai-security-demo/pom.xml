@@ -56,13 +56,14 @@
   </organization>
   <properties>
     <wildfly.version>10.0.0.Final</wildfly.version>
-    <errai.jboss.home>${project.build.directory}/wildfly-${wildfly.version}</errai.jboss.home>    
+    <errai.jboss.home>${project.build.directory}/wildfly-${wildfly.version}</errai.jboss.home>
     <slf4j.version>1.5.11</slf4j.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <javaee.version>3.0.1.Final</javaee.version>
     <errai.dev.context>${project.artifactId}</errai.dev.context>
     <maven.gwt.plugin.version>2.8.1</maven.gwt.plugin.version>
     <maven.deploy.plugin.version>2.7</maven.deploy.plugin.version>
+    <gwt.module.prefix> </gwt.module.prefix>
   </properties>
 
   <repositories>
@@ -160,29 +161,36 @@
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
     </dependency>
+
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-log4j12</artifactId>
     </dependency>
+
     <dependency>
       <groupId>com.google.gwt</groupId>
       <artifactId>gwt-user</artifactId>
       <scope>provided</scope>
     </dependency>
+
     <dependency>
       <groupId>org.jboss.errai</groupId>
       <artifactId>errai-cdi-jboss</artifactId>
     </dependency>
+
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <scope>test</scope>
     </dependency>
+
     <dependency>
       <groupId>org.jboss.errai</groupId>
       <artifactId>errai-jboss-as-support</artifactId>
     </dependency>
+
   </dependencies>
+
   <build>
     <outputDirectory>src/main/webapp/WEB-INF/classes</outputDirectory>
     <resources>
@@ -255,7 +263,7 @@
       </plugin>
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>2.3.2</version>
+        <version>3.6.2</version>
         <configuration>
           <source>1.8</source>
           <target>1.8</target>
@@ -288,7 +296,7 @@
       </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
-        <artifactId>gwt-maven-plugin</artifactId>   
+        <artifactId>gwt-maven-plugin</artifactId>
         <version>${maven.gwt.plugin.version}</version>
         <executions>
           <execution>
@@ -299,6 +307,7 @@
           </execution>
         </executions>
         <configuration>
+          <module>org.jboss.errai.security.demo.${gwt.module.prefix}App</module>
           <strict>true</strict>
           <webappDirectory>src/main/webapp</webappDirectory>
           <logLevel>INFO</logLevel>
@@ -306,7 +315,7 @@
           <server>org.jboss.errai.cdi.server.gwt.EmbeddedWildFlyLauncher</server>
           <disableCastChecking>true</disableCastChecking>
           <runTarget>${errai.dev.context}/</runTarget>
-          <soyc>false</soyc>
+          <soycDetailed>false</soycDetailed>
           <hostedWebapp>src/main/webapp</hostedWebapp>
           <extraJvmArgs>-Xmx1G -XX:CompileThreshold=7000 -Derrai.jboss.home=${errai.jboss.home} -Derrai.dev.context=${errai.dev.context}</extraJvmArgs>
         </configuration>
@@ -321,11 +330,54 @@
       </plugin>
     </plugins>
   </build>
+
+
+
   <profiles>
+
+    <profile>
+
+      <id>apt-generators</id>
+
+      <activation>
+        <property>
+          <name>apt-generators</name>
+        </property>
+      </activation>
+
+      <properties>
+        <gwt.module.prefix>AptGenerators_</gwt.module.prefix>
+      </properties>
+
+      <dependencies>
+        <dependency>
+          <groupId>org.jboss.errai</groupId>
+          <artifactId>errai-generators-apt</artifactId>
+          <scope>provided</scope>
+        </dependency>
+        <dependency>
+          <groupId>org.jboss.errai</groupId>
+          <artifactId>errai-javaee-all</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.jboss.errai</groupId>
+                    <artifactId>errai-jpa-client</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.jboss.errai</groupId>
+                    <artifactId>errai-jpa-datasync</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+      </dependencies>
+    </profile>
+
     <profile>
       <id>wildfly</id>
       <activation>
-        <activeByDefault>true</activeByDefault>
+        <property>
+          <name>!skipDefaultProfile</name>
+        </property>
       </activation>
       <build>
         <plugins>
@@ -375,7 +427,7 @@
           <groupId>org.jboss.errai</groupId>
           <artifactId>errai-jaxrs-client</artifactId>
           <scope>provided</scope>
-        </dependency>        
+        </dependency>
         <dependency>
           <groupId>org.jboss.errai</groupId>
           <artifactId>errai-javax-enterprise</artifactId>

@@ -16,20 +16,7 @@
 
 package org.jboss.errai.codegen.util;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-import java.util.function.Function;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.context.Dependent;
-import javax.inject.Singleton;
-
+import com.google.common.reflect.TypeToken;
 import org.jboss.errai.codegen.BlockStatement;
 import org.jboss.errai.codegen.BooleanOperator;
 import org.jboss.errai.codegen.Parameter;
@@ -39,22 +26,24 @@ import org.jboss.errai.codegen.Variable;
 import org.jboss.errai.codegen.builder.AnonymousClassStructureBuilder;
 import org.jboss.errai.codegen.builder.ElseBlockBuilder;
 import org.jboss.errai.codegen.builder.impl.BooleanExpressionBuilder;
+import org.jboss.errai.codegen.meta.MetaAnnotation;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
 import org.jboss.errai.common.client.api.ErrorCallback;
 import org.jboss.errai.common.client.api.RemoteCallback;
-import org.jboss.errai.common.client.api.interceptor.FeatureInterceptor;
-import org.jboss.errai.common.client.api.interceptor.InterceptedCall;
-import org.jboss.errai.common.client.api.interceptor.InterceptsRemoteCall;
 import org.jboss.errai.common.client.api.interceptor.RemoteCallContext;
 import org.jboss.errai.common.client.util.AsyncBeanFactory;
 import org.jboss.errai.common.client.util.CreationalCallback;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Multimap;
-import com.google.common.reflect.TypeToken;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
+import javax.inject.Singleton;
+import java.lang.reflect.Method;
+import java.lang.reflect.Type;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Utilities to avoid redundant code for proxy generation.
@@ -64,145 +53,139 @@ import com.google.common.reflect.TypeToken;
  */
 public abstract class ProxyUtil {
 
-  private ProxyUtil() {}
+  private ProxyUtil() {
+  }
 
   /**
    * Generates the {@link org.jboss.errai.common.client.api.interceptor.CallContext} for method
    * interception. Ignores annotations in non-translatable packages.
    *
-   * @param callContextType
-   *          the type of {@link org.jboss.errai.common.client.api.interceptor.RemoteCallContext} to
-   *          use.
-   * @param proxyClass
-   *          the declaring proxy class
-   * @param method
-   *          the method that is being proxied.
-   * @param proceed
-   *          the logic that should be invoked if
-   *          {@link org.jboss.errai.common.client.api.interceptor.CallContext#proceed()} is called.
-   * @param interceptors
-   *          a list of interceptors to use
+   * @param callContextType the type of {@link org.jboss.errai.common.client.api.interceptor.RemoteCallContext} to
+   *                        use.
+   * @param proxyClass      the declaring proxy class
+   * @param method          the method that is being proxied.
+   * @param proceed         the logic that should be invoked if
+   *                        {@link org.jboss.errai.common.client.api.interceptor.CallContext#proceed()} is called.
+   * @param interceptors    a list of interceptors to use
    * @return statement representing an anonymous implementation of the provided
-   *         {@link org.jboss.errai.common.client.api.interceptor.CallContext}
+   * {@link org.jboss.errai.common.client.api.interceptor.CallContext}
    */
-  public static AnonymousClassStructureBuilder generateProxyMethodCallContext(
-          final Class<? extends RemoteCallContext> callContextType,
+  public static AnonymousClassStructureBuilder generateProxyMethodCallContext(final Class<? extends RemoteCallContext> callContextType,
           final MetaClass proxyClass,
           final MetaMethod method,
           final Statement proceed,
-          final List<Class<?>> interceptors,
-          final Function<Annotation[], Annotation[]> annoFilter,
+          final List<MetaClass> interceptors,
+          final AnnotationFilter annotationFilter,
           final boolean iocEnabled) {
 
-    return Stmt.newObject(callContextType).extend()
-              .publicOverridesMethod("getMethodName")
-              .append(Stmt.load(method.getName()).returnValue())
-              .finish()
-              .publicOverridesMethod("getReturnType")
-              .append(Stmt.load(method.getReturnType()).returnValue())
-              .finish()
-              .publicOverridesMethod("getAnnotations")
-              .append(Stmt.load(annoFilter.apply(method.getAnnotations())).returnValue())
-              .finish()
-              .publicOverridesMethod("getTypeAnnotations")
-              .append(
-                  Stmt.load(annoFilter.apply(method.getDeclaringClass().getAnnotations())).returnValue())
-              .finish()
-              .publicOverridesMethod("proceed")
-              .append(generateInterceptorStackProceedMethod(callContextType, proceed, interceptors, iocEnabled))
-              .append(Stmt.load(null).returnValue())
-              .finish()
-              .publicOverridesMethod("proceed", Parameter.of(RemoteCallback.class, "interceptorCallback", true))
-              .append(Stmt.declareVariable(RemoteCallback.class).asFinal().named("providedCallback").initializeWith(
-                  Stmt.loadStatic(proxyClass, "this").loadField("remoteCallback")))
-              .append(
-                  Stmt.loadVariable("remoteCallback").assignValue(Stmt.newObject(RemoteCallback.class).extend()
-                      .publicOverridesMethod("callback", Parameter.of(Object.class, "response"))
-                      .append(Stmt.declareVariable(RemoteCallback.class).named("intCallback")
-                          .initializeWith(Stmt.loadVariable("interceptorCallback")))
-                      .append(StringStatement.of("setResult(response)"))
-                      .append(Stmt.loadVariable("intCallback").invoke("callback",
-                          StringStatement.of("getResult()", Object.class)))
-                      .append(Stmt.loadVariable("providedCallback").invoke("callback",
-                          StringStatement.of("getResult()", Object.class)))
-                      .finish()
-                      .finish())
-              )
-              .append(Stmt.loadVariable("this").invoke("proceed"))
-              .finish()
-              .publicOverridesMethod("proceed", Parameter.of(RemoteCallback.class, "interceptorCallback"),
-                  Parameter.of(ErrorCallback.class, "interceptorErrorCallback", true))
-              .append(
-                  Stmt.declareVariable(ErrorCallback.class).asFinal().named("providedErrorCallback").initializeWith(
-                      Stmt.loadStatic(proxyClass, "this").loadField("errorCallback")))
-              .append(
-                  Stmt.loadVariable("errorCallback").assignValue(
-                      Stmt.newObject(ErrorCallback.class).extend()
-                          .publicOverridesMethod("error", Parameter.of(Object.class, "message"),
-                              Parameter.of(Throwable.class, "throwable"))
-                          .append(
-                              Stmt.loadVariable("interceptorErrorCallback").invoke("error", Variable.get("message"),
-                                  Variable.get("throwable")))
-                          .append(
-                            Stmt.if_(
-                                  BooleanExpressionBuilder.create(
-                                     StringStatement.of("getResult()", Object.class), BooleanOperator.NotEquals, Stmt
-                                          .loadLiteral(null)))
-                                  .append(
-                                      Stmt.loadVariable("remoteCallback").invoke("callback",
-                                              StringStatement.of("getResult()", Object.class)))
-                                  .append(Stmt.load(false).returnValue())
-                                  .finish()
-                              .elseif_(
-                                  BooleanExpressionBuilder.create(
-                                      Stmt.loadVariable("providedErrorCallback"), BooleanOperator.NotEquals, Stmt
-                                          .loadLiteral(null)))
-                                  .append(
-                                      Stmt.nestedCall(
-                                        Stmt.loadVariable("providedErrorCallback").invoke("error",
-                                          Variable.get("message"),
-                                          Variable.get("throwable")))
-                                      .returnValue())
-                                  .finish())
-                          .append(Stmt.load(true).returnValue())
-                          .finish()
-                          .finish())
-              )
-              .append(Stmt.loadVariable("this").invoke("proceed", Variable.get("interceptorCallback")))
-              .finish();
+    final MetaAnnotation[] methodFilteredAnnotations = annotationFilter.filter(method.getAnnotations())
+            .toArray(new MetaAnnotation[0]);
+
+    final MetaAnnotation[] methodsDeclaringClassAnnotations = annotationFilter.filter(method.getDeclaringClass().getAnnotations())
+            .toArray(new MetaAnnotation[0]);
+
+    return Stmt.newObject(callContextType)
+            .extend()
+            .publicOverridesMethod("getMethodName")
+            .append(Stmt.load(method.getName()).returnValue())
+            .finish()
+            .publicOverridesMethod("getReturnType")
+            .append(Stmt.load(method.getReturnType()).returnValue())
+            .finish()
+            .publicOverridesMethod("getAnnotations")
+            .append(Stmt.load(methodFilteredAnnotations).returnValue())
+            .finish()
+            .publicOverridesMethod("getTypeAnnotations")
+            .append(Stmt.load(methodsDeclaringClassAnnotations).returnValue())
+            .finish()
+            .publicOverridesMethod("proceed")
+            .append(generateInterceptorStackProceedMethod(callContextType, proceed, interceptors, iocEnabled))
+            .append(Stmt.load(null).returnValue())
+            .finish()
+            .publicOverridesMethod("proceed", Parameter.of(RemoteCallback.class, "interceptorCallback", true))
+            .append(Stmt.declareVariable(RemoteCallback.class)
+                    .asFinal()
+                    .named("providedCallback")
+                    .initializeWith(Stmt.loadStatic(proxyClass, "this").loadField("remoteCallback")))
+            .append(Stmt.loadVariable("remoteCallback")
+                    .assignValue(Stmt.newObject(RemoteCallback.class)
+                            .extend()
+                            .publicOverridesMethod("callback", Parameter.of(Object.class, "response"))
+                            .append(Stmt.declareVariable(RemoteCallback.class)
+                                    .named("intCallback")
+                                    .initializeWith(Stmt.loadVariable("interceptorCallback")))
+                            .append(StringStatement.of("setResult(response)"))
+                            .append(Stmt.loadVariable("intCallback")
+                                    .invoke("callback", StringStatement.of("getResult()", Object.class)))
+                            .append(Stmt.loadVariable("providedCallback")
+                                    .invoke("callback", StringStatement.of("getResult()", Object.class)))
+                            .finish()
+                            .finish()))
+            .append(Stmt.loadVariable("this").invoke("proceed"))
+            .finish()
+            .publicOverridesMethod("proceed", Parameter.of(RemoteCallback.class, "interceptorCallback"),
+                    Parameter.of(ErrorCallback.class, "interceptorErrorCallback", true))
+            .append(Stmt.declareVariable(ErrorCallback.class)
+                    .asFinal()
+                    .named("providedErrorCallback")
+                    .initializeWith(Stmt.loadStatic(proxyClass, "this").loadField("errorCallback")))
+            .append(Stmt.loadVariable("errorCallback")
+                    .assignValue(Stmt.newObject(ErrorCallback.class)
+                            .extend()
+                            .publicOverridesMethod("error", Parameter.of(Object.class, "message"),
+                                    Parameter.of(Throwable.class, "throwable"))
+                            .append(Stmt.loadVariable("interceptorErrorCallback")
+                                    .invoke("error", Variable.get("message"), Variable.get("throwable")))
+                            .append(Stmt.if_(
+                                    BooleanExpressionBuilder.create(StringStatement.of("getResult()", Object.class),
+                                            BooleanOperator.NotEquals, Stmt.loadLiteral(null)))
+                                    .append(Stmt.loadVariable("remoteCallback")
+                                            .invoke("callback", StringStatement.of("getResult()", Object.class)))
+                                    .append(Stmt.load(false).returnValue())
+                                    .finish()
+                                    .elseif_(BooleanExpressionBuilder.create(Stmt.loadVariable("providedErrorCallback"),
+                                            BooleanOperator.NotEquals, Stmt.loadLiteral(null)))
+                                    .append(Stmt.nestedCall(Stmt.loadVariable("providedErrorCallback")
+                                            .invoke("error", Variable.get("message"), Variable.get("throwable")))
+                                            .returnValue())
+                                    .finish())
+                            .append(Stmt.load(true).returnValue())
+                            .finish()
+                            .finish()))
+            .append(Stmt.loadVariable("this").invoke("proceed", Variable.get("interceptorCallback")))
+            .finish();
   }
 
-  private static Statement generateInterceptorStackProceedMethod(
-            final Class<? extends RemoteCallContext> callContextType,
-            final Statement proceed,
-            final List<Class<?>> interceptors,
-            final boolean iocEnabled) {
+  private static Statement generateInterceptorStackProceedMethod(final Class<? extends RemoteCallContext> callContextType,
+          final Statement proceed,
+          final List<MetaClass> interceptors,
+          final boolean iocEnabled) {
+
     final BlockStatement proceedLogic = new BlockStatement();
     proceedLogic.addStatement(Stmt.loadVariable("status").invoke("proceed"));
 
-    ElseBlockBuilder interceptorStack =
-              If.isNull(Stmt.loadVariable("status").invoke("getNextInterceptor")).append(proceed).finish();
+    ElseBlockBuilder interceptorStack = If.isNull(Stmt.loadVariable("status").invoke("getNextInterceptor"))
+            .append(proceed)
+            .finish();
 
-    for (final Class<?> interceptor : interceptors) {
-      interceptorStack = interceptorStack.elseif_(Bool.equals(
-              Stmt.loadVariable("status").invoke("getNextInterceptor"), interceptor))
+    for (final MetaClass interceptor : interceptors) {
+      interceptorStack = interceptorStack.elseif_(
+              Bool.equals(Stmt.loadVariable("status").invoke("getNextInterceptor"), Stmt.load(interceptor)))
               .append(Stmt.declareFinalVariable("ctx", callContextType, Stmt.loadVariable("this")))
-              .append(
-                  Stmt.declareVariable(CreationalCallback.class).asFinal().named("icc")
-                      .initializeWith(
-                          Stmt.newObject(CreationalCallback.class).extend()
+              .append(Stmt.declareVariable(CreationalCallback.class)
+                      .asFinal()
+                      .named("icc")
+                      .initializeWith(Stmt.newObject(CreationalCallback.class)
+                              .extend()
                               .publicOverridesMethod("callback", Parameter.of(Object.class, "beanInstance", true))
                               .append(Stmt.loadVariable("status").invoke("setProceeding", false))
-                              .append(
-                                  Stmt.castTo(interceptor, Stmt.loadVariable("beanInstance")).invoke("aroundInvoke",
-                                      Variable.get("ctx")))
-                              .append(
-                                  If.cond(Bool.and(
-                                            Bool.notExpr(Stmt.loadVariable("status").invoke("isProceeding")),
-                                            Bool.equals(Stmt.loadLiteral(interceptor), Stmt.loadVariable("status").invoke("getNextInterceptor"))))
-                                      .append(
-                                          Stmt.loadVariable("remoteCallback").invoke("callback",
-                                              Stmt.loadVariable("ctx").invoke("getResult")))
+                              .append(Stmt.castTo(interceptor, Stmt.loadVariable("beanInstance"))
+                                      .invoke("aroundInvoke", Variable.get("ctx")))
+                              .append(If.cond(Bool.and(Bool.notExpr(Stmt.loadVariable("status").invoke("isProceeding")),
+                                      Bool.equals(Stmt.loadLiteral(interceptor),
+                                              Stmt.loadVariable("status").invoke("getNextInterceptor"))))
+                                      .append(Stmt.loadVariable("remoteCallback")
+                                              .invoke("callback", Stmt.loadVariable("ctx").invoke("getResult")))
                                       .finish())
                               .finish() // finish the method override body
                               .finish() // finish the anonymous CreationalCallback class body
@@ -219,10 +202,10 @@ public abstract class ProxyUtil {
    * IOC is available *and* the interceptor is a managed bean, then the IOC bean manager will be
    * used to load the interceptor.
    *
-   * @param context
+   * @param iocEnabled
    * @param interceptor
    */
-  private static Statement generateAsyncInterceptorCreation(final Class<?> interceptor, final boolean iocEnabled) {
+  private static Statement generateAsyncInterceptorCreation(final MetaClass interceptor, final boolean iocEnabled) {
     if (iocEnabled && isManagedBean(interceptor)) {
       // Note: for the IOC path, generate the code via StringStatement because we
       // need to make sure that IOC is an optional dependency. This should probably
@@ -230,114 +213,31 @@ public abstract class ProxyUtil {
       // be provided by some Provider in the IOC module itself maybe).
       final StringBuilder builder = new StringBuilder();
       builder.append("org.jboss.errai.ioc.client.container.IOC.getAsyncBeanManager().lookupBeans(")
-              .append(interceptor.getSimpleName())
+              .append(interceptor.getName())
               .append(".class).iterator().next().getInstance(icc)");
       return new StringStatement(builder.toString());
-    }
-    else {
-      return Stmt.invokeStatic(AsyncBeanFactory.class, "createBean",
-              Stmt.newObject(interceptor), Variable.get("icc"));
+    } else {
+      return Stmt.invokeStatic(AsyncBeanFactory.class, "createBean", Stmt.newObject(interceptor), Variable.get("icc"));
     }
   }
 
   /**
-   * A utility class that provides a list of interceptors for a given remote interface and method.
-   */
-  public static class InterceptorProvider {
-    // Maps a feature interceptor annotation (i.e. RequiredRoles, RestrictAccess) to a list of
-    // interceptors that should be triggered when this annotation is present.
-    final Multimap<Class<? extends Annotation>, Class<?>> featureInterceptors = ArrayListMultimap.create();
-
-    // Maps a remote interface type to a list of interceptors that should be triggered for all
-    // methods of this type.
-    final Multimap<Class<?>, Class<?>> standaloneInterceptors = ArrayListMultimap.create();
-
-    public InterceptorProvider(final Collection<? extends MetaClass> featureInterceptors, final Collection<? extends MetaClass> standaloneInterceptors) {
-      setFeatureInterceptors(featureInterceptors);
-      setStandaloneInterceptors(standaloneInterceptors);
-    }
-
-    private void setFeatureInterceptors(final Collection<? extends MetaClass> featureInterceptors) {
-      for (final MetaClass featureInterceptor : featureInterceptors) {
-        final Class<? extends Annotation>[] annotations =
-            featureInterceptor.getAnnotation(FeatureInterceptor.class).value();
-
-        for (int i = 0; i < annotations.length; i++) {
-          this.featureInterceptors.put(annotations[i], featureInterceptor.asClass());
-        }
-      }
-    }
-
-    private void setStandaloneInterceptors(final Collection<? extends MetaClass> standaloneInterceptors) {
-      for (final MetaClass interceptorClass : standaloneInterceptors) {
-        final InterceptsRemoteCall interceptor = interceptorClass.getAnnotation(InterceptsRemoteCall.class);
-        final Class<?>[] intercepts = interceptor.value();
-        for (final Class<?> intercept : intercepts) {
-          this.standaloneInterceptors.put(intercept, interceptorClass.asClass());
-        }
-      }
-    }
-
-    /**
-     * Returns the interceptors for the provided proxy type and method.
-     *
-     * @param type
-     *          the remote interface
-     * @param method
-     *          the remote method
-     *
-     * @return the list of interceptors that should be triggered when invoking the provided proxy
-     *         method on the provided type, never null.
-     */
-    public List<Class<?>> getInterceptors(final MetaClass type, final MetaMethod method) {
-      final List<Class<?>> interceptors = new ArrayList<>();
-
-      InterceptedCall interceptedCall = method.getAnnotation(InterceptedCall.class);
-      if (interceptedCall == null) {
-        interceptedCall = type.getAnnotation(InterceptedCall.class);
-      }
-
-      if (interceptedCall == null) {
-        interceptors.addAll(standaloneInterceptors.get(type.asClass()));
-      }
-      else {
-        for (final Class<?> clazz : interceptedCall.value()) {
-          interceptors.add(clazz);
-        }
-      }
-
-      for (final Class<? extends Annotation> annotation : featureInterceptors.keySet()) {
-        if (type.isAnnotationPresent(annotation) || method.isAnnotationPresent(annotation)) {
-          interceptors.addAll(featureInterceptors.get(annotation));
-        }
-      }
-
-      return interceptors;
-    }
-  }
-
-  /**
-   * Returns true if the given bean is an explicitely managed bean (meaning it is annotated in some
+   * Returns true if the given bean is an explicitly managed bean (meaning it is annotated in some
    * way).
    *
    * @param interceptor
    */
-  private static boolean isManagedBean(final Class<?> interceptor) {
-    if (interceptor.getAnnotation(ApplicationScoped.class) != null)
-      return true;
-    if (interceptor.getAnnotation(Singleton.class) != null)
-      return true;
-    if (interceptor.getAnnotation(Dependent.class) != null)
-      return true;
-    return false;
+  private static boolean isManagedBean(final MetaClass interceptor) {
+    return interceptor.getAnnotation(ApplicationScoped.class) != null
+            || interceptor.getAnnotation(Singleton.class) != null || interceptor.getAnnotation(Dependent.class) != null;
   }
 
   public static boolean shouldProxyMethod(final MetaMethod method) {
     final String methodName = method.getName();
 
     return !method.isFinal() && !method.isStatic() && !method.isPrivate() && !methodName.equals("hashCode")
-        && !methodName.equals("equals") && !methodName.equals("toString") && !methodName.equals("clone")
-        && !methodName.equals("finalize");
+            && !methodName.equals("equals") && !methodName.equals("toString") && !methodName.equals("clone")
+            && !methodName.equals("finalize");
   }
 
   public static String createCallSignature(final MetaMethod m) {
@@ -360,18 +260,20 @@ public abstract class ProxyUtil {
 
   public static boolean isMethodInInterface(final Class<?> iface, final Method member) {
     try {
-      if (iface.getMethod(member.getName(), member.getParameterTypes()) != null)
+      if (iface.getMethod(member.getName(), member.getParameterTypes()) != null) {
         return true;
-    }
-    catch (final NoSuchMethodException e) {
+      }
+    } catch (final NoSuchMethodException e) {
     }
     return false;
   }
 
   public static boolean isMethodInInterface(final MetaClass iface, final MetaMethod member) {
-    if (iface.getMethod(member.getName(), Arrays.stream(member.getParameters()).map(p -> p.getType()).toArray(MetaClass[]::new)) != null)
-      return true;
-    return false;
+    final MetaClass[] parameters = Arrays.stream(member.getParameters())
+            .map(MetaParameter::getType)
+            .toArray(MetaClass[]::new);
+
+    return iface.getMethod(member.getName(), parameters) != null;
   }
 
   /**
@@ -390,48 +292,21 @@ public abstract class ProxyUtil {
 
         if (MetaClassFactory.get(Double.class).isAssignableFrom(method.getReturnType().asBoxed())) {
           returnStatement = Stmt.load(0.0).returnValue();
-        }
-        else if (MetaClassFactory.get(Float.class).isAssignableFrom(method.getReturnType().asBoxed())) {
+        } else if (MetaClassFactory.get(Float.class).isAssignableFrom(method.getReturnType().asBoxed())) {
           returnStatement = Stmt.load(0f).returnValue();
-        }
-        else if (MetaClassFactory.get(Long.class).isAssignableFrom(method.getReturnType().asBoxed())) {
+        } else if (MetaClassFactory.get(Long.class).isAssignableFrom(method.getReturnType().asBoxed())) {
           returnStatement = Stmt.load(0l).returnValue();
-        }
-        else {
+        } else {
           returnStatement = Stmt.load(0).returnValue();
         }
-      }
-      else if (MetaClassFactory.get(char.class).equals(method.getReturnType())) {
+      } else if (MetaClassFactory.get(char.class).equals(method.getReturnType())) {
         returnStatement = Stmt.load(0).returnValue();
-      }
-      else if (MetaClassFactory.get(Boolean.class).isAssignableFrom(method.getReturnType().asBoxed())) {
+      } else if (MetaClassFactory.get(Boolean.class).isAssignableFrom(method.getReturnType().asBoxed())) {
         returnStatement = Stmt.load(false).returnValue();
-      }
-      else {
+      } else {
         returnStatement = Stmt.load(null).returnValue();
       }
     }
     return returnStatement;
-  }
-
-  private static Annotation[] filter(final Annotation[] raw, final Set<String> packages) {
-    final Annotation[] firstPass = new Annotation[raw.length];
-    int j = 0;
-    for (int i = 0; i < raw.length; i++) {
-      if (packages.contains(raw[i].annotationType().getPackage().getName())) {
-        firstPass[j++] = raw[i];
-      }
-    }
-
-    final Annotation[] retVal = new Annotation[j];
-    for (int i = 0; i < j; i++) {
-      retVal[i] = firstPass[i];
-    }
-
-    return retVal;
-  }
-
-  public static Function<Annotation[], Annotation[]> packageFilter(final Set<String> packages) {
-    return annos -> filter(annos, packages);
   }
 }

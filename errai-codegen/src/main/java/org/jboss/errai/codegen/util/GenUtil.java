@@ -130,7 +130,7 @@ public class GenUtil {
   }
 
   public static void assertIsIterable(final Statement statement) {
-    final Class<?> cls = statement.getType().asClass();
+    final Class<?> cls = statement.getType().unsafeAsClass();
 
     if (!cls.isArray() && !Iterable.class.isAssignableFrom(cls))
       throw new TypeNotIterableException(statement.generate(Context.create()));
@@ -198,7 +198,7 @@ public class GenUtil {
         inputClass = Class.class;
       }
 
-      final Class<?> targetClass = targetType.asBoxed().asClass();
+      final Class<?> targetClass = targetType.asBoxed().unsafeAsClass();
       if (NullType.class.getName().equals(targetClass.getName())) {
         return generate(context, input);
       }
@@ -632,8 +632,8 @@ public class GenUtil {
 
   public static boolean canConvert(final MetaClass to, final MetaClass from) {
     try {
-      final Class<?> fromClazz = from.asClass();
-      final Class<?> toClass = to.asClass();
+      final Class<?> fromClazz = from.unsafeAsClass();
+      final Class<?> toClass = to.unsafeAsClass();
 
       return DataConversion.canConvert(toClass, fromClazz);
     }

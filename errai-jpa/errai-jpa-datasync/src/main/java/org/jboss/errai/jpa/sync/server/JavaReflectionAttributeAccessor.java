@@ -48,7 +48,7 @@ public class JavaReflectionAttributeAccessor implements JpaAttributeAccessor {
         try {
           if (attrType.isPrimitive()) {
             MetaClass mc = MetaClassFactory.get(attrType);
-            attrType = (Class<Y>) mc.asBoxed().asClass();
+            attrType = (Class<Y>) mc.asBoxed().unsafeAsClass();
           }
           return attrType.cast(f.get(entity));
         } catch (ClassCastException e) {
@@ -60,7 +60,7 @@ public class JavaReflectionAttributeAccessor implements JpaAttributeAccessor {
         m.setAccessible(true);
         if (attrType.isPrimitive()) {
           MetaClass mc = MetaClassFactory.get(attrType);
-          attrType = (Class<Y>) mc.asBoxed().asClass();
+          attrType = (Class<Y>) mc.asBoxed().unsafeAsClass();
         }
         return attrType.cast(m.invoke(entity));
       }

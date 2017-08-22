@@ -303,7 +303,7 @@ public class MarshallingGenUtil {
     else {
       marshallerLookup =
           Stmt.invokeStatic(Marshalling.class, "getMarshaller",
-              Stmt.loadLiteral(type.asBoxed().asClass()), marshallerCreationCallback);
+              Stmt.loadLiteral(type.asBoxed().unsafeAsClass()), marshallerCreationCallback);
     }
 
     return marshallerLookup;

@@ -16,40 +16,10 @@
 
 package org.jboss.errai.ioc.rebind.ioc.bootstrapper;
 
-import static org.jboss.errai.codegen.Parameter.finalOf;
-import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
-import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
-import static org.jboss.errai.codegen.util.PrivateAccessUtil.addPrivateAccessStubs;
-import static org.jboss.errai.codegen.util.PrivateAccessUtil.getPrivateMethodName;
-import static org.jboss.errai.codegen.util.Stmt.declareFinalVariable;
-import static org.jboss.errai.codegen.util.Stmt.if_;
-import static org.jboss.errai.codegen.util.Stmt.invokeStatic;
-import static org.jboss.errai.codegen.util.Stmt.load;
-import static org.jboss.errai.codegen.util.Stmt.loadLiteral;
-import static org.jboss.errai.codegen.util.Stmt.loadStatic;
-import static org.jboss.errai.codegen.util.Stmt.loadVariable;
-import static org.jboss.errai.codegen.util.Stmt.nestedCall;
-import static org.jboss.errai.codegen.util.Stmt.newArray;
-import static org.jboss.errai.codegen.util.Stmt.newObject;
-import static org.jboss.errai.codegen.util.Stmt.throw_;
-import static org.jboss.errai.codegen.util.Stmt.try_;
-
-import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.Map.Entry;
-
-import javax.enterprise.context.Dependent;
-import javax.enterprise.inject.Any;
-import javax.enterprise.inject.Default;
-import javax.enterprise.inject.Typed;
-import javax.inject.Named;
-import javax.inject.Qualifier;
-
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
+import com.google.gwt.core.ext.GeneratorContext;
+import com.google.gwt.core.ext.TreeLogger;
 import org.jboss.errai.codegen.BooleanOperator;
 import org.jboss.errai.codegen.InnerClass;
 import org.jboss.errai.codegen.Modifier;
@@ -98,10 +68,38 @@ import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
-import com.google.gwt.core.ext.GeneratorContext;
-import com.google.gwt.core.ext.TreeLogger;
+import javax.enterprise.context.Dependent;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Default;
+import javax.enterprise.inject.Typed;
+import javax.inject.Named;
+import javax.inject.Qualifier;
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.Optional;
+
+import static org.jboss.errai.codegen.Parameter.finalOf;
+import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
+import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
+import static org.jboss.errai.codegen.util.PrivateAccessUtil.addPrivateAccessStubs;
+import static org.jboss.errai.codegen.util.PrivateAccessUtil.getPrivateMethodName;
+import static org.jboss.errai.codegen.util.Stmt.declareFinalVariable;
+import static org.jboss.errai.codegen.util.Stmt.if_;
+import static org.jboss.errai.codegen.util.Stmt.invokeStatic;
+import static org.jboss.errai.codegen.util.Stmt.load;
+import static org.jboss.errai.codegen.util.Stmt.loadLiteral;
+import static org.jboss.errai.codegen.util.Stmt.loadStatic;
+import static org.jboss.errai.codegen.util.Stmt.loadVariable;
+import static org.jboss.errai.codegen.util.Stmt.nestedCall;
+import static org.jboss.errai.codegen.util.Stmt.newArray;
+import static org.jboss.errai.codegen.util.Stmt.newObject;
+import static org.jboss.errai.codegen.util.Stmt.throw_;
+import static org.jboss.errai.codegen.util.Stmt.try_;
 
 /**
  * Implements functionality common to most {@link FactoryBodyGenerator} such as
@@ -729,7 +727,7 @@ public abstract class AbstractBodyGenerator implements FactoryBodyGenerator {
   public static AbstractStatementBuilder getAssignableTypesArrayStmt(final Injectable injectable) {
     final Object[] assignableTypes =
             injectable.getAnnotatedObject()
-            .flatMap(annotated -> Optional.ofNullable(annotated.getAnnotation(Typed.class)))
+            .flatMap(annotated -> Optional.ofNullable(annotated.unsafeGetAnnotation(Typed.class)))
             .map(typedAnno -> typedAnno.value())
             // Ensure that Object is an assignable type
             .map(beanTypes -> {
@@ -753,8 +751,8 @@ public abstract class AbstractBodyGenerator implements FactoryBodyGenerator {
 
   protected Statement generateFactoryHandleStatement(final Injectable injectable) {
     final Statement newObject;
-    if (injectable.getInjectedType().isAnnotationPresent(ActivatedBy.class)) {
-      final Class<? extends BeanActivator> activatorType = injectable.getInjectedType().getAnnotation(ActivatedBy.class).value();
+    if (injectable.getInjectedType().unsafeIsAnnotationPresent(ActivatedBy.class)) {
+      final Class<? extends BeanActivator> activatorType = injectable.getInjectedType().unsafeGetAnnotation(ActivatedBy.class).value();
       newObject = newObject(FactoryHandleImpl.class, loadLiteral(injectable.getInjectedType()),
               injectable.getFactoryName(), injectable.getScope(), isEager(injectable.getInjectedType()),
               injectable.getBeanName(), !injectable.isContextual(), loadLiteral(activatorType));
@@ -767,13 +765,13 @@ public abstract class AbstractBodyGenerator implements FactoryBodyGenerator {
   }
 
   protected static Object isEager(final MetaClass injectedType) {
-    return injectedType.isAnnotationPresent(EntryPoint.class) ||
+    return injectedType.unsafeIsAnnotationPresent(EntryPoint.class) ||
             // TODO review this before adding any scopes other than app-scoped and depdendent
-            (!injectedType.isAnnotationPresent(Dependent.class) && hasStartupAnnotation(injectedType));
+            (!injectedType.unsafeIsAnnotationPresent(Dependent.class) && hasStartupAnnotation(injectedType));
   }
 
   protected static boolean hasStartupAnnotation(final MetaClass injectedType) {
-    for (final Annotation anno : injectedType.getAnnotations()) {
+    for (final Annotation anno : injectedType.unsafeGetAnnotations()) {
       if (anno.annotationType().getName().equals("javax.ejb.Startup")) {
         return true;
       }
@@ -796,7 +794,7 @@ public abstract class AbstractBodyGenerator implements FactoryBodyGenerator {
 
   protected Collection<Annotation> getQualifiers(final HasAnnotations injectedType) {
     final Collection<Annotation> annos = new ArrayList<>();
-    for (final Annotation anno : injectedType.getAnnotations()) {
+    for (final Annotation anno : injectedType.unsafeGetAnnotations()) {
       if (anno.annotationType().isAnnotationPresent(Qualifier.class)) {
         annos.add(anno);
       }

@@ -16,21 +16,9 @@
 
 package org.jboss.errai.enterprise.rebind;
 
-import static org.jboss.errai.codegen.util.Stmt.if_;
-import static org.jboss.errai.codegen.util.Stmt.load;
-import static org.jboss.errai.codegen.util.Stmt.loadVariable;
-import static org.jboss.errai.codegen.util.Stmt.nestedCall;
-import static org.jboss.errai.enterprise.rebind.TypeMarshaller.demarshal;
-import static org.jboss.errai.enterprise.rebind.TypeMarshaller.marshal;
-
-import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.function.Function;
-
-import javax.ws.rs.QueryParam;
-
+import com.google.gwt.http.client.RequestBuilder;
+import com.google.gwt.http.client.Response;
+import com.google.gwt.http.client.URL;
 import org.jboss.errai.codegen.BlockStatement;
 import org.jboss.errai.codegen.BooleanOperator;
 import org.jboss.errai.codegen.DefParameters;
@@ -47,10 +35,11 @@ import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaParameterizedType;
 import org.jboss.errai.codegen.meta.MetaType;
+import org.jboss.errai.codegen.util.AnnotationFilter;
 import org.jboss.errai.codegen.util.Bool;
 import org.jboss.errai.codegen.util.If;
+import org.jboss.errai.codegen.util.InterceptorProvider;
 import org.jboss.errai.codegen.util.ProxyUtil;
-import org.jboss.errai.codegen.util.ProxyUtil.InterceptorProvider;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.client.framework.CallContextStatus;
 import org.jboss.errai.enterprise.client.jaxrs.ResponseDemarshallingCallback;
@@ -58,9 +47,17 @@ import org.jboss.errai.enterprise.client.jaxrs.api.RestClient;
 import org.jboss.errai.enterprise.client.jaxrs.api.interceptor.RestCallContext;
 import org.jboss.errai.enterprise.rebind.TypeMarshaller.PrimitiveTypeMarshaller;
 
-import com.google.gwt.http.client.RequestBuilder;
-import com.google.gwt.http.client.Response;
-import com.google.gwt.http.client.URL;
+import javax.ws.rs.QueryParam;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
+import static org.jboss.errai.codegen.util.Stmt.if_;
+import static org.jboss.errai.codegen.util.Stmt.load;
+import static org.jboss.errai.codegen.util.Stmt.loadVariable;
+import static org.jboss.errai.codegen.util.Stmt.nestedCall;
+import static org.jboss.errai.enterprise.rebind.TypeMarshaller.demarshal;
+import static org.jboss.errai.enterprise.rebind.TypeMarshaller.marshal;
 
 /**
  * Generates a JAX-RS remote proxy method.
@@ -76,18 +73,18 @@ public class JaxrsProxyMethodGenerator {
   private final BlockBuilder<?> methodBlock;
   private final List<Statement> parameters;
   private final InterceptorProvider interceptorProvider;
-  private final Function<Annotation[], Annotation[]> annoFilter;
+  private final AnnotationFilter annotationFilter;
   private final boolean iocEnabled;
 
   public JaxrsProxyMethodGenerator(final MetaClass remote,
       final ClassStructureBuilder<?> classBuilder,
       final JaxrsResourceMethod resourceMethod,
       final InterceptorProvider interceptorProvider,
-      final Function<Annotation[], Annotation[]> annoFilter,
+      final AnnotationFilter annotationFilter,
       final boolean iocEnabled) {
 
     this.remote = remote;
-    this.annoFilter = annoFilter;
+    this.annotationFilter = annotationFilter;
     this.iocEnabled = iocEnabled;
     this.declaringClass = classBuilder.getClassDefinition();
     this.resourceMethod = resourceMethod;
@@ -111,7 +108,7 @@ public class JaxrsProxyMethodGenerator {
       methodBlock.append(generateRequestBuilder());
       methodBlock.append(generateHeaders(jaxrsParams));
 
-      final List<Class<?>> interceptors = interceptorProvider.getInterceptors(remote, resourceMethod.getMethod());
+      final List<MetaClass> interceptors = interceptorProvider.getInterceptors(remote, resourceMethod.getMethod());
       if (!interceptors.isEmpty()) {
         methodBlock.append(generateInterceptorLogic(interceptors));
       }
@@ -316,12 +313,12 @@ public class JaxrsProxyMethodGenerator {
    * @param interceptors
    * @return statement representing the interceptor logic.
    */
-  private Statement generateInterceptorLogic(final List<Class<?>> interceptors) {
+  private Statement generateInterceptorLogic(final List<MetaClass> interceptors) {
     final JaxrsResourceMethodParameters jaxrsParams =
         JaxrsResourceMethodParameters.fromMethod(resourceMethod.getMethod(), "parameters");
     final Statement callContext =
         ProxyUtil.generateProxyMethodCallContext(RestCallContext.class, declaringClass,
-            resourceMethod.getMethod(), generateInterceptedRequest(), interceptors, annoFilter, iocEnabled)
+            resourceMethod.getMethod(), generateInterceptedRequest(), interceptors, annotationFilter, iocEnabled)
             .publicOverridesMethod("setParameters", Parameter.of(Object[].class, "parameters"))
               .append(new StringStatement("super.setParameters(parameters)"))
               .append(generateUrl(jaxrsParams))

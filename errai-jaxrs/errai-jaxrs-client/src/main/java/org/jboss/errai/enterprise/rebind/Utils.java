@@ -17,7 +17,9 @@
 package org.jboss.errai.enterprise.rebind;
 
 import java.util.Collection;
+import java.util.Optional;
 
+import org.jboss.errai.codegen.meta.MetaAnnotation;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.enterprise.client.jaxrs.ClientExceptionMapper;
@@ -39,8 +41,8 @@ public class Utils {
     MetaClass genericExceptionMapperClass = null;
     for (final MetaClass metaClass : providers) {
       if (!metaClass.isAbstract() && metaClass.isAssignableTo(ClientExceptionMapper.class)) {
-        final MapsFrom mapsFrom = metaClass.getAnnotation(MapsFrom.class);
-        if (mapsFrom == null) {
+        final Optional<MetaAnnotation> mapsFrom = metaClass.getAnnotation(MapsFrom.class);
+        if (!mapsFrom.isPresent()) {
           if (genericExceptionMapperClass == null) {
             // Found a generic client-side exception mapper (to be used for all REST interfaces)
             genericExceptionMapperClass = metaClass;
@@ -53,10 +55,10 @@ public class Utils {
           }
         }
         else {
-          final Class<?>[] remotes = mapsFrom.value();
+          final MetaClass[] remotes = mapsFrom.get().valueAsArray(MetaClass[].class);
           if (remotes != null) {
-            for (final Class<?> remote : remotes) {
-              result.put(metaClass, MetaClassFactory.get(remote));
+            for (final MetaClass remote : remotes) {
+              result.put(metaClass, remote);
             }
           }
         }

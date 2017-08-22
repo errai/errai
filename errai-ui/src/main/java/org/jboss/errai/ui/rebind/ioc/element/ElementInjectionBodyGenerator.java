@@ -34,7 +34,6 @@ import org.jboss.errai.ioc.rebind.ioc.bootstrapper.AbstractBodyGenerator;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraph;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.Injectable;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
-import org.jboss.errai.ui.shared.TemplateUtil;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
@@ -125,8 +124,8 @@ class ElementInjectionBodyGenerator extends AbstractBodyGenerator {
          */
         return true;
       } else {
-        final Stream<Annotation> getAnnos = Arrays.stream(getValue.getAnnotations());
-        final Stream<Annotation> setAnnos = Arrays.stream(setValue.getAnnotations());
+        final Stream<Annotation> getAnnos = Arrays.stream(getValue.unsafeGetAnnotations());
+        final Stream<Annotation> setAnnos = Arrays.stream(setValue.unsafeGetAnnotations());
 
         final Predicate<Annotation> testForOverlayOrProperty = anno -> anno.annotationType()
                 .getPackage()

@@ -39,7 +39,9 @@
     <profile>
       <id>default</id>
       <activation>
-        <activeByDefault>true</activeByDefault>
+        <property>
+          <name>!skipDefaultProfile</name>
+        </property>
       </activation>
       <properties>
         <profile.testOutputDirectory>target/test-classes</profile.testOutputDirectory>

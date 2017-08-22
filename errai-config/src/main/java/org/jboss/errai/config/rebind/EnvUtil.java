@@ -155,7 +155,7 @@ public abstract class EnvUtil {
     final Collection<MetaClass> exts = ClassScanner.getTypesAnnotatedWith(EnvironmentConfigExtension.class, true);
     for (final MetaClass cls : exts) {
       try {
-        final Class<? extends ExposedTypesProvider> providerClass = cls.asClass().asSubclass(ExposedTypesProvider.class);
+        final Class<? extends ExposedTypesProvider> providerClass = cls.unsafeAsClass().asSubclass(ExposedTypesProvider.class);
         for (final MetaClass exposedType : providerClass.newInstance().provideTypesToExpose()) {
           if (exposedType.isPrimitive()) {
             exposedClasses.add(exposedType.asBoxed());
@@ -380,11 +380,11 @@ public abstract class EnvUtil {
   }
 
   public static boolean isPortableType(final MetaClass mc) {
-    return isUserPortableType(mc) || isString(mc) || isBuiltinPortableType(mc.asClass());
+    return isUserPortableType(mc) || isString(mc) || isBuiltinPortableType(mc.unsafeAsClass());
   }
 
   private static boolean isUserPortableType(final MetaClass mc) {
-    return mc.isAnnotationPresent(Portable.class) || getEnvironmentConfig().getExposedClasses().contains(mc)
+    return mc.unsafeIsAnnotationPresent(Portable.class) || getEnvironmentConfig().getExposedClasses().contains(mc)
         || getEnvironmentConfig().getPortableSuperTypes().contains(mc);
   }
 
@@ -401,7 +401,7 @@ public abstract class EnvUtil {
   }
 
   public static boolean isLocalEventType(final MetaClass cls) {
-    return cls.isAnnotationPresent(LocalEvent.class);
+    return cls.unsafeIsAnnotationPresent(LocalEvent.class);
   }
 
   public static Set<Class<?>> getAllPortableConcreteSubtypes(final Class<?> clazz) {

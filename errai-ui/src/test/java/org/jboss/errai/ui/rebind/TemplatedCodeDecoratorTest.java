@@ -113,7 +113,7 @@ public class TemplatedCodeDecoratorTest {
   public void setup() {
     decorator = new TemplatedCodeDecorator(Templated.class);
 
-    when(templatedClass.getAnnotation(Templated.class)).thenReturn(defaultTemplatedAnno);
+    when(templatedClass.unsafeGetAnnotation(Templated.class)).thenReturn(defaultTemplatedAnno);
     when(templatedClass.getFullyQualifiedName()).thenReturn("org.foo.TestTemplated");
     when(templatedClass.getPackageName()).thenReturn("org.foo");
     when(templatedClass.getName()).thenReturn("TestTemplated");
@@ -128,8 +128,8 @@ public class TemplatedCodeDecoratorTest {
     when(elemental2EventClass.getFullyQualifiedName()).thenReturn(Event.class.getName());
     when(elemental2EventClass.getName()).thenReturn(Event.class.getSimpleName());
     when(elemental2EventClass.getPackageName()).thenReturn(Event.class.getPackage().getName());
-    when(elemental2EventClass.getAnnotations()).thenReturn(Event.class.getAnnotations());
-    when(elemental2EventClass.getAnnotation(any()))
+    when(elemental2EventClass.unsafeGetAnnotations()).thenReturn(Event.class.getAnnotations());
+    when(elemental2EventClass.unsafeGetAnnotation(any()))
             .then(inv -> Event.class.getAnnotation(inv.getArgumentAt(0, Class.class)));
     when(elemental2EventClass.isAssignableTo(any(Class.class)))
             .then(inv -> ofNullable(inv.getArgumentAt(0, Class.class)).filter(c -> c.isAssignableFrom(Event.class))
@@ -144,7 +144,7 @@ public class TemplatedCodeDecoratorTest {
     when(templatedClass.getMethodsAnnotatedWith(EventHandler.class))
       .thenReturn(singletonList(handlerMethod));
 
-    when(handlerMethod.getAnnotation(EventHandler.class)).thenReturn(defaultHandlerAnno);
+    when(handlerMethod.unsafeGetAnnotation(EventHandler.class)).thenReturn(defaultHandlerAnno);
     when(handlerMethod.getParameters()).thenReturn(new MetaParameter[] { eventParam });
 
     when(eventParam.getType()).thenReturn(elemental2EventClass);

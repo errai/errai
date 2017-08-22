@@ -64,7 +64,7 @@ public class JavaReflectionMethod extends MetaMethod {
       final Annotation[][] parameterAnnotations = method.getParameterAnnotations();
 
       for (int i = 0; i < parmTypes.length; i++) {
-        final TypeToken<?> token = TypeToken.of(declaringClass.asClass());
+        final TypeToken<?> token = TypeToken.of(declaringClass.unsafeAsClass());
         final Class<?> parmType = token.resolveType(genParmTypes[i]).getRawType();
 
         final MetaClass mcParm = MetaClassFactory.get(parmType, genParmTypes[i]);
@@ -101,7 +101,7 @@ public class JavaReflectionMethod extends MetaMethod {
   private volatile Annotation[] _annotationsCache;
 
   @Override
-  public synchronized Annotation[] getAnnotations() {
+  public synchronized Annotation[] unsafeGetAnnotations() {
     if (_annotationsCache != null)
       return _annotationsCache;
     return _annotationsCache = method.getAnnotations();

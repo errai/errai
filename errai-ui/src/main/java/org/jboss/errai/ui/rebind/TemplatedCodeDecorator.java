@@ -16,41 +16,23 @@
 
 package org.jboss.errai.ui.rebind;
 
-import static java.util.Collections.singletonList;
-import static org.apache.commons.lang3.StringUtils.capitalize;
-import static org.jboss.errai.codegen.builder.impl.ObjectBuilder.newInstanceOf;
-import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
-import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
-import static org.jboss.errai.codegen.util.Stmt.castTo;
-import static org.jboss.errai.codegen.util.Stmt.declareFinalVariable;
-import static org.jboss.errai.codegen.util.Stmt.declareVariable;
-import static org.jboss.errai.codegen.util.Stmt.invokeStatic;
-import static org.jboss.errai.codegen.util.Stmt.loadLiteral;
-import static org.jboss.errai.codegen.util.Stmt.loadVariable;
-import static org.jboss.errai.codegen.util.Stmt.nestedCall;
-import static org.jboss.errai.codegen.util.Stmt.newObject;
-import static org.jboss.errai.ioc.util.GeneratedNamesUtil.qualifiedClassNameToShortenedIdentifier;
-
-import java.io.IOException;
-import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.Supplier;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
-import javax.enterprise.util.TypeLiteral;
-
+import com.google.common.base.Strings;
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.dom.client.StyleInjector;
+import com.google.gwt.event.dom.client.DomEvent;
+import com.google.gwt.event.dom.client.DomEvent.Type;
+import com.google.gwt.resources.client.ClientBundle;
+import com.google.gwt.resources.client.ClientBundle.Source;
+import com.google.gwt.resources.client.CssResource;
+import com.google.gwt.resources.client.TextResource;
+import com.google.gwt.user.client.Event;
+import com.google.gwt.user.client.EventListener;
+import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.Widget;
+import jsinterop.annotations.JsType;
+import jsinterop.base.Js;
 import org.jboss.errai.codegen.Cast;
 import org.jboss.errai.codegen.InnerClass;
 import org.jboss.errai.codegen.Parameter;
@@ -103,24 +85,39 @@ import org.lesscss.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Strings;
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.NativeEvent;
-import com.google.gwt.dom.client.StyleInjector;
-import com.google.gwt.event.dom.client.DomEvent;
-import com.google.gwt.event.dom.client.DomEvent.Type;
-import com.google.gwt.resources.client.ClientBundle;
-import com.google.gwt.resources.client.ClientBundle.Source;
-import com.google.gwt.resources.client.CssResource;
-import com.google.gwt.resources.client.TextResource;
-import com.google.gwt.user.client.Event;
-import com.google.gwt.user.client.EventListener;
-import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.Widget;
+import javax.enterprise.util.TypeLiteral;
+import java.io.IOException;
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.Supplier;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
-import jsinterop.annotations.JsType;
-import jsinterop.base.Js;
+import static java.util.Collections.singletonList;
+import static org.apache.commons.lang3.StringUtils.capitalize;
+import static org.jboss.errai.codegen.builder.impl.ObjectBuilder.newInstanceOf;
+import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
+import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
+import static org.jboss.errai.codegen.util.Stmt.castTo;
+import static org.jboss.errai.codegen.util.Stmt.declareFinalVariable;
+import static org.jboss.errai.codegen.util.Stmt.declareVariable;
+import static org.jboss.errai.codegen.util.Stmt.invokeStatic;
+import static org.jboss.errai.codegen.util.Stmt.loadLiteral;
+import static org.jboss.errai.codegen.util.Stmt.loadVariable;
+import static org.jboss.errai.codegen.util.Stmt.nestedCall;
+import static org.jboss.errai.codegen.util.Stmt.newObject;
+import static org.jboss.errai.ioc.util.GeneratedNamesUtil.qualifiedClassNameToShortenedIdentifier;
 
 /**
  * Generates the code required for {@link Templated} classes.
@@ -394,7 +391,7 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
 
     for (final MetaMethod method : declaringClass.getMethodsAnnotatedWith(EventHandler.class)) {
 
-      final String[] targetDataFieldNames = method.getAnnotation(EventHandler.class).value();
+      final String[] targetDataFieldNames = method.unsafeGetAnnotation(EventHandler.class).value();
 
       validateNonEmptyEventHandlerTargets(declaringClass, method, targetDataFieldNames);
       final MetaClass eventType = assertEventType(declaringClass, method);
@@ -419,11 +416,11 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
           final MetaClass declaringClass, final MetaMethod method, final String[] targetDataFieldNames,
           final MetaClass eventType, final FactoryController controller) {
     final String[] browserEventTypes = Optional
-      .ofNullable(method.getParameters()[0].getAnnotation(ForEvent.class))
+      .ofNullable(method.getParameters()[0].unsafeGetAnnotation(ForEvent.class))
       .map(anno -> anno.value())
       .filter(value -> value.length > 0)
       .orElseGet(() -> Optional
-                        .ofNullable(eventType.getAnnotation(BrowserEvent.class))
+                        .ofNullable(eventType.unsafeGetAnnotation(BrowserEvent.class))
                         .map(anno -> anno.value())
                         .orElseThrow(() ->
                           new GenerationException(
@@ -535,7 +532,7 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
         initStmts.add(Stmt.invokeStatic(TemplateUtil.class, "setupWrappedElementEventHandler",
             eventSource, listenerInstance,
             Stmt.invokeStatic(eventType, "getType")));
-      } else if (dataFieldType.isAnnotationPresent(Templated.class)) {
+      } else if (dataFieldType.unsafeIsAnnotationPresent(Templated.class)) {
         final ContextualStatementBuilder widget = Stmt.invokeStatic(TemplateWidgetMapper.class, "get", eventSource);
         initStmts.add(widget.invoke("addDomHandler",
             listenerInstance, Stmt.invokeStatic(eventType, "getType")));
@@ -588,8 +585,8 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
 
     int eventsToSink =
         Event.FOCUSEVENTS | Event.GESTUREEVENTS | Event.KEYEVENTS | Event.MOUSEEVENTS | Event.TOUCHEVENTS;
-    if (method.isAnnotationPresent(SinkNative.class)) {
-      eventsToSink = method.getAnnotation(SinkNative.class).value();
+    if (method.unsafeIsAnnotationPresent(SinkNative.class)) {
+      eventsToSink = method.unsafeGetAnnotation(SinkNative.class).value();
     }
 
     for (final String name : targetDataFieldNames) {
@@ -652,9 +649,9 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
         return eventType;
       }
       else if (isAnnotatedBrowserEvent(eventType)) {
-        final BrowserEvent eventTypeAnno = eventType.getAnnotation(BrowserEvent.class);
+        final BrowserEvent eventTypeAnno = eventType.unsafeGetAnnotation(BrowserEvent.class);
         final boolean eventTypeMatchesAll = eventTypeAnno.value().length == 0;
-        final Optional<ForEvent> oParamAnno = Optional.ofNullable(method.getParameters()[0].getAnnotation(ForEvent.class)).filter(anno -> anno.value().length > 0);
+        final Optional<ForEvent> oParamAnno = Optional.ofNullable(method.getParameters()[0].unsafeGetAnnotation(ForEvent.class)).filter(anno -> anno.value().length > 0);
         final boolean parameterDeclaresEvent = oParamAnno.isPresent();
 
         if (eventTypeMatchesAll && parameterDeclaresEvent
@@ -687,12 +684,12 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
   }
 
   private boolean isAnnotatedBrowserEvent(final MetaClass eventType) {
-    return eventType.isAnnotationPresent(BrowserEvent.class) && isNativeJsType(eventType);
+    return eventType.unsafeIsAnnotationPresent(BrowserEvent.class) && isNativeJsType(eventType);
   }
 
   private boolean isNativeJsType(final MetaClass eventType) {
     return Optional
-            .ofNullable(eventType.getAnnotation(JsType.class)).filter(anno -> anno.isNative()).isPresent();
+            .ofNullable(eventType.unsafeGetAnnotation(JsType.class)).filter(anno -> anno.isNative()).isPresent();
   }
 
   private MetaClass getHandlerForEvent(final MetaClass eventType) {
@@ -893,7 +890,7 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
   }
 
   public static Optional<String> getTemplateStyleSheetPath(final MetaClass type) {
-    final Templated anno = type.getAnnotation(Templated.class);
+    final Templated anno = type.unsafeGetAnnotation(Templated.class);
 
     if (anno.stylesheet().isEmpty()) {
       return Optional.empty();
@@ -943,8 +940,8 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
   public static String getTemplateFileName(final MetaClass type) {
     String resource = type.getFullyQualifiedName().replace('.', '/') + ".html";
 
-    if (type.isAnnotationPresent(Templated.class)) {
-      final String source = canonicalizeTemplateSourceSyntax(type, type.getAnnotation(Templated.class).value());
+    if (type.unsafeIsAnnotationPresent(Templated.class)) {
+      final String source = canonicalizeTemplateSourceSyntax(type, type.unsafeGetAnnotation(Templated.class).value());
       final Matcher matcher = Pattern.compile("^([^#]+)#?.*$").matcher(source);
       if (matcher.matches()) {
         resource = (matcher.group(1) == null ? resource : matcher.group(1));
@@ -968,8 +965,8 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
   public static String getTemplateUrl(final MetaClass type) {
     String resource = type.getFullyQualifiedName().replace('.', '/') + ".html";
 
-    if (type.isAnnotationPresent(Templated.class)) {
-      final String source = canonicalizeTemplateSourceSyntax(type, type.getAnnotation(Templated.class).value());
+    if (type.unsafeIsAnnotationPresent(Templated.class)) {
+      final String source = canonicalizeTemplateSourceSyntax(type, type.unsafeGetAnnotation(Templated.class).value());
       final Matcher matcher = Pattern.compile("^([^#]+)#?.*$").matcher(source);
       if (matcher.matches()) {
         resource = (matcher.group(1) == null ? resource : matcher.group(1));
@@ -986,8 +983,8 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
   public static String getTemplateFragmentName(final MetaClass type) {
     String fragment = "";
 
-    if (type.isAnnotationPresent(Templated.class)) {
-      final String source = canonicalizeTemplateSourceSyntax(type, type.getAnnotation(Templated.class).value());
+    if (type.unsafeIsAnnotationPresent(Templated.class)) {
+      final String source = canonicalizeTemplateSourceSyntax(type, type.unsafeGetAnnotation(Templated.class).value());
       final Matcher matcher = Pattern.compile("^.*#([^#]+)$").matcher(source);
       if (matcher.matches()) {
         fragment = (matcher.group(1) == null ? fragment : matcher.group(1));

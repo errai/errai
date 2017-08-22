@@ -31,6 +31,7 @@ import org.jboss.errai.cdi.demo.tagcloud.client.shared.Tag;
 import org.jboss.errai.cdi.demo.tagcloud.client.shared.TagCloud;
 import org.jboss.errai.cdi.demo.tagcloud.client.shared.TagCloudSubscription;
 import org.jboss.errai.cdi.demo.tagcloud.client.shared.Updated;
+import org.jboss.errai.common.apt.ErraiApp;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 
 import com.google.gwt.user.client.ui.Anchor;
@@ -42,6 +43,7 @@ import com.google.gwt.user.client.ui.RootPanel;
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
+@ErraiApp
 @EntryPoint
 public class TagCloudDemoClient {
 

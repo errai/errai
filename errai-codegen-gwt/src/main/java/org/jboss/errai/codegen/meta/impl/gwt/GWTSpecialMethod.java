@@ -78,7 +78,7 @@ public class GWTSpecialMethod extends MetaMethod {
   }
 
   @Override
-  public Annotation[] getAnnotations() {
+  public Annotation[] unsafeGetAnnotations() {
     return new Annotation[0];
   }
 
