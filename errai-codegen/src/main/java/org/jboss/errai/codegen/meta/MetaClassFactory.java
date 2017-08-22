@@ -67,7 +67,7 @@ public final class MetaClassFactory {
       @Override
       public Object convertFrom(final Object in) {
         if (MetaClass.class.isAssignableFrom(in.getClass())) {
-          return ((MetaClass) in).asClass();
+          return ((MetaClass) in).unsafeAsClass();
         }
         else {
           throw new RuntimeException("cannot convert from " + in.getClass() + "; to " + Class.class.getName());
@@ -90,7 +90,7 @@ public final class MetaClassFactory {
           final Object el = Array.get(in, i);
 
           if (el instanceof MetaClass) {
-            cls[i] = ((MetaClass) el).asClass();
+            cls[i] = ((MetaClass) el).unsafeAsClass();
           }
           else if (el != null && el.getClass().isArray()) {
             cls[i] = (Class) convertFrom(el);
@@ -592,10 +592,10 @@ public final class MetaClassFactory {
     final Class<?>[] newClasses = new Class<?>[cls.length];
     for (int i = 0; i < cls.length; i++) {
       if (cls[i] instanceof MetaParameterizedType) {
-        newClasses[i] = ((MetaClass) ((MetaParameterizedType) cls[i]).getRawType()).asClass();
+        newClasses[i] = ((MetaClass) ((MetaParameterizedType) cls[i]).getRawType()).unsafeAsClass();
       }
       else {
-        newClasses[i] = ((MetaClass) cls[i]).asClass();
+        newClasses[i] = ((MetaClass) cls[i]).unsafeAsClass();
       }
     }
     return newClasses;

@@ -142,7 +142,7 @@ public class MetaDataScanner extends Reflections {
               final Class<?> aClass = Thread.currentThread().getContextClassLoader().loadClass(clsName);
               extensions.add(aClass.asSubclass(Vfs.UrlType.class));
             } catch (final Throwable t) {
-              log.warn("could not load class scanning extension: " + clsName, t);
+              throw new RuntimeException("could not load class scanning extension: " + clsName, t);
             }
           }
         }

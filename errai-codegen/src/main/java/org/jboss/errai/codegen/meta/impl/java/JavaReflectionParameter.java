@@ -57,7 +57,7 @@ public class JavaReflectionParameter extends MetaParameter {
   }
 
   @Override
-  public Annotation[] getAnnotations() {
+  public Annotation[] unsafeGetAnnotations() {
     return annotations == null ? new Annotation[0] : annotations;
   }
 

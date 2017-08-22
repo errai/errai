@@ -23,6 +23,7 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 
+import org.jboss.errai.common.apt.ErraiApp;
 import org.jboss.errai.demo.jpa.client.shared.Album;
 import org.jboss.errai.demo.jpa.client.shared.Artist;
 import org.jboss.errai.demo.jpa.client.shared.Format;
@@ -36,6 +37,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 
+@ErraiApp
 @EntryPoint
 public class Main {
 

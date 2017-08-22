@@ -236,7 +236,11 @@ public abstract class MetaClass extends AbstractHasAnnotations implements MetaTy
 
   public abstract boolean isPrimitiveWrapper();
 
-  public abstract Class<?> asClass();
+  /**
+   * @deprecated This method is not safe to use in APT environment.
+   */
+  @Deprecated
+  public abstract Class<?> unsafeAsClass();
 
   /**
    * Searches for the named field in this type, its superinterfaces, and its superclasses.

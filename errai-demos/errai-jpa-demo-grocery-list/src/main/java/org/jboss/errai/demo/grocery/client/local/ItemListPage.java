@@ -16,9 +16,7 @@
 
 package org.jboss.errai.demo.grocery.client.local;
 
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
-
+import com.google.gwt.user.client.ui.Composite;
 import org.jboss.errai.demo.grocery.client.shared.Item;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 import org.jboss.errai.ui.nav.client.local.DefaultPage;
@@ -26,7 +24,8 @@ import org.jboss.errai.ui.nav.client.local.Page;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 
-import com.google.gwt.user.client.ui.Composite;
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
 @Templated("#main")
 @Page(role = DefaultPage.class)

@@ -583,11 +583,11 @@ public class Context {
       MetaClass cls = clazz;
       do {
         if (ctx.literalizableClasses.contains(cls))
-          return cls.asClass();
+          return cls.unsafeAsClass();
 
         for (final MetaClass iface : cls.getInterfaces()) {
           if (ctx.literalizableClasses.contains(iface))
-            return iface.asClass();
+            return iface.unsafeAsClass();
         }
       }
       while ((cls = cls.getSuperClass()) != null);

@@ -16,10 +16,10 @@
 
 package org.jboss.errai.databinding.rebind;
 
-import java.util.List;
-
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.databinding.client.api.Bindable;
+
+import java.util.List;
 
 /**
  * Validation utilities for data binding.
@@ -42,7 +42,7 @@ public class DataBindingValidator {
    * @return True if the given property chain is resolvable from the given bindable type.
    */
   public static boolean isValidPropertyChain(final MetaClass bindableType, final String propertyChain) {
-    if (!bindableType.isAnnotationPresent(Bindable.class) &&
+    if (!bindableType.unsafeIsAnnotationPresent(Bindable.class) &&
         !DataBindingUtil.getConfiguredBindableTypes().contains(bindableType) &&
         !bindableType.getFullyQualifiedName().equals(List.class.getName())) {
       return false;

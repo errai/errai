@@ -145,11 +145,11 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
         if (!(pageClass.isAssignableTo(IsWidget.class)
                 || pageClass.isAssignableTo(IsElement.class)
                 || pageClass.isAssignableTo(org.jboss.errai.common.client.api.elemental2.IsElement.class)
-                || pageClass.isAnnotationPresent(Templated.class))) {
+                || pageClass.unsafeIsAnnotationPresent(Templated.class))) {
           throw new GenerationException("Class " + pageClass.getFullyQualifiedName()
                   + " is annotated with @Page, so it must implement IsWidget or be @Templated");
         }
-        Page annotation = pageClass.getAnnotation(Page.class);
+        Page annotation = pageClass.unsafeGetAnnotation(Page.class);
         String pageName = getPageName(pageClass);
         List<Class<? extends PageRole>> annotatedPageRoles = Arrays.asList(annotation.role());
 
@@ -328,7 +328,7 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
   }
 
   private String getPageURL(MetaClass pageClass, String pageName) {
-    Page pageAnnotation = pageClass.getAnnotation(Page.class);
+    Page pageAnnotation = pageClass.unsafeGetAnnotation(Page.class);
     String path = pageAnnotation.path();
 
     if (path.equals("")) {
@@ -401,8 +401,8 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
             "destroy",
             Parameter.of(pageClass, "widget")).body();
 
-    if (pageClass.getAnnotation(Singleton.class) == null && pageClass.getAnnotation(ApplicationScoped.class) == null
-            && pageClass.getAnnotation(EntryPoint.class) == null) {
+    if (pageClass.unsafeGetAnnotation(Singleton.class) == null && pageClass.unsafeGetAnnotation(ApplicationScoped.class) == null
+            && pageClass.unsafeGetAnnotation(EntryPoint.class) == null) {
       method.append(Stmt.loadVariable("bm").invoke("destroyBean", Stmt.loadVariable("widget")));
     }
 
@@ -462,7 +462,7 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
             Parameter param = optionalParams[i - 1];
             MetaParameter realParam = metaMethod.getParameters()[i - 1];
 
-            if (realParam.getType().equals(MetaClassFactory.get(param.getType().asClass()))) {
+            if (realParam.getType().equals(MetaClassFactory.get(param.getType().unsafeAsClass()))) {
               paramValues[i] = Stmt.loadVariable(param.getName());
             } else {
               throw new UnsupportedOperationException(
@@ -539,7 +539,7 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
 
     method.append(Stmt.declareFinalVariable("pageState", Map.class, new HashMap<String, Object>()));
     for (MetaField field : pageClass.getFieldsAnnotatedWith(PageState.class)) {
-      PageState psAnno = field.getAnnotation(PageState.class);
+      PageState psAnno = field.unsafeGetAnnotation(PageState.class);
       String fieldName = field.getName();
       String queryParamName = psAnno.value();
       if (queryParamName == null || queryParamName.trim().isEmpty()) {
@@ -650,7 +650,7 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
         // entry for the node itself
         out.print("\"" + pageName + "\"");
 
-        Page pageAnnotation = pageClass.getAnnotation(Page.class);
+        Page pageAnnotation = pageClass.unsafeGetAnnotation(Page.class);
         List<Class<? extends PageRole>> roles = Arrays.asList(pageAnnotation.role());
         if (roles.contains(DefaultPage.class)) {
           out.print(" [penwidth=3]");
@@ -757,6 +757,6 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
 
   @Override
   protected boolean isRelevantClass(MetaClass clazz) {
-    return clazz.isAnnotationPresent(Page.class);
+    return clazz.unsafeIsAnnotationPresent(Page.class);
   }
 }

@@ -39,7 +39,7 @@ public class DefaultArrayMarshaller implements Marshaller<Object> {
             arrayType.getOuterComponentType().getFullyQualifiedName(),
             outerMarshaller);
 
-    Class<?> type = arrayType.asClass();
+    Class<?> type = arrayType.unsafeAsClass();
     int dim = 0;
     while (type.isArray()) {
       dim++;
@@ -51,7 +51,7 @@ public class DefaultArrayMarshaller implements Marshaller<Object> {
 
   @SuppressWarnings("unchecked")
   public Class<Object> getTypeHandled() {
-    return (Class<Object>) arrayType.asClass();
+    return (Class<Object>) arrayType.unsafeAsClass();
   }
 
   public Object demarshall(final EJValue a0, final MarshallingSession a1) {
@@ -64,7 +64,7 @@ public class DefaultArrayMarshaller implements Marshaller<Object> {
       final int[] dims = new int[dimensions];
       dims[0] = arr.size();
 
-      final Object arrayInstance = Array.newInstance(arrayType.getOuterComponentType().asClass(), dims);
+      final Object arrayInstance = Array.newInstance(arrayType.getOuterComponentType().unsafeAsClass(), dims);
       _demarshall(dimensions - 1, arrayInstance, arr, a1);
       return arrayInstance;
     }
@@ -89,7 +89,7 @@ public class DefaultArrayMarshaller implements Marshaller<Object> {
     else {
       for (int i = 0; i < a0.size(); i++) {
         Array.set(arrayInstance, i, _demarshall(dim - 1,
-                Array.newInstance(arrayType.getOuterComponentType().asClass(), a0.get(i).isArray().size()),
+                Array.newInstance(arrayType.getOuterComponentType().unsafeAsClass(), a0.get(i).isArray().size()),
                 a0.get(i).isArray(),
                 a1));
       }
@@ -123,6 +123,6 @@ public class DefaultArrayMarshaller implements Marshaller<Object> {
 
   @Override
   public Object[] getEmptyArray() {
-    return (Object[]) Array.newInstance(arrayType.getOuterComponentType().asClass(), 0);
+    return (Object[]) Array.newInstance(arrayType.getOuterComponentType().unsafeAsClass(), 0);
   }
 }

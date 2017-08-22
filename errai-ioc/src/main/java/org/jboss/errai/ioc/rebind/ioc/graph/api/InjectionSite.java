@@ -16,15 +16,15 @@
 
 package org.jboss.errai.ioc.rebind.ioc.graph.api;
 
-import java.lang.annotation.Annotation;
-import java.util.Collection;
-import java.util.Collections;
-
 import org.jboss.errai.codegen.meta.HasAnnotations;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassMember;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaParameter;
+
+import java.lang.annotation.Annotation;
+import java.util.Collection;
+import java.util.Collections;
 
 /**
  * Contains metadata for a single injection point.
@@ -69,18 +69,18 @@ public class InjectionSite implements HasAnnotations {
   }
 
   @Override
-  public Annotation[] getAnnotations() {
-    return annotated.getAnnotations();
+  public Annotation[] unsafeGetAnnotations() {
+    return annotated.unsafeGetAnnotations();
   }
 
   @Override
-  public boolean isAnnotationPresent(final Class<? extends Annotation> annotation) {
-    return annotated.isAnnotationPresent(annotation);
+  public boolean unsafeIsAnnotationPresent(final Class<? extends Annotation> annotation) {
+    return annotated.unsafeIsAnnotationPresent(annotation);
   }
 
   @Override
-  public <A extends Annotation> A getAnnotation(final Class<A> annotation) {
-    return annotated.getAnnotation(annotation);
+  public <A extends Annotation> A unsafeGetAnnotation(final Class<A> annotation) {
+    return annotated.unsafeGetAnnotation(annotation);
   }
 
   /**

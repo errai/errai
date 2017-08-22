@@ -19,9 +19,11 @@ package org.jboss.errai.jsinterop.demo.client.local;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import org.jboss.errai.common.apt.ErraiApp;
 import org.jboss.errai.common.client.dom.Document;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 
+@ErraiApp
 @EntryPoint
 public class AppSetup {
 

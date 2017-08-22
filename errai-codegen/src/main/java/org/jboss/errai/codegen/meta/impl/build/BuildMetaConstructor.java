@@ -16,10 +16,6 @@
 
 package org.jboss.errai.codegen.meta.impl.build;
 
-import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.jboss.errai.codegen.Comment;
 import org.jboss.errai.codegen.Context;
 import org.jboss.errai.codegen.DefParameters;
@@ -35,6 +31,10 @@ import org.jboss.errai.codegen.meta.MetaParameter;
 import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.meta.MetaTypeVariable;
 import org.jboss.errai.codegen.util.GenUtil;
+
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -106,17 +106,17 @@ public class BuildMetaConstructor extends MetaConstructor implements Builder {
           }
 
           @Override
-          public Annotation[] getAnnotations() {
+          public Annotation[] unsafeGetAnnotations() {
             return new Annotation[0];
           }
 
           @Override
-          public boolean isAnnotationPresent(final Class<? extends Annotation> annotation) {
+          public boolean unsafeIsAnnotationPresent(final Class<? extends Annotation> annotation) {
             return false;
           }
 
           @Override
-          public <A extends Annotation> A getAnnotation(final Class<A> annotation) {
+          public <A extends Annotation> A unsafeGetAnnotation(final Class<A> annotation) {
             return null;
           }
         });
@@ -200,7 +200,7 @@ public class BuildMetaConstructor extends MetaConstructor implements Builder {
   }
 
   @Override
-  public Annotation[] getAnnotations() {
+  public Annotation[] unsafeGetAnnotations() {
     return new Annotation[0];
   }
 

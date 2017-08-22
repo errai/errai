@@ -74,13 +74,13 @@ public class TypeMarshaller {
       if (!type.equals(MetaClassFactory.get(void.class))) {
         if (type.isAssignableTo(Map.class)) {
           demarshallingStatement =
-              Stmt.invokeStatic(MarshallingWrapper.class, "fromJSON", statement, type.asBoxed().asClass(),
+              Stmt.invokeStatic(MarshallingWrapper.class, "fromJSON", statement, type.asBoxed(),
                   MarshallingGenUtil.getConcreteMapKeyType(type.asBoxed()),
                   MarshallingGenUtil.getConcreteMapValueType(type.asBoxed()));
         }
         else {
           demarshallingStatement = Stmt.invokeStatic(MarshallingWrapper.class, "fromJSON", statement,
-              type.asBoxed().asClass(), MarshallingGenUtil.getConcreteElementType(type.asBoxed()));
+              type.asBoxed(), MarshallingGenUtil.getConcreteElementType(type.asBoxed()));
         }
       }
       else {

@@ -24,18 +24,20 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.Produces;
 
 import org.apache.commons.lang3.StringUtils;
+import org.jboss.errai.codegen.meta.AbstractHasAnnotations;
+import org.jboss.errai.codegen.meta.HasAnnotations;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaMethod;
 
 /**
  * Represents HTTP headers based on JAX-RS annotations.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class JaxrsHeaders {
 
   private Map<String, String> headers;
-  
+
   private JaxrsHeaders() {};
 
   public JaxrsHeaders(JaxrsHeaders headers) {
@@ -44,73 +46,56 @@ public class JaxrsHeaders {
 
   /**
    * Generates HTTP headers based on the JAX-RS annotations on the provided class or interface.
-   * 
+   *
    * @param clazz  the JAX-RS resource class
    * @return headers
    */
   public static JaxrsHeaders fromClass(MetaClass clazz) {
-    JaxrsHeaders headers = new JaxrsHeaders();
-
-    Produces p = clazz.getAnnotation(Produces.class);
-    if (p != null) {
-      headers.setAcceptHeader(p.value());
-    }
-
-    Consumes c = clazz.getAnnotation(Consumes.class);
-    if (c != null) {
-      headers.setContentTypeHeader(c.value());
-    }
-
-    return headers;
+    return getJaxrsHeaders(clazz);
   }
 
   /**
    * Generates HTTP headers based on the JAX-RS annotations on the provided method.
-   * 
-   * @param clazz  the JAX-RS resource class
+   *
+   * @param method  the JAX-RS method
    * @return headers
    */
   public static JaxrsHeaders fromMethod(MetaMethod method) {
-    JaxrsHeaders headers = new JaxrsHeaders();
-
-    Produces p = method.getAnnotation(Produces.class);
-    if (p != null) {
-      headers.setAcceptHeader(p.value());
-    }
-
-    Consumes c = method.getAnnotation(Consumes.class);
-    if (c != null) {
-      headers.setContentTypeHeader(c.value());
-    }
-
-    return headers;
+    return getJaxrsHeaders(method);
   }
 
   private void setAcceptHeader(String[] value) {
     if (value == null)
       return;
-    
-    if (headers == null) 
+
+    if (headers == null)
       headers = new HashMap<String, String>();
-    
+
     headers.put("Accept", StringUtils.join(value, ","));
   }
 
   private void setContentTypeHeader(String[] value) {
     if (value == null)
       return;
-        
-    if (headers == null) 
+
+    if (headers == null)
       headers = new HashMap<String, String>();
-    
+
     if (value.length == 1)
       headers.put("Content-Type", value[0]);
   }
-  
+
   public Map<String, String> get() {
     if (headers == null)
       return Collections.<String, String>emptyMap();
-    
+
     return Collections.<String, String>unmodifiableMap(headers);
+  }
+
+  private static JaxrsHeaders getJaxrsHeaders(final AbstractHasAnnotations annotated) {
+    JaxrsHeaders headers = new JaxrsHeaders();
+    annotated.getAnnotation(Produces.class).ifPresent(a -> headers.setAcceptHeader(a.valueAsArray(String[].class)));
+    annotated.getAnnotation(Consumes.class).ifPresent(a -> headers.setContentTypeHeader(a.valueAsArray(String[].class)));
+    return headers;
   }
 }

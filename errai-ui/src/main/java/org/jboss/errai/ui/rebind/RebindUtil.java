@@ -38,7 +38,7 @@ public class RebindUtil {
   }
 
   private static boolean hasNativeJsTypeAnnotation(final MetaClass type) {
-    final JsType anno = type.getAnnotation(JsType.class);
+    final JsType anno = type.unsafeGetAnnotation(JsType.class);
     return anno != null && anno.isNative();
   }
 

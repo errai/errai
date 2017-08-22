@@ -16,28 +16,8 @@
 
 package org.jboss.errai.ioc.rebind.ioc.graph.impl;
 
-import static org.jboss.errai.ioc.rebind.ioc.graph.impl.ResolutionPriority.getMatchingPriority;
-
-import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.IdentityHashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Queue;
-import java.util.Set;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Produces;
-
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassMember;
 import org.jboss.errai.codegen.meta.MetaField;
@@ -56,8 +36,26 @@ import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Produces;
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.IdentityHashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Queue;
+import java.util.Set;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+
+import static org.jboss.errai.ioc.rebind.ioc.graph.impl.ResolutionPriority.getMatchingPriority;
 
 /**
  * @see DependencyGraphBuilder
@@ -208,7 +206,7 @@ public final class DependencyGraphBuilderImpl implements DependencyGraphBuilder 
     if (producerMemberDep.producingMember instanceof MetaMethod) {
       final MetaMethod specializedMethod = GraphUtil.getOverridenMethod((MetaMethod) producerMemberDep.producingMember);
       final MetaClass specializingType = producerMemberDep.producingMember.getDeclaringClass();
-      if (specializedMethod != null && specializedMethod.isAnnotationPresent(Produces.class)) {
+      if (specializedMethod != null && specializedMethod.unsafeIsAnnotationPresent(Produces.class)) {
         updateLinksToSpecialized(specialization, toBeRemoved, specializedMethod, specializingType);
       }
     } else {
@@ -288,7 +286,7 @@ public final class DependencyGraphBuilderImpl implements DependencyGraphBuilder 
       producedReferences.add(lookupInjectableReference(method.getReturnType(), qualFactory.forSource(method)));
     }
     for (final MetaField field : specialized.type.getDeclaredFields()) {
-      if (field.isAnnotationPresent(Produces.class)) {
+      if (field.unsafeIsAnnotationPresent(Produces.class)) {
         producedReferences.add(lookupInjectableReference(field.getType(), qualFactory.forSource(field)));
       }
     }

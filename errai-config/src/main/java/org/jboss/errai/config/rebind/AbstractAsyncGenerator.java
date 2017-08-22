@@ -190,13 +190,10 @@ public abstract class AbstractAsyncGenerator extends Generator implements AsyncC
             .treeLogger(logger)
             .generatorContext(context)
             .interfaceType(interfaceType)
-            .runIfStarting(new Runnable() {
-              @Override
-              public void run() {
-                final long start = System.currentTimeMillis();
-                MetaClassBridgeUtil.populateMetaClassFactoryFromTypeOracle(context, logger);
-                log.debug("MetaClassFactory populated in {}ms", System.currentTimeMillis() - start);
-              }
+            .runIfStarting(() -> {
+              final long start = System.currentTimeMillis();
+              MetaClassBridgeUtil.populateMetaClassFactoryFromTypeOracle(context, logger);
+              log.debug("MetaClassFactory populated in {}ms", System.currentTimeMillis() - start);
             })
             .build()
             // this causes all asynchronous code generators to run if this is the first one that executes.

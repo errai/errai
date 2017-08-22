@@ -134,17 +134,17 @@ public class Parameter extends AbstractStatement {
       }
 
       @Override
-      public Annotation[] getAnnotations() {
+      public Annotation[] unsafeGetAnnotations() {
         return new Annotation[0];
       }
 
       @Override
-      public boolean isAnnotationPresent(Class<? extends Annotation> annotation) {
+      public boolean unsafeIsAnnotationPresent(Class<? extends Annotation> annotation) {
         return false;
       }
 
       @Override
-      public <A extends Annotation> A getAnnotation(Class<A> annotation) {
+      public <A extends Annotation> A unsafeGetAnnotation(Class<A> annotation) {
         return null;
       }
     };

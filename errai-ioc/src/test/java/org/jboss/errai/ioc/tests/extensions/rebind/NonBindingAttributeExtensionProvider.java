@@ -75,7 +75,7 @@ public class NonBindingAttributeExtensionProvider implements IOCExtensionConfigu
   }
 
   private FactoryBodyGenerator getGenerator(final InjectionSite injectionSite) {
-    final AnnoWithNonBindingAttribute anno = injectionSite.getAnnotation(AnnoWithNonBindingAttribute.class);
+    final AnnoWithNonBindingAttribute anno = injectionSite.unsafeGetAnnotation(AnnoWithNonBindingAttribute.class);
     final String value = anno.value();
 
     return new AbstractBodyGenerator() {

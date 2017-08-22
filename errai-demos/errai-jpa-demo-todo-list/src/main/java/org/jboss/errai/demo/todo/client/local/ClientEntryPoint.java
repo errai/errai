@@ -19,12 +19,14 @@ package org.jboss.errai.demo.todo.client.local;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import org.jboss.errai.common.apt.ErraiApp;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 import org.jboss.errai.ui.nav.client.local.Navigation;
 
 import com.google.gwt.user.client.ui.DockPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 
+@ErraiApp
 @EntryPoint
 public class ClientEntryPoint {
 

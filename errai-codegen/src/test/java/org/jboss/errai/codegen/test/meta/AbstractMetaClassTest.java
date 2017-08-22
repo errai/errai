@@ -575,19 +575,19 @@ public abstract class AbstractMetaClassTest {
   public void testClassAnnotations() throws Exception {
     final HasAnnotations annotated = getMetaClass(ClassWithAnnotations.class);
 
-    assertEquals(4, annotated.getAnnotations().length);
-    assertAnnotationsEqual(mockPlain(), annotated.getAnnotation(Plain.class));
-    assertAnnotationsEqual(mockSingleValue("foo"), annotated.getAnnotation(SingleValue.class));
-    assertAnnotationsEqual(mockMultipleValues(9001, String.class, "foo", "bar"), annotated.getAnnotation(MultipleValues.class));
-    assertAnnotationsEqual(mockNested("bar"), annotated.getAnnotation(Nested.class));
+    assertEquals(4, annotated.unsafeGetAnnotations().length);
+    assertAnnotationsEqual(mockPlain(), annotated.unsafeGetAnnotation(Plain.class));
+    assertAnnotationsEqual(mockSingleValue("foo"), annotated.unsafeGetAnnotation(SingleValue.class));
+    assertAnnotationsEqual(mockMultipleValues(9001, String.class, "foo", "bar"), annotated.unsafeGetAnnotation(MultipleValues.class));
+    assertAnnotationsEqual(mockNested("bar"), annotated.unsafeGetAnnotation(Nested.class));
   }
 
   @Test
   public void testFieldAnnotations() throws Exception {
     final HasAnnotations annotated = getMetaClass(ClassWithAnnotations.class).getDeclaredField("foo");
 
-    assertEquals(1, annotated.getAnnotations().length);
-    assertAnnotationsEqual(mockPlain(), annotated.getAnnotation(Plain.class));
+    assertEquals(1, annotated.unsafeGetAnnotations().length);
+    assertAnnotationsEqual(mockPlain(), annotated.unsafeGetAnnotation(Plain.class));
   }
 
   @Test
@@ -595,8 +595,8 @@ public abstract class AbstractMetaClassTest {
     final HasAnnotations annotated = getMetaClass(ClassWithAnnotations.class).getDeclaredMethod("method", Object.class,
             Object.class);
 
-    assertEquals(1, annotated.getAnnotations().length);
-    assertAnnotationsEqual(mockPlain(), annotated.getAnnotation(Plain.class));
+    assertEquals(1, annotated.unsafeGetAnnotations().length);
+    assertAnnotationsEqual(mockPlain(), annotated.unsafeGetAnnotation(Plain.class));
   }
 
   @Test
@@ -608,11 +608,11 @@ public abstract class AbstractMetaClassTest {
                                    .getDeclaredMethod("method", Object.class, Object.class)
                                    .getParameters()[1];
 
-    assertEquals(1, param1.getAnnotations().length);
-    assertAnnotationsEqual(mockSingleValue("arg1"), param1.getAnnotation(SingleValue.class));
+    assertEquals(1, param1.unsafeGetAnnotations().length);
+    assertAnnotationsEqual(mockSingleValue("arg1"), param1.unsafeGetAnnotation(SingleValue.class));
 
-    assertEquals(1, param2.getAnnotations().length);
-    assertAnnotationsEqual(mockSingleValue("arg2"), param2.getAnnotation(SingleValue.class));
+    assertEquals(1, param2.unsafeGetAnnotations().length);
+    assertAnnotationsEqual(mockSingleValue("arg2"), param2.unsafeGetAnnotation(SingleValue.class));
   }
 
   @Test

@@ -19,15 +19,17 @@ package org.jboss.errai.enterprise.rebind;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.ws.rs.Path;
 
 import org.jboss.errai.codegen.Statement;
+import org.jboss.errai.codegen.meta.MetaAnnotation;
 import org.jboss.errai.codegen.meta.MetaMethod;
 
 /**
  * Represents a JAX-RS resource method.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class JaxrsResourceMethod {
@@ -40,21 +42,22 @@ public class JaxrsResourceMethod {
   private final JaxrsHeaders methodHeaders;
 
   public JaxrsResourceMethod(MetaMethod method, JaxrsHeaders headers, String rootResourcePath) {
-    Path subResourcePath = method.getAnnotation(Path.class);
+    Optional<MetaAnnotation> subResourcePath = method.getAnnotation(Path.class);
     String fullPath = rootResourcePath;
     if (fullPath.startsWith("/")) {
       fullPath = fullPath.substring(1);
     }
-    
+
     if (fullPath.endsWith("/")) {
-      fullPath = fullPath.substring(0, fullPath.length() - 1); 
+      fullPath = fullPath.substring(0, fullPath.length() - 1);
     }
 
-    if (subResourcePath != null) {
-      if (!subResourcePath.value().startsWith("/")) {
+    if (subResourcePath.isPresent()) {
+      final String value = subResourcePath.get().value();
+      if (!value.startsWith("/")) {
         fullPath += "/";
       }
-      fullPath += subResourcePath.value();
+      fullPath += value;
     }
 
     this.method = method;

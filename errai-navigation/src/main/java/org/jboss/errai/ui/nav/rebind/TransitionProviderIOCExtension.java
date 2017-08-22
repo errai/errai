@@ -16,25 +16,10 @@
 
 package org.jboss.errai.ui.nav.rebind;
 
-import static java.util.Collections.singleton;
-import static org.jboss.errai.codegen.Parameter.finalOf;
-import static org.jboss.errai.codegen.util.Stmt.castTo;
-import static org.jboss.errai.codegen.util.Stmt.declareFinalVariable;
-import static org.jboss.errai.codegen.util.Stmt.invokeStatic;
-import static org.jboss.errai.codegen.util.Stmt.loadVariable;
-import static org.jboss.errai.codegen.util.Stmt.newObject;
-import static org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraphBuilder.InjectableType.ExtensionProvided;
-import static org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType.DependentBean;
-
-import java.lang.annotation.Annotation;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.enterprise.context.Dependent;
-
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.Multimap;
+import com.google.gwt.core.ext.GeneratorContext;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.ContextualStatementBuilder;
@@ -68,10 +53,23 @@ import org.jboss.errai.ui.nav.client.local.UniquePageRole;
 import org.jboss.errai.ui.nav.client.local.api.TransitionTo;
 import org.jboss.errai.ui.nav.client.local.api.TransitionToRole;
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.ImmutableMultimap;
-import com.google.common.collect.Multimap;
-import com.google.gwt.core.ext.GeneratorContext;
+import javax.enterprise.context.Dependent;
+import java.lang.annotation.Annotation;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static java.util.Collections.singleton;
+import static org.jboss.errai.codegen.Parameter.finalOf;
+import static org.jboss.errai.codegen.util.Stmt.castTo;
+import static org.jboss.errai.codegen.util.Stmt.declareFinalVariable;
+import static org.jboss.errai.codegen.util.Stmt.invokeStatic;
+import static org.jboss.errai.codegen.util.Stmt.loadVariable;
+import static org.jboss.errai.codegen.util.Stmt.newObject;
+import static org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraphBuilder.InjectableType.ExtensionProvided;
+import static org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType.DependentBean;
 
 /**
  * Allows injecting {@link Anchor} elements that transition to a {@link Page} by direct type or by
@@ -132,9 +130,9 @@ public class TransitionProviderIOCExtension implements IOCExtensionConfigurator 
     final Collection<MetaClass> pages = ClassScanner.getTypesAnnotatedWith(Page.class, generatorContext);
     pages
       .stream()
-      .filter(type -> type.getAnnotation(Page.class).role().length > 0)
+      .filter(type -> type.unsafeGetAnnotation(Page.class).role().length > 0)
       .forEach(type -> {
-        final Page anno = type.getAnnotation(Page.class);
+        final Page anno = type.unsafeGetAnnotation(Page.class);
         Arrays
           .stream(anno.role())
           .filter(role -> UniquePageRole.class.isAssignableFrom(role))
@@ -162,10 +160,10 @@ public class TransitionProviderIOCExtension implements IOCExtensionConfigurator 
   }
 
   private Class<?> assertTargetType(final InjectionSite injectionSite, final InjectionContext injectionContext) {
-    if (injectionSite.isAnnotationPresent(TransitionTo.class)) {
+    if (injectionSite.unsafeIsAnnotationPresent(TransitionTo.class)) {
       return assertIsPage(injectionSite);
     }
-    else if (injectionSite.isAnnotationPresent(TransitionToRole.class)) {
+    else if (injectionSite.unsafeIsAnnotationPresent(TransitionToRole.class)) {
       return assertRoleExistsAndIsValid(injectionSite, injectionContext);
     }
     else {
@@ -176,7 +174,7 @@ public class TransitionProviderIOCExtension implements IOCExtensionConfigurator 
   }
 
   private Class<? extends UniquePageRole> assertRoleExistsAndIsValid(final InjectionSite injectionSite, final InjectionContext injectionContext) {
-    final Class<? extends UniquePageRole> candidateRole = injectionSite.getAnnotation(TransitionToRole.class).value();
+    final Class<? extends UniquePageRole> candidateRole = injectionSite.unsafeGetAnnotation(TransitionToRole.class).value();
     if (pagesByRole.get(candidateRole).size() == 1) {
       return candidateRole;
     }
@@ -194,7 +192,7 @@ public class TransitionProviderIOCExtension implements IOCExtensionConfigurator 
   }
 
   private Class<?> assertIsPage(final InjectionSite injectionSite) {
-    final Class<?> candidate = injectionSite.getAnnotation(TransitionTo.class).value();
+    final Class<?> candidate = injectionSite.unsafeGetAnnotation(TransitionTo.class).value();
     if (!candidate.isAnnotationPresent(Page.class)) {
       throw new IllegalArgumentException(String.format("They type %s is not a valid value for @%s. A @%s is required.",
               candidate.getName(), TransitionTo.class.getSimpleName(), Page.class.getSimpleName()));

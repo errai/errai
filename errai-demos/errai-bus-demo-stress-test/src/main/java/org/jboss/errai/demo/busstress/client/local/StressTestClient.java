@@ -25,6 +25,7 @@ import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.api.builder.MessageBuildSendable;
 import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.bus.client.api.messaging.MessageCallback;
+import org.jboss.errai.common.apt.ErraiApp;
 import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.demo.busstress.client.shared.RecursiveObject;
@@ -47,6 +48,7 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
+@ErraiApp
 @EntryPoint
 public class StressTestClient extends Composite {
 

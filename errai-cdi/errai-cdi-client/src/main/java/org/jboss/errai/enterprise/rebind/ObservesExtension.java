@@ -16,22 +16,7 @@
 
 package org.jboss.errai.enterprise.rebind;
 
-import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
-import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
-import static org.jboss.errai.codegen.util.Stmt.castTo;
-import static org.jboss.errai.codegen.util.Stmt.declareFinalVariable;
-import static org.jboss.errai.codegen.util.Stmt.invokeStatic;
-
-import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import javax.enterprise.event.Observes;
-import javax.enterprise.inject.Any;
-
+import jsinterop.annotations.JsType;
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.Subscription;
 import org.jboss.errai.codegen.Context;
@@ -57,7 +42,20 @@ import org.jboss.errai.ioc.rebind.ioc.extension.IOCDecoratorExtension;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.Decorable;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.FactoryController;
 
-import jsinterop.annotations.JsType;
+import javax.enterprise.event.Observes;
+import javax.enterprise.inject.Any;
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
+import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
+import static org.jboss.errai.codegen.util.Stmt.castTo;
+import static org.jboss.errai.codegen.util.Stmt.declareFinalVariable;
+import static org.jboss.errai.codegen.util.Stmt.invokeStatic;
 
 /**
  * Generates the boiler plate for @Observes annotations use in GWT clients.<br/>
@@ -131,7 +129,7 @@ public class ObservesExtension extends IOCDecoratorExtension<Observes> {
 
     final String subscribeMethod;
 
-    if (eventType.isAnnotationPresent(JsType.class)) {
+    if (eventType.unsafeIsAnnotationPresent(JsType.class)) {
       subscribeMethod = "subscribeJsType";
       callBackBlock = getJsTypeSubscriptionCallback(decorable, controller);
     }
@@ -154,7 +152,7 @@ public class ObservesExtension extends IOCDecoratorExtension<Observes> {
       initStatements.add(subscribeStatement);
     }
 
-    for (final Class<?> cls : EnvUtil.getAllPortableConcreteSubtypes(eventType.asClass())) {
+    for (final Class<?> cls : EnvUtil.getAllPortableConcreteSubtypes(eventType.unsafeAsClass())) {
       if (!EnvUtil.isLocalEventType(cls)) {
         final ContextualStatementBuilder routingSubStmt = Stmt.invokeStatic(ErraiBus.class, "get").invoke("subscribe",
                 CDI.getSubjectNameByType(cls.getName()), Stmt.loadStatic(CDI.class, "ROUTING_CALLBACK"));

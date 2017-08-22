@@ -64,7 +64,7 @@ public class DefaultJavaDefinitionMapper {
       final List<Boolean> hasMapsTos = new ArrayList<>();
       if (c.getParameters().length != 0) {
         for (int i = 0; i < c.getParameters().length; i++) {
-          final Annotation[] annotations = c.getParameters()[i].getAnnotations();
+          final Annotation[] annotations = c.getParameters()[i].unsafeGetAnnotations();
           if (annotations.length == 0) {
             hasMapsTos.add(false);
           }
@@ -119,7 +119,7 @@ public class DefaultJavaDefinitionMapper {
         if (method.isStatic()) {
           final List<Boolean> hasMapsTos = new ArrayList<>();
           for (int i = 0; i < method.getParameters().length; i++) {
-            final Annotation[] annotations = method.getParameters()[i].getAnnotations();
+            final Annotation[] annotations = method.getParameters()[i].unsafeGetAnnotations();
             if (annotations.length == 0) {
               hasMapsTos.add(false);
             }
@@ -176,8 +176,8 @@ public class DefaultJavaDefinitionMapper {
     }
 
     for (final MetaMethod method : toMap.getDeclaredMethods()) {
-      if (method.isAnnotationPresent(Key.class)) {
-        final String key = method.getAnnotation(Key.class).value();
+      if (method.unsafeIsAnnotationPresent(Key.class)) {
+        final String key = method.unsafeGetAnnotation(Key.class).value();
 
         if (method.getParameters().length == 0) {
           // assume this is a getter

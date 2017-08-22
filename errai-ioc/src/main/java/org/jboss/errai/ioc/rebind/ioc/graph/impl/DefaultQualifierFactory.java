@@ -120,7 +120,7 @@ public class DefaultQualifierFactory implements QualifierFactory {
 
   private SortedSet<AnnotationWrapper> getRawQualifiers(final HasAnnotations annotated) {
     final SortedSet<AnnotationWrapper> annos = new TreeSet<>();
-    for (final Annotation anno : annotated.getAnnotations()) {
+    for (final Annotation anno : annotated.unsafeGetAnnotations()) {
       if (anno.annotationType().isAnnotationPresent(javax.inject.Qualifier.class)) {
         if (anno.annotationType().equals(Named.class) && ((Named) anno).value().equals("")) {
           annos.add(createNamed(annotated));

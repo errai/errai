@@ -16,6 +16,20 @@
 
 package org.jboss.errai.config.util;
 
+import com.google.gwt.core.ext.GeneratorContext;
+import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaClassFactory;
+import org.jboss.errai.codegen.meta.MetaField;
+import org.jboss.errai.codegen.meta.MetaMethod;
+import org.jboss.errai.codegen.meta.MetaParameter;
+import org.jboss.errai.codegen.meta.impl.java.JavaReflectionField;
+import org.jboss.errai.codegen.meta.impl.java.JavaReflectionMethod;
+import org.jboss.errai.common.metadata.RebindUtils;
+import org.jboss.errai.common.metadata.ScannerSingleton;
+import org.jboss.errai.common.rebind.CacheStore;
+import org.jboss.errai.common.rebind.CacheUtil;
+import org.mvel2.util.NullType;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -30,21 +44,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Pattern;
-
-import org.jboss.errai.codegen.meta.MetaClass;
-import org.jboss.errai.codegen.meta.MetaClassFactory;
-import org.jboss.errai.codegen.meta.MetaField;
-import org.jboss.errai.codegen.meta.MetaMethod;
-import org.jboss.errai.codegen.meta.MetaParameter;
-import org.jboss.errai.codegen.meta.impl.java.JavaReflectionField;
-import org.jboss.errai.codegen.meta.impl.java.JavaReflectionMethod;
-import org.jboss.errai.common.metadata.RebindUtils;
-import org.jboss.errai.common.metadata.ScannerSingleton;
-import org.jboss.errai.common.rebind.CacheStore;
-import org.jboss.errai.common.rebind.CacheUtil;
-import org.mvel2.util.NullType;
-
-import com.google.gwt.core.ext.GeneratorContext;
 
 /**
  * @author Mike Brock
@@ -88,7 +87,7 @@ public final class ClassScanner {
       for (final MetaClass metaClass : getAllReloadableCachedClasses(genCtx)) {
         for (final MetaMethod method : metaClass.getDeclaredMethods()) {
           for (final MetaParameter parameter : method.getParameters()) {
-            if (parameter.isAnnotationPresent(annotation)) {
+            if (parameter.unsafeIsAnnotationPresent(annotation)) {
               result.add(parameter);
             }
           }
@@ -100,7 +99,7 @@ public final class ClassScanner {
           if (!isReloadable(clazz) && MetaClassFactory.isKnownType(clazz.getName())) {
             MetaMethod mm = new JavaReflectionMethod(m);
             for (final MetaParameter parameter : mm.getParameters()) {
-              if (parameter.isAnnotationPresent(annotation)) {
+              if (parameter.unsafeIsAnnotationPresent(annotation)) {
                 result.add(parameter);
               }
             }
@@ -113,7 +112,7 @@ public final class ClassScanner {
       for (final MetaClass metaClass : MetaClassFactory.getAllCachedClasses()) {
         for (final MetaMethod method : metaClass.getDeclaredMethods()) {
           for (final MetaParameter parameter : method.getParameters()) {
-            if (parameter.isAnnotationPresent(annotation)) {
+            if (parameter.unsafeIsAnnotationPresent(annotation)) {
               result.add(parameter);
             }
           }
@@ -137,7 +136,7 @@ public final class ClassScanner {
 
     if (genCtx != null) {
       for (final MetaClass metaClass : getAllReloadableCachedClasses(genCtx)) {
-        if (metaClass.isAnnotationPresent(annotation)) {
+        if (metaClass.unsafeIsAnnotationPresent(annotation)) {
           result.add(metaClass);
         }
       }
@@ -152,7 +151,7 @@ public final class ClassScanner {
     }
     else {
       for (final MetaClass metaClass : MetaClassFactory.getAllCachedClasses()) {
-        if (metaClass.isAnnotationPresent(annotation)) {
+        if (metaClass.unsafeIsAnnotationPresent(annotation)) {
           result.add(metaClass);
         }
       }
@@ -202,7 +201,7 @@ public final class ClassScanner {
     if (genCtx != null) {
       for (final MetaClass metaClass : getAllReloadableCachedClasses(genCtx)) {
         for (final MetaMethod metaMethod : metaClass.getDeclaredMethods()) {
-          if (metaMethod.isAnnotationPresent(annotation)) {
+          if (metaMethod.unsafeIsAnnotationPresent(annotation)) {
             result.add(metaMethod);
           }
         }
@@ -221,7 +220,7 @@ public final class ClassScanner {
     else {
       for (final MetaClass metaClass : MetaClassFactory.getAllCachedClasses()) {
         for (final MetaMethod metaMethod : metaClass.getDeclaredMethods()) {
-          if (metaMethod.isAnnotationPresent(annotation)) {
+          if (metaMethod.unsafeIsAnnotationPresent(annotation)) {
             result.add(metaMethod);
           }
         }
@@ -239,7 +238,7 @@ public final class ClassScanner {
     if (genCtx != null) {
       for (final MetaClass metaClass : getAllReloadableCachedClasses(genCtx)) {
         for (final MetaField metaField : metaClass.getDeclaredFields()) {
-          if (metaField.isAnnotationPresent(annotation)) {
+          if (metaField.unsafeIsAnnotationPresent(annotation)) {
             result.add(metaField);
           }
         }
@@ -257,7 +256,7 @@ public final class ClassScanner {
     else {
       for (final MetaClass metaClass : MetaClassFactory.getAllCachedClasses()) {
         for (final MetaField metaField : metaClass.getDeclaredFields()) {
-          if (metaField.isAnnotationPresent(annotation)) {
+          if (metaField.unsafeIsAnnotationPresent(annotation)) {
             result.add(metaField);
           }
         }
@@ -286,7 +285,7 @@ public final class ClassScanner {
       }
     }
 
-    final Class<?> cls = root.asClass();
+    final Class<?> cls = root.unsafeAsClass();
     if (cls != null && !cls.equals(NullType.class)) {
       for (final Class<?> c : ScannerSingleton.getOrCreateInstance().getSubTypesOf(cls)) {
         if (!c.isAnonymousClass() && !c.isSynthetic()) {

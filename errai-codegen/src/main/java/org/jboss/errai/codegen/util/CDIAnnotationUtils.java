@@ -16,23 +16,6 @@
  */
 package org.jboss.errai.codegen.util;
 
-import static java.lang.reflect.Modifier.isPublic;
-
-import java.lang.annotation.Annotation;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import javax.enterprise.util.Nonbinding;
-import javax.inject.Named;
-import javax.inject.Qualifier;
-
 import org.apache.commons.lang3.AnnotationUtils;
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.Validate;
@@ -45,6 +28,22 @@ import org.jboss.errai.common.client.util.AnnotationPropertyAccessor;
 import org.jboss.errai.common.client.util.AnnotationPropertyAccessorBuilder;
 import org.jboss.errai.common.metadata.MetaDataScanner;
 import org.jboss.errai.common.metadata.ScannerSingleton;
+
+import javax.enterprise.util.Nonbinding;
+import javax.inject.Named;
+import javax.inject.Qualifier;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static java.lang.reflect.Modifier.isPublic;
 
 /**
  * <p>
@@ -437,7 +436,7 @@ public class CDIAnnotationUtils {
 
     public static Collection<MetaMethod> getAnnotationAttributes(final MetaClass annoClass) {
       return filterAnnotationMethods(Arrays.stream(annoClass.getDeclaredMethods()),
-              method -> !method.isAnnotationPresent(Nonbinding.class) && method.isPublic()
+              method -> !method.unsafeIsAnnotationPresent(Nonbinding.class) && method.isPublic()
                       && !method.getName().equals("equals") && !method.getName().equals("hashCode"));
     }
 
@@ -449,7 +448,7 @@ public class CDIAnnotationUtils {
 
     public static Collection<MetaMethod> getNonBindingAttributes(final MetaClass annoClass) {
       return filterAnnotationMethods(Arrays.stream(annoClass.getDeclaredMethods()),
-              method -> method.isAnnotationPresent(Nonbinding.class) && method.isPublic()
+              method -> method.unsafeIsAnnotationPresent(Nonbinding.class) && method.isPublic()
                       && !method.getName().equals("equals") && !method.getName().equals("hashCode"));
     }
 

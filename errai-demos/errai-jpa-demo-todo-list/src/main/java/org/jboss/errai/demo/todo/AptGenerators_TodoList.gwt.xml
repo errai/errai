@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<module rename-to="TodoList">
+
+    <inherits name="org.jboss.errai.demo.todo.TodoList" />
+
+    <set-property name="errai.useAptGenerators" value="true" />
+
+</module>

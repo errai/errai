@@ -16,22 +16,6 @@
 
 package org.jboss.errai.samples.restdemo.client.local;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
-
-import org.jboss.errai.common.client.api.Caller;
-import org.jboss.errai.common.client.api.RemoteCallback;
-import org.jboss.errai.enterprise.client.jaxrs.MarshallingWrapper;
-import org.jboss.errai.enterprise.client.jaxrs.api.RestErrorCallback;
-import org.jboss.errai.ioc.client.api.EntryPoint;
-import org.jboss.errai.samples.restdemo.client.shared.Customer;
-import org.jboss.errai.samples.restdemo.client.shared.CustomerNotFoundException;
-import org.jboss.errai.samples.restdemo.client.shared.CustomerService;
-
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.http.client.Request;
@@ -44,12 +28,28 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import org.jboss.errai.common.apt.ErraiApp;
+import org.jboss.errai.common.client.api.Caller;
+import org.jboss.errai.common.client.api.RemoteCallback;
+import org.jboss.errai.enterprise.client.jaxrs.MarshallingWrapper;
+import org.jboss.errai.enterprise.client.jaxrs.api.RestErrorCallback;
+import org.jboss.errai.ioc.client.api.EntryPoint;
+import org.jboss.errai.samples.restdemo.client.shared.Customer;
+import org.jboss.errai.samples.restdemo.client.shared.CustomerNotFoundException;
+import org.jboss.errai.samples.restdemo.client.shared.CustomerService;
+
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Example code showing how to use Errai-JAXRS.
  *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
+@ErraiApp
 @EntryPoint
 public class App {
 

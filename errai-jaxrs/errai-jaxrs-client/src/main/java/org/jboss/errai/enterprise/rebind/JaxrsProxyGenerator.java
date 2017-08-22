@@ -16,29 +16,26 @@
 
 package org.jboss.errai.enterprise.rebind;
 
-import java.lang.annotation.Annotation;
-import java.util.Collection;
-import java.util.function.Function;
-
-import javax.ws.rs.Path;
-
+import com.google.common.collect.Multimap;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.Variable;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
-import org.jboss.errai.codegen.builder.ContextualStatementBuilder;
 import org.jboss.errai.codegen.builder.impl.ClassBuilder;
+import org.jboss.errai.codegen.meta.MetaAnnotation;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaMethod;
+import org.jboss.errai.codegen.util.AnnotationFilter;
 import org.jboss.errai.codegen.util.EmptyStatement;
+import org.jboss.errai.codegen.util.InterceptorProvider;
 import org.jboss.errai.codegen.util.ProxyUtil;
-import org.jboss.errai.codegen.util.ProxyUtil.InterceptorProvider;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.client.api.ErrorCallback;
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.enterprise.client.jaxrs.AbstractJaxrsProxy;
 
-import com.google.common.collect.Multimap;
+import javax.ws.rs.Path;
+import java.util.Collection;
 
 /**
  * Generates a JAX-RS remote proxy.
@@ -52,20 +49,20 @@ public class JaxrsProxyGenerator {
   private final String rootResourcePath;
   private final InterceptorProvider interceptorProvider;
   private final Multimap<MetaClass, MetaClass> exceptionMappers;
-  private final Function<Annotation[], Annotation[]> annoFilter;
+  private final AnnotationFilter annoFilter;
   private final boolean iocEnabled;
 
   public JaxrsProxyGenerator(
           final MetaClass remote,
           final InterceptorProvider interceptorProvider,
           final Multimap<MetaClass, MetaClass> exceptionMappers,
-          final Function<Annotation[], Annotation[]> annoFilter,
+          final AnnotationFilter annotationFilter,
           final boolean iocEnabled) {
     this.remote = remote;
     this.exceptionMappers = exceptionMappers;
-    this.annoFilter = annoFilter;
+    this.annoFilter = annotationFilter;
     this.iocEnabled = iocEnabled;
-    this.rootResourcePath = remote.getAnnotation(Path.class).value();
+    this.rootResourcePath = remote.getAnnotation(Path.class).map(MetaAnnotation::<String>value).orElse("");
     this.headers = JaxrsHeaders.fromClass(remote);
     this.interceptorProvider = interceptorProvider;
   }
@@ -127,11 +124,8 @@ public class JaxrsProxyGenerator {
 
     // If we found one, create it in the c'tor and assign it to the proxy's exceptionMapper field
     if (exceptionMapperClass != null) {
-      final ContextualStatementBuilder setMapper = Stmt.loadVariable("this").invoke("setExceptionMapper",
-          Stmt.newObject(exceptionMapperClass));
-      return setMapper;
-    }
-    else {
+      return Stmt.loadVariable("this").invoke("setExceptionMapper", Stmt.newObject(exceptionMapperClass));
+    } else {
       return EmptyStatement.INSTANCE;
     }
   }

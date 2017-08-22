@@ -73,7 +73,7 @@ public class ShadowServiceDecorator extends IOCDecoratorExtension<ShadowService>
     String serviceName = null;
 
     Statement subscribeShadowStatement = null;
-    final Class<?> javaClass = decorable.getType().asClass();
+    final Class<?> javaClass = decorable.getType().unsafeAsClass();
     for (final Class<?> intf : javaClass.getInterfaces()) {
       if (intf.isAnnotationPresent(Remote.class)) {
         serviceName = intf.getName() + ":RPC";

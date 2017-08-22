@@ -16,26 +16,7 @@
 
 package org.jboss.errai.databinding.rebind;
 
-import static java.util.stream.Collectors.toCollection;
-import static org.jboss.errai.codegen.util.Stmt.invokeStatic;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.annotation.Annotation;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Target;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.PropertyResourceBundle;
-import java.util.ResourceBundle;
-import java.util.Set;
-
+import com.google.gwt.core.ext.GeneratorContext;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.Variable;
 import org.jboss.errai.codegen.exception.GenerationException;
@@ -65,7 +46,25 @@ import org.jboss.errai.ui.shared.api.annotations.Model;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.gwt.core.ext.GeneratorContext;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.annotation.Annotation;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Target;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.PropertyResourceBundle;
+import java.util.ResourceBundle;
+import java.util.Set;
+
+import static java.util.stream.Collectors.toCollection;
+import static org.jboss.errai.codegen.util.Stmt.invokeStatic;
 
 /**
  * Utility to retrieve a data binder reference. The reference is either to an
@@ -214,7 +213,7 @@ public class DataBindingUtil {
 
     if (allowedTypes == null || allowedTypes.contains(ElementType.CONSTRUCTOR)) {
       for (final MetaConstructor ctor : enclosingType.getConstructors()) {
-        if (ctor.isAnnotationPresent(annoType)) {
+        if (ctor.unsafeIsAnnotationPresent(annoType)) {
           annotated.add(ctor);
         }
       }
@@ -223,14 +222,14 @@ public class DataBindingUtil {
     if (allowedTypes == null || allowedTypes.contains(ElementType.PARAMETER)) {
       for (final MetaMethod method : enclosingType.getMethods()) {
         for (final MetaParameter param : method.getParameters()) {
-          if (param.isAnnotationPresent(annoType)) {
+          if (param.unsafeIsAnnotationPresent(annoType)) {
             annotated.add(param);
           }
         }
       }
       for (final MetaConstructor ctor : enclosingType.getConstructors()) {
         for (final MetaParameter param : ctor.getParameters()) {
-          if (param.isAnnotationPresent(annoType)) {
+          if (param.unsafeIsAnnotationPresent(annoType)) {
             annotated.add(param);
           }
         }
@@ -278,7 +277,7 @@ public class DataBindingUtil {
     }
     else {
       for (final MetaField field : enclosingType.getFields()) {
-        if (field.isAnnotationPresent(AutoBound.class)) {
+        if (field.unsafeIsAnnotationPresent(AutoBound.class)) {
           assertTypeIsDataBinder(field.getType());
           dataModelType = (MetaClass) field.getType().getParameterizedType().getTypeParameters()[0];
           dataBinderRef = invokeStatic(decorable.getInjectionContext().getProcessingContext().getBootstrapClass(),
@@ -303,7 +302,7 @@ public class DataBindingUtil {
           throw new RuntimeException("Found " + dep.getDependencyType() + " dependency that was not of type " + ParamDependency.class.getName());
         }
         final ParamDependency paramDep = (ParamDependency) dep;
-        if (paramDep.getParameter().isAnnotationPresent(AutoBound.class)) {
+        if (paramDep.getParameter().unsafeIsAnnotationPresent(AutoBound.class)) {
           return DecorableType.PARAM.getAccessStatement(paramDep.getParameter(), decorable.getFactoryMetaClass());
         } else {
           break;
@@ -313,7 +312,7 @@ public class DataBindingUtil {
           throw new RuntimeException("Found " + dep.getDependencyType() + " dependency that was not of type " + FieldDependency.class.getName());
         }
         final FieldDependency fieldDep = (FieldDependency) dep;
-        if (fieldDep.getField().isAnnotationPresent(AutoBound.class)) {
+        if (fieldDep.getField().unsafeIsAnnotationPresent(AutoBound.class)) {
           if (!fieldDep.getField().isPublic()) {
             controller.exposedFieldStmt(fieldDep.getField());
           }
@@ -351,7 +350,7 @@ public class DataBindingUtil {
    *          the type to check
    */
   private static void assertTypeIsBindable(final MetaClass type) {
-    if (!type.isAnnotationPresent(Bindable.class) && !getConfiguredBindableTypes().contains(type)) {
+    if (!type.unsafeIsAnnotationPresent(Bindable.class) && !getConfiguredBindableTypes().contains(type)) {
       throw new GenerationException(type.getName() + " must be a @Bindable type when used as @Model");
     }
   }
@@ -365,7 +364,7 @@ public class DataBindingUtil {
    * @return true if the provide type is bindable, otherwise false.
    */
   public static boolean isBindableType(final MetaClass type) {
-    return (type.isAnnotationPresent(Bindable.class) || getConfiguredBindableTypes().contains(type));
+    return (type.unsafeIsAnnotationPresent(Bindable.class) || getConfiguredBindableTypes().contains(type));
   }
 
   /**

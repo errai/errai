@@ -72,7 +72,7 @@ public class DefaultDefinitionMarshaller implements ServerMarshaller<Object> {
   @SuppressWarnings("unchecked")
   //@Override
   private Class<Object> getTypeHandled() {
-    return (Class<Object>) definition.getMappingClass().asClass();
+    return (Class<Object>) definition.getMappingClass().unsafeAsClass();
   }
   
   @Override

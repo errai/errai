@@ -63,7 +63,7 @@ public class GWTMethod extends MetaMethod {
   }
 
   @Override
-  public synchronized Annotation[] getAnnotations() {
+  public synchronized Annotation[] unsafeGetAnnotations() {
     return annotations;
   }
 

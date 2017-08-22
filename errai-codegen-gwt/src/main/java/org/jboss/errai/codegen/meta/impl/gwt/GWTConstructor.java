@@ -79,7 +79,7 @@ public class GWTConstructor extends MetaConstructor {
   }
 
   @Override
-  public Annotation[] getAnnotations() {
+  public Annotation[] unsafeGetAnnotations() {
     return annotations;
   }
 

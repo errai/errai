@@ -18,22 +18,37 @@ package org.jboss.errai.codegen.meta;
 
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Optional;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public interface HasAnnotations {
-  public Annotation[] getAnnotations();
 
-  public default boolean isAnnotationPresent(final Class<? extends Annotation> annotation) {
-    return getAnnotation(annotation) != null;
+  /**
+   * @deprecated This method is not safe to use in APT environment.
+   */
+  @Deprecated
+  Annotation[] unsafeGetAnnotations();
+
+  /**
+   * @deprecated This method is not safe to use in APT environment.
+   */
+  @Deprecated
+  default boolean unsafeIsAnnotationPresent(final Class<? extends Annotation> annotation) {
+    return unsafeGetAnnotation(annotation) != null;
   }
 
+  /**
+   * @deprecated This method is not safe to use in APT environment.
+   */
+  @Deprecated
   @SuppressWarnings("unchecked")
-  public default <A extends Annotation> A getAnnotation(final Class<A> annotation) {
+  default <A extends Annotation> A unsafeGetAnnotation(final Class<A> annotation) {
     // Please no hate or else null.
-    return (A) Arrays.stream(getAnnotations())
+    return (A) Arrays.stream(unsafeGetAnnotations())
             .filter(a -> a.annotationType().equals(annotation))
             .findFirst()
             .orElse(null);

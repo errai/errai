@@ -16,13 +16,9 @@
 
 package org.jboss.errai.enterprise.rebind;
 
-import static org.jboss.errai.enterprise.client.cdi.EventQualifierSerializer.SERIALIZER_CLASS_NAME;
-import static org.jboss.errai.enterprise.client.cdi.EventQualifierSerializer.SERIALIZER_PACKAGE_NAME;
-
-import java.io.File;
-
-import javax.inject.Qualifier;
-
+import com.google.gwt.core.ext.GeneratorContext;
+import com.google.gwt.core.ext.TreeLogger;
+import com.google.gwt.core.ext.UnableToCompleteException;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.util.ClassChangeUtil;
 import org.jboss.errai.common.metadata.RebindUtils;
@@ -35,9 +31,11 @@ import org.jboss.errai.marshalling.rebind.util.OutputDirectoryUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.gwt.core.ext.GeneratorContext;
-import com.google.gwt.core.ext.TreeLogger;
-import com.google.gwt.core.ext.UnableToCompleteException;
+import javax.inject.Qualifier;
+import java.io.File;
+
+import static org.jboss.errai.enterprise.client.cdi.EventQualifierSerializer.SERIALIZER_CLASS_NAME;
+import static org.jboss.errai.enterprise.client.cdi.EventQualifierSerializer.SERIALIZER_PACKAGE_NAME;
 
 /**
  *
@@ -99,7 +97,7 @@ public class EventQualifierSerializerGenerator extends AbstractAsyncGenerator {
 
   @Override
   protected boolean isRelevantClass(final MetaClass clazz) {
-    return clazz.isAnnotation() && clazz.isAnnotationPresent(Qualifier.class);
+    return clazz.isAnnotation() && clazz.unsafeIsAnnotationPresent(Qualifier.class);
   }
 
 }

@@ -54,12 +54,6 @@
 
       <dependency>
         <groupId>org.jboss.errai</groupId>
-        <artifactId>errai-bus-processors</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.jboss.errai</groupId>
         <artifactId>errai-bus</artifactId>
         <type>test-jar</type>
         <version>${project.version}</version>
@@ -93,12 +87,6 @@
       <dependency>
         <groupId>org.jboss.errai</groupId>
         <artifactId>errai-codegen-gwt</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.jboss.errai</groupId>
-        <artifactId>errai-codegen-apt</artifactId>
         <version>${project.version}</version>
       </dependency>
 
@@ -173,12 +161,6 @@
       <dependency>
         <groupId>org.jboss.errai</groupId>
         <artifactId>errai-jaxrs-client</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.jboss.errai</groupId>
-        <artifactId>errai-jaxrs-processors</artifactId>
         <version>${project.version}</version>
       </dependency>
 
@@ -320,6 +302,31 @@
         <artifactId>errai-api</artifactId>
         <version>${project.version}</version>
       </dependency>
+
+      <dependency>
+        <groupId>org.jboss.errai</groupId>
+        <artifactId>errai-common-apt</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.jboss.errai</groupId>
+        <artifactId>errai-bus-export-apt</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.jboss.errai</groupId>
+        <artifactId>errai-jaxrs-export-apt</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.jboss.errai</groupId>
+        <artifactId>errai-generators-apt</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
     </dependencies>
   </dependencyManagement>
 

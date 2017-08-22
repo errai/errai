@@ -504,7 +504,7 @@ public class GWTClass extends AbstractMetaClass<JType> {
   }
 
   @Override
-  public Annotation[] getAnnotations() {
+  public Annotation[] unsafeGetAnnotations() {
     return annotations;
   }
 

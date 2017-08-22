@@ -231,7 +231,7 @@ public class MappingContextSingleton {
 
               if (def.getServerMarshallerClass().isAnnotationPresent(AlwaysQualify.class)) {
                 def.setMarshallerInstance(new QualifyingMarshallerWrapper<Object>(marshallerInstance,
-                    (Class<Object>) def.getMappingClass().asClass()));
+                    (Class<Object>) def.getMappingClass().unsafeAsClass()));
               }
               else {
                 def.setMarshallerInstance(marshallerInstance);
@@ -286,7 +286,7 @@ public class MappingContextSingleton {
           MappingDefinition newDef = new MappingDefinition(
               EncDecUtil.qualifyMarshaller(
                   new DefaultArrayMarshaller(type, marshaller),
-                  (Class<Object>) type.asClass()
+                  (Class<Object>) type.unsafeAsClass()
                   ), type, true);
 
           if (outerDef != null) {

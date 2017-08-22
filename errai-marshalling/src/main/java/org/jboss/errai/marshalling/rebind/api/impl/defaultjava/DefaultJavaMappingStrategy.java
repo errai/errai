@@ -37,7 +37,6 @@ import org.jboss.errai.codegen.builder.CaseBlockBuilder;
 import org.jboss.errai.codegen.builder.ClassDefinitionStaticOption;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.ContextualStatementBuilder;
-import org.jboss.errai.codegen.builder.ElseBlockBuilder;
 import org.jboss.errai.codegen.builder.impl.ClassBuilder;
 import org.jboss.errai.codegen.builder.impl.StatementBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
@@ -742,7 +741,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
 
       if (toType.equals(MetaClassFactory.get(Object.class))) {
         return Stmt.castTo(ObjectMarshaller.class, Stmt.loadVariable(varName))
-            .invoke("demarshall", targetType.asClass(), valueStatement, loadVariable("a1"));
+            .invoke("demarshall", targetType.unsafeAsClass(), valueStatement, loadVariable("a1"));
       }
 
       return Stmt.loadVariable(varName)
