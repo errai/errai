@@ -118,6 +118,8 @@ public class Navigation {
 
   protected HistoryToken currentPageToken;
 
+  protected ContentDelegation contentDelegation = new DefaultContentDelegation();
+
   private PageNavigationErrorHandler navigationErrorHandler;
 
   private HandlerRegistration historyHandlerRegistration;
@@ -375,11 +377,10 @@ public class Navigation {
     if (currentPage != null && (currentContent == null || currentWidget.asWidget() != currentContent)) {
       // This could happen if someone was manipulating the DOM behind our backs
       GWT.log("Current content widget vanished or changed. " + "Not delivering pageHiding event to " + currentPage
-              + ".");
+            + ".");
     }
 
-    // Ensure clean contentPanel regardless of currentPage being null
-    navigatingContainer.clear();
+    contentDelegation.hideContent(currentPage, navigatingContainer, currentWidget);
 
     if (currentPage != null && currentComponent != null) {
       currentPage.pageHidden(currentComponent);
@@ -388,7 +389,8 @@ public class Navigation {
   }
 
   /**
-   * Call navigation and page related lifecycle methods. If the {@link Access} is fired successfully, load the new page.
+   * Call navigation and page related lifecycle methods.
+   * If the {@link Access} is fired successfully, load the new page.
    */
   private <C> void maybeShowPage(final Request<C> request, final boolean fireEvent) {
     request.pageNode.produceContent(component -> {
@@ -466,7 +468,7 @@ public class Navigation {
                     setCurrentPage(request.pageNode);
                     currentWidget = componentWidget;
                     currentComponent = component;
-                    navigatingContainer.setWidget(componentWidget);
+                    contentDelegation.showContent(currentPage, navigatingContainer, currentWidget);
                     request.pageNode.pageShown(component, request.state);
                   } finally {
                     locked = false;
@@ -628,4 +630,8 @@ public class Navigation {
   private native static IsWidget getCompositeWidget(Composite instance) /*-{
       return instance.@com.google.gwt.user.client.ui.Composite::widget;
   }-*/;
+
+  public void setContentDelegation(ContentDelegation contentDelegation) {
+    this.contentDelegation = contentDelegation;
+  }
 }
