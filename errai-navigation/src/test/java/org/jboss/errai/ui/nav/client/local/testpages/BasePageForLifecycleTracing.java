@@ -80,7 +80,7 @@ public class BasePageForLifecycleTracing extends HorizontalPanel {
   @PageShowing
   protected void beforeShow() {
     lifecycleTracer.add(new Record(PageShowing.class));
-     doRedirect();
+    doRedirect();
   }
 
   @PageShown
