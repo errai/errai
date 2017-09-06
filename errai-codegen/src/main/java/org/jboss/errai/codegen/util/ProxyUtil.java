@@ -228,8 +228,8 @@ public abstract class ProxyUtil {
    * @param interceptor
    */
   private static boolean isManagedBean(final MetaClass interceptor) {
-    return interceptor.getAnnotation(ApplicationScoped.class) != null
-            || interceptor.getAnnotation(Singleton.class) != null || interceptor.getAnnotation(Dependent.class) != null;
+    return interceptor.getAnnotation(ApplicationScoped.class).isPresent()
+            || interceptor.getAnnotation(Singleton.class).isPresent() || interceptor.getAnnotation(Dependent.class).isPresent();
   }
 
   public static boolean shouldProxyMethod(final MetaMethod method) {
