@@ -16,10 +16,10 @@
 
 package org.jboss.errai.common.apt.generator;
 
+import org.jboss.errai.codegen.apt.test.ErraiAptTest;
 import org.jboss.errai.common.apt.AnnotatedElementsFinder;
 import org.jboss.errai.common.apt.TestAnnotatedElementsFinder;
 import org.jboss.errai.common.apt.exportfile.ExportFile;
-import org.jboss.errai.codegen.apt.test.ErraiAptTest;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -94,12 +94,35 @@ public class AbstractErraiModuleExportFileGeneratorTest extends ErraiAptTest {
 
   @Test
   public void testAnnotatedClassesAndInterfacesForAnnotatedClass() {
-    final TypeElement testExportedType = getTypeElement(TestExportableTypeWithFieldAnnotations.class);
     final TypeElement testAnnotation = getTypeElement(TestAnnotation.class);
+    final TypeElement testExportedType = getTypeElement(TestExportableTypeWithFieldAnnotations.class);
 
     final Set<? extends Element> elements = new TestGenerator().annotatedClassesAndInterfaces(
             new TestAnnotatedElementsFinder(testExportedType), testAnnotation);
 
     Assert.assertEquals(singleton(testExportedType), elements);
+  }
+
+  @Test
+  public void testNewExportFileWithOneExportedType() {
+    final TypeElement testAnnotation = getTypeElement(TestAnnotation.class);
+    final TypeElement testExportedType = getTypeElement(TestExportableTypeWithFieldAnnotations.class);
+    final TestAnnotatedElementsFinder annotatedElementsFinder = new TestAnnotatedElementsFinder(testExportedType);
+
+    final TestGenerator testGenerator = new TestGenerator();
+    final ExportFile exportFile = testGenerator.newExportFile(annotatedElementsFinder, testAnnotation);
+
+    Assert.assertEquals(1, exportFile.exportedTypes.size());
+    Assert.assertTrue(exportFile.exportedTypes.contains(testExportedType));
+  }
+
+  @Test
+  public void testNewExportFileWithNoExportedTypes() {
+    final TypeElement testAnnotation = getTypeElement(TestAnnotation.class);
+
+    final TestGenerator testGenerator = new TestGenerator();
+    final ExportFile exportFile = testGenerator.newExportFile(new TestAnnotatedElementsFinder(), testAnnotation);
+
+    Assert.assertFalse(exportFile.hasExportedTypes());
   }
 }

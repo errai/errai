@@ -16,15 +16,10 @@
 
 package org.jboss.errai.common.apt.generator;
 
-import org.apache.commons.lang3.RandomStringUtils;
-import org.jboss.errai.codegen.builder.ClassStructureBuilder;
-import org.jboss.errai.codegen.builder.impl.ClassBuilder;
-import org.jboss.errai.codegen.meta.impl.apt.APTClass;
 import org.jboss.errai.codegen.meta.impl.apt.APTClassUtil;
 import org.jboss.errai.common.apt.AnnotatedElementsFinder;
 import org.jboss.errai.common.apt.AptAnnotatedElementsFinder;
 import org.jboss.errai.common.apt.exportfile.ExportFile;
-import org.jboss.errai.common.apt.exportfile.ExportFileName;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.RoundEnvironment;
@@ -36,7 +31,6 @@ import java.io.Writer;
 import java.util.Set;
 
 import static java.util.stream.Collectors.toSet;
-import static org.jboss.errai.common.apt.ErraiAptPackages.exportFilesPackagePath;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
@@ -67,13 +61,17 @@ public abstract class AbstractErraiModuleExportFileGenerator extends AbstractPro
           final AnnotatedElementsFinder annotatedElementsFinder) {
 
     return annotations.stream()
-            .map(annotation -> new ExportFile(getModuleName(), annotation,
-                    annotatedClassesAndInterfaces(annotatedElementsFinder, annotation)))
+            .map(annotation -> newExportFile(annotatedElementsFinder, annotation))
             .filter(ExportFile::hasExportedTypes)
             .collect(toSet());
   }
 
-  Set<? extends Element> annotatedClassesAndInterfaces(final AnnotatedElementsFinder annotatedElementsFinder,
+  ExportFile newExportFile(final AnnotatedElementsFinder annotatedElementsFinder, final TypeElement annotation) {
+    final Set<Element> exportedTypes = annotatedClassesAndInterfaces(annotatedElementsFinder, annotation);
+    return new ExportFile(getModuleName(), annotation, exportedTypes);
+  }
+
+  Set<Element> annotatedClassesAndInterfaces(final AnnotatedElementsFinder annotatedElementsFinder,
           final TypeElement annotationTypeElement) {
 
     return annotatedElementsFinder.getElementsAnnotatedWith(annotationTypeElement)
@@ -83,27 +81,15 @@ public abstract class AbstractErraiModuleExportFileGenerator extends AbstractPro
   }
 
   private void generateSourceAndSave(final ExportFile exportFile) {
-
-    final Set<APTClass> exportedTypes = exportFile.exportedTypes.stream()
-            .map(s -> new APTClass(s.asType()))
-            .collect(toSet());
-
-    final String className = ExportFileName.encodeAnnotationNameAsExportFileName(exportFile);
-    final String fullClassName = exportFilesPackagePath() + "." + className;
-    final ClassStructureBuilder<?> classBuilder = ClassBuilder.define(fullClassName).publicScope().body();
-
-    exportedTypes.forEach(
-            exportedType -> classBuilder.publicField(RandomStringUtils.randomAlphabetic(6), exportedType).finish());
-
     try {
-      final String generatedSource = classBuilder.toJavaString();
       final Element[] originatingElements = exportFile.exportedTypes.toArray(new Element[0]);
-      final JavaFileObject sourceFile = processingEnv.getFiler().createSourceFile(fullClassName, originatingElements);
+      final JavaFileObject sourceFile = processingEnv.getFiler()
+              .createSourceFile(exportFile.getFullClassName(), originatingElements);
 
       try (Writer writer = sourceFile.openWriter()) {
-        writer.write(generatedSource);
+        writer.write(exportFile.generateSource());
       }
-      System.out.println("Successfully generated export file [" + className + "]");
+      System.out.println("Successfully generated export file [" + exportFile.simpleClassName + "]");
     } catch (final IOException e) {
       throw new RuntimeException("Error writing generated export file", e);
     }
