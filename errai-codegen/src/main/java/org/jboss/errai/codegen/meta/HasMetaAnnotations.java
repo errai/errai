@@ -29,5 +29,9 @@ public interface HasMetaAnnotations {
 
   boolean isAnnotationPresent(final MetaClass metaClass);
 
+  default boolean isAnnotationPresent(final Class<? extends Annotation> annotationClass) {
+    return getAnnotation(annotationClass).isPresent();
+  }
+
   Collection<MetaAnnotation> getAnnotations();
 }

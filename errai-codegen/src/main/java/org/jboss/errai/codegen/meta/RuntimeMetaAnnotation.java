@@ -44,6 +44,12 @@ public class RuntimeMetaAnnotation extends MetaAnnotation {
   private Object convertValue(final Object value) {
     if (value instanceof Class[]) {
       return Arrays.stream((Class[]) value).map(MetaClassFactory::get).toArray(MetaClass[]::new);
+    } else if (value instanceof Annotation[]) {
+      return Arrays.stream((Annotation[]) value).map(RuntimeMetaAnnotation::new).toArray(MetaAnnotation[]::new);
+    } else if (value instanceof Class) {
+      return MetaClassFactory.get((Class) value);
+    } else if (value instanceof Annotation) {
+      return new RuntimeMetaAnnotation((Annotation) value);
     } else {
       return value;
     }
