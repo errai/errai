@@ -16,7 +16,6 @@
 
 package org.jboss.errai.codegen.meta.impl.apt;
 
-import org.jboss.errai.codegen.meta.HasMetaAnnotations;
 import org.jboss.errai.codegen.meta.HasAnnotations;
 import org.jboss.errai.codegen.meta.MetaAnnotation;
 import org.jboss.errai.codegen.meta.MetaClass;
@@ -32,7 +31,7 @@ import java.util.Optional;
 /**
  * @author Max Barkley <mbarkley@redhat.com>
  */
-interface APTMember extends MetaClassMember, HasAnnotations, HasMetaAnnotations {
+interface APTMember extends MetaClassMember, HasAnnotations {
   Element getMember();
 
   @Override
@@ -112,7 +111,7 @@ interface APTMember extends MetaClassMember, HasAnnotations, HasMetaAnnotations 
   }
 
   @Override
-  default boolean isAnnotationPresent(final MetaClass metaClass) {
+  default Boolean isAnnotationPresent(final MetaClass metaClass) {
     return APTClassUtil.isAnnotationPresent(getMember(), metaClass);
   }
 

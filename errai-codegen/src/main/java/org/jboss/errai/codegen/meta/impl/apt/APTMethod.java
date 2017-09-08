@@ -111,7 +111,7 @@ public class APTMethod extends MetaMethod implements APTMember {
   }
 
   @Override
-  public boolean isAnnotationPresent(final MetaClass metaClass) {
+  public Boolean isAnnotationPresent(final MetaClass metaClass) {
     return APTClassUtil.isAnnotationPresent(method, metaClass);
   }
 

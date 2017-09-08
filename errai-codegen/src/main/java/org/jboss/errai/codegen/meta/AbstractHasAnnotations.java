@@ -33,7 +33,7 @@ import static java.util.stream.Collectors.toList;
  * 
  * @author Christian Sadilek<csadilek@redhat.com>
  */
-public abstract class AbstractHasAnnotations implements HasAnnotations, HasMetaAnnotations {
+public abstract class AbstractHasAnnotations implements HasAnnotations {
 
   private Set<String> annotationPresentCache = null;
 
@@ -57,24 +57,5 @@ public abstract class AbstractHasAnnotations implements HasAnnotations, HasMetaA
     }
 
     return annotationPresentCache.contains(annotation.getName());
-  }
-
-  @Override
-  public Optional<MetaAnnotation> getAnnotation(final Class<? extends Annotation> annotationClass) {
-    return Optional.ofNullable(unsafeGetAnnotation(annotationClass)).map(RuntimeMetaAnnotation::new);
-  }
-
-  @Override
-  public boolean isAnnotationPresent(final MetaClass metaClass) {
-    return unsafeIsAnnotationPresent((Class<? extends Annotation>) metaClass.unsafeAsClass());
-  }
-
-  public boolean isAnnotationPresent(final Class<? extends Annotation> annotationClass) {
-    return getAnnotation(annotationClass).isPresent();
-  }
-
-  @Override
-  public Collection<MetaAnnotation> getAnnotations() {
-    return Arrays.stream(unsafeGetAnnotations()).map(RuntimeMetaAnnotation::new).collect(toList());
   }
 }
