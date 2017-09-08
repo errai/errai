@@ -24,6 +24,7 @@ import java.util.Set;
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
+@FunctionalInterface
 public interface AnnotatedElementsFinder {
   Set<? extends Element> getElementsAnnotatedWith(final TypeElement typeElement);
 }

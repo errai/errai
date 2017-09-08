@@ -25,6 +25,7 @@ import java.util.function.Function;
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
+@FunctionalInterface
 public interface AnnotationFilter extends Function<Collection<MetaAnnotation>, Collection<MetaAnnotation>> {
   default Collection<MetaAnnotation> filter(final Collection<MetaAnnotation> annotations) {
     return this.apply(annotations);
