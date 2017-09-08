@@ -72,6 +72,7 @@ public final class APTClassUtil {
     case LONG:
     case SHORT:
     case VOID:
+    case ARRAY:
       return new APTClass(mirror);
     case DECLARED:
       final DeclaredType dType = (DeclaredType) mirror;

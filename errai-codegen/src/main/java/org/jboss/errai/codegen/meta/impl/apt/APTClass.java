@@ -460,6 +460,7 @@ public class APTClass extends AbstractMetaClass<TypeMirror> {
     case LONG:
     case SHORT:
     case ARRAY:
+    case INTERSECTION:
       return null;
     case TYPEVAR:
       return new APTClass(((Type.TypeVar) getEnclosedMetaObject()).getUpperBound());
