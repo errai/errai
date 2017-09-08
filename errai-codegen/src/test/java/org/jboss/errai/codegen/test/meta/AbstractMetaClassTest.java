@@ -19,7 +19,7 @@ package org.jboss.errai.codegen.test.meta;
 import com.google.common.collect.Lists;
 import com.google.gwt.core.ext.typeinfo.NotFoundException;
 import org.apache.commons.lang3.AnnotationUtils;
-import org.jboss.errai.codegen.meta.HasMetaAnnotations;
+import org.jboss.errai.codegen.meta.HasAnnotations;
 import org.jboss.errai.codegen.meta.MetaAnnotation;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
@@ -569,7 +569,7 @@ public abstract class AbstractMetaClassTest {
 
   @Test
   public void testClassAnnotations() throws Exception {
-    final HasMetaAnnotations annotated = getMetaClass(ClassWithAnnotations.class);
+    final HasAnnotations annotated = getMetaClass(ClassWithAnnotations.class);
 
     assertEquals(4, annotated.getAnnotations().size());
     assertTrue(annotated.isAnnotationPresent(Plain.class));
@@ -586,7 +586,7 @@ public abstract class AbstractMetaClassTest {
 
   @Test
   public void testFieldAnnotations() throws Exception {
-    final HasMetaAnnotations annotated = getMetaClass(ClassWithAnnotations.class).getDeclaredField("foo");
+    final HasAnnotations annotated = getMetaClass(ClassWithAnnotations.class).getDeclaredField("foo");
 
     assertEquals(1, annotated.getAnnotations().size());
     assertTrue(annotated.isAnnotationPresent(Plain.class));
@@ -594,7 +594,7 @@ public abstract class AbstractMetaClassTest {
 
   @Test
   public void testMethodAnnotations() throws Exception {
-    final HasMetaAnnotations annotated = getMetaClass(ClassWithAnnotations.class).getDeclaredMethod("method",
+    final HasAnnotations annotated = getMetaClass(ClassWithAnnotations.class).getDeclaredMethod("method",
             Object.class, Object.class);
 
     assertEquals(1, annotated.getAnnotations().size());
@@ -603,9 +603,9 @@ public abstract class AbstractMetaClassTest {
 
   @Test
   public void testParameterAnnotations() throws Exception {
-    final HasMetaAnnotations param1 = getMetaClass(ClassWithAnnotations.class).getDeclaredMethod("method", Object.class,
+    final HasAnnotations param1 = getMetaClass(ClassWithAnnotations.class).getDeclaredMethod("method", Object.class,
             Object.class).getParameters()[0];
-    final HasMetaAnnotations param2 = getMetaClass(ClassWithAnnotations.class).getDeclaredMethod("method", Object.class,
+    final HasAnnotations param2 = getMetaClass(ClassWithAnnotations.class).getDeclaredMethod("method", Object.class,
             Object.class).getParameters()[1];
 
     assertEquals(1, param1.getAnnotations().size());

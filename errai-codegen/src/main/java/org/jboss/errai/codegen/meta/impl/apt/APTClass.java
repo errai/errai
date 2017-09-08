@@ -779,7 +779,7 @@ public class APTClass extends AbstractMetaClass<TypeMirror> {
   }
 
   @Override
-  public boolean isAnnotationPresent(final MetaClass metaClass) {
+  public Boolean isAnnotationPresent(final MetaClass metaClass) {
     return APTClassUtil.isAnnotationPresent(types.asElement(getEnclosedMetaObject()), metaClass);
   }
 

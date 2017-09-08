@@ -16,7 +16,6 @@
 
 package org.jboss.errai.codegen.meta.impl.apt;
 
-import com.sun.tools.javac.code.Type;
 import org.jboss.errai.codegen.meta.MetaAnnotation;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassMember;
@@ -70,7 +69,7 @@ public class APTParameter extends MetaParameter {
   }
 
   @Override
-  public boolean isAnnotationPresent(final MetaClass metaClass) {
+  public Boolean isAnnotationPresent(final MetaClass metaClass) {
     return APTClassUtil.isAnnotationPresent(parameter, metaClass);
   }
 

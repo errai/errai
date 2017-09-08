@@ -21,6 +21,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Optional;
 
+import static java.util.stream.Collectors.toList;
+
 /**
  * @author Mike Brock <cbrock@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
@@ -52,5 +54,22 @@ public interface HasAnnotations {
             .filter(a -> a.annotationType().equals(annotation))
             .findFirst()
             .orElse(null);
+  }
+
+  default Optional<MetaAnnotation> getAnnotation(final Class<? extends Annotation> annotationClass) {
+    return Optional.ofNullable(unsafeGetAnnotation(annotationClass)).map(RuntimeMetaAnnotation::new);
+  }
+
+  @SuppressWarnings("unchecked")
+  default Boolean isAnnotationPresent(final MetaClass metaClass) {
+    return unsafeIsAnnotationPresent((Class<? extends Annotation>) metaClass.unsafeAsClass());
+  }
+
+  default Collection<MetaAnnotation> getAnnotations() {
+    return Arrays.stream(unsafeGetAnnotations()).map(RuntimeMetaAnnotation::new).collect(toList());
+  }
+
+  default Boolean isAnnotationPresent(final Class<? extends Annotation> annotationClass) {
+    return getAnnotation(annotationClass).isPresent();
   }
 }

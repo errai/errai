@@ -100,7 +100,7 @@ public class APTConstructor extends MetaConstructor implements APTMember {
   }
 
   @Override
-  public boolean isAnnotationPresent(final MetaClass metaClass) {
+  public Boolean isAnnotationPresent(final MetaClass metaClass) {
     return APTClassUtil.isAnnotationPresent(ctor, metaClass);
   }
 
