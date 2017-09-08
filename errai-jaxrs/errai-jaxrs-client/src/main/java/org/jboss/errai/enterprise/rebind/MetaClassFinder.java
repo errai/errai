@@ -26,6 +26,7 @@ import java.util.function.BiFunction;
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
+@FunctionalInterface
 public interface MetaClassFinder
         extends BiFunction<GeneratorContext, Class<? extends Annotation>, Collection<MetaClass>> {
 
