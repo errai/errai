@@ -369,8 +369,10 @@ public class Navigation {
 
   /**
    * Hide the page currently displayed and call the associated lifecycle methods.
+   *
+   * @param requestPage the next requested page, this can be null if there is none.
    */
-  private void hideCurrentPage() {
+  private void hideCurrentPage(PageNode<?> requestPage, NavigationControl control) {
     final IsWidget currentContent = navigatingContainer.getWidget();
 
     // Note: Optimized out in production mode
@@ -380,11 +382,20 @@ public class Navigation {
             + ".");
     }
 
-    contentDelegation.hideContent(currentPage, navigatingContainer, currentWidget);
+    NavigationControl hideControl = new NavigationControl(this, () -> {
+      if (currentPage != null && currentComponent != null) {
+        currentPage.pageHidden(currentComponent);
+        currentPage.destroy(currentComponent);
+      }
 
-    if (currentPage != null && currentComponent != null) {
-      currentPage.pageHidden(currentComponent);
-      currentPage.destroy(currentComponent);
+      control.proceed();
+    });
+
+    if(currentComponent != null) {
+      contentDelegation.hideContent(currentComponent, navigatingContainer, currentWidget, requestPage, hideControl);
+    } else {
+      navigatingContainer.clear();
+      hideControl.proceed();
     }
   }
 
@@ -465,11 +476,13 @@ public class Navigation {
                     // fields actually changed.
                     stateChangeEvent.fireAsync(component);
 
+                    PageNode<?> previousPage = currentPage;
                     setCurrentPage(request.pageNode);
                     currentWidget = componentWidget;
                     currentComponent = component;
-                    contentDelegation.showContent(currentPage, navigatingContainer, currentWidget);
-                    request.pageNode.pageShown(component, request.state);
+                    contentDelegation.showContent(component, navigatingContainer, currentWidget, previousPage, new NavigationControl(Navigation.this, () -> {
+                      request.pageNode.pageShown(component, request.state);
+                    }));
                   } finally {
                     locked = false;
                   }
@@ -485,8 +498,9 @@ public class Navigation {
 
               try {
                 locked = true;
-                hideCurrentPage();
-                request.pageNode.pageShowing(component, request.state, showControl);
+                hideCurrentPage(request.pageNode, new NavigationControl(Navigation.this, () -> {
+                  request.pageNode.pageShowing(component, request.state, showControl);
+                }));
               } catch (Exception ex) {
                 locked = false;
                 throw ex;
@@ -500,8 +514,9 @@ public class Navigation {
     }, new Runnable() {
       @Override
       public void run() {
-        hideCurrentPage();
-        setCurrentPage(null);
+        hideCurrentPage(null, new NavigationControl(Navigation.this, () -> {
+          setCurrentPage(null);
+        }));
       }
     });
 
