@@ -37,8 +37,8 @@ public class NavigationControl {
   private boolean hasRun;
 
   public NavigationControl(final Navigation navigation, final Runnable runnable) {
-    this.runnable = runnable;
     this.navigation = navigation;
+    this.runnable = runnable;
   }
 
   public NavigationControl(final Navigation navigation, final Runnable runnable, Runnable interrupt) {
