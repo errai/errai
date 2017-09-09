@@ -19,7 +19,7 @@ package org.jboss.errai.enterprise.apt.export;
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
-public interface SupportedAnnotationTypes {
+interface SupportedAnnotationTypes {
   String PATH = "javax.ws.rs.Path";
   String FEATURE_INTERCEPTOR = "org.jboss.errai.common.client.api.interceptor.FeatureInterceptor";
   String INTERCEPTED_CALL = "org.jboss.errai.common.client.api.interceptor.InterceptedCall";

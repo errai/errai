@@ -36,7 +36,7 @@ import static org.jboss.errai.enterprise.apt.export.SupportedAnnotationTypes.PRO
 public class ErraiJaxrsExportFileGenerator extends AbstractErraiModuleExportFileGenerator {
 
   @Override
-  protected String getModuleName() {
+  protected String getCamelCaseModuleName() {
     return "jaxrs";
   }
 }

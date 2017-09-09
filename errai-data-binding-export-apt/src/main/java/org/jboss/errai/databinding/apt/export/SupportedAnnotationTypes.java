@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 Red Hat, Inc. and/or its affiliates.
+ * Copyright (C) 2017 Red Hat, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,21 +14,12 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.databinding.client;
-
-import org.jboss.errai.databinding.client.api.Bindable;
+package org.jboss.errai.databinding.apt.export;
 
 /**
- * This interface is used internally during compile time to produce the required proxies for {@link Bindable} types (see
- * the GWT module descriptor).
- * 
- * @author Christian Sadilek <csadilek@redhat.com>
+ * @author Tiago Bento <tfernand@redhat.com>
  */
-public interface BindableProxyLoader {
-
-  /**
-   * Registers the generated proxies for bindable types.
-   */
-  public void loadBindableProxies();
-
+interface SupportedAnnotationTypes {
+  String DEFAULT_CONVERTER = "org.jboss.errai.databinding.client.api.DefaultConverter";
+  String BINDABLE = "org.jboss.errai.databinding.client.api.Bindable";
 }

@@ -46,6 +46,7 @@ import org.jboss.errai.codegen.builder.ContextualStatementBuilder;
 import org.jboss.errai.codegen.builder.ElseBlockBuilder;
 import org.jboss.errai.codegen.builder.impl.ClassBuilder;
 import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
+import org.jboss.errai.codegen.meta.MetaAnnotation;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaMethod;
@@ -70,6 +71,8 @@ import org.jboss.errai.databinding.client.api.handler.property.PropertyChangeEve
 import org.jboss.errai.databinding.client.api.handler.property.PropertyChangeHandler;
 
 import com.google.gwt.core.ext.TreeLogger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Generates a proxy for a {@link Bindable} type. A bindable proxy subclasses the bindable type and
@@ -79,17 +82,19 @@ import com.google.gwt.core.ext.TreeLogger;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class BindableProxyGenerator {
+
+  private final Logger log = LoggerFactory.getLogger(BindableProxyLoaderGenerator.class);
+
+
   private final MetaClass bindable;
   private final String agentField;
   private final String targetField;
-  private final TreeLogger logger;
   private final Set<MetaMethod> proxiedAccessorMethods;
 
-  public BindableProxyGenerator(final MetaClass bindable, final TreeLogger logger) {
+  public BindableProxyGenerator(final MetaClass bindable) {
     this.bindable = bindable;
     this.agentField = inferSafeFieldName("agent");
     this.targetField = inferSafeFieldName("target");
-    this.logger = logger;
     this.proxiedAccessorMethods = new HashSet<>();
   }
 
@@ -159,8 +164,13 @@ public class BindableProxyGenerator {
     for (final MetaMethod method : handlerMethods) {
       if (method.getParameters().length == 1
               && method.getParameters()[0].getType().getFullyQualifiedName().equals(PropertyChangeEvent.class.getName())) {
-        final String property = method.unsafeGetAnnotation(org.jboss.errai.ui.shared.api.annotations.PropertyChangeHandler.class).value();
-        if (!property.isEmpty()) validateProperty(bindable, property);
+        final String property = method.getAnnotation(org.jboss.errai.ui.shared.api.annotations.PropertyChangeHandler.class).map(
+                MetaAnnotation::<String>value).orElse("");
+
+        if (!property.isEmpty()) {
+          validateProperty(bindable, property);
+        }
+
         final Object handler = createHandlerForMethod(method);
         final ContextualStatementBuilder subStmt = (property.isEmpty() ?
                 loadVariable("agent").invoke("addPropertyChangeHandler", handler):
@@ -466,7 +476,7 @@ public class BindableProxyGenerator {
                 colBlock.append(Stmt.declareFinalVariable(colVarName, type.getErased(), Stmt.newObject(type.getErased())));
               }
               else {
-                logger.log(TreeLogger.WARN, "Bean validation on collection " + property + " in class " + bindable +
+                log.warn("Bean validation on collection " + property + " in class " + bindable +
                         " won't work. Change to either List or Set or use a concrete type instead.");
                 continue;
               }
@@ -571,7 +581,7 @@ public class BindableProxyGenerator {
       }
       else {
         // TODO add full support for generics in errai codegen
-        logger.log(TreeLogger.WARN, "Ignoring method: " + method + " in class " + bindable + ". Methods using " +
+        log.warn("Ignoring method: " + method + " in class " + bindable + ". Methods using " +
             "multiple type parameters or type parameters with multiple bounds are currently not supported in " +
             "@Bindable types! Invoking this method on a bound model will have unpredictable results.");
         return null;
@@ -584,7 +594,7 @@ public class BindableProxyGenerator {
       return (MetaClass) clazz;
     }
 
-    logger.log(TreeLogger.WARN, "Ignoring method: " + method + " in class " + bindable + ". Method cannot be proxied!");
+    log.warn("Ignoring method: " + method + " in class " + bindable + ". Method cannot be proxied!");
     return null;
   }
 }

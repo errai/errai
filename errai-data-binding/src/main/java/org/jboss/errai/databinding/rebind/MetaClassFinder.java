@@ -14,14 +14,23 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.apt.export;
+package org.jboss.errai.databinding.rebind;
+
+import com.google.gwt.core.ext.GeneratorContext;
+import org.jboss.errai.codegen.meta.MetaClass;
+
+import java.lang.annotation.Annotation;
+import java.util.Collection;
+import java.util.function.BiFunction;
 
 /**
- * @author Max Barkley <mbarkley@redhat.com>
+ * @author Tiago Bento <tfernand@redhat.com>
  */
-interface SupportedAnnotationTypes {
-  String REMOTE = "org.jboss.errai.bus.server.annotations.Remote";
-  String FEATURE_INTERCEPTOR = "org.jboss.errai.common.client.api.interceptor.FeatureInterceptor";
-  String INTERCEPTED_CALL = "org.jboss.errai.common.client.api.interceptor.InterceptedCall";
-  String INTERCEPTS_REMOTE_CALL = "org.jboss.errai.common.client.api.interceptor.InterceptsRemoteCall";
+@FunctionalInterface
+public interface MetaClassFinder
+        extends BiFunction<GeneratorContext, Class<? extends Annotation>, Collection<MetaClass>> {
+
+  default Collection<MetaClass> find(final GeneratorContext context, final Class<? extends Annotation> annotationClass) {
+    return this.apply(context, annotationClass);
+  }
 }

@@ -92,18 +92,18 @@ import java.util.function.Supplier;
 public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
   private static final Logger logger = LoggerFactory.getLogger(BindableProxyAgent.class);
 
-  final Multimap<String, Binding> bindings = LinkedHashMultimap.create();
-  final Map<String, PropertyType> propertyTypes = new HashMap<>();
-  final Map<String, DataBinder> binders = new HashMap<>();
-  final Map<String, Object> knownValues = new HashMap<>();
-  final Collection<HandlerRegistration> modelChangeHandlers = new ArrayList<>();
+  public final Multimap<String, Binding> bindings = LinkedHashMultimap.create();
+  public final Map<String, PropertyType> propertyTypes = new HashMap<>();
+  public final Map<String, DataBinder> binders = new HashMap<>();
+  public final Map<String, Object> knownValues = new HashMap<>();
+  public final Collection<HandlerRegistration> modelChangeHandlers = new ArrayList<>();
 
-  PropertyChangeHandlerSupport propertyChangeHandlerSupport = new PropertyChangeHandlerSupport();
+  public final PropertyChangeHandlerSupport propertyChangeHandlerSupport = new PropertyChangeHandlerSupport();
 
-  final BindableProxy<T> proxy;
-  T target;
+  public final BindableProxy<T> proxy;
+  public T target;
 
-  BindableProxyAgent(final BindableProxy<T> proxy, final T target) {
+  public BindableProxyAgent(final BindableProxy<T> proxy, final T target) {
     this.proxy = proxy;
     this.target = target;
   }
@@ -112,7 +112,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
    * Copies the values of all properties to be able to compare them in case they
    * change outside a setter method.
    */
-  void copyValues() {
+  public void copyValues() {
     for (final String property : propertyTypes.keySet()) {
       if (!"this".equals(property)) {
         knownValues.put(property, proxy.get(property));
@@ -675,7 +675,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
    * changed). This method is invoked in case a bound property changed outside
    * the property's write method (when using a non accessor method).
    */
-  void updateWidgetsAndFireEvents() {
+  public void updateWidgetsAndFireEvents() {
     for (final String property : propertyTypes.keySet()) {
       final Object knownValue = knownValues.get(property);
       final Object actualValue = proxy.get(property);
@@ -708,7 +708,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
    * @param newValue
    *          The new value of the property.
    */
-  <P> void updateWidgetsAndFireEvent(final boolean sync, final String property, final P oldValue, final P newValue) {
+  public <P> void updateWidgetsAndFireEvent(final boolean sync, final String property, final P oldValue, final P newValue) {
     updateWidgetsAndFireEvent(sync, property, oldValue, newValue, null);
   }
 
@@ -885,7 +885,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
    * @return a new the wrapped (proxied) list or the provided list if already
    *         proxied
    */
-  List ensureBoundListIsProxied(final String property, final List list) {
+  public List ensureBoundListIsProxied(final String property, final List list) {
     if (!(list instanceof BindableListWrapper) && bindings.containsKey(property) && list != null) {
       final BindableListWrapper newList = new BindableListWrapper(list);
       addHandlersForBindableListWrapper(property, newList);

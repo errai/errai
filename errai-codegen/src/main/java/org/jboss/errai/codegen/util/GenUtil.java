@@ -130,9 +130,9 @@ public class GenUtil {
   }
 
   public static void assertIsIterable(final Statement statement) {
-    final Class<?> cls = statement.getType().unsafeAsClass();
+    final MetaClass cls = statement.getType();
 
-    if (!cls.isArray() && !Iterable.class.isAssignableFrom(cls))
+    if (!cls.isArray() && !cls.isAssignableTo(Iterable.class))
       throw new TypeNotIterableException(statement.generate(Context.create()));
   }
 

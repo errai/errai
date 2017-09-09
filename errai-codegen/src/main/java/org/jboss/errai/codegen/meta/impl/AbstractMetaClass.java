@@ -341,7 +341,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     MetaClass scanTarget = this;
     while (scanTarget != null) {
       for (final MetaMethod m : scanTarget.getDeclaredMethods()) {
-        if (m.unsafeIsAnnotationPresent(annotation)) {
+        if (m.isAnnotationPresent(annotation)) {
           final List<MetaMethod> methods = methodsByName.computeIfAbsent(m.getName(), k -> new ArrayList<>());
           if (isNotOverriden(m, methods)) {
             methods.add(m);

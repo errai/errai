@@ -21,7 +21,7 @@ package org.jboss.errai.common.apt.generator;
  */
 class TestGenerator extends AbstractErraiModuleExportFileGenerator {
   @Override
-  protected String getModuleName() {
+  protected String getCamelCaseModuleName() {
     return "test";
   }
 }
