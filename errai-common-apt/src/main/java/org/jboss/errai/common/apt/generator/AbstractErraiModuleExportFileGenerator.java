@@ -68,7 +68,7 @@ public abstract class AbstractErraiModuleExportFileGenerator extends AbstractPro
 
   ExportFile newExportFile(final AnnotatedElementsFinder annotatedElementsFinder, final TypeElement annotation) {
     final Set<Element> exportedTypes = annotatedClassesAndInterfaces(annotatedElementsFinder, annotation);
-    return new ExportFile(getModuleName(), annotation, exportedTypes);
+    return new ExportFile(getCamelCaseModuleName(), annotation, exportedTypes);
   }
 
   Set<Element> annotatedClassesAndInterfaces(final AnnotatedElementsFinder annotatedElementsFinder,
@@ -95,5 +95,5 @@ public abstract class AbstractErraiModuleExportFileGenerator extends AbstractPro
     }
   }
 
-  protected abstract String getModuleName();
+  protected abstract String getCamelCaseModuleName();
 }

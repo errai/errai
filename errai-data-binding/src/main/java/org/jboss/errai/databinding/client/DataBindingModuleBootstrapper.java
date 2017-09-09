@@ -16,6 +16,7 @@
 
 package org.jboss.errai.databinding.client;
 
+import org.jboss.errai.databinding.client.local.BindableProxyLoader;
 import org.jboss.errai.ioc.client.api.IOCBootstrapTask;
 import org.jboss.errai.ioc.client.api.TaskOrder;
 

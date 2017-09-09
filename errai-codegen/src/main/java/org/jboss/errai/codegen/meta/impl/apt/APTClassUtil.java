@@ -183,7 +183,7 @@ public final class APTClassUtil {
 
   public static Optional<MetaAnnotation> getAnnotation(final TypeMirror typeMirror,
           final Class<? extends Annotation> annotationClass) {
-    return getAnnotation(types.asElement(typeMirror), annotationClass);
+    return Optional.ofNullable(types.asElement(typeMirror)).flatMap(element -> getAnnotation(element, annotationClass));
   }
 
   public static boolean isAnnotationPresent(final Element element, final MetaClass annotationMetaClass) {

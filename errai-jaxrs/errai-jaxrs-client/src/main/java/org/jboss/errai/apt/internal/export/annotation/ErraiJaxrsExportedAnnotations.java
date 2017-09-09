@@ -27,9 +27,9 @@ import javax.ws.rs.ext.Provider;
  *
  * @author Tiago Bento <tfernand@redhat.com>
  */
-public final class JaxrsExportedAnnotations {
+public final class ErraiJaxrsExportedAnnotations {
 
-  private JaxrsExportedAnnotations() {
+  private ErraiJaxrsExportedAnnotations() {
   }
 
   private Path path;

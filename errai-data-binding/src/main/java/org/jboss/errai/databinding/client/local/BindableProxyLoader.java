@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Red Hat, Inc. and/or its affiliates.
+ * Copyright (C) 2011 Red Hat, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,21 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.apt.export;
+package org.jboss.errai.databinding.client.local;
+
+import org.jboss.errai.databinding.client.api.Bindable;
 
 /**
- * @author Max Barkley <mbarkley@redhat.com>
+ * This interface is used internally during compile time to produce the required proxies for {@link Bindable} types (see
+ * the GWT module descriptor).
+ * 
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
-interface SupportedAnnotationTypes {
-  String REMOTE = "org.jboss.errai.bus.server.annotations.Remote";
-  String FEATURE_INTERCEPTOR = "org.jboss.errai.common.client.api.interceptor.FeatureInterceptor";
-  String INTERCEPTED_CALL = "org.jboss.errai.common.client.api.interceptor.InterceptedCall";
-  String INTERCEPTS_REMOTE_CALL = "org.jboss.errai.common.client.api.interceptor.InterceptsRemoteCall";
+public interface BindableProxyLoader {
+
+  /**
+   * Registers the generated proxies for bindable types.
+   */
+  public void loadBindableProxies();
+
 }

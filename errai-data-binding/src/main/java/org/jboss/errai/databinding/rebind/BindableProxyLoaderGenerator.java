@@ -16,10 +16,9 @@
 
 package org.jboss.errai.databinding.rebind;
 
-import java.lang.annotation.Annotation;
-import java.util.Collection;
-import java.util.Set;
-
+import com.google.gwt.core.ext.GeneratorContext;
+import com.google.gwt.core.ext.TreeLogger;
+import com.google.gwt.core.ext.UnableToCompleteException;
 import org.jboss.errai.codegen.Cast;
 import org.jboss.errai.codegen.InnerClass;
 import org.jboss.errai.codegen.Parameter;
@@ -38,7 +37,7 @@ import org.jboss.errai.config.rebind.AbstractAsyncGenerator;
 import org.jboss.errai.config.rebind.GenerateAsync;
 import org.jboss.errai.config.util.ClassScanner;
 import org.jboss.errai.databinding.client.BindableProxyFactory;
-import org.jboss.errai.databinding.client.BindableProxyLoader;
+import org.jboss.errai.databinding.client.local.BindableProxyLoader;
 import org.jboss.errai.databinding.client.BindableProxyProvider;
 import org.jboss.errai.databinding.client.api.Bindable;
 import org.jboss.errai.databinding.client.api.Convert;
@@ -47,9 +46,9 @@ import org.jboss.errai.databinding.client.api.DefaultConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.gwt.core.ext.GeneratorContext;
-import com.google.gwt.core.ext.TreeLogger;
-import com.google.gwt.core.ext.UnableToCompleteException;
+import java.lang.annotation.Annotation;
+import java.util.Collection;
+import java.util.Set;
 
 /**
  * Generates the proxy loader for {@link Bindable}s.
@@ -58,55 +57,63 @@ import com.google.gwt.core.ext.UnableToCompleteException;
  */
 @GenerateAsync(BindableProxyLoader.class)
 public class BindableProxyLoaderGenerator extends AbstractAsyncGenerator {
+
   private final Logger log = LoggerFactory.getLogger(BindableProxyLoaderGenerator.class);
-  private final String packageName = BindableProxyLoader.class.getPackage().getName();
-  private final String className = BindableProxyLoader.class.getSimpleName() + "Impl";
+
+  private final String packageName = "org.jboss.errai.databinding.client.local";
+  private final String classSimpleName = "BindableProxyLoaderImpl";
 
   @Override
   public String generate(final TreeLogger logger, final GeneratorContext context, final String typeName)
-      throws UnableToCompleteException {
+          throws UnableToCompleteException {
 
-    return startAsyncGeneratorsAndWaitFor(BindableProxyLoader.class, context, logger, packageName, className);
+    return startAsyncGeneratorsAndWaitFor(BindableProxyLoader.class, context, logger, packageName, classSimpleName);
   }
 
   @Override
   protected String generate(final TreeLogger logger, final GeneratorContext context) {
+    final Set<String> translatablePackages = RebindUtils.findTranslatablePackages(context);
+    return generate((ctx, annotation) -> findAnnotatedElements(context, translatablePackages, annotation), context);
+  }
+
+  public String generate(final MetaClassFinder metaClassFinder, final GeneratorContext context) {
+
+    final Collection<MetaClass> defaultConverters = metaClassFinder.find(context, DefaultConverter.class);
+    addCacheRelevantClasses(defaultConverters);
+
+    final Collection<MetaClass> bindableTypes = metaClassFinder.find(context, Bindable.class);
+    addCacheRelevantClasses(bindableTypes);
+
     ClassStructureBuilder<?> classBuilder = ClassBuilder.implement(BindableProxyLoader.class);
     final MethodBlockBuilder<?> loadProxies = classBuilder.publicMethod(void.class, "loadBindableProxies");
 
-    final Set<MetaClass> allBindableTypes = DataBindingUtil.getAllBindableTypes(context);
-    addCacheRelevantClasses(allBindableTypes);
-
-    for (final MetaClass bindable : allBindableTypes) {
+    for (final MetaClass bindable : bindableTypes) {
       if (bindable.isFinal()) {
         throw new RuntimeException("@Bindable type cannot be final: " + bindable.getFullyQualifiedName());
       }
 
-      if (bindable.getDeclaredConstructor(new MetaClass[0]) == null || !bindable.getDeclaredConstructor(new MetaClass[0]).isPublic()) {
-        throw new RuntimeException("@Bindable type needs a public default no-arg constructor: "
-            + bindable.getFullyQualifiedName());
+      if (bindable.getDeclaredConstructor(new MetaClass[0]) == null || !bindable.getDeclaredConstructor(
+              new MetaClass[0]).isPublic()) {
+        throw new RuntimeException(
+                "@Bindable type needs a public default no-arg constructor: " + bindable.getFullyQualifiedName());
       }
 
-      final ClassStructureBuilder<?> bindableProxy = new BindableProxyGenerator(bindable, logger).generate();
+      final ClassStructureBuilder<?> bindableProxy = new BindableProxyGenerator(bindable).generate();
       loadProxies.append(new InnerClass(bindableProxy.getClassDefinition()));
-      final Statement proxyProvider =
-          ObjectBuilder.newInstanceOf(BindableProxyProvider.class)
+      final Statement proxyProvider = ObjectBuilder.newInstanceOf(BindableProxyProvider.class)
               .extend()
               .publicOverridesMethod("getBindableProxy", Parameter.of(Object.class, "model"))
               .append(Stmt.nestedCall(Stmt.newObject(bindableProxy.getClassDefinition())
-                  .withParameters(Cast.to(bindable, Stmt.loadVariable("model")))).returnValue())
+                      .withParameters(Cast.to(bindable, Stmt.loadVariable("model")))).returnValue())
               .finish()
               .publicOverridesMethod("getBindableProxy")
-              .append(
-                  Stmt.nestedCall(
-                      Stmt.newObject(bindableProxy.getClassDefinition()))
-                      .returnValue())
+              .append(Stmt.nestedCall(Stmt.newObject(bindableProxy.getClassDefinition())).returnValue())
               .finish()
               .finish();
       loadProxies.append(Stmt.invokeStatic(BindableProxyFactory.class, "addBindableProxy", bindable, proxyProvider));
     }
 
-    generateDefaultConverterRegistrations(loadProxies, context);
+    generateDefaultConverterRegistrations(loadProxies, defaultConverters);
 
     classBuilder = (ClassStructureBuilder<?>) loadProxies.finish();
     return classBuilder.toJavaString();
@@ -116,11 +123,8 @@ public class BindableProxyLoaderGenerator extends AbstractAsyncGenerator {
    * Scans for and registers global default converters.
    */
   private void generateDefaultConverterRegistrations(final MethodBlockBuilder<?> loadProxies,
-      final GeneratorContext context) {
+          final Collection<MetaClass> defaultConverters) {
 
-    final Collection<MetaClass> defaultConverters = ClassScanner.getTypesAnnotatedWith(DefaultConverter.class,
-            RebindUtils.findTranslatablePackages(context), context);
-    addCacheRelevantClasses(defaultConverters);
     for (final MetaClass converter : defaultConverters) {
 
       Statement registerConverterStatement = null;
@@ -130,8 +134,8 @@ public class BindableProxyLoaderGenerator extends AbstractAsyncGenerator {
           if (parameterizedInterface != null) {
             final MetaType[] typeArgs = parameterizedInterface.getTypeParameters();
             if (typeArgs != null && typeArgs.length == 2) {
-              registerConverterStatement = Stmt.invokeStatic(Convert.class, "registerDefaultConverter",
-                  typeArgs[0], typeArgs[1], Stmt.newObject(converter));
+              registerConverterStatement = Stmt.invokeStatic(Convert.class, "registerDefaultConverter", typeArgs[0],
+                      typeArgs[1], Stmt.newObject(converter));
             }
           }
         }
@@ -139,10 +143,10 @@ public class BindableProxyLoaderGenerator extends AbstractAsyncGenerator {
 
       if (registerConverterStatement != null) {
         loadProxies.append(registerConverterStatement);
-      }
-      else {
-        log.warn("Ignoring @DefaultConverter: " + converter
-            + "! Make sure it implements Converter and specifies type arguments for the model and widget type");
+      } else {
+        log.warn("Ignoring @DefaultConverter: "
+                + converter
+                + "! Make sure it implements Converter and specifies type arguments for the model and widget type");
       }
     }
   }
@@ -156,5 +160,19 @@ public class BindableProxyLoaderGenerator extends AbstractAsyncGenerator {
     }
 
     return false;
+  }
+
+  private Collection<MetaClass> findAnnotatedElements(final GeneratorContext context,
+          final Set<String> translatablePackages,
+          final Class<? extends Annotation> annotation) {
+    return ClassScanner.getTypesAnnotatedWith(annotation, translatablePackages, context);
+  }
+
+  public String getPackageName() {
+    return packageName;
+  }
+
+  public String getClassSimpleName() {
+    return classSimpleName;
   }
 }

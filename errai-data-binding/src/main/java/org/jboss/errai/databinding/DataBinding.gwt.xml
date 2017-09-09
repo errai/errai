@@ -20,9 +20,16 @@
     <inherits name='com.google.gwt.user.User'/>
     <inherits name='com.google.common.collect.Collect'/>
     <inherits name='org.jboss.errai.ui.DataBindingUIExtensions'/>
+    <inherits name="org.jboss.errai.common.apt.ErraiCommonApt"/>
 
     <generate-with class="org.jboss.errai.databinding.rebind.BindableProxyLoaderGenerator">
-        <when-type-assignable
-                class="org.jboss.errai.databinding.client.BindableProxyLoader"/>
+        <when-type-assignable class="org.jboss.errai.databinding.client.local.BindableProxyLoader"/>
+        <when-property-is name="errai.useAptGenerators" value="false"/>
     </generate-with>
+
+    <replace-with class="org.jboss.errai.databinding.client.local.BindableProxyLoaderImpl">
+        <when-type-assignable class="org.jboss.errai.databinding.client.local.BindableProxyLoader"/>
+        <when-property-is name="errai.useAptGenerators" value="true"/>
+    </replace-with>
+
 </module>

@@ -93,12 +93,19 @@
       <classifier>sources</classifier>
       <scope>provided</scope>
     </dependency>
-    
+
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-log4j12</artifactId>
       <scope>test</scope>
     </dependency>
+
+    <dependency>
+      <groupId>org.jboss.errai</groupId>
+      <artifactId>errai-data-binding-export-apt</artifactId>
+      <scope>compile</scope>
+    </dependency>
+
   </dependencies>
 
   <profiles>

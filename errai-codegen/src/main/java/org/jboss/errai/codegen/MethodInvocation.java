@@ -95,8 +95,13 @@ public class MethodInvocation extends AbstractStatement {
 
   // Resolves type variables by inspecting call parameters
   private void resolveTypeVariables() {
-    final MetaParameterizedType gSuperClass = inputType.getGenericSuperClass();
-    final MetaClass superClass = inputType.getSuperClass();
+    MetaParameterizedType gSuperClass = inputType.getGenericSuperClass();
+    MetaClass superClass = inputType.getSuperClass();
+
+    if (gSuperClass == null && superClass == null)  {
+      gSuperClass = inputType.getParameterizedType();
+      superClass = inputType;
+    }
 
     if (superClass != null && superClass.getTypeParameters() != null && superClass.getTypeParameters().length > 0
             && gSuperClass != null && gSuperClass.getTypeParameters().length > 0) {

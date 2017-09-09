@@ -13,15 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.jboss.errai.apt.internal.export.annotations;
 
-package org.jboss.errai.bus.apt.export;
+import org.jboss.errai.databinding.client.api.Bindable;
+import org.jboss.errai.databinding.client.api.DefaultConverter;
 
 /**
- * @author Max Barkley <mbarkley@redhat.com>
+ * IMPORTANT: Do not move this class. ErraiAptExportedTypes depends on it being in this exact package.
+ *
+ * @author Tiago Bento <tfernand@redhat.com>
  */
-interface SupportedAnnotationTypes {
-  String REMOTE = "org.jboss.errai.bus.server.annotations.Remote";
-  String FEATURE_INTERCEPTOR = "org.jboss.errai.common.client.api.interceptor.FeatureInterceptor";
-  String INTERCEPTED_CALL = "org.jboss.errai.common.client.api.interceptor.InterceptedCall";
-  String INTERCEPTS_REMOTE_CALL = "org.jboss.errai.common.client.api.interceptor.InterceptsRemoteCall";
+public final class ErraiDataBindingExportedAnnotations {
+
+  private ErraiDataBindingExportedAnnotations() {
+  }
+
+  private Bindable bindable;
+  private DefaultConverter defaultConverter;
 }
