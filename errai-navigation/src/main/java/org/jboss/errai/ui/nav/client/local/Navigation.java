@@ -40,6 +40,7 @@ import org.jboss.errai.ioc.client.lifecycle.api.Access;
 import org.jboss.errai.ioc.client.lifecycle.api.LifecycleCallback;
 import org.jboss.errai.ioc.client.lifecycle.api.StateChange;
 import org.jboss.errai.ioc.client.lifecycle.impl.AccessImpl;
+import org.jboss.errai.ui.nav.client.local.api.DelegationControl;
 import org.jboss.errai.ui.nav.client.local.api.NavigationControl;
 import org.jboss.errai.ui.nav.client.local.api.PageNavigationErrorHandler;
 import org.jboss.errai.ui.nav.client.local.api.PageNotFoundException;
@@ -372,7 +373,7 @@ public class Navigation {
    *
    * @param requestPage the next requested page, this can be null if there is none.
    */
-  private void hideCurrentPage(PageNode<?> requestPage, NavigationControl control) {
+  private void hideCurrentPage(Object requestPage, NavigationControl control) {
     final IsWidget currentContent = navigatingContainer.getWidget();
 
     // Note: Optimized out in production mode
@@ -382,7 +383,7 @@ public class Navigation {
             + ".");
     }
 
-    NavigationControl hideControl = new NavigationControl(this, () -> {
+    DelegationControl hideControl = new DelegationControl(() -> {
       if (currentPage != null && currentComponent != null) {
         currentPage.pageHidden(currentComponent);
         currentPage.destroy(currentComponent);
@@ -476,11 +477,11 @@ public class Navigation {
                     // fields actually changed.
                     stateChangeEvent.fireAsync(component);
 
-                    PageNode<?> previousPage = currentPage;
+                    Object previousPage = currentComponent;
                     setCurrentPage(request.pageNode);
                     currentWidget = componentWidget;
                     currentComponent = component;
-                    contentDelegation.showContent(component, navigatingContainer, currentWidget, previousPage, new NavigationControl(Navigation.this, () -> {
+                    contentDelegation.showContent(component, navigatingContainer, currentWidget, previousPage, new DelegationControl(() -> {
                       request.pageNode.pageShown(component, request.state);
                     }));
                   } finally {
@@ -498,7 +499,7 @@ public class Navigation {
 
               try {
                 locked = true;
-                hideCurrentPage(request.pageNode, new NavigationControl(Navigation.this, () -> {
+                hideCurrentPage(component, new NavigationControl(Navigation.this, () -> {
                   request.pageNode.pageShowing(component, request.state, showControl);
                 }));
               } catch (Exception ex) {
