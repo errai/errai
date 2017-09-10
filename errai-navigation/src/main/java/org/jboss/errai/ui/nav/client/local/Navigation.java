@@ -392,7 +392,7 @@ public class Navigation {
       control.proceed();
     });
 
-    if(currentComponent != null) {
+    if (currentComponent != null) {
       contentDelegation.hideContent(currentComponent, navigatingContainer, currentWidget, requestPage, hideControl);
     } else {
       navigatingContainer.clear();
