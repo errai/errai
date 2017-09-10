@@ -2,8 +2,6 @@ package org.jboss.errai.ui.nav.client.local;
 
 import com.google.gwt.user.client.ui.IsWidget;
 import org.jboss.errai.ui.nav.client.local.api.DelegationControl;
-import org.jboss.errai.ui.nav.client.local.api.NavigationControl;
-import org.jboss.errai.ui.nav.client.local.spi.PageNode;
 
 /**
  * Default content delegation procedure.
