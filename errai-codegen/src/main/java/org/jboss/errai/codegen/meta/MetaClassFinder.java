@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.databinding.rebind;
+package org.jboss.errai.codegen.meta;
 
 import com.google.gwt.core.ext.GeneratorContext;
 import org.jboss.errai.codegen.meta.MetaClass;

@@ -17,20 +17,15 @@
 package org.jboss.errai.apt.internal.generator;
 
 import com.google.gwt.core.ext.GeneratorContext;
-import org.jboss.errai.codegen.meta.MetaAnnotation;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.common.apt.ErraiAptExportedTypes;
 import org.jboss.errai.common.apt.ErraiAptGenerator;
+import org.jboss.errai.common.apt.configuration.ErraiModuleConfiguration;
 import org.jboss.errai.databinding.client.api.Bindable;
 import org.jboss.errai.databinding.rebind.BindableProxyLoaderGenerator;
 
 import java.lang.annotation.Annotation;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.stream.Stream;
-
-import static org.jboss.errai.common.configuration.ErraiModule.Property.BINDABLE_TYPES;
-import static org.jboss.errai.common.configuration.ErraiModule.Property.SERIALIZABLE_TYPES;
 
 /**
  * IMPORTANT: Do not move this class. ErraiAppAptGenerator depends on it being in this exact package.
@@ -40,10 +35,12 @@ import static org.jboss.errai.common.configuration.ErraiModule.Property.SERIALIZ
 public class BindableProxyLoaderAptGenerator extends ErraiAptGenerator {
 
   private final BindableProxyLoaderGenerator bindableProxyLoaderGenerator;
+  private final ErraiModuleConfiguration erraiModuleConfiguration;
 
   // IMPORTANT: Do not remove. ErraiAppAptGenerator depends on this constructor
   public BindableProxyLoaderAptGenerator(final ErraiAptExportedTypes exportedTypes) {
     super(exportedTypes);
+    this.erraiModuleConfiguration = new ErraiModuleConfiguration(exportedTypes);
     this.bindableProxyLoaderGenerator = new BindableProxyLoaderGenerator();
   }
 
@@ -68,14 +65,10 @@ public class BindableProxyLoaderAptGenerator extends ErraiAptGenerator {
     final Collection<MetaClass> annotatedMetaClasses = findAnnotatedMetaClasses(annotation);
 
     if (annotation.equals(Bindable.class)) {
-      annotatedMetaClasses.addAll(getErraiModuleConfiguredArrayProperty(this::bindableTypes));
+      annotatedMetaClasses.addAll(erraiModuleConfiguration.getBindableTypes());
     }
 
     return annotatedMetaClasses;
   }
 
-  private Stream<MetaClass> bindableTypes(final MetaAnnotation metaAnnotation) {
-    final MetaClass[] metaClasses = metaAnnotation.valueAsArray(BINDABLE_TYPES, MetaClass[].class);
-    return Arrays.stream(metaClasses);
-  }
 }
