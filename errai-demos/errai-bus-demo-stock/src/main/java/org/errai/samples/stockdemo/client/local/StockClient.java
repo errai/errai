@@ -26,7 +26,7 @@ import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.bus.client.api.messaging.MessageCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
-import org.jboss.errai.common.apt.ErraiApp;
+import org.jboss.errai.common.configuration.ErraiApp;
 
 import java.util.HashMap;
 import java.util.Map;

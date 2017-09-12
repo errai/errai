@@ -20,6 +20,7 @@ import com.google.gwt.core.ext.GeneratorContext;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.common.apt.ErraiAptExportedTypes;
 import org.jboss.errai.common.apt.ErraiAptGenerator;
+import org.jboss.errai.databinding.client.api.Bindable;
 import org.jboss.errai.databinding.rebind.BindableProxyLoaderGenerator;
 
 import java.lang.annotation.Annotation;
@@ -57,6 +58,9 @@ public class BindableProxyLoaderAptGenerator implements ErraiAptGenerator {
   private Collection<MetaClass> findAnnotatedMetaClasses(final GeneratorContext context,
           Class<? extends Annotation> annotation) {
 
-    return ErraiAptExportedTypes.findAnnotatedMetaClasses(annotation);
+    Collection<MetaClass> annotatedMetaClasses = ErraiAptExportedTypes.findAnnotatedMetaClasses(annotation);
+
+
+    return annotatedMetaClasses;
   }
 }

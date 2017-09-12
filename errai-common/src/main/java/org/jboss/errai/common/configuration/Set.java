@@ -14,15 +14,20 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.common.apt;
+package org.jboss.errai.common.configuration;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
+import org.jboss.errai.common.configuration.ErraiModuleConfiguration.ErraiModuleConfigurations;
+import org.jboss.errai.common.configuration.ErraiModuleConfiguration.Property;
+
+import java.lang.annotation.Repeatable;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
-@Retention(RetentionPolicy.SOURCE)
-public @interface ErraiApp {
+@Repeatable(ErraiModuleConfigurations.class)
+public @interface Set {
 
+  Property property();
+
+  Class<?>[] equals() default {};
 }
