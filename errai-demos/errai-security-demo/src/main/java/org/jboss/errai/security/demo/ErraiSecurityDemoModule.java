@@ -17,18 +17,16 @@
 package org.jboss.errai.security.demo;
 
 import org.jboss.errai.common.configuration.ErraiModule;
-import org.jboss.errai.common.configuration.Set;
-
-import static org.jboss.errai.common.configuration.ErraiModuleConfiguration.Property.BINDABLE_TYPES;
-import static org.jboss.errai.common.configuration.ErraiModuleConfiguration.Property.SERIALIZABLE_TYPES;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
 
-@Set(property = BINDABLE_TYPES, equals = {})
-@Set(property = SERIALIZABLE_TYPES, equals = {})
-
-@ErraiModule
-public interface ErraiSecurityDemoModule {
+@ErraiModule(userOnHostPageEnabled = true,
+             bindableTypes = {},
+             nonSerializableTypes = {},
+             serializableTypes = {},
+             iocAlternatives = {},
+             iocBlacklist = {})
+public final class ErraiSecurityDemoModule {
 }

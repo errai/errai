@@ -14,18 +14,19 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.common.configuration;
+package org.jboss.errai.apt.internal.export.annotation;
+
+import org.jboss.errai.common.configuration.ErraiModule;
 
 /**
+ * IMPORTANT: Do not move this class. ErraiAptExportedTypes depends on it being in this exact package.
+ *
  * @author Tiago Bento <tfernand@redhat.com>
  */
-public interface ErraiModuleConfiguration {
+public final class ErraiCommonAptExportedAnnotations {
 
-  enum Property {
-    BINDABLE_TYPES, SERIALIZABLE_TYPES, NON_SERIALIZABLE_TYPES, IOC_BLACKLIST, IOC_ENABLED_ALTERNATIVES,
+  private ErraiCommonAptExportedAnnotations() {
   }
 
-  @interface ErraiModuleConfigurations {
-    Set[] value();
-  }
+  private ErraiModule erraiModule;
 }

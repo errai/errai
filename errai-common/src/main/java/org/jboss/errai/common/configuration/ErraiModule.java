@@ -16,9 +16,32 @@
 
 package org.jboss.errai.common.configuration;
 
+import java.lang.annotation.Annotation;
+
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
 public @interface ErraiModule {
+
+  Class<?>[] bindableTypes() default {};
+
+  Class<?>[] serializableTypes() default {};
+
+  Class<?>[] nonSerializableTypes() default {};
+
+  Class<?>[] iocAlternatives() default {};
+
+  Class<?>[] iocBlacklist() default {};
+
+  boolean userOnHostPageEnabled() default false;
+
+  interface Property {
+    String BINDABLE_TYPES = "bindableTypes";
+    String SERIALIZABLE_TYPES = "serializableTypes";
+    String NON_SERIALIZABLE_TYPES = "nonSerializableTypes";
+    String IOC_ALTERNATIVES = "iocAlternatives";
+    String IOC_BLACKLIST = "iocBlacklist";
+    String USER_ON_HOST_PAGE_ENABLED = "userOnHostPageEnabled";
+  }
 
 }

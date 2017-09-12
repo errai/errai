@@ -35,8 +35,4 @@ public class ErraiModuleExportFileGenerator extends AbstractErraiModuleExportFil
     return "errai";
   }
 
-  @Override
-  public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-    return super.process(annotations, roundEnv);
-  }
 }

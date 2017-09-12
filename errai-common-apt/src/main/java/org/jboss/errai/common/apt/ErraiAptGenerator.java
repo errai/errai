@@ -16,10 +16,18 @@
 
 package org.jboss.errai.common.apt;
 
+import org.jboss.errai.codegen.meta.MetaAnnotation;
 import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.common.configuration.ErraiModule;
 
 import java.lang.annotation.Annotation;
 import java.util.Collection;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Stream;
+
+import static java.util.stream.Collectors.toSet;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
@@ -32,17 +40,30 @@ public abstract class ErraiAptGenerator {
     this.exportedTypes = exportedTypes;
   }
 
-  public final Collection<MetaClass> findAnnotatedMetaClasses(final Class<? extends Annotation> annotation) {
-    return exportedTypes.findAnnotatedMetaClasses(annotation);
-  }
-
   public abstract String generate();
-
-  String getFullQualifiedClassName() {
-    return getPackageName() + "." + getClassSimpleName();
-  }
 
   public abstract String getPackageName();
 
   public abstract String getClassSimpleName();
+
+  protected final Collection<MetaClass> findAnnotatedMetaClasses(final Class<? extends Annotation> annotation) {
+    return exportedTypes.findAnnotatedMetaClasses(annotation);
+  }
+
+  //FIXME: not the best places for these below methods live
+
+  protected <V> Set<V> getErraiModuleConfiguredArrayProperty(final Function<MetaAnnotation, Stream<V>> getter) {
+    return getErraiModuleMetaClassesStream().flatMap(getter).collect(toSet());
+  }
+
+  protected <V> Set<V> getErraiModuleConfiguredProperty(final Function<MetaAnnotation, V> getter) {
+    return getErraiModuleMetaClassesStream().map(getter).collect(toSet());
+  }
+
+  private Stream<MetaAnnotation> getErraiModuleMetaClassesStream() {
+    return findAnnotatedMetaClasses(ErraiModule.class).stream()
+            .map(module -> module.getAnnotation(ErraiModule.class))
+            .map(Optional::get);
+  }
+
 }
