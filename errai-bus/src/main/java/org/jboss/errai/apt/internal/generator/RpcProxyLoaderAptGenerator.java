@@ -33,12 +33,13 @@ import static java.util.stream.Collectors.toList;
  *
  * @author Tiago Bento <tfernand@redhat.com>
  */
-public final class RpcProxyLoaderAptGenerator implements ErraiAptGenerator {
+public final class RpcProxyLoaderAptGenerator extends ErraiAptGenerator {
 
   private final RpcProxyLoaderGenerator rpcProxyLoaderGenerator;
 
   // IMPORTANT: Do not remove. ErraiAppAptGenerator depends on this constructor
-  public RpcProxyLoaderAptGenerator() {
+  public RpcProxyLoaderAptGenerator(final ErraiAptExportedTypes exportedTypes) {
+    super(exportedTypes);
     this.rpcProxyLoaderGenerator = new RpcProxyLoaderGenerator();
   }
 
@@ -63,7 +64,7 @@ public final class RpcProxyLoaderAptGenerator implements ErraiAptGenerator {
   private Collection<MetaClass> findAnnotatedMetaClasses(final GeneratorContext context,
           Class<? extends Annotation> annotation) {
 
-    return ErraiAptExportedTypes.findAnnotatedMetaClasses(annotation);
+    return findAnnotatedMetaClasses(annotation);
   }
 
   @Override

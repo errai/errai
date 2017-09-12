@@ -31,12 +31,13 @@ import java.util.Collection;
  *
  * @author Tiago Bento <tfernand@redhat.com>
  */
-public class BindableProxyLoaderAptGenerator implements ErraiAptGenerator {
+public class BindableProxyLoaderAptGenerator extends ErraiAptGenerator {
 
   private final BindableProxyLoaderGenerator bindableProxyLoaderGenerator;
 
   // IMPORTANT: Do not remove. ErraiAppAptGenerator depends on this constructor
-  public BindableProxyLoaderAptGenerator() {
+  public BindableProxyLoaderAptGenerator(final ErraiAptExportedTypes exportedTypes) {
+    super(exportedTypes);
     this.bindableProxyLoaderGenerator = new BindableProxyLoaderGenerator();
   }
 
@@ -58,7 +59,7 @@ public class BindableProxyLoaderAptGenerator implements ErraiAptGenerator {
   private Collection<MetaClass> findAnnotatedMetaClasses(final GeneratorContext context,
           Class<? extends Annotation> annotation) {
 
-    Collection<MetaClass> annotatedMetaClasses = ErraiAptExportedTypes.findAnnotatedMetaClasses(annotation);
+    Collection<MetaClass> annotatedMetaClasses = findAnnotatedMetaClasses(annotation);
 
 
     return annotatedMetaClasses;

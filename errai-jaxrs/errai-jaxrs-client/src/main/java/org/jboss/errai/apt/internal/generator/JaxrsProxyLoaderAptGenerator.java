@@ -33,12 +33,13 @@ import static java.util.stream.Collectors.toList;
  *
  * @author Tiago Bento <tfernand@redhat.com>
  */
-public final class JaxrsProxyLoaderAptGenerator implements ErraiAptGenerator {
+public final class JaxrsProxyLoaderAptGenerator extends ErraiAptGenerator {
 
   private final JaxrsProxyLoaderGenerator jaxrsProxyLoaderGenerator;
 
   // IMPORTANT: Do not remove. ErraiAppAptGenerator depends on this constructor
-  public JaxrsProxyLoaderAptGenerator() {
+  public JaxrsProxyLoaderAptGenerator(final ErraiAptExportedTypes exportedTypes) {
+    super(exportedTypes);
     this.jaxrsProxyLoaderGenerator = new JaxrsProxyLoaderGenerator();
   }
 
@@ -66,7 +67,7 @@ public final class JaxrsProxyLoaderAptGenerator implements ErraiAptGenerator {
   private Collection<MetaClass> findAnnotatedMetaClasses(final GeneratorContext context,
           final Class<? extends Annotation> annotation) {
 
-    return ErraiAptExportedTypes.findAnnotatedMetaClasses(annotation);
+    return findAnnotatedMetaClasses(annotation);
   }
 
   @Override

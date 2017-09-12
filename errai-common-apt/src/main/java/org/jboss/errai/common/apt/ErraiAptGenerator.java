@@ -16,18 +16,33 @@
 
 package org.jboss.errai.common.apt;
 
+import org.jboss.errai.codegen.meta.MetaClass;
+
+import java.lang.annotation.Annotation;
+import java.util.Collection;
+
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
-public interface ErraiAptGenerator {
+public abstract class ErraiAptGenerator {
 
-  String generate();
+  private final ErraiAptExportedTypes exportedTypes;
 
-  default String getFullQualifiedClassName() {
+  public ErraiAptGenerator(final ErraiAptExportedTypes exportedTypes) {
+    this.exportedTypes = exportedTypes;
+  }
+
+  public final Collection<MetaClass> findAnnotatedMetaClasses(final Class<? extends Annotation> annotation) {
+    return exportedTypes.findAnnotatedMetaClasses(annotation);
+  }
+
+  public abstract String generate();
+
+  String getFullQualifiedClassName() {
     return getPackageName() + "." + getClassSimpleName();
   }
 
-  String getPackageName();
+  public abstract String getPackageName();
 
-  String getClassSimpleName();
+  public abstract String getClassSimpleName();
 }
