@@ -49,22 +49,19 @@ import static org.jboss.errai.common.apt.ErraiAptPackages.exportedAnnotationsPac
  */
 public final class ErraiAptExportedTypes {
 
-  private static Map<String, Set<TypeMirror>> exportedClassesByAnnotationClassName;
+  private final Map<String, Set<TypeMirror>> exportedClassesByAnnotationClassName;
 
-  private static Types types;
-  private static Elements elements;
-  private static AnnotatedElementsFinder annotatedElementsFinder;
+  private final Types types;
+  private final Elements elements;
+  private final AnnotatedElementsFinder annotatedElementsFinder;
 
-  private ErraiAptExportedTypes() {
-  }
-
-  public static void init(final Types types,
+  public ErraiAptExportedTypes(final Types types,
           final Elements elements,
           final AnnotatedElementsFinder annotatedElementsFinder) {
 
-    ErraiAptExportedTypes.types = types;
-    ErraiAptExportedTypes.elements = elements;
-    ErraiAptExportedTypes.annotatedElementsFinder = annotatedElementsFinder;
+    this.types = types;
+    this.elements = elements;
+    this.annotatedElementsFinder = annotatedElementsFinder;
 
     // Loads all exported types from ExportFiles
     exportedClassesByAnnotationClassName = getExportedTypesFromExportFilesInExportFilesPackage();
@@ -73,55 +70,52 @@ public final class ErraiAptExportedTypes {
     addLocalExportableTypesWhichHaveNotBeenExported();
   }
 
-  private static Map<String, Set<TypeMirror>> getExportedTypesFromExportFilesInExportFilesPackage() {
-    return exportFilesPackageElement(elements).map(ErraiAptExportedTypes::getExportedTypesFromExportFiles)
-            .orElseGet(HashMap::new);
+  private Map<String, Set<TypeMirror>> getExportedTypesFromExportFilesInExportFilesPackage() {
+    return exportFilesPackageElement(elements).map(this::getExportedTypesFromExportFiles).orElseGet(HashMap::new);
   }
 
-  private static Map<String, Set<TypeMirror>> getExportedTypesFromExportFiles(final PackageElement packageElement) {
+  private Map<String, Set<TypeMirror>> getExportedTypesFromExportFiles(final PackageElement packageElement) {
     return packageElement.getEnclosedElements()
             .stream()
-            .collect(groupingBy(ErraiAptExportedTypes::annotationName,
-                    flatMapping(ErraiAptExportedTypes::getExportedTypesFromExportFile, toSet())));
+            .collect(groupingBy(this::annotationName, flatMapping(this::getExportedTypesFromExportFile, toSet())));
   }
 
-  private static void addLocalExportableTypesWhichHaveNotBeenExported() {
+  private void addLocalExportableTypesWhichHaveNotBeenExported() {
     System.out.println("Exporting local exportable types..");
     exportedAnnotationsPackageElement(elements).ifPresent(p -> getLocalExportableTypes(p).entrySet()
             .stream()
             .filter(s -> !s.getValue().isEmpty())
-            .forEach(ErraiAptExportedTypes::addExportableLocalTypes));
+            .forEach(this::addExportableLocalTypes));
   }
 
-  private static Map<String, Set<TypeMirror>> getLocalExportableTypes(final PackageElement packageElement) {
+  private Map<String, Set<TypeMirror>> getLocalExportableTypes(final PackageElement packageElement) {
     return packageElement.getEnclosedElements()
             .stream()
-            .flatMap(ErraiAptExportedTypes::getExportedTypesFromExportFile)
-            .collect(groupingBy(TypeMirror::toString,
-                    flatMapping(ErraiAptExportedTypes::exportableLocalTypes, toSet())));
+            .flatMap(this::getExportedTypesFromExportFile)
+            .collect(groupingBy(TypeMirror::toString, flatMapping(this::exportableLocalTypes, toSet())));
   }
 
-  private static void addExportableLocalTypes(final Map.Entry<String, Set<TypeMirror>> entry) {
+  private void addExportableLocalTypes(final Map.Entry<String, Set<TypeMirror>> entry) {
     final String annotationName = entry.getKey();
     final Set<TypeMirror> mappedTypes = entry.getValue();
     exportedClassesByAnnotationClassName.putIfAbsent(annotationName, new HashSet<>());
     exportedClassesByAnnotationClassName.get(annotationName).addAll(mappedTypes);
   }
 
-  private static Stream<TypeMirror> exportableLocalTypes(final TypeMirror element) {
+  private Stream<TypeMirror> exportableLocalTypes(final TypeMirror element) {
     final TypeElement annotation = (TypeElement) types.asElement(element);
     return annotatedElementsFinder.getElementsAnnotatedWith(annotation).stream().map(Element::asType);
   }
 
-  private static String annotationName(final Element e) {
+  private String annotationName(final Element e) {
     return ExportFileName.decodeAnnotationClassNameFromExportFileName(e.asType().toString());
   }
 
-  private static Stream<TypeMirror> getExportedTypesFromExportFile(final Element exportFile) {
+  private Stream<TypeMirror> getExportedTypesFromExportFile(final Element exportFile) {
     return exportFile.getEnclosedElements().stream().filter(x -> x.getKind().isField()).map(Element::asType);
   }
 
-  public static Collection<MetaClass> findAnnotatedMetaClasses(final Class<? extends Annotation> annotation) {
+  public Collection<MetaClass> findAnnotatedMetaClasses(final Class<? extends Annotation> annotation) {
     return exportedClassesByAnnotationClassName.getOrDefault(annotation.getName(), emptySet())
             .stream()
             .filter(s -> s.getKind().equals(TypeKind.DECLARED))

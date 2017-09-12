@@ -16,12 +16,18 @@
 
 package org.jboss.errai.apt.internal.generator;
 
+import org.jboss.errai.common.apt.ErraiAptExportedTypes;
 import org.jboss.errai.common.apt.ErraiAptGenerator;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
-public class TestGenerator implements ErraiAptGenerator {
+public class TestGenerator extends ErraiAptGenerator {
+
+  public TestGenerator(final ErraiAptExportedTypes exportedTypes) {
+    super(exportedTypes);
+  }
+
   @Override
   public String generate() {
     return "";

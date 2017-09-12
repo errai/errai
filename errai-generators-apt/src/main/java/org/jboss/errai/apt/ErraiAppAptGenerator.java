@@ -31,6 +31,7 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
+import javax.lang.model.util.Types;
 import javax.tools.FileObject;
 import java.io.IOException;
 import java.io.Writer;
@@ -49,6 +50,8 @@ import static org.jboss.errai.common.apt.ErraiAptPackages.generatorsPackageEleme
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 @SupportedAnnotationTypes({ "org.jboss.errai.common.configuration.ErraiApp" })
 public class ErraiAppAptGenerator extends AbstractProcessor {
+
+  private ErraiAptExportedTypes erraiAptExportedTypes;
 
   @Override
   public boolean process(final Set<? extends TypeElement> annotations, final RoundEnvironment roundEnv) {
@@ -69,11 +72,13 @@ public class ErraiAppAptGenerator extends AbstractProcessor {
     for (final TypeElement erraiAppAnnotation : annotations) {
       System.out.println("Generating files using Errai APT Generators..");
 
-      APTClassUtil.init(processingEnv.getTypeUtils(), processingEnv.getElementUtils());
-      ErraiAptExportedTypes.init(processingEnv.getTypeUtils(), processingEnv.getElementUtils(),
-              annotatedElementsFinder);
+      final Types types = processingEnv.getTypeUtils();
+      final Elements elements = processingEnv.getElementUtils();
+      APTClassUtil.init(types, elements);
 
-      findGenerators(processingEnv.getElementUtils()).forEach(this::generateAndSaveSourceFile);
+      this.erraiAptExportedTypes = new ErraiAptExportedTypes(types, elements, annotatedElementsFinder);
+
+      findGenerators(elements).forEach(this::generateAndSaveSourceFile);
       System.out.println("Successfully generated files using Errai APT Generators");
     }
   }
@@ -98,9 +103,9 @@ public class ErraiAppAptGenerator extends AbstractProcessor {
 
   private ErraiAptGenerator newGenerator(final Class<? extends ErraiAptGenerator> generatorClass) {
     try {
-      final Constructor<? extends ErraiAptGenerator> constructor = generatorClass.getConstructor();
+      final Constructor<? extends ErraiAptGenerator> constructor = generatorClass.getConstructor(ErraiAptExportedTypes.class);
       constructor.setAccessible(true);
-      return constructor.newInstance();
+      return constructor.newInstance(erraiAptExportedTypes);
     } catch (final Exception e) {
       throw new RuntimeException("Class " + generatorClass.getName() + " couldn't be instantiated.", e);
     }
