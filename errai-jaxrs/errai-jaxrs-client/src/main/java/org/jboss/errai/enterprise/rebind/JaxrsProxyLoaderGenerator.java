@@ -27,6 +27,7 @@ import org.jboss.errai.codegen.builder.MethodBlockBuilder;
 import org.jboss.errai.codegen.builder.impl.ClassBuilder;
 import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaClassFinder;
 import org.jboss.errai.codegen.util.AnnotationFilter;
 import org.jboss.errai.codegen.util.InterceptorProvider;
 import org.jboss.errai.codegen.util.RuntimeAnnotationFilter;
@@ -136,9 +137,10 @@ public class JaxrsProxyLoaderGenerator extends AbstractAsyncGenerator {
   protected boolean isRelevantClass(final MetaClass clazz) {
     // It's ok to use unsafe methods here because the APT environment doesn't call this method
     for (final Annotation anno : clazz.unsafeGetAnnotations()) {
-      if (anno.annotationType().equals(Path.class) || anno.annotationType().equals(FeatureInterceptor.class)
-              || anno.annotationType().equals(InterceptsRemoteCall.class) || anno.annotationType()
-              .equals(Provider.class)) {
+      if (anno.annotationType().equals(Path.class)
+              || anno.annotationType().equals(FeatureInterceptor.class)
+              || anno.annotationType().equals(InterceptsRemoteCall.class)
+              || anno.annotationType().equals(Provider.class)) {
         return true;
       }
     }

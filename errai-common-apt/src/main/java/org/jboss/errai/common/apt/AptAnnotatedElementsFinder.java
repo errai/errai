@@ -36,4 +36,5 @@ public class AptAnnotatedElementsFinder implements AnnotatedElementsFinder {
   public Set<? extends Element> getElementsAnnotatedWith(final TypeElement typeElement) {
     return roundEnvironment.getElementsAnnotatedWith(typeElement);
   }
+
 }
