@@ -13,21 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.jboss.errai.apt.internal.export.annotation;
 
-package org.jboss.errai.common.configuration;
-
-import org.jboss.errai.common.configuration.ErraiModuleConfiguration.ErraiModuleConfigurations;
-import org.jboss.errai.common.configuration.ErraiModuleConfiguration.Property;
-
-import java.lang.annotation.Repeatable;
+import org.jboss.errai.databinding.client.api.Bindable;
+import org.jboss.errai.databinding.client.api.DefaultConverter;
 
 /**
+ * IMPORTANT: Do not move this class. ErraiAptExportedTypes depends on it being in this exact package.
+ *
  * @author Tiago Bento <tfernand@redhat.com>
  */
-@Repeatable(ErraiModuleConfigurations.class)
-public @interface Set {
+public final class ErraiDataBindingExportedAnnotations {
 
-  Property property();
+  private ErraiDataBindingExportedAnnotations() {
+  }
 
-  Class<?>[] equals() default {};
+  private Bindable bindable;
+  private DefaultConverter defaultConverter;
 }
