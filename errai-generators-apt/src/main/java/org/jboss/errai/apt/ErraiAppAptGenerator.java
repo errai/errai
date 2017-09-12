@@ -47,7 +47,7 @@ import static org.jboss.errai.common.apt.ErraiAptPackages.generatorsPackageEleme
  * @author Tiago Bento <tfernand@redhat.com>
  */
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
-@SupportedAnnotationTypes({ "org.jboss.errai.common.apt.ErraiApp" })
+@SupportedAnnotationTypes({ "org.jboss.errai.common.configuration.ErraiApp" })
 public class ErraiAppAptGenerator extends AbstractProcessor {
 
   @Override
