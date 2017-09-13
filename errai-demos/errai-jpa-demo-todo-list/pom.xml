@@ -423,7 +423,19 @@
   <profiles>
 
     <profile>
+
       <id>apt-generators</id>
+
+      <activation>
+        <property>
+          <name>apt-generators</name>
+        </property>
+      </activation>
+
+      <properties>
+        <gwt.module.prefix>AptGenerators_</gwt.module.prefix>
+      </properties>
+
       <dependencies>
         <dependency>
           <groupId>org.jboss.errai</groupId>
@@ -431,6 +443,7 @@
           <scope>provided</scope>
         </dependency>
       </dependencies>
+
     </profile>
 
     <profile>
