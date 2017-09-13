@@ -40,10 +40,14 @@ import static org.jboss.errai.common.configuration.ErraiModule.Property.USER_ON_
  */
 public class ErraiModuleConfiguration {
 
-  private final ErraiAptExportedTypes exportedTypes;
+  private final Set<MetaAnnotation> erraiModules;
 
   public ErraiModuleConfiguration(final ErraiAptExportedTypes exportedTypes) {
-    this.exportedTypes = exportedTypes;
+    erraiModules = exportedTypes.findAnnotatedMetaClasses(ErraiModule.class)
+            .stream()
+            .map(module -> module.getAnnotation(ErraiModule.class))
+            .map(Optional::get)
+            .collect(toSet());
   }
 
   public Set<MetaClass> getBindableTypes() {
@@ -71,17 +75,11 @@ public class ErraiModuleConfiguration {
   }
 
   private <V> Set<V> getConfiguredArrayProperty(final Function<MetaAnnotation, Stream<V>> getter) {
-    return getErraiModuleMetaClassesStream().flatMap(getter).collect(toSet());
+    return erraiModules.stream().flatMap(getter).collect(toSet());
   }
 
   private <V> Set<V> getConfiguredProperty(final Function<MetaAnnotation, V> getter) {
-    return getErraiModuleMetaClassesStream().map(getter).collect(toSet());
+    return erraiModules.stream().map(getter).collect(toSet());
   }
 
-  private Stream<MetaAnnotation> getErraiModuleMetaClassesStream() {
-    return exportedTypes.findAnnotatedMetaClasses(ErraiModule.class)
-            .stream()
-            .map(module -> module.getAnnotation(ErraiModule.class))
-            .map(Optional::get);
-  }
 }
