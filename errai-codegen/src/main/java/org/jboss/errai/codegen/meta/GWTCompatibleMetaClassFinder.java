@@ -16,6 +16,8 @@
 
 package org.jboss.errai.codegen.meta;
 
+import com.google.gwt.core.ext.GeneratorContext;
+
 import java.lang.annotation.Annotation;
 import java.util.Collection;
 
@@ -23,6 +25,12 @@ import java.util.Collection;
  * @author Tiago Bento <tfernand@redhat.com>
  */
 @FunctionalInterface
-public interface MetaClassFinder {
-  Collection<MetaClass> findAnnotatedWith(final Class<? extends Annotation> annotationClass);
+public interface GWTCompatibleMetaClassFinder extends MetaClassFinder {
+
+  Collection<MetaClass> find(final GeneratorContext context, final Class<? extends Annotation> annotationClass);
+
+  @Override
+  default Collection<MetaClass> findAnnotatedWith(final Class<? extends Annotation> annotationClass) {
+    return find(null, annotationClass);
+  }
 }

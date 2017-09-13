@@ -40,7 +40,7 @@ public class BindableProxyLoaderAptGenerator extends ErraiAptGenerator {
   // IMPORTANT: Do not remove. ErraiAppAptGenerator depends on this constructor
   public BindableProxyLoaderAptGenerator(final ErraiAptExportedTypes exportedTypes) {
     super(exportedTypes);
-    this.erraiModuleConfiguration = new ErraiModuleConfiguration(exportedTypes);
+    this.erraiModuleConfiguration = new ErraiModuleConfiguration(this::findAnnotatedMetaClasses);
     this.bindableProxyLoaderGenerator = new BindableProxyLoaderGenerator();
   }
 

@@ -16,15 +16,25 @@
 
 package org.jboss.errai.common.apt;
 
+import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
-import java.lang.annotation.Annotation;
 import java.util.Set;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
-@FunctionalInterface
-public interface AnnotatedElementsFinder {
-  Set<? extends Element> getElementsAnnotatedWith(final TypeElement typeElement);
+public class AptAnnotatedSourceElementsFinder implements AnnotatedSourceElementsFinder {
+
+  private RoundEnvironment roundEnvironment;
+
+  public AptAnnotatedSourceElementsFinder(final RoundEnvironment roundEnvironment) {
+    this.roundEnvironment = roundEnvironment;
+  }
+
+  @Override
+  public Set<? extends Element> findSourceElementsAnnotatedWith(final TypeElement typeElement) {
+    return roundEnvironment.getElementsAnnotatedWith(typeElement);
+  }
+
 }

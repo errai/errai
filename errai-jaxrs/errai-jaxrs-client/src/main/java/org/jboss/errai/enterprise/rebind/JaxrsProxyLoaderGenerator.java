@@ -27,7 +27,7 @@ import org.jboss.errai.codegen.builder.MethodBlockBuilder;
 import org.jboss.errai.codegen.builder.impl.ClassBuilder;
 import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
-import org.jboss.errai.codegen.meta.MetaClassFinder;
+import org.jboss.errai.codegen.meta.GWTCompatibleMetaClassFinder;
 import org.jboss.errai.codegen.util.AnnotationFilter;
 import org.jboss.errai.codegen.util.InterceptorProvider;
 import org.jboss.errai.codegen.util.RuntimeAnnotationFilter;
@@ -74,12 +74,12 @@ public class JaxrsProxyLoaderGenerator extends AbstractAsyncGenerator {
     final Boolean iocEnabled = RebindUtils.isModuleInherited(context, IOC_MODULE_NAME);
     final Set<String> translatablePackages = RebindUtils.findTranslatablePackages(context);
     final AnnotationFilter annotationFilter = new RuntimeAnnotationFilter(translatablePackages);
-    final MetaClassFinder metaClassFinder = (ctx, annotation) -> getMetaClasses(ctx, annotation, translatablePackages);
+    final GWTCompatibleMetaClassFinder metaClassFinder = (ctx, annotation) -> getMetaClasses(ctx, annotation, translatablePackages);
 
     return generate(metaClassFinder, iocEnabled, annotationFilter, context);
   }
 
-  public String generate(final MetaClassFinder metaClassFinder,
+  public String generate(final GWTCompatibleMetaClassFinder metaClassFinder,
           final Boolean iocEnabled,
           final AnnotationFilter annotationFilter,
           final GeneratorContext context) {

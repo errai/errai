@@ -53,15 +53,15 @@ public final class ErraiAptExportedTypes {
 
   private final Types types;
   private final Elements elements;
-  private final AnnotatedElementsFinder annotatedElementsFinder;
+  private final AnnotatedSourceElementsFinder annotatedSourceElementsFinder;
 
   public ErraiAptExportedTypes(final Types types,
           final Elements elements,
-          final AnnotatedElementsFinder annotatedElementsFinder) {
+          final AnnotatedSourceElementsFinder annotatedSourceElementsFinder) {
 
     this.types = types;
     this.elements = elements;
-    this.annotatedElementsFinder = annotatedElementsFinder;
+    this.annotatedSourceElementsFinder = annotatedSourceElementsFinder;
 
     // Loads all exported types from ExportFiles
     exportedClassesByAnnotationClassName = getExportedTypesFromExportFilesInExportFilesPackage();
@@ -104,7 +104,7 @@ public final class ErraiAptExportedTypes {
 
   private Stream<TypeMirror> exportableLocalTypes(final TypeMirror element) {
     final TypeElement annotation = (TypeElement) types.asElement(element);
-    return annotatedElementsFinder.getElementsAnnotatedWith(annotation).stream().map(Element::asType);
+    return annotatedSourceElementsFinder.findSourceElementsAnnotatedWith(annotation).stream().map(Element::asType);
   }
 
   private String annotationName(final Element e) {

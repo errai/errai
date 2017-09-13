@@ -18,7 +18,7 @@ package org.jboss.errai.common.apt.configuration;
 
 import org.jboss.errai.codegen.meta.MetaAnnotation;
 import org.jboss.errai.codegen.meta.MetaClass;
-import org.jboss.errai.common.apt.ErraiAptExportedTypes;
+import org.jboss.errai.codegen.meta.MetaClassFinder;
 import org.jboss.errai.common.configuration.ErraiModule;
 
 import java.util.Optional;
@@ -42,8 +42,8 @@ public class ErraiModuleConfiguration {
 
   private final Set<MetaAnnotation> erraiModules;
 
-  public ErraiModuleConfiguration(final ErraiAptExportedTypes exportedTypes) {
-    erraiModules = exportedTypes.findAnnotatedMetaClasses(ErraiModule.class)
+  public ErraiModuleConfiguration(final MetaClassFinder metaClassFinder) {
+    erraiModules = metaClassFinder.findAnnotatedWith(ErraiModule.class)
             .stream()
             .map(module -> module.getAnnotation(ErraiModule.class))
             .map(Optional::get)
@@ -70,7 +70,8 @@ public class ErraiModuleConfiguration {
     return getConfiguredArrayProperty(a -> stream(a.valueAsArray(IOC_BLACKLIST, MetaClass[].class)));
   }
 
-  public Set<MetaClass> isUserEnabledOnHostPage() {
+  //FIXME: decide whether true wins, false wins or throws exception when more then 1 is defined
+  public Set<Boolean> isUserEnabledOnHostPage() {
     return getConfiguredProperty(s -> s.value(USER_ON_HOST_PAGE_ENABLED));
   }
 

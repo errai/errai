@@ -17,8 +17,8 @@
 package org.jboss.errai.apt;
 
 import org.jboss.errai.codegen.meta.impl.apt.APTClassUtil;
-import org.jboss.errai.common.apt.AnnotatedElementsFinder;
-import org.jboss.errai.common.apt.AptAnnotatedElementsFinder;
+import org.jboss.errai.common.apt.AnnotatedSourceElementsFinder;
+import org.jboss.errai.common.apt.AptAnnotatedSourceElementsFinder;
 import org.jboss.errai.common.apt.ErraiAptExportedTypes;
 import org.jboss.errai.common.apt.ErraiAptGenerator;
 
@@ -57,7 +57,7 @@ public class ErraiAppAptGenerator extends AbstractProcessor {
   public boolean process(final Set<? extends TypeElement> annotations, final RoundEnvironment roundEnv) {
 
     try {
-      generateAndSaveSourceFiles(annotations, new AptAnnotatedElementsFinder(roundEnv));
+      generateAndSaveSourceFiles(annotations, new AptAnnotatedSourceElementsFinder(roundEnv));
     } catch (final Exception e) {
       System.out.println("Error generating files: " + e.getMessage());
       e.printStackTrace();
@@ -67,7 +67,7 @@ public class ErraiAppAptGenerator extends AbstractProcessor {
   }
 
   void generateAndSaveSourceFiles(final Set<? extends TypeElement> annotations,
-          final AnnotatedElementsFinder annotatedElementsFinder) {
+          final AnnotatedSourceElementsFinder annotatedElementsFinder) {
 
     for (final TypeElement erraiAppAnnotation : annotations) {
       System.out.println("Generating files using Errai APT Generators..");
