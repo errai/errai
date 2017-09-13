@@ -17,6 +17,8 @@
 package org.jboss.errai.codegen.apt.test;
 
 import com.google.testing.compile.CompilationRule;
+import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.impl.apt.APTClass;
 import org.jboss.errai.codegen.meta.impl.apt.APTClassUtil;
 import org.jboss.errai.codegen.test.AbstractCodegenTest;
 import org.junit.Before;
@@ -46,6 +48,10 @@ public abstract class ErraiAptTest extends AbstractCodegenTest {
 
   protected TypeElement getTypeElement(final Class<?> clazz) {
     return elements.getTypeElement(clazz.getCanonicalName());
+  }
+
+  protected MetaClass aptClass(final Class<?> clazz) {
+    return new APTClass(getTypeElement(clazz).asType());
   }
 
 }

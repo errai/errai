@@ -2,7 +2,7 @@ package org.jboss.errai.apt;
 
 import org.jboss.errai.apt.internal.generator.TestExportedGenerator;
 import org.jboss.errai.codegen.apt.test.ErraiAptTest;
-import org.jboss.errai.common.apt.AnnotatedElementsFinder;
+import org.jboss.errai.common.apt.AnnotatedSourceElementsFinder;
 import org.jboss.errai.common.apt.ErraiAptGenerator;
 import org.junit.Assert;
 import org.junit.Test;
@@ -20,7 +20,7 @@ public class ErraiAppAptGeneratorTest extends ErraiAptTest {
     Assert.assertFalse(new ErraiAppAptGenerator() {
       @Override
       void generateAndSaveSourceFiles(Set<? extends TypeElement> annotations,
-              AnnotatedElementsFinder annotatedElementsFinder) {
+              AnnotatedSourceElementsFinder annotatedElementsFinder) {
         throw new TestException();
       }
     }.process(null, null));

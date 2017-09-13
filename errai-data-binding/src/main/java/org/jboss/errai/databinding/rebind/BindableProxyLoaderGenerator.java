@@ -29,7 +29,7 @@ import org.jboss.errai.codegen.builder.impl.ClassBuilder;
 import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
-import org.jboss.errai.codegen.meta.MetaClassFinder;
+import org.jboss.errai.codegen.meta.GWTCompatibleMetaClassFinder;
 import org.jboss.errai.codegen.meta.MetaParameterizedType;
 import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.util.Stmt;
@@ -77,7 +77,7 @@ public class BindableProxyLoaderGenerator extends AbstractAsyncGenerator {
     return generate((ctx, annotation) -> findAnnotatedElements(context, translatablePackages, annotation), context);
   }
 
-  public String generate(final MetaClassFinder metaClassFinder, final GeneratorContext context) {
+  public String generate(final GWTCompatibleMetaClassFinder metaClassFinder, final GeneratorContext context) {
 
     final Collection<MetaClass> defaultConverters = metaClassFinder.find(context, DefaultConverter.class);
     addCacheRelevantClasses(defaultConverters);

@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.codegen.meta;
+package org.jboss.errai.common.apt;
 
+import javax.lang.model.element.Element;
+import javax.lang.model.element.TypeElement;
 import java.lang.annotation.Annotation;
-import java.util.Collection;
+import java.util.Set;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
 @FunctionalInterface
-public interface MetaClassFinder {
-  Collection<MetaClass> findAnnotatedWith(final Class<? extends Annotation> annotationClass);
+public interface AnnotatedSourceElementsFinder {
+  Set<? extends Element> findSourceElementsAnnotatedWith(final TypeElement typeElement);
 }

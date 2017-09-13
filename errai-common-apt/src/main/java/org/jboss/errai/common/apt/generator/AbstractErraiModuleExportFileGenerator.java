@@ -17,8 +17,8 @@
 package org.jboss.errai.common.apt.generator;
 
 import org.jboss.errai.codegen.meta.impl.apt.APTClassUtil;
-import org.jboss.errai.common.apt.AnnotatedElementsFinder;
-import org.jboss.errai.common.apt.AptAnnotatedElementsFinder;
+import org.jboss.errai.common.apt.AnnotatedSourceElementsFinder;
+import org.jboss.errai.common.apt.AptAnnotatedSourceElementsFinder;
 import org.jboss.errai.common.apt.exportfile.ExportFile;
 
 import javax.annotation.processing.AbstractProcessor;
@@ -42,7 +42,7 @@ public abstract class AbstractErraiModuleExportFileGenerator extends AbstractPro
 
     try {
       APTClassUtil.init(processingEnv.getTypeUtils(), processingEnv.getElementUtils());
-      generateAndSaveExportFiles(annotations, new AptAnnotatedElementsFinder(roundEnv));
+      generateAndSaveExportFiles(annotations, new AptAnnotatedSourceElementsFinder(roundEnv));
     } catch (final Exception e) {
       System.out.println("Error generating export files");
       e.printStackTrace();
@@ -52,13 +52,13 @@ public abstract class AbstractErraiModuleExportFileGenerator extends AbstractPro
   }
 
   void generateAndSaveExportFiles(final Set<? extends TypeElement> annotations,
-          final AnnotatedElementsFinder annotatedElementsFinder) {
+          final AnnotatedSourceElementsFinder annotatedElementsFinder) {
 
     buildExportFiles(annotations, annotatedElementsFinder).forEach(this::generateSourceAndSave);
   }
 
   Set<ExportFile> buildExportFiles(final Set<? extends TypeElement> annotations,
-          final AnnotatedElementsFinder annotatedElementsFinder) {
+          final AnnotatedSourceElementsFinder annotatedElementsFinder) {
 
     return annotations.stream()
             .map(annotation -> newExportFile(annotatedElementsFinder, annotation))
@@ -66,15 +66,15 @@ public abstract class AbstractErraiModuleExportFileGenerator extends AbstractPro
             .collect(toSet());
   }
 
-  ExportFile newExportFile(final AnnotatedElementsFinder annotatedElementsFinder, final TypeElement annotation) {
+  ExportFile newExportFile(final AnnotatedSourceElementsFinder annotatedElementsFinder, final TypeElement annotation) {
     final Set<Element> exportedTypes = annotatedClassesAndInterfaces(annotatedElementsFinder, annotation);
     return new ExportFile(getCamelCaseModuleName(), annotation, exportedTypes);
   }
 
-  Set<Element> annotatedClassesAndInterfaces(final AnnotatedElementsFinder annotatedElementsFinder,
+  Set<Element> annotatedClassesAndInterfaces(final AnnotatedSourceElementsFinder annotatedElementsFinder,
           final TypeElement annotationTypeElement) {
 
-    return annotatedElementsFinder.getElementsAnnotatedWith(annotationTypeElement)
+    return annotatedElementsFinder.findSourceElementsAnnotatedWith(annotationTypeElement)
             .stream()
             .filter(e -> e.getKind().isClass() || e.getKind().isInterface())
             .collect(toSet());

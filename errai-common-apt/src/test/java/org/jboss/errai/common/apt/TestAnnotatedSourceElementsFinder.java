@@ -16,8 +16,6 @@
 
 package org.jboss.errai.common.apt;
 
-import org.jboss.errai.common.apt.AnnotatedElementsFinder;
-
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import java.util.Arrays;
@@ -28,16 +26,16 @@ import static java.util.stream.Collectors.toSet;
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
-public class TestAnnotatedElementsFinder implements AnnotatedElementsFinder {
+public class TestAnnotatedSourceElementsFinder implements AnnotatedSourceElementsFinder {
 
   private final Set<? extends Element> elements;
 
-  public TestAnnotatedElementsFinder(final Element... elements) {
+  public TestAnnotatedSourceElementsFinder(final Element... elements) {
     this.elements = Arrays.stream(elements).collect(toSet());
   }
 
   @Override
-  public Set<? extends Element> getElementsAnnotatedWith(final TypeElement typeElement) {
+  public Set<? extends Element> findSourceElementsAnnotatedWith(final TypeElement typeElement) {
     return elements;
   }
 }
