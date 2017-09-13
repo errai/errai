@@ -321,7 +321,7 @@ public class BindableProxyGenerator {
         updateNestedProxy =
             Stmt.if_(Bool.expr(agent("binders").invoke("containsKey", property)))
                 .append(Stmt.loadVariable(property).assignValue(Cast.to(paramType,
-                    agent("binders").invoke("get", property).invoke("setModel", Variable.get(property),
+                    agent("binders").invoke("get", property).invoke("setModel", Cast.to(Object.class, Variable.get(property)),
                         Stmt.loadStatic(StateSync.class, "FROM_MODEL"),
                         Stmt.loadLiteral(true)))))
                 .finish();
