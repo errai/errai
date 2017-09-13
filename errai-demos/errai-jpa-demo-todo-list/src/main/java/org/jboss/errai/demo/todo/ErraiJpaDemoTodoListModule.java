@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.security.demo;
+package org.jboss.errai.demo.todo;
 
 import org.jboss.errai.common.configuration.ErraiModule;
 
@@ -23,5 +23,5 @@ import org.jboss.errai.common.configuration.ErraiModule;
  */
 
 @ErraiModule(userOnHostPageEnabled = true)
-public final class ErraiSecurityDemoModule {
+public final class ErraiJpaDemoTodoListModule {
 }

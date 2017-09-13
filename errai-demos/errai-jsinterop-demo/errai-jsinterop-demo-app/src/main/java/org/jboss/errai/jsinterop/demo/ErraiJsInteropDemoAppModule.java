@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.security.demo;
+package org.jboss.errai.jsinterop.demo;
 
 import org.jboss.errai.common.configuration.ErraiModule;
 
@@ -22,6 +22,6 @@ import org.jboss.errai.common.configuration.ErraiModule;
  * @author Tiago Bento <tfernand@redhat.com>
  */
 
-@ErraiModule(userOnHostPageEnabled = true)
-public final class ErraiSecurityDemoModule {
+@ErraiModule
+public final class ErraiJsInteropDemoAppModule {
 }
