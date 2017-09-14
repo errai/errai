@@ -422,8 +422,11 @@ public class APTClass extends AbstractMetaClass<TypeMirror> {
     switch (mirror.getKind()) {
     case DECLARED:
     case TYPEVAR:
-      final TypeElement element = (TypeElement) types.asElement(mirror);
-      return element.getInterfaces().stream().map(APTClass::new).toArray(MetaClass[]::new);
+      final Element element = types.asElement(mirror);
+      if (element instanceof  TypeElement) {
+        final TypeElement typeElement = (TypeElement) element;
+        return typeElement.getInterfaces().stream().map(APTClass::new).toArray(MetaClass[]::new);
+      }
     case BOOLEAN:
     case BYTE:
     case CHAR:
@@ -433,6 +436,7 @@ public class APTClass extends AbstractMetaClass<TypeMirror> {
     case LONG:
     case SHORT:
     case ARRAY:
+    case VOID:
       return new MetaClass[0];
     default:
       return throwUnsupportedTypeError(mirror);
@@ -451,6 +455,7 @@ public class APTClass extends AbstractMetaClass<TypeMirror> {
       } else {
         return new APTClass(superclass);
       }
+    case VOID:
     case BOOLEAN:
     case BYTE:
     case CHAR:

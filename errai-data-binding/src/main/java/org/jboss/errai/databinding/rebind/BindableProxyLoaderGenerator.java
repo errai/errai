@@ -100,7 +100,7 @@ public class BindableProxyLoaderGenerator extends AbstractAsyncGenerator {
                 "@Bindable type needs a public default no-arg constructor: " + bindable.getFullyQualifiedName());
       }
 
-      final ClassStructureBuilder<?> bindableProxy = new BindableProxyGenerator(bindable).generate();
+      final ClassStructureBuilder<?> bindableProxy = new BindableProxyGenerator(bindable, bindableTypes).generate();
       loadProxies.append(new InnerClass(bindableProxy.getClassDefinition()));
       final Statement proxyProvider = ObjectBuilder.newInstanceOf(BindableProxyProvider.class)
               .extend()
