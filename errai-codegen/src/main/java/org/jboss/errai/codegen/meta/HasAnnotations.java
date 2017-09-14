@@ -27,6 +27,7 @@ import static java.util.stream.Collectors.toList;
  * @author Mike Brock <cbrock@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
  */
+@FunctionalInterface
 public interface HasAnnotations {
 
   /**
