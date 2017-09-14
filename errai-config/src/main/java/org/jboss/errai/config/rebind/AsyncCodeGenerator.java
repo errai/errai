@@ -25,5 +25,9 @@ import java.util.concurrent.Future;
  * @author Mike Brock
  */
 public interface AsyncCodeGenerator {
-  public Future<String> generateAsync(TreeLogger logger, GeneratorContext context);
+  Future<String> generateAsync(TreeLogger logger, GeneratorContext context);
+
+  default boolean alreadyGeneratedSourcesViaAptGenerators(final GeneratorContext context) {
+    return false;
+  }
 }
