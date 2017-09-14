@@ -19,6 +19,7 @@ package org.jboss.errai.bus.rebind;
 import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.UnableToCompleteException;
+import com.google.gwt.core.ext.typeinfo.NotFoundException;
 import org.jboss.errai.bus.client.api.messaging.MessageBus;
 import org.jboss.errai.bus.client.local.RpcProxyLoader;
 import org.jboss.errai.bus.server.annotations.Remote;
@@ -29,8 +30,8 @@ import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.MethodBlockBuilder;
 import org.jboss.errai.codegen.builder.impl.ClassBuilder;
 import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
-import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.GWTCompatibleMetaClassFinder;
+import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.util.AnnotationFilter;
 import org.jboss.errai.codegen.util.InterceptorProvider;
 import org.jboss.errai.codegen.util.RuntimeAnnotationFilter;
@@ -75,7 +76,8 @@ public class RpcProxyLoaderGenerator extends AbstractAsyncGenerator {
     final Boolean iocEnabled = RebindUtils.isModuleInherited(context, IOC_MODULE_NAME);
     final Set<String> translatablePackages = RebindUtils.findTranslatablePackages(context);
     final AnnotationFilter gwtAnnotationFilter = new RuntimeAnnotationFilter(translatablePackages);
-    final GWTCompatibleMetaClassFinder metaClassFinder = (ctx, annotation) -> getMetaClasses(ctx, annotation, translatablePackages);
+    final GWTCompatibleMetaClassFinder metaClassFinder = (ctx, annotation) -> getMetaClasses(ctx, annotation,
+            translatablePackages);
 
     return generate(metaClassFinder, iocEnabled, gwtAnnotationFilter, context);
   }
@@ -158,4 +160,14 @@ public class RpcProxyLoaderGenerator extends AbstractAsyncGenerator {
   public String getClassSimpleName() {
     return classSimpleName;
   }
+
+  @Override
+  public boolean alreadyGeneratedSourcesViaAptGenerators(final GeneratorContext context) {
+    try {
+      return context.getTypeOracle().getType(getPackageName() + "." + getClassSimpleName()) != null;
+    } catch (final NotFoundException e) {
+      return false;
+    }
+  }
+
 }

@@ -150,15 +150,20 @@ public final class AsyncGenerators {
             final AsyncCodeGenerator asyncCodeGenerator
                 = cls.asSubclass(AsyncCodeGenerator.class).newInstance();
 
-
-
             final GenerateAsync generateAsync = cls.getAnnotation(GenerateAsync.class);
 
             try {
               job.getGeneratorContext().getTypeOracle().getType(generateAsync.value().getName());
-              codeGenerators.put(generateAsync.value(), asyncCodeGenerator);
 
-              log.info("discovered async generator " + cls.getName() + "; for type: " + generateAsync.value().getName());
+              if (!asyncCodeGenerator.alreadyGeneratedSourcesViaAptGenerators(currentContext)) {
+                codeGenerators.put(generateAsync.value(), asyncCodeGenerator);
+                log.info("discovered async generator " + cls.getName() + "; for type: " + generateAsync.value().getName());
+              } else {
+                log.info(
+                        "Skipping async generator {} for type {} because it already generated sources via APT generators",
+                        cls.getName(), generateAsync.value().getName());
+              }
+
             }
             catch (TypeOracleException e) {
               codeGenerators.remove(generateAsync.value());
