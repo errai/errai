@@ -90,12 +90,14 @@ public class BindableProxyGenerator {
   private final String agentField;
   private final String targetField;
   private final Set<MetaMethod> proxiedAccessorMethods;
+  private final Collection<MetaClass> allBindableTypes;
 
-  public BindableProxyGenerator(final MetaClass bindable) {
+  public BindableProxyGenerator(final MetaClass bindable, final Collection<MetaClass> allBindableTypes) {
     this.bindable = bindable;
     this.agentField = inferSafeFieldName("agent");
     this.targetField = inferSafeFieldName("target");
     this.proxiedAccessorMethods = new HashSet<>();
+    this.allBindableTypes = allBindableTypes;
   }
 
   public ClassStructureBuilder<?> generate() {
@@ -317,7 +319,7 @@ public class BindableProxyGenerator {
       }
 
       Statement updateNestedProxy = null;
-      if (DataBindingUtil.isBindableType(paramType)) {
+      if (allBindableTypes.contains(paramType)) {
         updateNestedProxy =
             Stmt.if_(Bool.expr(agent("binders").invoke("containsKey", property)))
                 .append(Stmt.loadVariable(property).assignValue(Cast.to(paramType,
@@ -423,7 +425,7 @@ public class BindableProxyGenerator {
             "put",
             property,
             Stmt.newObject(PropertyType.class, loadLiteral(propertyType.asBoxed()),
-                DataBindingUtil.isBindableType(propertyType),
+                allBindableTypes.contains(propertyType),
                 propertyType.isAssignableTo(List.class))
             )
         );
@@ -455,7 +457,7 @@ public class BindableProxyGenerator {
       final MetaMethod writeMethod = bindable.getBeanDescriptor().getWriteMethodForProperty(property);
       if (readMethod != null && writeMethod != null) {
         final MetaClass type = readMethod.getReturnType();
-        if (!DataBindingUtil.isBindableType(type)) {
+        if (!allBindableTypes.contains(type)) {
           // If we find a collection we copy its elements and unwrap them if necessary
           // TODO support map types
           if (type.isAssignableTo(Collection.class)) {

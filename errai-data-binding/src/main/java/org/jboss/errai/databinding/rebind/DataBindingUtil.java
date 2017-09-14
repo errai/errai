@@ -357,18 +357,6 @@ public class DataBindingUtil {
   }
 
   /**
-   * Checks if the provided type is bindable.
-   *
-   * @param type
-   *          the type to check
-   *
-   * @return true if the provide type is bindable, otherwise false.
-   */
-  public static boolean isBindableType(final MetaClass type) {
-    return (type.isAnnotationPresent(Bindable.class) || getConfiguredBindableTypes().contains(type));
-  }
-
-  /**
    * Returns all bindable types on the classpath.
    *
    * @param context
