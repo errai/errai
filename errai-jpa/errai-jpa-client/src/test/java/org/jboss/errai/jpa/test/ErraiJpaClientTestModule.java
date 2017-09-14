@@ -14,23 +14,13 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.common.apt.generator;
+package org.jboss.errai.jpa.test;
 
-import org.jboss.errai.common.apt.AnnotatedSourceElementsFinder;
-
-import javax.annotation.processing.Filer;
-import javax.lang.model.element.TypeElement;
-import java.util.Set;
+import org.jboss.errai.common.configuration.ErraiModule;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
-class TestGenerator extends ExportFileGenerator {
-
-  TestGenerator(final Filer filer,
-          final Set<? extends TypeElement> exportableAnnotations,
-          final AnnotatedSourceElementsFinder annotatedSourceElementsFinder) {
-    super("test", exportableAnnotations, annotatedSourceElementsFinder);
-  }
-
+@ErraiModule
+public class ErraiJpaClientTestModule {
 }
