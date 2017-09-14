@@ -19,6 +19,7 @@ package org.jboss.errai.common.apt;
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
+import java.lang.annotation.Annotation;
 import java.util.Set;
 
 /**
@@ -37,4 +38,8 @@ public class AptAnnotatedSourceElementsFinder implements AnnotatedSourceElements
     return roundEnvironment.getElementsAnnotatedWith(typeElement);
   }
 
+  @Override
+  public Set<? extends Element> findSourceElementsAnnotatedWith(final Class<? extends Annotation> annotationClass) {
+    return roundEnvironment.getElementsAnnotatedWith(annotationClass);
+  }
 }

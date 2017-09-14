@@ -35,7 +35,7 @@ import static org.jboss.errai.bus.apt.export.SupportedAnnotationTypes.REMOTE;
 public class ErraiBusExportFileGenerator extends AbstractErraiModuleExportFileGenerator {
 
   @Override
-  protected String getCamelCaseModuleName() {
+  protected String getCamelCaseErraiModuleName() {
     return "bus";
   }
 }

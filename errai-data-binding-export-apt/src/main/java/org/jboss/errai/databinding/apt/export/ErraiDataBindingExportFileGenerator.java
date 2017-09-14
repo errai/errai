@@ -33,7 +33,7 @@ import static org.jboss.errai.databinding.apt.export.SupportedAnnotationTypes.DE
 public class ErraiDataBindingExportFileGenerator extends AbstractErraiModuleExportFileGenerator {
 
   @Override
-  protected String getCamelCaseModuleName() {
+  protected String getCamelCaseErraiModuleName() {
     return "dataBinding";
   }
 }

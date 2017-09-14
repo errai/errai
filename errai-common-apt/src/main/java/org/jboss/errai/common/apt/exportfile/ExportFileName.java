@@ -16,8 +16,6 @@
 
 package org.jboss.errai.common.apt.exportfile;
 
-import static org.apache.commons.lang3.RandomStringUtils.randomAlphabetic;
-
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
@@ -30,7 +28,7 @@ public final class ExportFileName {
 
   public static String encodeAnnotationNameAsExportFileName(final ExportFile exportFile) {
     final String annotationName = exportFile.annotation.getQualifiedName().toString().replace(".", "_");
-    return exportFile.moduleName + "_" + randomAlphabetic(6) + "_" + PREFIX + annotationName;
+    return exportFile.erraiModuleNamespace + "_" + PREFIX + annotationName;
   }
 
   public static String decodeAnnotationClassNameFromExportFileName(final String exportFileName) {

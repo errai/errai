@@ -16,12 +16,9 @@
 
 package org.jboss.errai.common.apt.generator;
 
-import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
-import javax.lang.model.element.TypeElement;
-import java.util.Set;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
@@ -31,8 +28,7 @@ import java.util.Set;
 public class ErraiModuleExportFileGenerator extends AbstractErraiModuleExportFileGenerator {
 
   @Override
-  protected String getCamelCaseModuleName() {
+  public String getCamelCaseErraiModuleName() {
     return "errai";
   }
-
 }

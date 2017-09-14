@@ -32,13 +32,13 @@ import static org.jboss.errai.common.apt.ErraiAptPackages.exportFilesPackagePath
  */
 public class ExportFile {
 
-  public final String moduleName;
+  public final String erraiModuleNamespace;
   public final TypeElement annotation;
   public final Set<? extends Element> exportedTypes;
   public final String simpleClassName;
 
-  public ExportFile(final String moduleName, final TypeElement annotation, final Set<? extends Element> exportedTypes) {
-    this.moduleName = moduleName;
+  public ExportFile(final String erraiModuleNamespace, final TypeElement annotation, final Set<? extends Element> exportedTypes) {
+    this.erraiModuleNamespace = erraiModuleNamespace;
     this.annotation = annotation;
     this.exportedTypes = exportedTypes;
     this.simpleClassName = ExportFileName.encodeAnnotationNameAsExportFileName(this);
@@ -57,10 +57,6 @@ public class ExportFile {
 
   private String fieldName(final MetaClass exportedType) {
     return exportedType.getCanonicalName().replace(".", "_");
-  }
-
-  public Boolean hasExportedTypes() {
-    return !exportedTypes.isEmpty();
   }
 
   public String getFullClassName() {
