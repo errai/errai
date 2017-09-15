@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.common.apt.configuration;
+package org.jboss.errai.common.apt.configuration2;
+
+import org.jboss.errai.common.apt.configuration.TestAnnotation;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
-public @interface TestAnnotation {
+@TestAnnotation
+public class AnnotatedTypeOutOfModule {
 }

@@ -16,11 +16,9 @@
 
 package org.jboss.errai.common.apt.configuration;
 
-import org.jboss.errai.common.configuration.ErraiModule;
-
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
-@ErraiModule
-public class ErraiTestDefaultModule {
+@TestAnnotation
+public class AnnotatedTypeInsideModule {
 }

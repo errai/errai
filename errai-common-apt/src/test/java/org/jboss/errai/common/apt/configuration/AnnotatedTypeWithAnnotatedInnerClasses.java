@@ -19,5 +19,10 @@ package org.jboss.errai.common.apt.configuration;
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
-public @interface TestAnnotation {
+@TestAnnotation
+class AnnotatedTypeWithAnnotatedInnerClasses {
+
+  @TestAnnotation
+  static class InnerAnnotatedType {
+  }
 }
