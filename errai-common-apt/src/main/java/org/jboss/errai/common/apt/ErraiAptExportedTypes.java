@@ -88,8 +88,8 @@ public final class ErraiAptExportedTypes {
             .forEach(this::addExportableLocalTypes));
   }
 
-  private Map<String, Set<TypeMirror>> getLocalExportableTypes(final PackageElement packageElement) {
-    return packageElement.getEnclosedElements()
+  private Map<String, Set<TypeMirror>> getLocalExportableTypes(final PackageElement exportedAnnotationsPackageElement) {
+    return exportedAnnotationsPackageElement.getEnclosedElements()
             .stream()
             .flatMap(this::getExportedTypesFromExportFile)
             .collect(groupingBy(TypeMirror::toString, flatMapping(this::exportableLocalTypes, toSet())));

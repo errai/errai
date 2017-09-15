@@ -14,13 +14,10 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ui;
-
-import org.jboss.errai.common.configuration.ErraiModule;
+package org.jboss.errai.common.apt.configuration;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
-@ErraiModule
-public class ErraiUiTestModule {
+@interface TestAnnotation {
 }

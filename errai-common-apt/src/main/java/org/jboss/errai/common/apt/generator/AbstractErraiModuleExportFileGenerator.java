@@ -47,11 +47,14 @@ public abstract class AbstractErraiModuleExportFileGenerator extends AbstractPro
     return false;
   }
 
-  void generateAndSaveExportFiles(final Set<? extends TypeElement> annotations,
+  void generateAndSaveExportFiles(final Set<? extends TypeElement> exportableAnnotations,
           final AnnotatedSourceElementsFinder annotatedSourceElementsFinder,
           final Filer filer) {
 
-    final ExportFileGenerator generator = new ExportFileGenerator(getCamelCaseErraiModuleName(), annotations, annotatedSourceElementsFinder);
+    final String camelCaseErraiModuleName = getCamelCaseErraiModuleName();
+    final ExportFileGenerator generator = new ExportFileGenerator(camelCaseErraiModuleName, exportableAnnotations,
+            annotatedSourceElementsFinder);
+
     generator.generateAndSaveExportFiles(filer);
   }
 }
