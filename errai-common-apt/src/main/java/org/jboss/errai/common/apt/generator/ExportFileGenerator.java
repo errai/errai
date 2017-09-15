@@ -34,13 +34,13 @@ import static java.util.stream.Collectors.toSet;
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
-class ExportFileGenerator {
+public class ExportFileGenerator {
 
   private final String camelCaseErraiModuleName;
   private final Set<? extends TypeElement> exportableAnnotations;
   private final AnnotatedSourceElementsFinder annotatedSourceElementsFinder;
 
-  ExportFileGenerator(final String camelCaseErraiModuleName,
+  public ExportFileGenerator(final String camelCaseErraiModuleName,
           final Set<? extends TypeElement> exportableAnnotations,
           final AnnotatedSourceElementsFinder annotatedSourceElementsFinder) {
 
@@ -53,7 +53,7 @@ class ExportFileGenerator {
     createExportFiles().forEach(exportFile -> generateSourceAndSave(exportFile, filer));
   }
 
-  Set<ExportFile> createExportFiles() {
+  public Set<ExportFile> createExportFiles() {
     return annotatedSourceElementsFinder.findSourceElementsAnnotatedWith(
             org.jboss.errai.common.configuration.ErraiModule.class)
             .stream()

@@ -18,7 +18,9 @@ package org.jboss.errai.common.apt;
 
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.impl.apt.APTClass;
+import org.jboss.errai.common.apt.exportfile.ExportFile;
 import org.jboss.errai.common.apt.exportfile.ExportFileName;
+import org.jboss.errai.common.apt.generator.ExportFileGenerator;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.PackageElement;
@@ -77,22 +79,49 @@ public final class ErraiAptExportedTypes {
   private Map<String, Set<TypeMirror>> getExportedTypesFromExportFiles(final PackageElement packageElement) {
     return packageElement.getEnclosedElements()
             .stream()
-            .collect(groupingBy(this::annotationName, flatMapping(this::getExportedTypesFromExportFile, toSet())));
+            .collect(groupingBy(this::getAnnotationNameFromExportFileElement,
+                    flatMapping(this::getExportedTypesFromExportFileElement, toSet())));
+  }
+
+  private String getAnnotationNameFromExportFileElement(final Element e) {
+    return ExportFileName.decodeAnnotationClassNameFromExportFileName(e.asType().toString());
+  }
+
+  private Stream<TypeMirror> getExportedTypesFromExportFileElement(final Element exportFile) {
+    return exportFile.getEnclosedElements().stream().filter(e -> e.getKind().isField()).map(Element::asType);
   }
 
   private void addLocalExportableTypesWhichHaveNotBeenExported() {
     System.out.println("Exporting local exportable types..");
-    exportedAnnotationsPackageElement(elements).ifPresent(p -> getLocalExportableTypes(p).entrySet()
-            .stream()
-            .filter(s -> !s.getValue().isEmpty())
-            .forEach(this::addExportableLocalTypes));
+    exportedAnnotationsPackageElement(elements).map(this::getAllExportedAnnotations)
+            .ifPresent(this::addAllExportableTypes);
   }
 
-  private Map<String, Set<TypeMirror>> getLocalExportableTypes(final PackageElement exportedAnnotationsPackageElement) {
+  private Set<TypeElement> getAllExportedAnnotations(final PackageElement exportedAnnotationsPackageElement) {
     return exportedAnnotationsPackageElement.getEnclosedElements()
             .stream()
-            .flatMap(this::getExportedTypesFromExportFile)
-            .collect(groupingBy(TypeMirror::toString, flatMapping(this::exportableLocalTypes, toSet())));
+            .flatMap(this::getExportedTypesFromExportFileElement)
+            .map(types::asElement)
+            .map(s -> (TypeElement) s)
+            .collect(toSet());
+  }
+
+  private void addAllExportableTypes(final Set<TypeElement> allExportableAnnotations) {
+    getLocalExportableTypesByItsAnnotationName(allExportableAnnotations).entrySet()
+            .stream()
+            .filter(e -> !e.getValue().isEmpty())
+            .forEach(this::addExportableLocalTypes);
+  }
+
+  private Map<String, Set<TypeMirror>> getLocalExportableTypesByItsAnnotationName(final Set<TypeElement> allExportableAnnotations) {
+    return getLocalExportFileGenerator(allExportableAnnotations).createExportFiles()
+            .stream()
+            .collect(groupingBy(this::getAnnotationNameFromExportFile,
+                    flatMapping(this::getExportedTypesFromExportFile, toSet())));
+  }
+
+  private ExportFileGenerator getLocalExportFileGenerator(final Set<TypeElement> allExportableAnnotations) {
+    return new ExportFileGenerator("localExportableTypes", allExportableAnnotations, annotatedSourceElementsFinder);
   }
 
   private void addExportableLocalTypes(final Map.Entry<String, Set<TypeMirror>> entry) {
@@ -102,17 +131,12 @@ public final class ErraiAptExportedTypes {
     exportedClassesByAnnotationClassName.get(annotationName).addAll(mappedTypes);
   }
 
-  private Stream<TypeMirror> exportableLocalTypes(final TypeMirror element) {
-    final TypeElement annotation = (TypeElement) types.asElement(element);
-    return annotatedSourceElementsFinder.findSourceElementsAnnotatedWith(annotation).stream().map(Element::asType);
+  private String getAnnotationNameFromExportFile(final ExportFile exportFile) {
+    return exportFile.annotation.getQualifiedName().toString();
   }
 
-  private String annotationName(final Element e) {
-    return ExportFileName.decodeAnnotationClassNameFromExportFileName(e.asType().toString());
-  }
-
-  private Stream<TypeMirror> getExportedTypesFromExportFile(final Element exportFile) {
-    return exportFile.getEnclosedElements().stream().filter(x -> x.getKind().isField()).map(Element::asType);
+  private Stream<TypeMirror> getExportedTypesFromExportFile(final ExportFile exportFile) {
+    return exportFile.exportedTypes.stream().map(Element::asType);
   }
 
   public Collection<MetaClass> findAnnotatedMetaClasses(final Class<? extends Annotation> annotation) {
