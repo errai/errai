@@ -21,7 +21,7 @@ public class AbstractErraiModuleExportFileGeneratorTest {
       }
 
       @Override
-      void generateAndSaveExportFiles(Set<? extends TypeElement> annotations,
+      void generateAndSaveExportFiles(Set<? extends TypeElement> exportableAnnotations,
               AnnotatedSourceElementsFinder annotatedSourceElementsFinder,
               Filer filer) {
         throw new TestException();

@@ -43,7 +43,7 @@ public class ExportFileGeneratorTest extends ErraiAptTest {
 
     final TestGenerator testGenerator = getTestGenerator(singleton(testAnnotation),
             annotatedElementsFinder(testExportedType));
-    final Set<ExportFile> exportFiles = testGenerator.buildExportFiles();
+    final Set<ExportFile> exportFiles = testGenerator.createExportFiles();
 
     Assert.assertEquals(1, exportFiles.size());
     final ExportFile exportFile = exportFiles.stream().findFirst().get();
@@ -54,7 +54,7 @@ public class ExportFileGeneratorTest extends ErraiAptTest {
   @Test
   public void testBuildExportFilesForUnusedAnnotation() {
     final Set<TypeElement> annotations = singleton(getTypeElement(TestUnusedAnnotation.class));
-    final Set<ExportFile> exportFiles = getTestGenerator(annotations, annotatedElementsFinder()).buildExportFiles();
+    final Set<ExportFile> exportFiles = getTestGenerator(annotations, annotatedElementsFinder()).createExportFiles();
 
     Assert.assertEquals(0, exportFiles.size());
   }
@@ -62,56 +62,8 @@ public class ExportFileGeneratorTest extends ErraiAptTest {
   @Test
   public void testBuildExportFilesForEmptySetOfAnnotations() {
     final TestGenerator testGenerator = getTestGenerator(emptySet(), annotatedElementsFinder());
-    final Set<ExportFile> exportFiles = testGenerator.buildExportFiles();
+    final Set<ExportFile> exportFiles = testGenerator.createExportFiles();
     Assert.assertEquals(0, exportFiles.size());
-  }
-
-  @Test
-  public void testAnnotatedClassesAndInterfacesForAnnotatedField() {
-    final Element[] testExportedType = getTypeElement(
-            TestExportableTypeWithFieldAnnotations.class).getEnclosedElements().toArray(new Element[0]);
-
-    final TypeElement testEnclosedElementAnnotation = getTypeElement(TestEnclosedElementAnnotation.class);
-
-    final TestGenerator testGenerator = getTestGenerator(emptySet(), annotatedElementsFinder(testExportedType));
-
-    final Set<? extends Element> elements = testGenerator.annotatedClassesAndInterfaces(testEnclosedElementAnnotation);
-    Assert.assertTrue(elements.isEmpty());
-  }
-
-  @Test
-  public void testAnnotatedClassesAndInterfacesForAnnotatedClass() {
-    final TypeElement testAnnotation = getTypeElement(TestAnnotation.class);
-    final TypeElement testExportedType = getTypeElement(TestExportableTypeWithFieldAnnotations.class);
-
-    final TestGenerator testGenerator = getTestGenerator(emptySet(), annotatedElementsFinder(testExportedType));
-
-    final Set<? extends Element> elements = testGenerator.annotatedClassesAndInterfaces(testAnnotation);
-    Assert.assertEquals(singleton(testExportedType), elements);
-  }
-
-  @Test
-  public void testNewExportFileWithOneExportedType() {
-    final TypeElement testAnnotation = getTypeElement(TestAnnotation.class);
-    final TypeElement testExportedType = getTypeElement(TestExportableTypeWithFieldAnnotations.class);
-    final TestAnnotatedSourceElementsFinder annotatedElementsFinder = annotatedElementsFinder(testExportedType);
-
-    final TestGenerator testGenerator = getTestGenerator(emptySet(), annotatedElementsFinder);
-    final Optional<ExportFile> exportFile = testGenerator.newExportFile(testAnnotation);
-
-    Assert.assertTrue(exportFile.isPresent());
-    Assert.assertEquals(1, exportFile.get().exportedTypes.size());
-    Assert.assertTrue(exportFile.get().exportedTypes.contains(testExportedType));
-  }
-
-  @Test
-  public void testNewExportFileWithNoExportedTypes() {
-    final TypeElement testAnnotation = getTypeElement(TestAnnotation.class);
-
-    final TestGenerator testGenerator = getTestGenerator(emptySet(), annotatedElementsFinder());
-    final Optional<ExportFile> exportFile = testGenerator.newExportFile(testAnnotation);
-
-    Assert.assertFalse(exportFile.isPresent());
   }
 
   private TestAnnotatedSourceElementsFinder annotatedElementsFinder(final Element... typeElements) {
