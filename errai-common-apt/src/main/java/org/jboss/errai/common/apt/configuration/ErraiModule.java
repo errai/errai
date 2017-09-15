@@ -55,16 +55,16 @@ public class ErraiModule {
 
   Optional<ExportFile> newExportFile(final TypeElement annotation) {
 
-    final Set<Element> exportedTypes = annotatedClassesAndInterfaces(annotation);
+    final Set<Element> exportedTypes = findAnnotatedClassesAndInterfaces(annotation);
 
     if (exportedTypes.isEmpty()) {
       return Optional.empty();
     }
 
-    return Optional.of(new ExportFile(erraiModuleNamespace(), annotation, exportedTypes));
+    return Optional.of(new ExportFile(erraiModuleUniqueNamespace(), annotation, exportedTypes));
   }
 
-  Set<Element> annotatedClassesAndInterfaces(final TypeElement annotationTypeElement) {
+  Set<Element> findAnnotatedClassesAndInterfaces(final TypeElement annotationTypeElement) {
     return annotatedSourceElementsFinder.findSourceElementsAnnotatedWith(annotationTypeElement)
             .stream()
             .filter(e -> e.getKind().isClass() || e.getKind().isInterface())
@@ -77,10 +77,10 @@ public class ErraiModule {
     // Here is where the .gwt.xml file processing will be.
     // For now, we're restricting classes under the package of
     // an errai module (located on the same package as an .gwt.xml file)
-    return ((TypeElement) element).getQualifiedName().toString().contains(packageName);
+    return ((TypeElement) element).getQualifiedName().toString().contains(packageName + ".");
   }
 
-  private String erraiModuleNamespace() {
+  String erraiModuleUniqueNamespace() {
 
     final String moduleFullName = ((TypeElement) erraiModuleClassElement).getQualifiedName()
             .toString()
@@ -90,11 +90,7 @@ public class ErraiModule {
   }
 
   private String getPackageName() {
-    return getPackage().getQualifiedName().toString();
-  }
-
-  private PackageElement getPackage() {
-    return getPackage(erraiModuleClassElement);
+    return getPackage(erraiModuleClassElement).getQualifiedName().toString();
   }
 
   private PackageElement getPackage(final Element erraiModuleClassElement) {

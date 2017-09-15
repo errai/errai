@@ -43,7 +43,7 @@ public class ErraiModuleConfigurationTest extends ErraiAptTest {
 
   @Test
   public void testGetAllPropertiesWithDefaultValues() {
-    final TestMetaClassFinder metaClassFinder = new TestMetaClassFinder(aptClass(ErraiTestDefaultModule.class));
+    final TestMetaClassFinder metaClassFinder = new TestMetaClassFinder(aptClass(ErraiDefaultTestModule.class));
     final ErraiModuleConfiguration config = new ErraiModuleConfiguration(metaClassFinder);
 
     assertTrue(config.getBindableTypes().isEmpty());
