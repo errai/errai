@@ -33,8 +33,8 @@ import com.google.gwt.dom.client.Document;
  * {@link #init()} method because it is annotated with the
  * {@link PostConstruct} annotation.
  */
-@ErraiApp
 @EntryPoint
+@ErraiApp(userOnHostPageEnabled = true)
 public class App {
 
   @Inject

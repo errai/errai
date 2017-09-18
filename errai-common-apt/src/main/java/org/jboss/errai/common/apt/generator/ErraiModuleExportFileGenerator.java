@@ -24,7 +24,8 @@ import javax.lang.model.SourceVersion;
  * @author Tiago Bento <tfernand@redhat.com>
  */
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
-@SupportedAnnotationTypes({ "org.jboss.errai.common.configuration.ErraiModule" })
+@SupportedAnnotationTypes({ "org.jboss.errai.common.configuration.ErraiModule",
+                            "org.jboss.errai.common.configuration.ErraiApp" })
 public class ErraiModuleExportFileGenerator extends AbstractErraiModuleExportFileGenerator {
 
   @Override

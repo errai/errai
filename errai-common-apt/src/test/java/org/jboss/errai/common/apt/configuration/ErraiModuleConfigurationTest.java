@@ -53,12 +53,6 @@ public class ErraiModuleConfigurationTest extends ErraiAptTest {
     assertTrue(config.getNonSerializableTypes().isEmpty());
     assertTrue(config.getNonSerializableTypes().isEmpty());
     assertTrue(config.getNonSerializableTypes().isEmpty());
-
-    assertContainsOnly(config.getApplicationContext(), "");
-    assertContainsOnly(config.isUserEnabledOnHostPage(), false);
-    assertContainsOnly(config.asyncBeanManager(), false);
-    assertContainsOnly(config.isWebSocketServerEnabled(), false);
-    assertContainsOnly(config.isAutoDiscoverServicesEnabled(), false);
   }
 
   @Test
@@ -71,12 +65,6 @@ public class ErraiModuleConfigurationTest extends ErraiAptTest {
     assertContainsOnly(config.getIocBlacklist(), aptClass(IocBlacklisted1.class));
     assertContainsOnly(config.getSerializableTypes(), aptClass(Serializable1.class));
     assertContainsOnly(config.getNonSerializableTypes(), aptClass(NonSerializable1.class));
-
-    assertContainsOnly(config.getApplicationContext(), "/test");
-    assertContainsOnly(config.isUserEnabledOnHostPage(), true);
-    assertContainsOnly(config.asyncBeanManager(), true);
-    assertContainsOnly(config.isWebSocketServerEnabled(), true);
-    assertContainsOnly(config.isAutoDiscoverServicesEnabled(), true);
   }
 
   @Test
@@ -93,13 +81,6 @@ public class ErraiModuleConfigurationTest extends ErraiAptTest {
     assertContainsOnly(config.getSerializableTypes(), aptClass(Serializable1.class), aptClass(Serializable2.class));
     assertContainsOnly(config.getNonSerializableTypes(), aptClass(NonSerializable1.class),
             aptClass(NonSerializable2.class));
-
-    //Equal values are not repeated
-    assertContainsOnly(config.getApplicationContext(), "/test");
-    assertContainsOnly(config.isUserEnabledOnHostPage(), true);
-    assertContainsOnly(config.asyncBeanManager(), true);
-    assertContainsOnly(config.isWebSocketServerEnabled(), true);
-    assertContainsOnly(config.isAutoDiscoverServicesEnabled(), true);
   }
 
   private static void assertContainsOnly(final Set<?> configValue, final Object... objects) {

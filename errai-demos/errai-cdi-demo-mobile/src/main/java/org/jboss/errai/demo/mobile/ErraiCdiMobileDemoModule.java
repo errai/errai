@@ -22,6 +22,6 @@ import org.jboss.errai.common.configuration.ErraiModule;
  * @author Tiago Bento <tfernand@redhat.com>
  */
 
-@ErraiModule(applicationContext = "/errai-cdi-demo-mobile/", autoDiscoverServices = true, enableWebSocketServer = false)
+@ErraiModule
 public final class ErraiCdiMobileDemoModule {
 }

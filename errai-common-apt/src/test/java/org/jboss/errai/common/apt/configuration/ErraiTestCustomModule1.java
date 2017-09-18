@@ -25,12 +25,7 @@ import org.jboss.errai.common.configuration.ErraiModule;
              serializableTypes = ErraiTestCustomModule1.Serializable1.class,
              nonSerializableTypes = ErraiTestCustomModule1.NonSerializable1.class,
              iocAlternatives = ErraiTestCustomModule1.IocAlternative1.class,
-             iocBlacklist = ErraiTestCustomModule1.IocBlacklisted1.class,
-             userOnHostPageEnabled = true,
-             asyncBeanManager = true,
-             enableWebSocketServer = true,
-             autoDiscoverServices = true,
-             applicationContext = "/test")
+             iocBlacklist = ErraiTestCustomModule1.IocBlacklisted1.class)
 class ErraiTestCustomModule1 {
 
   static class Serializable1 {
