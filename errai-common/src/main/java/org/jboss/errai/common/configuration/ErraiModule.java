@@ -33,27 +33,12 @@ public @interface ErraiModule {
 
   Class<?>[] iocBlacklist() default {};
 
-  boolean userOnHostPageEnabled() default false;
-
-  String applicationContext() default "";
-
-  boolean autoDiscoverServices() default false;
-
-  boolean enableWebSocketServer() default false;
-
-  boolean asyncBeanManager() default false;
-
   interface Property {
     String BINDABLE_TYPES = "bindableTypes";
     String SERIALIZABLE_TYPES = "serializableTypes";
     String NON_SERIALIZABLE_TYPES = "nonSerializableTypes";
     String IOC_ALTERNATIVES = "iocAlternatives";
     String IOC_BLACKLIST = "iocBlacklist";
-    String USER_ON_HOST_PAGE_ENABLED = "userOnHostPageEnabled";
-    String APPLICATION_CONTEXT = "applicationContext";
-    String AUTO_DISCOVER_SERVICES = "autoDiscoverServices";
-    String ENABLE_WEB_SOCKET_SERVER = "enableWebSocketServer";
-    String ASYNC_BEAN_MANAGER = "asyncBeanManager";
   }
 
 }

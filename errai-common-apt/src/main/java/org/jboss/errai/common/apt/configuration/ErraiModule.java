@@ -73,10 +73,7 @@ public class ErraiModule {
   }
 
   private boolean isPartOfModule(final Element element) {
-    //FIXME: improve restrictions
-    // Here is where the .gwt.xml file processing will be.
-    // For now, we're restricting classes under the package of
-    // an errai module (located on the same package as an .gwt.xml file)
+    // Exporting only classes on subpackages of an @ErraiModule is not ideal, but works for now.
     return ((TypeElement) element).getQualifiedName().toString().contains(packageName + ".");
   }
 
@@ -93,8 +90,8 @@ public class ErraiModule {
     return getPackage(erraiModuleClassElement).getQualifiedName().toString();
   }
 
-  private PackageElement getPackage(final Element erraiModuleClassElement) {
-    final Element enclosingElement = erraiModuleClassElement.getEnclosingElement();
+  private PackageElement getPackage(final Element element) {
+    final Element enclosingElement = element.getEnclosingElement();
 
     if (enclosingElement.getKind().equals(ElementKind.PACKAGE)) {
       return ((PackageElement) enclosingElement);

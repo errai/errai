@@ -22,6 +22,6 @@ import org.jboss.errai.common.configuration.ErraiModule;
  * @author Tiago Bento <tfernand@redhat.com>
  */
 
-@ErraiModule(userOnHostPageEnabled = true)
+@ErraiModule
 public final class ErraiJsInteropDemoPluginModule {
 }

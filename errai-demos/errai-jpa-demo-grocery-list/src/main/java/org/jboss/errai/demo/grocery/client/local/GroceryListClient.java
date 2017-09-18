@@ -37,7 +37,7 @@ import com.google.gwt.user.client.ui.SimplePanel;
  * token in the page URL.
  */
 @Templated("#body")
-@ErraiApp
+@ErraiApp(asyncBeanManager = true)
 @EntryPoint
 @Bundle("GroceryListTranslation.json")
 public class GroceryListClient extends Composite {

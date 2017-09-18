@@ -26,8 +26,8 @@ import org.jboss.errai.ui.nav.client.local.Navigation;
 import com.google.gwt.user.client.ui.DockPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 
-@ErraiApp
 @EntryPoint
+@ErraiApp(userOnHostPageEnabled = true)
 public class ClientEntryPoint {
 
   @Inject private Navigation navigation;

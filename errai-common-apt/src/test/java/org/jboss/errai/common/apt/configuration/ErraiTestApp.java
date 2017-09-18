@@ -14,14 +14,17 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.demo.todo;
+package org.jboss.errai.common.apt.configuration;
 
-import org.jboss.errai.common.configuration.ErraiModule;
+import org.jboss.errai.common.configuration.ErraiApp;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
-
-@ErraiModule
-public final class ErraiJpaDemoTodoListModule {
+@ErraiApp(userOnHostPageEnabled = true,
+          asyncBeanManager = true,
+          enableWebSocketServer = true,
+          autoDiscoverServices = true,
+          applicationContext = "/test")
+class ErraiTestApp {
 }

@@ -28,16 +28,11 @@ import java.util.stream.Stream;
 
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toSet;
-import static org.jboss.errai.common.configuration.ErraiModule.Property.APPLICATION_CONTEXT;
-import static org.jboss.errai.common.configuration.ErraiModule.Property.ASYNC_BEAN_MANAGER;
-import static org.jboss.errai.common.configuration.ErraiModule.Property.AUTO_DISCOVER_SERVICES;
 import static org.jboss.errai.common.configuration.ErraiModule.Property.BINDABLE_TYPES;
 import static org.jboss.errai.common.configuration.ErraiModule.Property.IOC_ALTERNATIVES;
 import static org.jboss.errai.common.configuration.ErraiModule.Property.IOC_BLACKLIST;
 import static org.jboss.errai.common.configuration.ErraiModule.Property.NON_SERIALIZABLE_TYPES;
 import static org.jboss.errai.common.configuration.ErraiModule.Property.SERIALIZABLE_TYPES;
-import static org.jboss.errai.common.configuration.ErraiModule.Property.ENABLE_WEB_SOCKET_SERVER;
-import static org.jboss.errai.common.configuration.ErraiModule.Property.USER_ON_HOST_PAGE_ENABLED;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
@@ -74,37 +69,8 @@ public class ErraiModuleConfiguration {
     return getConfiguredArrayProperty(a -> stream(a.valueAsArray(IOC_BLACKLIST, MetaClass[].class)));
   }
 
-  //FIXME: decide whether true wins, false wins or throws exception when more then 1 is defined
-  public Set<Boolean> isUserEnabledOnHostPage() {
-    return getConfiguredProperty(s -> s.value(USER_ON_HOST_PAGE_ENABLED));
-  }
-
-  //FIXME: decide whether true wins, false wins or throws exception when more then 1 is defined
-  public Set<Boolean> isWebSocketServerEnabled() {
-    return getConfiguredProperty(s -> s.value(ENABLE_WEB_SOCKET_SERVER));
-  }
-
-  //FIXME: decide whether true wins, false wins or throws exception when more then 1 is defined
-  public Set<Boolean> isAutoDiscoverServicesEnabled() {
-    return getConfiguredProperty(s -> s.value(AUTO_DISCOVER_SERVICES));
-  }
-
-  //FIXME: decide how to reduce this list
-  public Set<String> getApplicationContext() {
-    return getConfiguredProperty(s -> s.value(APPLICATION_CONTEXT));
-  }
-
-  //FIXME: decide whether true wins, false wins or throws exception when more then 1 is defined
-  public Set<Boolean> asyncBeanManager() {
-    return getConfiguredProperty(s -> s.value(ASYNC_BEAN_MANAGER));
-  }
-
   private <V> Set<V> getConfiguredArrayProperty(final Function<MetaAnnotation, Stream<V>> getter) {
     return erraiModules.stream().flatMap(getter).collect(toSet());
-  }
-
-  private <V> Set<V> getConfiguredProperty(final Function<MetaAnnotation, V> getter) {
-    return erraiModules.stream().map(getter).collect(toSet());
   }
 
 }
