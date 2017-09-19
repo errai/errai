@@ -65,8 +65,13 @@ public class MethodCall extends AbstractCallElement {
       final MetaClass callType = statement.getType();
 
       final MetaClass[] parameterTypes = callParams.getParameterTypes();
-      final MetaMethod method = (staticMethod) ? callType.getBestMatchingStaticMethod(methodName, parameterTypes)
-              : callType.getBestMatchingMethod(methodName, parameterTypes);
+      final MetaMethod method;
+
+      if (staticMethod) {
+        method = callType.getBestMatchingStaticMethod(methodName, parameterTypes);
+      } else {
+        method = callType.getBestMatchingMethod(methodName, parameterTypes);
+      }
 
       if (method == null) {
         if (context.isPermissiveMode()) {

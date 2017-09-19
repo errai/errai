@@ -67,7 +67,7 @@ public class APTMethod extends MetaMethod implements APTMember {
       return new APTClass(((Type.MethodType) typeMirror).getReturnType());
     }
 
-    return new APTClass(method.getReturnType());
+    return new APTClass(method.getReturnType()).getErased();
   }
 
   @Override

@@ -21,6 +21,7 @@ import org.jboss.errai.codegen.util.GenUtil;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -102,9 +103,9 @@ public abstract class MetaMethod extends AbstractHasAnnotations implements MetaC
   @Override
   public String toString() {
     final StringBuilder sb = new StringBuilder();
-    final Annotation[] annos = unsafeGetAnnotations();
+    final Collection<MetaAnnotation> annos = getAnnotations();
     if (annos != null) {
-      for (final Annotation anno : annos) {
+      for (final MetaAnnotation anno : annos) {
         sb.append(anno.toString()).append(" ");
       }
     }
