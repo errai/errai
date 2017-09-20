@@ -33,12 +33,15 @@ public @interface ErraiModule {
 
   Class<?>[] iocBlacklist() default {};
 
+  Class<?>[] iocWhitelist() default {};
+
   interface Property {
     String BINDABLE_TYPES = "bindableTypes";
     String SERIALIZABLE_TYPES = "serializableTypes";
     String NON_SERIALIZABLE_TYPES = "nonSerializableTypes";
     String IOC_ALTERNATIVES = "iocAlternatives";
     String IOC_BLACKLIST = "iocBlacklist";
+    String IOC_WHITELIST = "iocWhitelist";
   }
 
 }

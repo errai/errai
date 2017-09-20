@@ -47,7 +47,7 @@ public interface OrientationDetector {
   void fireOrientationEvent(double x, double y, double z);
 
   @ApplicationScoped
-  public static class OrientationDetectorProvider {
+  class OrientationDetectorProvider {
 
     @Inject
     private Event<OrientationEvent> orientationEventSource;

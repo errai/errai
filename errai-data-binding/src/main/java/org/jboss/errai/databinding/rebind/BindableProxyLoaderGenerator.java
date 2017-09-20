@@ -30,11 +30,12 @@ import org.jboss.errai.codegen.builder.impl.ClassBuilder;
 import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
-import org.jboss.errai.codegen.meta.GWTCompatibleMetaClassFinder;
 import org.jboss.errai.codegen.meta.MetaParameterizedType;
 import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.util.Stmt;
+import org.jboss.errai.common.apt.MetaClassFinder;
 import org.jboss.errai.common.metadata.RebindUtils;
+import org.jboss.errai.config.ErraiAppPropertiesConfiguration;
 import org.jboss.errai.config.rebind.AbstractAsyncGenerator;
 import org.jboss.errai.config.rebind.GenerateAsync;
 import org.jboss.errai.config.util.ClassScanner;
@@ -50,6 +51,7 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.annotation.Annotation;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -75,15 +77,18 @@ public class BindableProxyLoaderGenerator extends AbstractAsyncGenerator {
   @Override
   protected String generate(final TreeLogger logger, final GeneratorContext context) {
     final Set<String> translatablePackages = RebindUtils.findTranslatablePackages(context);
-    return generate((ctx, annotation) -> findAnnotatedElements(context, translatablePackages, annotation), context);
+    final Set<MetaClass> allConfiguredBindableTypes = new ErraiAppPropertiesConfiguration().modules().getBindableTypes();
+
+    return generate((annotation) -> findAnnotatedElements(annotation, context, translatablePackages,
+            allConfiguredBindableTypes));
   }
 
-  public String generate(final GWTCompatibleMetaClassFinder metaClassFinder, final GeneratorContext context) {
+  public String generate(final MetaClassFinder metaClassFinder) {
 
-    final Collection<MetaClass> defaultConverters = metaClassFinder.find(context, DefaultConverter.class);
+    final Collection<MetaClass> defaultConverters = metaClassFinder.findAnnotatedWith(DefaultConverter.class);
     addCacheRelevantClasses(defaultConverters);
 
-    final Collection<MetaClass> bindableTypes = metaClassFinder.find(context, Bindable.class);
+    final Collection<MetaClass> bindableTypes = metaClassFinder.findAnnotatedWith(Bindable.class);
     addCacheRelevantClasses(bindableTypes);
 
     ClassStructureBuilder<?> classBuilder = ClassBuilder.implement(BindableProxyLoader.class);
@@ -164,15 +169,21 @@ public class BindableProxyLoaderGenerator extends AbstractAsyncGenerator {
     return false;
   }
 
-  private Collection<MetaClass> findAnnotatedElements(final GeneratorContext context,
+  private Set<MetaClass> findAnnotatedElements(final Class<? extends Annotation> annotation,
+          final GeneratorContext context,
           final Set<String> translatablePackages,
-          final Class<? extends Annotation> annotation) {
+          final Set<MetaClass> allConfiguredBindableTypes) {
 
     if (annotation.equals(Bindable.class)) {
-      return DataBindingUtil.getAllBindableTypes(context);
+      final Set<MetaClass> annotatedBindableTypes = new HashSet<>(
+              ClassScanner.getTypesAnnotatedWith(Bindable.class, translatablePackages, context));
+
+      final Set<MetaClass> bindableTypes = new HashSet<>(annotatedBindableTypes);
+      bindableTypes.addAll(allConfiguredBindableTypes);
+      return bindableTypes;
     }
 
-    return ClassScanner.getTypesAnnotatedWith(annotation, translatablePackages, context);
+    return new HashSet<>(ClassScanner.getTypesAnnotatedWith(annotation, translatablePackages, context));
   }
 
   public String getPackageName() {

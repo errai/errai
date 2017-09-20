@@ -17,7 +17,7 @@
 package org.jboss.errai.codegen.util;
 
 import org.jboss.errai.codegen.meta.MetaAnnotation;
-import org.jboss.errai.codegen.meta.RuntimeMetaAnnotation;
+import org.jboss.errai.codegen.meta.RuntimeAnnotation;
 
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
@@ -39,12 +39,12 @@ public class RuntimeAnnotationFilter implements AnnotationFilter {
   public Collection<MetaAnnotation> apply(final Collection<MetaAnnotation> metaAnnotations) {
     
     final Annotation[] annotationsToBeFiltered = metaAnnotations.stream()
-            .map(s -> (RuntimeMetaAnnotation) s)
-            .map(RuntimeMetaAnnotation::getAnnotation)
+            .map(s -> (RuntimeAnnotation) s)
+            .map(RuntimeAnnotation::getAnnotation)
             .toArray(Annotation[]::new);
 
     return Arrays.stream(packageFilter(translatablePackages, annotationsToBeFiltered))
-            .map(RuntimeMetaAnnotation::new)
+            .map(RuntimeAnnotation::new)
             .collect(Collectors.toList());
   }
 

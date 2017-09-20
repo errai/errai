@@ -20,14 +20,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jboss.errai.codegen.Statement;
+import org.jboss.errai.codegen.meta.MetaAnnotation;
+import org.jboss.errai.codegen.meta.MetaEnum;
 import org.jboss.errai.codegen.util.Stmt;
+import org.jboss.errai.common.client.util.TimeUnit;
 import org.jboss.errai.ioc.client.api.CodeDecorator;
 import org.jboss.errai.ioc.client.api.Timed;
+import org.jboss.errai.ioc.client.api.TimerType;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCDecoratorExtension;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.Decorable;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.FactoryController;
 
 import com.google.gwt.user.client.Timer;
+
+import static org.jboss.errai.ioc.client.api.TimerType.REPEATING;
 
 /**
  * @author Mike Brock
@@ -41,14 +47,14 @@ public class TimedExtension extends IOCDecoratorExtension<Timed> {
   @Override
   public void generateDecorator(Decorable decorable, FactoryController controller) {
     try {
-      final Timed timed = (Timed) decorable.getAnnotation();
+      final MetaAnnotation timed = decorable.getAnnotation();
 
 
       final Statement methodInvokation
           = decorable.getAccessStatement();
 
-      final org.jboss.errai.common.client.util.TimeUnit timeUnit = timed.timeUnit();
-      final int interval = timed.interval();
+      final TimeUnit timeUnit = timed.<MetaEnum>value("timeUnit").as(TimeUnit.class);
+      final int interval = timed.value("interval");
 
       final Statement timerDecl
           = Stmt.nestedCall(Stmt.newObject(Timer.class).extend()
@@ -65,7 +71,9 @@ public class TimedExtension extends IOCDecoratorExtension<Timed> {
       initStmts.add(controller.setReferenceStmt(timerVarName, timerDecl));
 
       final Statement timerExec;
-      switch (timed.type()) {
+      final MetaEnum type = timed.value("type");
+
+      switch (TimerType.valueOf(type.name())) {
         case REPEATING:
           timerExec = Stmt.nestedCall(timerVar).invoke("scheduleRepeating", timeUnit.toMillis(interval));
           break;

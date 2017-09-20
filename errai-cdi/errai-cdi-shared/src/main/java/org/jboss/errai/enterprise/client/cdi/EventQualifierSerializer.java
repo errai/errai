@@ -21,8 +21,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.jboss.errai.common.client.api.Assert;
-import org.jboss.errai.common.client.util.AnnotationPropertyAccessor;
-import org.jboss.errai.common.client.util.SharedAnnotationSerializer;
+import org.jboss.errai.ioc.client.util.AnnotationPropertyAccessor;
+import org.jboss.errai.ioc.client.util.ClientAnnotationSerializer;
 
 /**
  *
@@ -31,7 +31,7 @@ import org.jboss.errai.common.client.util.SharedAnnotationSerializer;
 public abstract class EventQualifierSerializer {
 
   public static final String SERIALIZER_CLASS_NAME = "EventQualifierSerializerImpl";
-  public static final String SERIALIZER_PACKAGE_NAME = "org.jboss.errai.cdi";
+  public static final String SERIALIZER_PACKAGE_NAME = "org.jboss.errai.enterprise.client.cdi";
 
   private static EventQualifierSerializer instance;
 
@@ -60,16 +60,6 @@ public abstract class EventQualifierSerializer {
 
   public String serialize(final Annotation qualifier) {
     final AnnotationPropertyAccessor entry = serializers.get(qualifier.annotationType().getName());
-    return SharedAnnotationSerializer.serialize(qualifier, entry);
+    return ClientAnnotationSerializer.serialize(qualifier, entry);
   }
-
-  public String qualifierName(final String serializedQualifier) {
-    if (serializedQualifier.contains("(")) {
-      return serializedQualifier.substring(0, serializedQualifier.indexOf('('));
-    }
-    else {
-      return serializedQualifier;
-    }
-  }
-
 }

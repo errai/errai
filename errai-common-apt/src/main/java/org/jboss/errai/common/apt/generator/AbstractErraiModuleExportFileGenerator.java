@@ -24,6 +24,8 @@ import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.util.Elements;
+import javax.lang.model.util.Types;
 import java.util.Set;
 
 /**
@@ -36,15 +38,27 @@ public abstract class AbstractErraiModuleExportFileGenerator extends AbstractPro
   @Override
   public boolean process(final Set<? extends TypeElement> annotations, final RoundEnvironment roundEnv) {
 
+    final Types types = processingEnv.getTypeUtils();
+    final Elements elements = processingEnv.getElementUtils();
+    final Filer filer = processingEnv.getFiler();
+
+    process(annotations, types, elements, filer, new AptAnnotatedSourceElementsFinder(roundEnv));
+
+    return false;
+  }
+
+  public void process(final Set<? extends TypeElement> annotations,
+          final Types types,
+          final Elements elements,
+          final Filer filer,
+          final AnnotatedSourceElementsFinder annotatedSourceElementsFinder) {
     try {
-      APTClassUtil.init(processingEnv.getTypeUtils(), processingEnv.getElementUtils());
-      generateAndSaveExportFiles(annotations, new AptAnnotatedSourceElementsFinder(roundEnv), processingEnv.getFiler());
+      APTClassUtil.init(types, elements);
+      generateAndSaveExportFiles(annotations, annotatedSourceElementsFinder, filer);
     } catch (final Exception e) {
       System.out.println("Error generating export files");
       e.printStackTrace();
     }
-
-    return false;
   }
 
   void generateAndSaveExportFiles(final Set<? extends TypeElement> exportableAnnotations,

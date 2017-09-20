@@ -22,5 +22,5 @@ import org.jboss.errai.common.configuration.ErraiModule;
  * @author Tiago Bento <tfernand@redhat.com>
  */
 @ErraiModule
-public class ErraiDefaultTestModule {
+class ErraiDefaultTestModule {
 }

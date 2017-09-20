@@ -16,18 +16,20 @@
 
 package org.jboss.errai.ioc.client.api.builtin;
 
-import javax.inject.Singleton;
-
 import org.jboss.errai.common.client.api.annotations.IOCProducer;
 import org.jboss.errai.ioc.client.api.EnabledByProperty;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.async.AsyncBeanManager;
 
+import javax.inject.Singleton;
+
+import static org.jboss.errai.config.ErraiAppPropertiesErraiAppConfiguration.ERRAI_IOC_ASYNC_BEAN_MANAGER;
+
 /**
  * @author Mike Brock
  */
 @Singleton
-@EnabledByProperty(value = "errai.ioc.async_bean_manager")
+@EnabledByProperty(ERRAI_IOC_ASYNC_BEAN_MANAGER)
 public class AsyncBeanManagerProvider {
 
   @IOCProducer

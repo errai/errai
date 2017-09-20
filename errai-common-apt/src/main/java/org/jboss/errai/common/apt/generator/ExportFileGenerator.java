@@ -17,7 +17,7 @@
 package org.jboss.errai.common.apt.generator;
 
 import org.jboss.errai.common.apt.AnnotatedSourceElementsFinder;
-import org.jboss.errai.common.apt.configuration.ErraiModule;
+import org.jboss.errai.common.apt.module.ErraiModule;
 import org.jboss.errai.common.apt.exportfile.ExportFile;
 
 import javax.annotation.processing.Filer;
@@ -72,15 +72,14 @@ public class ExportFileGenerator {
 
   private void generateSourceAndSave(final ExportFile exportFile, final Filer filer) {
     try {
-      final Element[] originatingElements = exportFile.exportedTypes.toArray(new Element[0]);
+      final Element[] originatingElements = exportFile.exportedTypes().toArray(new Element[0]);
       final JavaFileObject sourceFile = filer.createSourceFile(exportFile.getFullClassName(), originatingElements);
 
       try (Writer writer = sourceFile.openWriter()) {
         writer.write(exportFile.generateSource());
       }
-      System.out.println("Successfully generated export file [" + exportFile.simpleClassName + "]");
     } catch (final IOException e) {
-      throw new RuntimeException("Error writing generated export file", e);
+      throw new RuntimeException("Error writing generated export file " + exportFile.getFullClassName(), e);
     }
   }
 }

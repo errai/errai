@@ -130,6 +130,13 @@
       <classifier>sources</classifier>
       <scope>provided</scope>
     </dependency>
+
+    <dependency>
+      <groupId>org.jboss.errai</groupId>
+      <artifactId>errai-cdi-export-apt</artifactId>
+      <scope>compile</scope>
+    </dependency>
+
   </dependencies>
 
 </project>

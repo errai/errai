@@ -31,10 +31,11 @@ import java.util.Set;
  */
 public class ErraiAptExportedTypesTest extends ErraiAptTest {
 
+
   @Test
   public void testFindAnnotatedMetaClassesWithNoExportedOrLocallyExportableTypes() {
     final ErraiAptExportedTypes erraiAptExportedTypes = new ErraiAptExportedTypes(types, elements,
-            new TestAnnotatedSourceElementsFinder());
+            new TestAnnotatedSourceElementsFinder(), resourceFilesFinder());
 
     final Collection<MetaClass> annotatedMetaClasses = erraiAptExportedTypes.findAnnotatedMetaClasses(
             ErraiAptExportedTypesUnusedTestAnnotation.class);
@@ -45,7 +46,7 @@ public class ErraiAptExportedTypesTest extends ErraiAptTest {
   @Test
   public void testFindAnnotatedMetaClassesWithNoLocallyExportableTypes() {
     final ErraiAptExportedTypes erraiAptExportedTypes = new ErraiAptExportedTypes(types, elements,
-            new TestAnnotatedSourceElementsFinder());
+            new TestAnnotatedSourceElementsFinder(), resourceFilesFinder());
 
     final Collection<MetaClass> annotatedMetaClasses = erraiAptExportedTypes.findAnnotatedMetaClasses(
             ErraiAptExportedTypesTestAnnotation.class);
@@ -59,7 +60,8 @@ public class ErraiAptExportedTypesTest extends ErraiAptTest {
   @Test
   public void testFindAnnotatedMetaClassesWithSameTypeAsExportedAndLocallyExportable() {
     final ErraiAptExportedTypes erraiAptExportedTypes = new ErraiAptExportedTypes(types, elements,
-            new TestAnnotatedSourceElementsFinder(getTypeElement(ErraiAptExportedTypesTestExportedType.class)));
+            new TestAnnotatedSourceElementsFinder(getTypeElement(ErraiAptExportedTypesTestExportedType.class)),
+            resourceFilesFinder());
 
     final Collection<MetaClass> annotatedMetaClasses = erraiAptExportedTypes.findAnnotatedMetaClasses(
             ErraiAptExportedTypesTestAnnotation.class);
@@ -73,7 +75,8 @@ public class ErraiAptExportedTypesTest extends ErraiAptTest {
   @Test
   public void testFindAnnotatedMetaClassesWithOneTypeAsExportedAndOneAsLocallyExportable() {
     final ErraiAptExportedTypes erraiAptExportedTypes = new ErraiAptExportedTypes(types, elements,
-            new TestAnnotatedSourceElementsFinder(getTypeElement(ErraiAptExportedTypesLocallyExportableType2.class)));
+            new TestAnnotatedSourceElementsFinder(getTypeElement(ErraiAptExportedTypesLocallyExportableType2.class)),
+            resourceFilesFinder());
 
     final Collection<MetaClass> annotatedMetaClasses = erraiAptExportedTypes.findAnnotatedMetaClasses(
             ErraiAptExportedTypesTestAnnotation.class);
@@ -85,4 +88,7 @@ public class ErraiAptExportedTypesTest extends ErraiAptTest {
     Assert.assertEquals(expected, annotatedMetaClasses);
   }
 
+  private ResourceFilesFinder resourceFilesFinder() {
+    return a -> null;
+  }
 }

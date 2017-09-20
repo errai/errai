@@ -79,8 +79,8 @@ public abstract class MetaMethod extends AbstractHasAnnotations implements MetaC
 
   public List<MetaParameter> getParametersAnnotatedWith(final Class<? extends Annotation> annotation) {
     return Arrays.stream(getParameters())
-            .filter(p -> p.unsafeIsAnnotationPresent(annotation))
-            .collect(Collectors.collectingAndThen(Collectors.toList(), l -> Collections.unmodifiableList(l)));
+            .filter(p -> p.isAnnotationPresent(annotation))
+            .collect(Collectors.collectingAndThen(Collectors.toList(), Collections::unmodifiableList));
   }
 
   public Method asMethod() {

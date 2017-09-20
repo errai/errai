@@ -20,6 +20,7 @@ import org.jboss.errai.codegen.util.GenUtil;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.util.Collection;
 
 public abstract class MetaField extends AbstractHasAnnotations implements MetaClassMember {
 
@@ -76,9 +77,9 @@ public abstract class MetaField extends AbstractHasAnnotations implements MetaCl
     sb.append(MetaField.class.getName()).append(":");
     sb.append(getDeclaringClassName()).append(".");
 
-    Annotation[] annos = unsafeGetAnnotations();
+    Collection<MetaAnnotation> annos = getAnnotations();
     if (annos != null) {
-      for (Annotation anno : annos) {
+      for (MetaAnnotation anno : annos) {
         sb.append(anno.toString()).append(" ");
       }
     }

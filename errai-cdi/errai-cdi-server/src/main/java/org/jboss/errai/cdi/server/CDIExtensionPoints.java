@@ -75,6 +75,7 @@ import org.jboss.errai.cdi.server.events.EventRoutingTable;
 import org.jboss.errai.cdi.server.events.ShutdownEventObserver;
 import org.jboss.errai.codegen.util.ProxyUtil;
 import org.jboss.errai.common.client.api.Assert;
+import org.jboss.errai.common.client.api.annotations.LocalEvent;
 import org.jboss.errai.common.client.framework.ProxyFactory;
 import org.jboss.errai.common.server.api.ErraiBootstrapFailure;
 import org.jboss.errai.config.rebind.EnvUtil;
@@ -256,7 +257,7 @@ public class CDIExtensionPoints implements Extension {
 
     ClassScanner.setReflectionsScanning(true);
 
-    if (type != null && EnvUtil.isPortableType(type) && !EnvUtil.isLocalEventType(type)) {
+    if (type != null && EnvUtil.isPortableType(type) && !type.isAnnotationPresent(LocalEvent.class)) {
       final Set<Annotation> annotations = processObserverMethod.getObserverMethod().getObservedQualifiers();
       final Annotation[] methodQualifiers = annotations.toArray(new Annotation[annotations.size()]);
       for (final Annotation qualifier : methodQualifiers) {

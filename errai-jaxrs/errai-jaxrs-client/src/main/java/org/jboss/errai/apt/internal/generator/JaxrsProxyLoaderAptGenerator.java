@@ -16,14 +16,11 @@
 
 package org.jboss.errai.apt.internal.generator;
 
-import com.google.gwt.core.ext.GeneratorContext;
 import org.jboss.errai.codegen.meta.MetaAnnotation;
-import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.common.apt.ErraiAptExportedTypes;
-import org.jboss.errai.common.apt.ErraiAptGenerator;
+import org.jboss.errai.common.apt.ErraiAptGenerators;
 import org.jboss.errai.enterprise.rebind.JaxrsProxyLoaderGenerator;
 
-import java.lang.annotation.Annotation;
 import java.util.Collection;
 
 import static java.util.stream.Collectors.toList;
@@ -33,7 +30,7 @@ import static java.util.stream.Collectors.toList;
  *
  * @author Tiago Bento <tfernand@redhat.com>
  */
-public final class JaxrsProxyLoaderAptGenerator extends ErraiAptGenerator {
+public final class JaxrsProxyLoaderAptGenerator extends ErraiAptGenerators.SingleFile {
 
   private final JaxrsProxyLoaderGenerator jaxrsProxyLoaderGenerator;
 
@@ -45,8 +42,8 @@ public final class JaxrsProxyLoaderAptGenerator extends ErraiAptGenerator {
 
   @Override
   public String generate() {
-    return jaxrsProxyLoaderGenerator.generate(this::findAnnotatedMetaClasses, isIOCModuleInherited(),
-            this::filterAnnotations, null);
+    return jaxrsProxyLoaderGenerator.generate(metaClassFinder(), isIOCModuleInherited(),
+            this::filterAnnotations);
   }
 
   private Boolean isIOCModuleInherited() {
@@ -62,12 +59,6 @@ public final class JaxrsProxyLoaderAptGenerator extends ErraiAptGenerator {
       String packageName = s.annotationType().getPackageName();
       return !packageName.contains("server");
     }).collect(toList());
-  }
-
-  private Collection<MetaClass> findAnnotatedMetaClasses(final GeneratorContext context,
-          final Class<? extends Annotation> annotation) {
-
-    return findAnnotatedMetaClasses(annotation);
   }
 
   @Override

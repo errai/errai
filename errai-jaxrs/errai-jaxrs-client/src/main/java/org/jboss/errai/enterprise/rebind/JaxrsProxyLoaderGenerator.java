@@ -28,7 +28,7 @@ import org.jboss.errai.codegen.builder.MethodBlockBuilder;
 import org.jboss.errai.codegen.builder.impl.ClassBuilder;
 import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
-import org.jboss.errai.codegen.meta.GWTCompatibleMetaClassFinder;
+import org.jboss.errai.common.apt.MetaClassFinder;
 import org.jboss.errai.codegen.util.AnnotationFilter;
 import org.jboss.errai.codegen.util.InterceptorProvider;
 import org.jboss.errai.codegen.util.RuntimeAnnotationFilter;
@@ -49,6 +49,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.ext.Provider;
 import java.lang.annotation.Annotation;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -75,15 +76,14 @@ public class JaxrsProxyLoaderGenerator extends AbstractAsyncGenerator {
     final Boolean iocEnabled = RebindUtils.isModuleInherited(context, IOC_MODULE_NAME);
     final Set<String> translatablePackages = RebindUtils.findTranslatablePackages(context);
     final AnnotationFilter annotationFilter = new RuntimeAnnotationFilter(translatablePackages);
-    final GWTCompatibleMetaClassFinder metaClassFinder = (ctx, annotation) -> getMetaClasses(ctx, annotation, translatablePackages);
+    final MetaClassFinder metaClassFinder = annotation -> getMetaClasses(context, annotation, translatablePackages);
 
-    return generate(metaClassFinder, iocEnabled, annotationFilter, context);
+    return generate(metaClassFinder, iocEnabled, annotationFilter);
   }
 
-  public String generate(final GWTCompatibleMetaClassFinder metaClassFinder,
+  public String generate(final MetaClassFinder metaClassFinder,
           final Boolean iocEnabled,
-          final AnnotationFilter annotationFilter,
-          final GeneratorContext context) {
+          final AnnotationFilter annotationFilter) {
 
     log.info("Generating JAX-RS RPC proxy loader class...");
     final long time = System.currentTimeMillis();
@@ -92,21 +92,21 @@ public class JaxrsProxyLoaderGenerator extends AbstractAsyncGenerator {
 
     final MethodBlockBuilder<?> loadProxies = classBuilder.publicMethod(void.class, "loadProxies");
 
-    final Collection<MetaClass> featureInterceptors = metaClassFinder.find(context, FeatureInterceptor.class);
+    final Collection<MetaClass> featureInterceptors = metaClassFinder.findAnnotatedWith(FeatureInterceptor.class);
     addCacheRelevantClasses(featureInterceptors);
 
-    final Collection<MetaClass> standaloneInterceptors = metaClassFinder.find(context, InterceptsRemoteCall.class);
+    final Collection<MetaClass> standaloneInterceptors = metaClassFinder.findAnnotatedWith(InterceptsRemoteCall.class);
     addCacheRelevantClasses(standaloneInterceptors);
 
     final InterceptorProvider interceptorProvider = new InterceptorProvider(featureInterceptors,
             standaloneInterceptors);
 
-    final Collection<MetaClass> providers = metaClassFinder.find(context, Provider.class);
+    final Collection<MetaClass> providers = metaClassFinder.findAnnotatedWith(Provider.class);
     addCacheRelevantClasses(providers);
 
     final Multimap<MetaClass, MetaClass> exceptionMappers = Utils.getClientExceptionMappers(providers);
 
-    final Collection<MetaClass> remotes = metaClassFinder.find(context, Path.class);
+    final Collection<MetaClass> remotes = metaClassFinder.findAnnotatedWith(Path.class);
     addCacheRelevantClasses(remotes);
 
     for (final MetaClass remote : remotes) {
@@ -149,11 +149,11 @@ public class JaxrsProxyLoaderGenerator extends AbstractAsyncGenerator {
     return false;
   }
 
-  private Collection<MetaClass> getMetaClasses(final GeneratorContext context,
+  private Set<MetaClass> getMetaClasses(final GeneratorContext context,
           final Class<? extends Annotation> annotation,
           final Set<String> translatablePackages) {
 
-    return ClassScanner.getTypesAnnotatedWith(annotation, translatablePackages, context);
+    return new HashSet<>(ClassScanner.getTypesAnnotatedWith(annotation, translatablePackages, context));
   }
 
   public String getPackageName() {

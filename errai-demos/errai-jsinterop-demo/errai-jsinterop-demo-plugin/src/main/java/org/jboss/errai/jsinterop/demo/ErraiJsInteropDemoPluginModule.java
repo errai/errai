@@ -16,12 +16,14 @@
 
 package org.jboss.errai.jsinterop.demo;
 
+import org.jboss.errai.common.configuration.ErraiApp;
 import org.jboss.errai.common.configuration.ErraiModule;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
 
+@ErraiApp
 @ErraiModule
 public final class ErraiJsInteropDemoPluginModule {
 }

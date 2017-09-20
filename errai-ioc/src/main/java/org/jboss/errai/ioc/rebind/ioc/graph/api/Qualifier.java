@@ -16,6 +16,8 @@
 
 package org.jboss.errai.ioc.rebind.ioc.graph.api;
 
+import org.jboss.errai.codegen.meta.MetaAnnotation;
+
 import java.lang.annotation.Annotation;
 import java.util.Spliterators;
 import java.util.stream.Stream;
@@ -30,7 +32,7 @@ import javax.inject.Named;
  * @see QualifierFactory
  * @author Max Barkley <mbarkley@redhat.com>
  */
-public interface Qualifier extends Iterable<Annotation> {
+public interface Qualifier extends Iterable<MetaAnnotation> {
 
   /**
    * @param other Another qualifier to compare this to.
@@ -50,7 +52,7 @@ public interface Qualifier extends Iterable<Annotation> {
    */
   String getName();
 
-  default Stream<Annotation> stream() {
+  default Stream<MetaAnnotation> stream() {
     return StreamSupport.stream(Spliterators.spliteratorUnknownSize(iterator(), 0), false);
   }
 

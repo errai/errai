@@ -36,7 +36,6 @@ import org.jboss.errai.demo.grocery.client.shared.qual.Updated;
  *
  * @author jfuerth
  */
-@ErraiApp
 public class EventTranslator {
 
     private static EventTranslator INSTANCE;

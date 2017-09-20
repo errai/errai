@@ -80,8 +80,9 @@ public final class DependencyGraphBuilderImpl implements DependencyGraphBuilder 
 
   @Override
   public Injectable addInjectable(final MetaClass injectedType, final Qualifier qualifier,
-          final Predicate<List<InjectableHandle>> pathPredicate, final Class<? extends Annotation> literalScope,
+          final Predicate<List<InjectableHandle>> pathPredicate, final MetaClass literalScope,
           final InjectableType injectableType, final WiringElementType... wiringTypes) {
+
     final InjectableImpl injectable = new InjectableImpl(injectedType, qualifier, pathPredicate,
             nameGenerator.generateFor(injectedType, qualifier, injectableType), literalScope, injectableType,
             Arrays.asList(wiringTypes));
@@ -206,7 +207,7 @@ public final class DependencyGraphBuilderImpl implements DependencyGraphBuilder 
     if (producerMemberDep.producingMember instanceof MetaMethod) {
       final MetaMethod specializedMethod = GraphUtil.getOverridenMethod((MetaMethod) producerMemberDep.producingMember);
       final MetaClass specializingType = producerMemberDep.producingMember.getDeclaringClass();
-      if (specializedMethod != null && specializedMethod.unsafeIsAnnotationPresent(Produces.class)) {
+      if (specializedMethod != null && specializedMethod.isAnnotationPresent(Produces.class)) {
         updateLinksToSpecialized(specialization, toBeRemoved, specializedMethod, specializingType);
       }
     } else {
@@ -286,7 +287,7 @@ public final class DependencyGraphBuilderImpl implements DependencyGraphBuilder 
       producedReferences.add(lookupInjectableReference(method.getReturnType(), qualFactory.forSource(method)));
     }
     for (final MetaField field : specialized.type.getDeclaredFields()) {
-      if (field.unsafeIsAnnotationPresent(Produces.class)) {
+      if (field.isAnnotationPresent(Produces.class)) {
         producedReferences.add(lookupInjectableReference(field.getType(), qualFactory.forSource(field)));
       }
     }
@@ -359,7 +360,7 @@ public final class DependencyGraphBuilderImpl implements DependencyGraphBuilder 
     case Annotated:
       return inj -> !inj.getWiringElementTypes().contains(WiringElementType.Simpleton);
     case Aggressive:
-      return inj -> EntryPoint.class.equals(inj.getScope()) || inj.getWiringElementTypes().contains(WiringElementType.JsType);
+      return inj -> inj.getScope().instanceOf(EntryPoint.class) || inj.getWiringElementTypes().contains(WiringElementType.JsType);
     default:
       throw new RuntimeException("Unrecognized reachability strategy, " + strategy.toString());
     }

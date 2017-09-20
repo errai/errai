@@ -36,7 +36,6 @@ public abstract class Window {
     }
 
     @JsProperty(namespace = JsPackage.GLOBAL)
-    @IOCProducer
     public static native Document getDocument();
 
     /**

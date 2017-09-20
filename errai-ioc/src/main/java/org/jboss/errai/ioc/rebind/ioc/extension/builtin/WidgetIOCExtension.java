@@ -34,7 +34,6 @@ import org.jboss.errai.ioc.rebind.ioc.bootstrapper.FactoryBodyGenerator;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCExtensionConfigurator;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.CustomFactoryInjectable;
-import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraph;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraphBuilder.InjectableType;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.Injectable;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.InjectionSite;
@@ -94,7 +93,7 @@ public class WidgetIOCExtension implements IOCExtensionConfigurator {
             final FactoryBodyGenerator generator = new AbstractBodyGenerator() {
               @Override
               protected List<Statement> generateCreateInstanceStatements(ClassStructureBuilder<?> bodyBlockBuilder,
-                      Injectable injectable, DependencyGraph graph, InjectionContext injectionContext) {
+                      Injectable injectable, InjectionContext injectionContext) {
                 return Collections
                         .<Statement> singletonList(nestedCall(newObject(widgetType, new Object[0])).returnValue());
               }

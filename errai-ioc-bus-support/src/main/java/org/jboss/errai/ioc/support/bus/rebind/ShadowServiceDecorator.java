@@ -34,6 +34,7 @@ import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.builder.ElseBlockBuilder;
 import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.builder.impl.StatementBuilder;
+import org.jboss.errai.codegen.meta.MetaAnnotation;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaMethod;
@@ -69,14 +70,14 @@ public class ShadowServiceDecorator extends IOCDecoratorExtension<ShadowService>
 
   @Override
   public void generateDecorator(final Decorable decorable, final FactoryController controller) {
-    final ShadowService shadowService = (ShadowService) decorable.getAnnotation();
+    final MetaAnnotation shadowService = decorable.getAnnotation();
     String serviceName = null;
 
     Statement subscribeShadowStatement = null;
-    final Class<?> javaClass = decorable.getType().unsafeAsClass();
-    for (final Class<?> intf : javaClass.getInterfaces()) {
+    final MetaClass javaClass = decorable.getType();
+    for (final MetaClass intf : javaClass.getInterfaces()) {
       if (intf.isAnnotationPresent(Remote.class)) {
-        serviceName = intf.getName() + ":RPC";
+        serviceName = intf.getFullyQualifiedName() + ":RPC";
 
         final AnonymousClassStructureBuilder builder = generateMethodDelegates(intf, decorable, controller);
         subscribeShadowStatement = Stmt.castTo(ClientMessageBus.class, Stmt.invokeStatic(ErraiBus.class, "get"))
@@ -99,7 +100,7 @@ public class ShadowServiceDecorator extends IOCDecoratorExtension<ShadowService>
     }
   }
 
-  private AnonymousClassStructureBuilder generateMethodDelegates(final Class<?> intf, final Decorable decorable, final FactoryController controller) {
+  private AnonymousClassStructureBuilder generateMethodDelegates(final MetaClass intf, final Decorable decorable, final FactoryController controller) {
 
     final BlockBuilder<AnonymousClassStructureBuilder> builder = ObjectBuilder.newInstanceOf(MessageCallback.class)
             .extend().publicOverridesMethod("callback", Parameter.of(Message.class, "message"))
@@ -108,9 +109,8 @@ public class ShadowServiceDecorator extends IOCDecoratorExtension<ShadowService>
             .append(Stmt.declareVariable("methodParms", List.class,
                     Stmt.loadVariable("message").invoke("get", List.class, Stmt.loadLiteral("MethodParms"))));
 
-    final MetaClass mc = MetaClassFactory.get(intf);
-    for (final MetaMethod method : mc.getMethods()) {
-      if (ProxyUtil.isMethodInInterface(mc, method) && ProxyUtil.shouldProxyMethod(method)) {
+    for (final MetaMethod method : intf.getMethods()) {
+      if (ProxyUtil.isMethodInInterface(intf, method) && ProxyUtil.shouldProxyMethod(method)) {
         final MetaClass[] parameterTypes = Arrays.stream(method.getParameters()).map(p -> p.getType()).toArray(MetaClass[]::new);
         final Statement[] objects = new Statement[parameterTypes.length];
         final BlockBuilder<ElseBlockBuilder> blockBuilder = If

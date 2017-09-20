@@ -44,7 +44,7 @@ public interface Injectable extends HasInjectableHandle {
    * @return The scope of the injectable. For pseudo-dependent injectables, this
    *         should return {@link Dependent}.
    */
-  Class<? extends Annotation> getScope();
+  MetaClass getScope();
 
   /**
    * @return If available, the annotated object that is the source of this injectable.

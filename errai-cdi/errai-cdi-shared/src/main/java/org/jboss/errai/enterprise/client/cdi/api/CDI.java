@@ -16,20 +16,6 @@
 
 package org.jboss.errai.enterprise.client.cdi.api;
 
-import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.IdentityHashMap;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.ClientMessageBus;
 import org.jboss.errai.bus.client.api.Subscription;
@@ -53,6 +39,23 @@ import org.jboss.errai.enterprise.client.cdi.WindowEventObservers;
 import org.jboss.errai.marshalling.client.api.MarshallerFramework;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.IdentityHashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import static java.util.stream.Collectors.toSet;
 
 /**
  * CDI client interface.
@@ -119,22 +122,8 @@ public class CDI {
    *
    * @return
    */
-  public static Set<String> getQualifiersPart(final Annotation[] qualifiers) {
-    Set<String> qualifiersPart = null;
-    if (qualifiers != null) {
-      for (final Annotation qualifier : qualifiers) {
-        if (qualifiersPart == null)
-          qualifiersPart = new HashSet<>(qualifiers.length);
-
-        qualifiersPart.add(asString(qualifier));
-      }
-    }
-    return qualifiersPart == null ? Collections.<String>emptySet() : qualifiersPart;
-
-  }
-
-  private static String asString(final Annotation qualifier) {
-    return EventQualifierSerializer.get().serialize(qualifier);
+  public static Set<String> getSerializedQualifiers(final Annotation[] qualifiers) {
+    return Arrays.stream(qualifiers).map(EventQualifierSerializer.get()::serialize).collect(toSet());
   }
 
   public static void fireEvent(final Object payload, final Annotation... qualifiers) {
@@ -164,7 +153,7 @@ public class CDI {
     messageMap.put(CDIProtocol.FromClient.name(), "1");
 
     if (qualifiers != null && qualifiers.length > 0) {
-      messageMap.put(CDIProtocol.Qualifiers.name(), getQualifiersPart(qualifiers));
+      messageMap.put(CDIProtocol.Qualifiers.name(), getSerializedQualifiers(qualifiers));
     }
 
     consumeEventFromMessage(CommandMessage.createWithParts(messageMap));

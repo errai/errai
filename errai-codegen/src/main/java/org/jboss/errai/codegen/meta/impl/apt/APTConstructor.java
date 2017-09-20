@@ -90,6 +90,11 @@ public class APTConstructor extends MetaConstructor implements APTMember {
   }
 
   @Override
+  public String getName() {
+    return "";
+  }
+
+  @Override
   public Optional<MetaAnnotation> getAnnotation(final Class<? extends Annotation> annotationClass) {
     return APTClassUtil.getAnnotation(ctor, annotationClass);
   }

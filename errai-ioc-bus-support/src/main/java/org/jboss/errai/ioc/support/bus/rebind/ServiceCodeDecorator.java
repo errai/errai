@@ -24,6 +24,8 @@ import org.jboss.errai.bus.client.api.Local;
 import org.jboss.errai.bus.client.api.Subscription;
 import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.codegen.Statement;
+import org.jboss.errai.codegen.meta.MetaAnnotation;
+import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.ioc.client.api.CodeDecorator;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.InjectUtil;
@@ -39,15 +41,14 @@ public class ServiceCodeDecorator extends IOCDecoratorExtension<Service> {
 
   @Override
   public void generateDecorator(final Decorable decorable, final FactoryController controller) {
-    Service serviceAnno = (Service) decorable.getAnnotation();
-    /**
-     * Figure out the service name;
-     */
+    MetaAnnotation serviceAnno = decorable.getAnnotation();
+
+    // Figure out the service name;
     final String svcName = serviceAnno.value().equals("") ? decorable.getName() : serviceAnno.value();
 
     boolean local = false;
-    for (final Annotation a : InjectUtil.extractQualifiers(decorable.get())) {
-      if (Local.class.equals(a.annotationType())) {
+    for (final MetaAnnotation a : InjectUtil.extractQualifiers(decorable.get())) {
+      if (a.instanceOf(Local.class)) {
         local = true;
       }
     }

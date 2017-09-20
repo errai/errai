@@ -19,6 +19,7 @@ package org.jboss.errai.ui.nav.client.local;
 import java.util.Collection;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Produces;
 
 import org.jboss.errai.ui.nav.client.local.spi.NavigationGraph;
@@ -32,6 +33,7 @@ import com.google.gwt.core.client.GWT;
  * @author Divya Dadlani <ddadlani@redhat.com>
  *
  */
+@Dependent
 public class URLPatternMatcherProvider {
 
   @Produces @ApplicationScoped

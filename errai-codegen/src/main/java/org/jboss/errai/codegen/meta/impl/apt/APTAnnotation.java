@@ -20,14 +20,12 @@ import org.apache.commons.lang3.ClassUtils;
 import org.jboss.errai.codegen.meta.MetaAnnotation;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
+import org.jboss.errai.codegen.meta.MetaEnum;
 
+import javax.enterprise.util.Nonbinding;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
-import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
-import javax.lang.model.type.ArrayType;
-import javax.lang.model.type.DeclaredType;
-import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
@@ -39,7 +37,6 @@ import java.util.stream.Stream;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toMap;
 import static org.jboss.errai.codegen.meta.impl.apt.APTClassUtil.elements;
-import static org.jboss.errai.codegen.meta.impl.apt.APTClassUtil.throwUnsupportedTypeError;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
@@ -79,8 +76,8 @@ public class APTAnnotation extends MetaAnnotation {
   }
 
   private Class<?> arrayType(final MetaClass attributeMetaClass) {
-    return ANNOTATION_VALUE_POSSIBLE_ARRAY_TYPES_BY_ITS_COMPONENTS_META_CLASS.get(
-            attributeMetaClass.getComponentType().getErased());
+    return ANNOTATION_VALUE_POSSIBLE_ARRAY_TYPES_BY_ITS_COMPONENTS_META_CLASS.getOrDefault(
+            attributeMetaClass.getComponentType().getErased(), Object[].class);
   }
 
   @Override
@@ -97,9 +94,7 @@ public class APTAnnotation extends MetaAnnotation {
     } else if (value instanceof TypeMirror) {
       return new APTClass((TypeMirror) value);
     } else if (value instanceof VariableElement) {
-      final VariableElement var = (VariableElement) value;
-      final Class<?> enumClass = unsafeLoadClass(var.asType()); //FIXME: remove this (MetaEnum?)
-      return Enum.valueOf((Class) enumClass, var.getSimpleName().toString());
+      return new APTEnum((VariableElement) value);
     } else if (value instanceof AnnotationMirror) {
       return new APTAnnotation((AnnotationMirror) value);
     } else if (value instanceof List) {
@@ -115,63 +110,31 @@ public class APTAnnotation extends MetaAnnotation {
   private static Object convertToArrayValue(final Object value, final Class<?> arrayTypeHint) {
     return ((List<?>) value).stream()
             .map(av -> ((AnnotationValue) av).getValue())
-            .map(v -> convertValue(v, null))
+            .map(v -> convertValue(v, arrayTypeHint))
             .toArray(n -> buildArray(arrayTypeHint, n));
   }
 
-  private static Object[] buildArray(final Class<?> arrayTypeHint, int n) {
+  private static Object[] buildArray(final Class<?> arrayTypeHint, final int n) {
     if (arrayTypeHint.equals(Class[].class)) {
       return (Object[]) Array.newInstance(MetaClass.class, n);
     } else if (arrayTypeHint.equals(Annotation[].class)) {
       return (Object[]) Array.newInstance(MetaAnnotation.class, n);
+    } else if (arrayTypeHint.equals(Enum[].class)) {
+      return (Object[]) Array.newInstance(MetaEnum.class, n);
     } else {
       return (Object[]) Array.newInstance(arrayTypeHint.getComponentType(), n);
     }
   }
 
-  @Deprecated
-  private static Class<?> unsafeLoadClass(final TypeMirror value) {
-    switch (value.getKind()) {
-    case ARRAY: {
-      TypeMirror cur = value;
-      int dim = 0;
-      do {
-        cur = ((ArrayType) cur).getComponentType();
-        dim += 1;
-      } while (cur.getKind().equals(TypeKind.ARRAY));
-      final Class<?> componentClazz = unsafeLoadClass(cur);
-      final int[] dims = new int[dim];
-      final Object array = Array.newInstance(componentClazz, dims);
+  @Override
+  public Map<String, Object> values() {
+    return values.entrySet()
+            .stream()
+            .filter(e -> !isNonbinding(e.getKey()))
+            .collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
+  }
 
-      return array.getClass();
-    }
-    case DECLARED:
-      final String fqcn = ((TypeElement) ((DeclaredType) value).asElement()).getQualifiedName().toString();
-      try {
-        return Class.forName(fqcn);
-      } catch (final ClassNotFoundException e) {
-        throw new IllegalArgumentException(format("Cannot load class object for [%s].", fqcn));
-      }
-    case BOOLEAN:
-      return boolean.class;
-    case BYTE:
-      return byte.class;
-    case CHAR:
-      return char.class;
-    case DOUBLE:
-      return double.class;
-    case FLOAT:
-      return float.class;
-    case INT:
-      return int.class;
-    case LONG:
-      return long.class;
-    case SHORT:
-      return short.class;
-    case VOID:
-      return void.class;
-    default:
-      return throwUnsupportedTypeError(value);
-    }
+  private boolean isNonbinding(final String methodName) {
+    return annotationType().getDeclaredMethod(methodName, new MetaClass[0]).isAnnotationPresent(Nonbinding.class);
   }
 }

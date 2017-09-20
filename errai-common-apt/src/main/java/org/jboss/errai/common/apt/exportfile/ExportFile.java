@@ -32,10 +32,10 @@ import static org.jboss.errai.common.apt.ErraiAptPackages.exportFilesPackagePath
  */
 public class ExportFile {
 
-  public final String erraiModuleNamespace;
-  public final TypeElement annotation;
-  public final Set<? extends Element> exportedTypes;
-  public final String simpleClassName;
+  private final String erraiModuleNamespace;
+  private final TypeElement annotation;
+  private final Set<? extends Element> exportedTypes;
+  private final String simpleClassName;
 
   public ExportFile(final String erraiModuleNamespace, final TypeElement annotation, final Set<? extends Element> exportedTypes) {
     this.erraiModuleNamespace = erraiModuleNamespace;
@@ -49,6 +49,7 @@ public class ExportFile {
 
     exportedTypes.stream()
             .map(Element::asType)
+            .distinct()
             .map(APTClass::new)
             .forEach(exportedType -> classBuilder.publicField(fieldName(exportedType), exportedType).finish());
 
@@ -56,10 +57,31 @@ public class ExportFile {
   }
 
   private String fieldName(final MetaClass exportedType) {
+
+    if (exportedType.isPrimitive()) {
+      return exportedType.getName() + "_";
+    }
+
     return exportedType.getCanonicalName().replace(".", "_");
   }
 
   public String getFullClassName() {
     return exportFilesPackagePath() + "." + simpleClassName;
+  }
+
+  public String simpleClassName() {
+    return simpleClassName;
+  }
+
+  public Set<? extends Element> exportedTypes() {
+    return exportedTypes;
+  }
+
+  public TypeElement annotation() {
+    return annotation;
+  }
+
+  public String erraiModuleNamespace() {
+    return erraiModuleNamespace;
   }
 }

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2016 Red Hat, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,11 +16,21 @@
 
 package org.jboss.errai.cdi.server;
 
-import java.lang.annotation.Annotation;
-
+import org.jboss.errai.codegen.meta.impl.java.JavaReflectionMethod;
 import org.jboss.errai.codegen.util.CDIAnnotationUtils;
-import org.jboss.errai.common.client.util.AnnotationPropertyAccessor;
 import org.jboss.errai.enterprise.client.cdi.EventQualifierSerializer;
+import org.jboss.errai.ioc.client.util.AnnotationPropertyAccessor;
+import org.jboss.errai.ioc.client.util.AnnotationPropertyAccessorBuilder;
+import org.jboss.errai.ioc.client.util.ClientAnnotationSerializer;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.stream.Collectors;
+
+import static java.lang.String.format;
+import static java.util.stream.Collectors.toList;
 
 /**
  * A specialization of {@link EventQualifierSerializer} that uses the Java Reflection API to serialize qualifiers.
@@ -34,12 +44,36 @@ public class DynamicEventQualifierSerializer extends EventQualifierSerializer {
 
   @Override
   public String serialize(final Annotation qualifier) {
+
     if (!serializers.containsKey(qualifier.annotationType().getName())) {
-      final AnnotationPropertyAccessor serializer = CDIAnnotationUtils.createDynamicSerializer(qualifier.annotationType());
-      serializers.put(qualifier.annotationType().getName(), serializer);
+      serializers.put(qualifier.annotationType().getName(), createPropertyAccessor(qualifier.annotationType()));
     }
 
     return super.serialize(qualifier);
   }
-  
+
+  private AnnotationPropertyAccessor createPropertyAccessor(final Class<? extends Annotation> annotationType) {
+    final AnnotationPropertyAccessorBuilder builder = AnnotationPropertyAccessorBuilder.create();
+
+    for (final Method method : getSerializableMethods(annotationType)) {
+      builder.with(method.getName(), anno -> serializeValue(method, anno));
+    }
+
+    return builder.build();
+  }
+
+  private String serializeValue(final Method method, final Annotation annotation) {
+    try {
+      return ClientAnnotationSerializer.serializeObject(method.invoke(annotation));
+    } catch (final Exception e) {
+      throw new RuntimeException(format("Could not access '%s' property while serializing %s.", method.getName(),
+              annotation.annotationType()), e);
+    }
+  }
+
+  private Collection<Method> getSerializableMethods(final Class<? extends Annotation> annotationClass) {
+    return Arrays.stream(annotationClass.getDeclaredMethods())
+            .filter(m -> CDIAnnotationUtils.relevantForSerialization(new JavaReflectionMethod(m)))
+            .collect(toList());
+  }
 }

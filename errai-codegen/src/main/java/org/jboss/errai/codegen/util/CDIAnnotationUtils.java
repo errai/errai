@@ -21,11 +21,12 @@ import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.jboss.errai.codegen.meta.MetaAnnotation;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaMethod;
-import org.jboss.errai.common.client.util.AnnotationPropertyAccessor;
-import org.jboss.errai.common.client.util.AnnotationPropertyAccessorBuilder;
+import org.jboss.errai.codegen.meta.RuntimeAnnotation;
+import org.jboss.errai.codegen.meta.impl.apt.APTAnnotation;
 import org.jboss.errai.common.metadata.MetaDataScanner;
 import org.jboss.errai.common.metadata.ScannerSingleton;
 
@@ -37,13 +38,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static java.lang.reflect.Modifier.isPublic;
 
 /**
  * <p>
@@ -282,6 +279,8 @@ public class CDIAnnotationUtils {
         }
         if (value instanceof Annotation) {
             return part1 ^ hashCode((Annotation) value);
+        } else if (value instanceof MetaAnnotation){
+          return part1 ^ hashCode((MetaAnnotation) value);
         }
         return part1 ^ value.hashCode();
     }
@@ -425,7 +424,7 @@ public class CDIAnnotationUtils {
 
     public static Set<MetaClass> getQualifiers() {
       final Set<Class<?>> qualifiersAsClasses = getQualifiersAsClasses();
-      final Set<MetaClass> qualifiersAsMetaClasses = qualifiersAsClasses.stream().map(c -> MetaClassFactory.get(c)).collect(Collectors.toSet());
+      final Set<MetaClass> qualifiersAsMetaClasses = qualifiersAsClasses.stream().map(MetaClassFactory::get).collect(Collectors.toSet());
 
       if (qualifiersAsClasses.size() > qualifiersAsMetaClasses.size()) {
         throw new RuntimeException("Lost some qualifiers when converting from Class to MetaClass");
@@ -434,73 +433,73 @@ public class CDIAnnotationUtils {
       return qualifiersAsMetaClasses;
     }
 
-    public static Collection<MetaMethod> getAnnotationAttributes(final MetaClass annoClass) {
-      return filterAnnotationMethods(Arrays.stream(annoClass.getDeclaredMethods()),
-              method -> !method.unsafeIsAnnotationPresent(Nonbinding.class) && method.isPublic()
-                      && !method.getName().equals("equals") && !method.getName().equals("hashCode"));
+
+
+  public static Collection<MetaMethod> getAnnotationAttributes(final MetaClass annoClass) {
+    return Arrays.stream(annoClass.getDeclaredMethods())
+            .filter(CDIAnnotationUtils::relevantForSerialization)
+            .collect(Collectors.toList());
+  }
+
+  public static boolean relevantForSerialization(final MetaMethod method) {
+    return !method.isAnnotationPresent(Nonbinding.class)
+            && method.isPublic()
+            && !method.getName().equals("equals")
+            && !method.getName().equals("hashCode");
+  }
+
+  public static boolean equals(final MetaAnnotation anno1, final MetaAnnotation anno2) {
+
+    if (anno1 instanceof RuntimeAnnotation && anno2 instanceof RuntimeAnnotation) {
+      return equals(((RuntimeAnnotation) anno1).getAnnotation(), ((RuntimeAnnotation) anno2).getAnnotation());
     }
 
-    public static Collection<Method> getAnnotationAttributes(final Class<?> annoClass) {
-      return filterAnnotationMethods(Arrays.stream(annoClass.getDeclaredMethods()),
-              method -> !method.isAnnotationPresent(Nonbinding.class) && isPublic(method.getModifiers())
-                      && !method.getName().equals("equals") && !method.getName().equals("hashCode"));
-    }
-
-    public static Collection<MetaMethod> getNonBindingAttributes(final MetaClass annoClass) {
-      return filterAnnotationMethods(Arrays.stream(annoClass.getDeclaredMethods()),
-              method -> method.unsafeIsAnnotationPresent(Nonbinding.class) && method.isPublic()
-                      && !method.getName().equals("equals") && !method.getName().equals("hashCode"));
-    }
-
-    public static Collection<Method> getNonBindingAttributes(final Class<?> annoClass) {
-      return filterAnnotationMethods(Arrays.stream(annoClass.getDeclaredMethods()),
-              method -> method.isAnnotationPresent(Nonbinding.class) && isPublic(method.getModifiers())
-                      && !method.getName().equals("equals") && !method.getName().equals("hashCode"));
-    }
-
-    private static <T, M> Collection<M> filterAnnotationMethods(final Stream<M> methods, final Predicate<M> methodPredicate) {
-      return methods.filter(methodPredicate).collect(Collectors.toList());
-    }
-
-    public static AnnotationPropertyAccessor createDynamicSerializer(final Class<? extends Annotation> annotationType) {
-      final AnnotationPropertyAccessorBuilder builder = AnnotationPropertyAccessorBuilder.create();
-
-      final Collection<Method> annoAttrs = CDIAnnotationUtils.getAnnotationAttributes(annotationType);
-      for (final Method attr : annoAttrs) {
-        builder.with(attr.getName(), anno -> {
-          try {
-            final String retVal;
-            final Function<Object, String> toString = componentToString(
-                  attr.getReturnType().isArray() ? attr.getReturnType().getComponentType() : attr.getReturnType());
-            if (attr.getReturnType().isArray()) {
-              final StringBuilder sb = new StringBuilder();
-              final Object[] array = (Object[]) attr.invoke(anno);
-              sb.append("[");
-              for (final Object obj : array) {
-                sb.append(toString.apply(obj)).append(",");
-              }
-              sb.replace(sb.length()-1, sb.length(), "]");
-              retVal = sb.toString();
-            }
-            else {
-              retVal = toString.apply(attr.invoke(anno));
-            }
-            return retVal;
-          } catch (final Exception e) {
-            throw new RuntimeException(String.format("Could not access '%s' property while serializing %s.", attr.getName(), anno.annotationType()), e);
-          }
-        });
-      }
-
-      return builder.build();
-    }
-
-    private static Function<Object, String> componentToString(final Class<?> returnType) {
-      if (Class.class.equals(returnType)) {
-        return o -> ((Class<?>) o).getName();
-      }
-      else {
-        return o -> String.valueOf(o);
+    if (anno1 instanceof APTAnnotation && anno2 instanceof APTAnnotation) {
+      for (Map.Entry<String, Object> e : anno1.values().entrySet()) {
+        final Object o = anno2.values().get(e.getKey());
+        if (o == null || !o.equals(e.getValue())) {
+          return false;
+        }
       }
     }
+
+    final MetaAnnotation apt = anno1 instanceof APTAnnotation ? anno1 : anno2;
+    final MetaAnnotation runtime = anno2 instanceof APTAnnotation ? anno1 : anno2;
+
+    if (apt instanceof APTAnnotation && runtime instanceof RuntimeAnnotation) {
+      for (Map.Entry<String, Object> entry : apt.values().entrySet()) {
+        final String key = entry.getKey();
+        if (runtime.annotationType().getMethod(key, new MetaClass[0]).isAnnotationPresent(Nonbinding.class)) {
+          continue;
+        }
+        Object runtimeValue = runtime.value(entry.getKey());
+        Object aptValue = apt.value(entry.getKey());
+        if (runtimeValue == null || !runtimeValue.equals(aptValue)) {
+          return false;
+        }
+      }
+    }
+
+    return true;
+  }
+
+
+  public static int hashCode(final MetaAnnotation a) {
+    if (a instanceof RuntimeAnnotation) {
+      return hashCode(((RuntimeAnnotation) a).getAnnotation());
+    }
+
+    int result = 0;
+    final MetaClass type = a.annotationType();
+    for (final MetaMethod m : type.getDeclaredMethods()) {
+      if (!m.isAnnotationPresent(Nonbinding.class)) {
+        final Object value = a.value(m.getName());
+        if (value == null) {
+          throw new IllegalStateException(String.format("Annotation method %s returned null", m));
+        }
+        result += hashMember(m.getName(), value);
+      }
+    }
+    return result;
+  }
 }

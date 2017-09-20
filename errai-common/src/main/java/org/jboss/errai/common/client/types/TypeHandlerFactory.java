@@ -147,4 +147,12 @@ public class TypeHandlerFactory {
     }
     handlers.get(from).put(to, handler);
   }
+
+  public static Map<Class, Map<Class, TypeHandler>> handlers() {
+    return new HashMap<>(handlers);
+  }
+
+  public static Map<Class, Class> inheritanceMap() {
+    return new HashMap<>(inheritanceMap);
+  }
 }

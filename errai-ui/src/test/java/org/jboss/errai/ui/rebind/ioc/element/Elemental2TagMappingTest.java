@@ -17,6 +17,7 @@
 package org.jboss.errai.ui.rebind.ioc.element;
 
 import elemental2.dom.HTMLDivElement;
+import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.junit.Test;
 
 import static java.util.Collections.emptyList;
@@ -33,17 +34,18 @@ public class Elemental2TagMappingTest {
   public void testGetTags() {
     assertEquals("null should return no tag", emptyList(), getTags(null));
 
-    assertEquals("Object.class should not have any mapped tag name", emptyList(), getTags(Object.class));
+    assertEquals("Object.class should not have any mapped tag name", emptyList(), getTags(
+            MetaClassFactory.get(Object.class)));
 
-    assertEquals("String.class should not have any mapped tag name", emptyList(), getTags(String.class));
+    assertEquals("String.class should not have any mapped tag name", emptyList(), getTags(MetaClassFactory.get(String.class)));
 
-    assertEquals("HTMLDivElement should have a tag mapped to it", singletonList("div"), getTags(HTMLDivElement.class));
-
-    assertEquals("HTMLDivElement subclass should have a tag mapped to it", singletonList("div"),
-            getTags(CustomElement.class));
+    assertEquals("HTMLDivElement should have a tag mapped to it", singletonList("div"), getTags(MetaClassFactory.get(HTMLDivElement.class)));
 
     assertEquals("HTMLDivElement subclass should have a tag mapped to it", singletonList("div"),
-            getTags(CustomElement.Child.class));
+            getTags(MetaClassFactory.get(CustomElement.class)));
+
+    assertEquals("HTMLDivElement subclass should have a tag mapped to it", singletonList("div"),
+            getTags(MetaClassFactory.get(CustomElement.Child.class)));
   }
 
 }

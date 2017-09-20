@@ -16,6 +16,7 @@
 
 package org.jboss.errai.codegen.meta.impl.apt;
 
+import com.sun.tools.javac.code.Symbol;
 import com.sun.tools.javac.code.Type;
 import org.jboss.errai.codegen.meta.MetaAnnotation;
 import org.jboss.errai.codegen.meta.MetaClass;
@@ -115,6 +116,17 @@ public class APTClass extends AbstractMetaClass<TypeMirror> {
   @Override
   public String getFullyQualifiedName() {
     final TypeMirror mirror = getEnclosedMetaObject();
+
+    if (mirror.getKind().equals(TypeKind.DECLARED)) {
+      return ((Symbol) ((DeclaredType) mirror).asElement()).flatName().toString();
+    }
+
+    return getCanonicalName();
+  }
+
+  @Override
+  public String getCanonicalName() {
+    final TypeMirror mirror = getEnclosedMetaObject();
     switch (mirror.getKind()) {
     case DECLARED:
       final Element element = types.asElement(mirror);
@@ -138,11 +150,6 @@ public class APTClass extends AbstractMetaClass<TypeMirror> {
     default:
       return throwUnsupportedTypeError(mirror);
     }
-  }
-
-  @Override
-  public String getCanonicalName() {
-    return getFullyQualifiedName();
   }
 
   @Override
@@ -604,6 +611,7 @@ public class APTClass extends AbstractMetaClass<TypeMirror> {
     case INT:
     case LONG:
     case SHORT:
+    case VOID:
       return true;
     case ARRAY:
       return getComponentType().isPublic();
@@ -809,6 +817,15 @@ public class APTClass extends AbstractMetaClass<TypeMirror> {
     default:
       return throwUnsupportedTypeError(mirror);
     }
+  }
+
+  @Override
+  public MetaClass getDeclaringClass() {
+    final TypeMirror typeMirror = getEnclosedMetaObject();
+    return Optional.ofNullable(APTClassUtil.types.asElement(typeMirror).getEnclosingElement())
+            .filter(s -> s.getKind().isInterface() || s.getKind().isClass())
+            .map(s -> new APTClass(s.asType()))
+            .orElse(null);
   }
 
   @Override

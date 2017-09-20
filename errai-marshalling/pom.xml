@@ -69,5 +69,11 @@
       <scope>provided</scope>
     </dependency>
 
+    <dependency>
+      <groupId>org.jboss.errai</groupId>
+      <artifactId>errai-marshalling-export-apt</artifactId>
+      <scope>compile</scope>
+    </dependency>
+
   </dependencies>
 </project>

@@ -22,6 +22,7 @@ import org.jboss.errai.codegen.meta.MetaClassMember;
 import org.jboss.errai.codegen.meta.MetaParameter;
 
 import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.TypeMirror;
@@ -54,8 +55,14 @@ public class APTParameter extends MetaParameter {
 
   @Override
   public MetaClassMember getDeclaringMember() {
-    return new APTMethod((ExecutableElement) parameter.getEnclosingElement(),
-            new APTClass(parameter.getEnclosingElement().getEnclosingElement().asType()));
+    final APTClass metaClass = new APTClass(parameter.getEnclosingElement().getEnclosingElement().asType());
+    final ExecutableElement method = (ExecutableElement) parameter.getEnclosingElement();
+
+    if (method.getKind().equals(ElementKind.CONSTRUCTOR)) {
+      return new APTConstructor(method, metaClass);
+    } else {
+      return new APTMethod(method, metaClass);
+    }
   }
 
   @Override

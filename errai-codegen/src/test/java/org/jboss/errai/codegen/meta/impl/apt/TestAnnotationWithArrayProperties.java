@@ -24,4 +24,8 @@ package org.jboss.errai.codegen.meta.impl.apt;
   String[] value() default "";
 
   Class[] classes() default {};
+
+  TestEnum[] enums() default {};
+
+  TestInnerAnnotation[] annotations() default {};
 }

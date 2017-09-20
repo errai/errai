@@ -19,8 +19,10 @@ package org.jboss.errai.apt;
 import org.jboss.errai.codegen.meta.impl.apt.APTClassUtil;
 import org.jboss.errai.common.apt.AnnotatedSourceElementsFinder;
 import org.jboss.errai.common.apt.AptAnnotatedSourceElementsFinder;
+import org.jboss.errai.common.apt.AptResourceFilesFinder;
 import org.jboss.errai.common.apt.ErraiAptExportedTypes;
-import org.jboss.errai.common.apt.ErraiAptGenerator;
+import org.jboss.errai.common.apt.generator.ErraiAptGeneratedSourceFile;
+import org.jboss.errai.common.apt.ErraiAptGenerators;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.RoundEnvironment;
@@ -40,6 +42,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toList;
 import static javax.tools.StandardLocation.SOURCE_OUTPUT;
 import static org.jboss.errai.common.apt.ErraiAptPackages.generatorsPackageElement;
@@ -59,7 +62,7 @@ public class ErraiAppAptGenerator extends AbstractProcessor {
     try {
       generateAndSaveSourceFiles(annotations, new AptAnnotatedSourceElementsFinder(roundEnv));
     } catch (final Exception e) {
-      System.out.println("Error generating files: " + e.getMessage());
+      System.out.println("Error generating files:");
       e.printStackTrace();
     }
 
@@ -76,34 +79,39 @@ public class ErraiAppAptGenerator extends AbstractProcessor {
       final Elements elements = processingEnv.getElementUtils();
       APTClassUtil.init(types, elements);
 
-      this.erraiAptExportedTypes = new ErraiAptExportedTypes(types, elements, annotatedElementsFinder);
+      this.erraiAptExportedTypes = new ErraiAptExportedTypes(types, elements, annotatedElementsFinder, new AptResourceFilesFinder(processingEnv.getFiler()));
 
-      findGenerators(elements).forEach(this::generateAndSaveSourceFile);
+      findGenerators(elements).stream().flatMap(generator -> generator.files().stream()).forEach(this::saveFile);
       System.out.println("Successfully generated files using Errai APT Generators");
     }
   }
 
-  List<ErraiAptGenerator> findGenerators(final Elements elements) {
+  List<ErraiAptGenerators.Any> findGenerators(final Elements elements) {
     return generatorsPackageElement(elements).map(this::newGenerators).orElseGet(ArrayList::new);
   }
 
-  private List<ErraiAptGenerator> newGenerators(final PackageElement packageElement) {
-    return packageElement.getEnclosedElements().stream().map(this::loadClass).map(this::newGenerator).collect(toList());
+  private List<ErraiAptGenerators.Any> newGenerators(final PackageElement packageElement) {
+    return packageElement.getEnclosedElements()
+            .stream()
+            .map(this::loadClass)
+            .map(this::newGenerator)
+            .sorted(comparing(ErraiAptGenerators.Any::priority))
+            .collect(toList());
   }
 
   @SuppressWarnings("unchecked")
-  private Class<? extends ErraiAptGenerator> loadClass(final Element element) {
+  private Class<? extends ErraiAptGenerators.Any> loadClass(final Element element) {
     try {
-      // Because generators will always be pre-compiled, it's safe to get their classes using Class.forName
-      return (Class<? extends ErraiAptGenerator>) Class.forName(element.asType().toString());
+      // Because we're sure generators will always be pre-compiled, it's safe to get their classes using Class.forName
+      return (Class<? extends ErraiAptGenerators.Any>) Class.forName(element.asType().toString());
     } catch (final ClassNotFoundException e) {
       throw new RuntimeException(element.asType().toString() + " is not an ErraiAptGenerator", e);
     }
   }
 
-  private ErraiAptGenerator newGenerator(final Class<? extends ErraiAptGenerator> generatorClass) {
+  private ErraiAptGenerators.Any newGenerator(final Class<? extends ErraiAptGenerators.Any> generatorClass) {
     try {
-      final Constructor<? extends ErraiAptGenerator> constructor = generatorClass.getConstructor(ErraiAptExportedTypes.class);
+      final Constructor<? extends ErraiAptGenerators.Any> constructor = generatorClass.getConstructor(ErraiAptExportedTypes.class);
       constructor.setAccessible(true);
       return constructor.newInstance(erraiAptExportedTypes);
     } catch (final Exception e) {
@@ -111,23 +119,21 @@ public class ErraiAppAptGenerator extends AbstractProcessor {
     }
   }
 
-  private void generateAndSaveSourceFile(final ErraiAptGenerator generator) {
+  private void saveFile(final ErraiAptGeneratedSourceFile file) {
     try {
-      final String generatedSourceCode = generator.generate();
-      saveFile(generatedSourceCode, generator.getPackageName(), generator.getClassSimpleName() + ".java");
+      // By saving .java source files as resources we skip javac compilation. This behavior is desirable since all
+      // generated code is client code and will be compiled by the GWT/J2CL compiler.
+      // FIXME: errai-marshalling will generate server code too
+
+      final String fileName = file.getClassSimpleName() + ".java";
+      final String packageName = file.getPackageName();
+      final FileObject sourceFile = processingEnv.getFiler().createResource(SOURCE_OUTPUT, packageName, fileName);
+
+      try (final Writer writer = sourceFile.openWriter()) {
+        writer.write(file.getSourceCode());
+      }
     } catch (final IOException e) {
       throw new RuntimeException("Could not write generated file", e);
-    }
-  }
-
-  private void saveFile(final String generatedSourceCode, final String pkg, final String fileName) throws IOException {
-    // By saving .java source files as resources we skip javac compilation. This behavior is desirable since all
-    // generated code is client code and will be compiled by the GWT/J2CL compiler.
-    // FIXME: errai-marshalling will generate server code too
-    final FileObject sourceFile = processingEnv.getFiler().createResource(SOURCE_OUTPUT, pkg, fileName);
-
-    try (final Writer writer = sourceFile.openWriter()) {
-      writer.write(generatedSourceCode);
     }
   }
 }

@@ -465,4 +465,10 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
     }
     return arrayType;
   }
+
+  @Override
+  public MetaClass getDeclaringClass() {
+    final Class<?> declaringClass = unsafeAsClass().getDeclaringClass();
+    return declaringClass != null ? newInstance(declaringClass) : null;
+  }
 }
