@@ -16,12 +16,6 @@
 
 package org.jboss.errai.ioc.rebind.ioc.graph.impl;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
-
 import org.apache.commons.lang3.Validate;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaMethod;
@@ -31,6 +25,14 @@ import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraphBuilder.Dependenc
 import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraphBuilder.InjectableType;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.HasInjectableHandle;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.Injectable;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
+
+import static java.util.stream.Collectors.joining;
 
 /**
  *

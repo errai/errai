@@ -23,11 +23,13 @@ import org.jboss.errai.ioc.client.api.EnabledByProperty;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.SyncBeanManager;
 
+import static org.jboss.errai.config.ErraiAppPropertiesErraiAppConfiguration.ERRAI_IOC_ASYNC_BEAN_MANAGER;
+
 /**
  * @author Mike Brock
  */
 @Singleton
-@EnabledByProperty(value = "errai.ioc.async_bean_manager", negated = true)
+@EnabledByProperty(value = ERRAI_IOC_ASYNC_BEAN_MANAGER, negated = true)
 public class IOCBeanManagerProvider {
 
   @IOCProducer

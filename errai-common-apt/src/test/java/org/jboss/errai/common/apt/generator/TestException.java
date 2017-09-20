@@ -16,12 +16,14 @@
 
 package org.jboss.errai.common.apt.generator;
 
+import com.sun.tools.doclets.formats.html.SourceToHTMLConverter;
+
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
 class TestException extends RuntimeException {
   @Override
   public void printStackTrace() {
-    //do not print anything when thrown
+    System.out.println("Expected exception happened");
   }
 }

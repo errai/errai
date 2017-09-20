@@ -37,6 +37,7 @@ import org.jboss.errai.codegen.builder.MethodBlockBuilder;
 import org.jboss.errai.codegen.builder.impl.ClassBuilder;
 import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.impl.java.JavaReflectionClass;
 import org.jboss.errai.codegen.util.Arith;
@@ -56,7 +57,6 @@ import com.google.gwt.core.ext.Generator;
 import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.UnableToCompleteException;
-import com.google.gwt.core.ext.typeinfo.JClassType;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
 
 /**
@@ -66,19 +66,19 @@ public class QualifierEqualityFactoryGenerator extends Generator {
 
   private static final Logger log = LoggerFactory.getLogger(QualifierEqualityFactoryGenerator.class);
 
+  public static final String PACKAGE_NAME = "org.jboss.errai.ioc.client";
+  public static final String CLASS_NAME = "QualifierEqualityFactoryImpl";
+
   @Override
   public String generate(final TreeLogger logger, final GeneratorContext context, final String typeName)
       throws UnableToCompleteException {
     try {
-      final JClassType classType = context.getTypeOracle().getType(typeName);
-      final String packageName = classType.getPackage().getName();
-      final String className = classType.getSimpleSourceName() + "Impl";
 
       // Generate class source code
-      generateQualifierEqualityFactory(packageName, className, logger, context);
+      generateQualifierEqualityFactory(logger, context);
 
       // return the fully qualified name of the class generated
-      return packageName + "." + className;
+      return PACKAGE_NAME + "." + CLASS_NAME;
     }
     catch (Throwable e) {
       log.error("Error generating QualifierEqualityFactory", e);
@@ -88,36 +88,45 @@ public class QualifierEqualityFactoryGenerator extends Generator {
 
   private static final String COMPARATOR_MAP_VAR = "comparatorMap";
 
-  private void generateQualifierEqualityFactory(final String packageName,
-                                                final String className,
-                                                final TreeLogger logger,
-                                                final GeneratorContext generatorContext) {
+  private void generateQualifierEqualityFactory(final TreeLogger logger, final GeneratorContext generatorContext) {
 
-    final PrintWriter printWriter = generatorContext.tryCreate(logger, packageName, className);
+    final PrintWriter printWriter = generatorContext.tryCreate(logger, PACKAGE_NAME, CLASS_NAME);
     if (printWriter == null) {
       return;
     }
-    final long start = System.currentTimeMillis();
-    log.info("Generating QualifierEqualityFactory...");
 
     final TypeOracle oracle = generatorContext.getTypeOracle();
 
+    final long start = System.currentTimeMillis();
+    log.info("Generating QualifierEqualityFactory...");
+    final String csq = generate(TranslatableAnnotationUtils.getTranslatableQualifiers(oracle));
+    log.info("Generated QualifierEqualityFactory in " + (System.currentTimeMillis() - start) + "ms");
+
+    RebindUtils.writeStringToJavaSourceFileInErraiCacheDir(PACKAGE_NAME, CLASS_NAME, csq);
+
+    printWriter.append(csq);
+    generatorContext.commit(logger, printWriter);
+  }
+
+  public String generate(final Iterable<MetaClass> translatableQualifiers) {
+
+
     final ClassStructureBuilder<? extends ClassStructureBuilder<?>> builder
-        = ClassBuilder.define(packageName + "." + className).publicScope()
+        = ClassBuilder.define(PACKAGE_NAME + "." + CLASS_NAME).publicScope()
         .implementsInterface(QualifierEqualityFactory.class)
         .body();
 
     builder.getClassDefinition().getContext().setPermissiveMode(true);
 
     final MetaClass mapStringAnnoComp
-        = parameterizedAs(HashMap.class, typeParametersOf(String.class, AnnotationComparator.class));
+        = parameterizedAs(HashMap.class, typeParametersOf(MetaClassFactory.get(String.class), MetaClassFactory.get(AnnotationComparator.class)));
 
     builder.privateField(COMPARATOR_MAP_VAR, mapStringAnnoComp)
         .initializesWith(Stmt.newObject(mapStringAnnoComp)).finish();
 
     final ConstructorBlockBuilder<? extends ClassStructureBuilder<?>> constrBuilder = builder.publicConstructor();
 
-    for (final MetaClass MC_annotationClass : TranslatableAnnotationUtils.getTranslatableQualifiers(oracle)) {
+    for (final MetaClass MC_annotationClass : translatableQualifiers) {
       final Collection<MetaMethod> methods = CDIAnnotationUtils.getAnnotationAttributes(MC_annotationClass);
 
       if (methods.isEmpty()) continue;
@@ -151,7 +160,6 @@ public class QualifierEqualityFactoryGenerator extends Generator {
             .finish())
         .finish();
 
-
     builder.publicMethod(int.class, "hashCodeOf", Parameter.of(Annotation.class, "a1"))
         .body()
         ._(
@@ -165,15 +173,7 @@ public class QualifierEqualityFactoryGenerator extends Generator {
                 ._(Stmt.loadVariable("a1").invoke("annotationType").invoke("hashCode").returnValue())
                 .finish()).finish();
 
-
-    final String csq = builder.toJavaString();
-
-    RebindUtils.writeStringToJavaSourceFileInErraiCacheDir(packageName, className, csq);
-
-    printWriter.append(csq);
-
-    log.info("Generated QualifierEqualityFactory in " + (System.currentTimeMillis() - start) + "ms");
-    generatorContext.commit(logger, printWriter);
+    return builder.toJavaString();
   }
 
   private Statement generateComparatorFor(final MetaClass MC_annotationClass, final Collection<MetaMethod> methods) {

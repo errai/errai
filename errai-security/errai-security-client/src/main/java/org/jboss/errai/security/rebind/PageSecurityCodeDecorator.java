@@ -17,6 +17,7 @@
 package org.jboss.errai.security.rebind;
 
 import org.jboss.errai.codegen.Statement;
+import org.jboss.errai.codegen.meta.MetaAnnotation;
 import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.ioc.client.api.CodeDecorator;
@@ -49,8 +50,8 @@ public class PageSecurityCodeDecorator extends IOCDecoratorExtension<Page> {
   public void generateDecorator(final Decorable decorable, final FactoryController controller) {
     final List<Statement> statements = new ArrayList<Statement>();
 
-    if (decorable.getDecorableDeclaringType().unsafeIsAnnotationPresent(RestrictedAccess.class)) {
-      final RestrictedAccess annotation = decorable.getDecorableDeclaringType().unsafeGetAnnotation(RestrictedAccess.class);
+    if (decorable.getDecorableDeclaringType().isAnnotationPresent(RestrictedAccess.class)) {
+      final MetaAnnotation annotation = decorable.getDecorableDeclaringType().getAnnotation(RestrictedAccess.class).get();
       final String roleListenerVar = "roleListener";
 
       statements.add(controller.setReferenceStmt(roleListenerVar,

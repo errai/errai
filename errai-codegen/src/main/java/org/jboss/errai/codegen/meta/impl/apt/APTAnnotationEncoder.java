@@ -69,8 +69,7 @@ public class APTAnnotationEncoder {
         } else if (method.getName().equals("toString")) {
           return annotationMetaClass.toString();
         } else {
-          final Object value = metaAnnotation.value(method.getName(), method.getReturnType());
-          return Stmt.load(value);
+          return getValue(method, metaAnnotation);
         }
       }
 
@@ -79,5 +78,14 @@ public class APTAnnotationEncoder {
         return annotationMetaClass;
       }
     };
+  }
+
+  private static Object getValue(final MetaMethod method, final APTAnnotation metaAnnotation) {
+    final Object value = metaAnnotation.value(method.getName(), method.getReturnType());
+    if (value.getClass().isArray()) {
+      return Stmt.newArray(method.getReturnType().getComponentType()).initialize((Object[]) value);
+    } else {
+      return Stmt.load(value);
+    }
   }
 }

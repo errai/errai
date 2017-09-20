@@ -41,7 +41,7 @@ public interface HasAnnotations {
    */
   @Deprecated
   default boolean unsafeIsAnnotationPresent(final Class<? extends Annotation> annotation) {
-    return unsafeGetAnnotation(annotation) != null;
+    return isAnnotationPresent(annotation);
   }
 
   /**
@@ -58,7 +58,7 @@ public interface HasAnnotations {
   }
 
   default Optional<MetaAnnotation> getAnnotation(final Class<? extends Annotation> annotationClass) {
-    return Optional.ofNullable(unsafeGetAnnotation(annotationClass)).map(RuntimeMetaAnnotation::new);
+    return Optional.ofNullable(unsafeGetAnnotation(annotationClass)).map(RuntimeAnnotation::new);
   }
 
   @SuppressWarnings("unchecked")
@@ -67,7 +67,7 @@ public interface HasAnnotations {
   }
 
   default Collection<MetaAnnotation> getAnnotations() {
-    return Arrays.stream(unsafeGetAnnotations()).map(RuntimeMetaAnnotation::new).collect(toList());
+    return Arrays.stream(unsafeGetAnnotations()).map(RuntimeAnnotation::new).collect(toList());
   }
 
   default Boolean isAnnotationPresent(final Class<? extends Annotation> annotationClass) {

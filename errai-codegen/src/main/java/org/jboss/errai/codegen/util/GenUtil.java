@@ -480,9 +480,14 @@ public class GenUtil {
 
           score = scoreMethods(arguments, parmTypes, isVarArgs);
 
+
           if (score != 0 && score > bestScore) {
             bestCandidate = meth;
             bestScore = score;
+          }
+
+          if (score != 0 && score == bestScore && bestCandidate.isVarArgs()) {
+            bestCandidate = meth;
           }
         }
       }

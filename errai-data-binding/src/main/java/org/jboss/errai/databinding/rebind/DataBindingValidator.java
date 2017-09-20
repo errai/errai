@@ -17,9 +17,12 @@
 package org.jboss.errai.databinding.rebind;
 
 import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaParameterizedType;
+import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.databinding.client.api.Bindable;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * Validation utilities for data binding.
@@ -39,11 +42,17 @@ public class DataBindingValidator {
    *          The root type the given property chain is resolved against. Not null.
    * @param propertyChain
    *          The data binding property chain to validate. Not null.
+   * @param allConfiguredBindableTypes
+   *          All configured bindable types. Either on APT or ErraiAppProperties configuration
+   *
    * @return True if the given property chain is resolvable from the given bindable type.
    */
-  public static boolean isValidPropertyChain(final MetaClass bindableType, final String propertyChain) {
-    if (!bindableType.unsafeIsAnnotationPresent(Bindable.class) &&
-        !DataBindingUtil.getConfiguredBindableTypes().contains(bindableType) &&
+  public static boolean isValidPropertyChain(final MetaClass bindableType,
+          final String propertyChain,
+          final Set<MetaClass> allConfiguredBindableTypes) {
+
+    if (!bindableType.isAnnotationPresent(Bindable.class) &&
+        !allConfiguredBindableTypes.contains(bindableType) &&
         !bindableType.getFullyQualifiedName().equals(List.class.getName())) {
       return false;
     }
@@ -63,7 +72,7 @@ public class DataBindingValidator {
         return false;
       }
       MetaClass propertyType = bindableType.getBeanDescriptor().getPropertyType(thisProperty);
-      return  isValidPropertyChain(propertyType, moreProperties);
+      return isValidPropertyChain(propertyType, moreProperties, allConfiguredBindableTypes);
     }
   }
 

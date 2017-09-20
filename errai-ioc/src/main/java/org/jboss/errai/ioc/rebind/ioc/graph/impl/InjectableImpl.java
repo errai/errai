@@ -26,6 +26,8 @@ import java.util.function.Predicate;
 
 import org.jboss.errai.codegen.meta.HasAnnotations;
 import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaClassFactory;
+import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraphBuilder;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraphBuilder.Dependency;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraphBuilder.DependencyType;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraphBuilder.InjectableType;
@@ -51,7 +53,7 @@ class InjectableImpl extends InjectableBase implements Injectable {
   final InjectableType injectableType;
   final Collection<WiringElementType> wiringTypes;
   final List<BaseDependency> dependencies = new ArrayList<>();
-  final Class<? extends Annotation> literalScope;
+  final MetaClass literalScope;
   Boolean proxiable = null;
   boolean requiresProxy = false;
   Integer hashContent = null;
@@ -65,12 +67,24 @@ class InjectableImpl extends InjectableBase implements Injectable {
                      final Class<? extends Annotation> literalScope,
                      final InjectableType injectorType,
                      final Collection<WiringElementType> wiringTypes) {
-    super(type, qualifier);
+
+    this(type, qualifier, pathPredicate, factoryName, MetaClassFactory.get(literalScope), injectorType, wiringTypes);
+  }
+
+  InjectableImpl(final MetaClass injectedType,
+          final Qualifier qualifier,
+          final Predicate<List<InjectableHandle>> pathPredicate,
+          final String factoryName,
+          final MetaClass literalScope,
+          final InjectableType injectableType,
+          final Collection<WiringElementType> wiringTypes) {
+
+    super(injectedType, qualifier);
     this.pathPredicate = pathPredicate;
     this.factoryName = factoryName;
     this.literalScope = literalScope;
     this.wiringTypes = wiringTypes;
-    this.injectableType = injectorType;
+    this.injectableType = injectableType;
   }
 
   @Override
@@ -79,7 +93,7 @@ class InjectableImpl extends InjectableBase implements Injectable {
   }
 
   @Override
-  public Class<? extends Annotation> getScope() {
+  public MetaClass getScope() {
     return literalScope;
   }
 

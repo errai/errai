@@ -16,6 +16,9 @@
 
 package org.jboss.errai.codegen.meta;
 
+import java.lang.annotation.Annotation;
+import java.util.Map;
+
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
@@ -38,4 +41,22 @@ public abstract class MetaAnnotation {
   public abstract <V> V valueAsArray(final String attributeName, final Class<V> arrayClass);
 
   public abstract MetaClass annotationType();
+
+  public boolean instanceOf(final Class<? extends Annotation> clazz) {
+    return clazz.getCanonicalName().equals(annotationType().getCanonicalName());
+  }
+
+  @Override
+  public boolean equals(final Object o) {
+    return o instanceof MetaAnnotation
+            && annotationType().equals(((MetaAnnotation) o).annotationType())
+            && values().equals(((MetaAnnotation) o).values());
+  }
+
+  @Override
+  public String toString() {
+    return "@" + annotationType().getName();
+  }
+
+  public abstract Map<String, Object> values();
 }

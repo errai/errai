@@ -17,6 +17,7 @@
 package org.jboss.errai.ioc.rebind.ioc.graph.api;
 
 import org.jboss.errai.codegen.meta.HasAnnotations;
+import org.jboss.errai.codegen.meta.MetaAnnotation;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassMember;
 import org.jboss.errai.codegen.meta.MetaField;
@@ -25,6 +26,7 @@ import org.jboss.errai.codegen.meta.MetaParameter;
 import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Optional;
 
 /**
  * Contains metadata for a single injection point.
@@ -69,11 +71,13 @@ public class InjectionSite implements HasAnnotations {
   }
 
   @Override
+  @Deprecated
   public Annotation[] unsafeGetAnnotations() {
     return annotated.unsafeGetAnnotations();
   }
 
   @Override
+  @Deprecated
   public boolean unsafeIsAnnotationPresent(final Class<? extends Annotation> annotation) {
     return annotated.unsafeIsAnnotationPresent(annotation);
   }
@@ -81,6 +85,26 @@ public class InjectionSite implements HasAnnotations {
   @Override
   public <A extends Annotation> A unsafeGetAnnotation(final Class<A> annotation) {
     return annotated.unsafeGetAnnotation(annotation);
+  }
+
+  @Override
+  public Optional<MetaAnnotation> getAnnotation(final Class<? extends Annotation> annotationClass) {
+    return annotated.getAnnotation(annotationClass);
+  }
+
+  @Override
+  public Boolean isAnnotationPresent(final MetaClass metaClass) {
+    return annotated.isAnnotationPresent(metaClass);
+  }
+
+  @Override
+  public Collection<MetaAnnotation> getAnnotations() {
+    return annotated.getAnnotations();
+  }
+
+  @Override
+  public Boolean isAnnotationPresent(final Class<? extends Annotation> annotationClass) {
+    return annotated.isAnnotationPresent(annotationClass);
   }
 
   /**

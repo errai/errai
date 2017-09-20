@@ -37,6 +37,7 @@ import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaTypeVariable;
 import org.jboss.errai.codegen.meta.impl.AbstractMetaClass;
+import org.jboss.errai.codegen.meta.impl.java.JavaReflectionClass;
 import org.jboss.errai.codegen.util.GWTPrivateMemberAccessor;
 import org.jboss.errai.codegen.util.GenUtil;
 import org.jboss.errai.codegen.util.PrivateAccessUtil;
@@ -607,5 +608,11 @@ public class GWTClass extends AbstractMetaClass<JType> {
     }
 
     return new GWTClass(oracle, type, false);
+  }
+
+  @Override
+  public MetaClass getDeclaringClass() {
+    final Class<?> declaringClass = unsafeAsClass().getDeclaringClass();
+    return declaringClass != null ? JavaReflectionClass.newInstance(declaringClass) : null;
   }
 }

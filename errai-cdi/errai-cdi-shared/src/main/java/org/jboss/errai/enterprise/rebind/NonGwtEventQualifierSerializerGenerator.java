@@ -38,8 +38,8 @@ import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.util.CDIAnnotationUtils;
 import org.jboss.errai.codegen.util.ClassChangeUtil;
 import org.jboss.errai.common.client.api.Assert;
-import org.jboss.errai.common.client.util.AnnotationPropertyAccessorBuilder;
-import org.jboss.errai.common.client.util.SharedAnnotationSerializer;
+import org.jboss.errai.ioc.client.util.AnnotationPropertyAccessorBuilder;
+import org.jboss.errai.ioc.client.util.ClientAnnotationSerializer;
 import org.jboss.errai.enterprise.client.cdi.EventQualifierSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,7 +74,7 @@ public class NonGwtEventQualifierSerializerGenerator {
     for (final MetaClass qual : qualifiers) {
       final Collection<MetaMethod> bindingAttributes = CDIAnnotationUtils.getAnnotationAttributes(qual);
       if (!bindingAttributes.isEmpty()) {
-        ctor.append(loadVariable("serializers").invoke("put", qual.getFullyQualifiedName(), generateEntryStatement(qual, bindingAttributes)));
+        ctor.append(loadVariable("serializers").invoke("put", qual.getFullyQualifiedName(), generateEntryStatement(bindingAttributes)));
       }
     }
     ctor.finish();
@@ -82,8 +82,7 @@ public class NonGwtEventQualifierSerializerGenerator {
     return body.toJavaString();
   }
 
-  private static ContextualStatementBuilder generateEntryStatement(final MetaClass qual,
-          final Collection<MetaMethod> bindingAttributes) {
+  private static ContextualStatementBuilder generateEntryStatement(final Collection<MetaMethod> bindingAttributes) {
     ContextualStatementBuilder entryStmt = invokeStatic(AnnotationPropertyAccessorBuilder.class, "create");
 
     for (final MetaMethod attr : bindingAttributes) {
@@ -97,7 +96,7 @@ public class NonGwtEventQualifierSerializerGenerator {
   private static ObjectBuilder anonymousAttributeAccessorFor(final MetaMethod attr) {
     return newInstanceOf(Function.class).extend()
             .publicOverridesMethod("apply", Parameter.finalOf(Object.class, "anno"))
-            .append(invokeStatic(SharedAnnotationSerializer.class, "stringify",
+            .append(invokeStatic(ClientAnnotationSerializer.class, "serializeObject",
                             castTo(attr.getDeclaringClass(), loadVariable("anno")).invoke(attr))
                     .returnValue())
             .finish().finish();

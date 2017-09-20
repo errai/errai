@@ -18,8 +18,10 @@ package org.jboss.errai.ui.rebind;
 
 import java.util.Arrays;
 import java.util.LinkedList;
+import java.util.Optional;
 import java.util.Queue;
 
+import org.jboss.errai.codegen.meta.MetaAnnotation;
 import org.jboss.errai.codegen.meta.MetaClass;
 
 import com.google.gwt.core.client.JavaScriptObject;
@@ -38,8 +40,8 @@ public class RebindUtil {
   }
 
   private static boolean hasNativeJsTypeAnnotation(final MetaClass type) {
-    final JsType anno = type.unsafeGetAnnotation(JsType.class);
-    return anno != null && anno.isNative();
+    final Optional<MetaAnnotation> anno = type.getAnnotation(JsType.class);
+    return anno.map(a -> a.<Boolean>value("isNative")).orElse(false);
   }
 
   /**

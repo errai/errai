@@ -29,6 +29,7 @@ import javax.inject.Qualifier;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.ContextualStatementBuilder;
 import org.jboss.errai.codegen.meta.HasAnnotations;
+import org.jboss.errai.codegen.meta.MetaAnnotation;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
@@ -51,9 +52,9 @@ public class InjectUtil {
     }
   }
 
-  public static List<Annotation> extractQualifiers(final HasAnnotations annotated) {
-    final List<Annotation> qualifiers = new ArrayList<Annotation>();
-    for (final Annotation anno : annotated.unsafeGetAnnotations()) {
+  public static List<MetaAnnotation> extractQualifiers(final HasAnnotations annotated) {
+    final List<MetaAnnotation> qualifiers = new ArrayList<>();
+    for (final MetaAnnotation anno : annotated.getAnnotations()) {
       if (anno.annotationType().isAnnotationPresent(Qualifier.class)) {
         qualifiers.add(anno);
       }

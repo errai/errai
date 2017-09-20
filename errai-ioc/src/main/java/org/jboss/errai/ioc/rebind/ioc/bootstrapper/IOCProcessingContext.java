@@ -16,75 +16,79 @@
 
 package org.jboss.errai.ioc.rebind.ioc.bootstrapper;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.Stack;
-
-import org.jboss.errai.codegen.Context;
+import com.google.gwt.core.ext.GeneratorContext;
+import org.jboss.errai.codegen.InnerClass;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
+import org.jboss.errai.codegen.builder.impl.ClassBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.common.apt.MetaClassFinder;
 import org.jboss.errai.codegen.meta.impl.build.BuildMetaClass;
+import org.jboss.errai.common.apt.ResourceFilesFinder;
+import org.jboss.errai.config.ErraiConfiguration;
 import org.jboss.errai.common.client.api.Assert;
+import org.jboss.errai.ioc.client.container.Factory;
+import org.jboss.errai.ioc.rebind.ioc.graph.api.Injectable;
 
-import com.google.gwt.core.ext.GeneratorContext;
-import com.google.gwt.core.ext.TreeLogger;
+import java.util.Stack;
+
+import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
+import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class IOCProcessingContext {
-  protected final Set<String> packages;
 
-  protected final Context context;
   protected final BuildMetaClass bootstrapClass;
   protected final ClassStructureBuilder bootstrapBuilder;
-
   protected final Stack<BlockBuilder<?>> blockBuilder;
-
-  protected final List<Statement> appendToEnd;
-  protected final Set<MetaClass> discovered = new HashSet<MetaClass>();
-
-  protected final TreeLogger treeLogger;
   protected final GeneratorContext generatorContext;
-
-  protected final boolean gwtTarget;
+  protected final MetaClassFinder metaClassFinder;
+  protected final ErraiConfiguration erraiConfiguration;
+  protected final ResourceFilesFinder resourceFilesFinder;
 
   private IOCProcessingContext(final Builder builder) {
-    this.treeLogger = builder.treeLogger;
     this.generatorContext = builder.generatorContext;
-    this.context = builder.context;
     this.bootstrapClass = builder.bootstrapClassInstance;
     this.bootstrapBuilder = builder.bootstrapBuilder;
+    this.metaClassFinder = builder.metaClassFinder;
+    this.erraiConfiguration = builder.erraiConfiguration;
+    this.resourceFilesFinder = builder.resourcesFilesFinder;
 
-    this.blockBuilder = new Stack<BlockBuilder<?>>();
+    this.blockBuilder = new Stack<>();
     this.blockBuilder.push(builder.blockBuilder);
+  }
 
-    this.appendToEnd = new ArrayList<Statement>();
-    this.packages = builder.packages;
-    this.gwtTarget = builder.gwtTarget;
+  public MetaClass buildFactoryMetaClass(final Injectable injectable) {
+    final String factoryName = injectable.getFactoryName();
+    final MetaClass typeCreatedByFactory = injectable.getInjectedType();
+    final BuildMetaClass factoryMetaClass = ClassBuilder.define(factoryName,
+            parameterizedAs(Factory.class, typeParametersOf(typeCreatedByFactory)))
+            .publicScope()
+            .abstractClass()
+            .body()
+            .getClassDefinition();
+
+    if (!erraiConfiguration.app().isAptEnvironment()) {
+      getBootstrapBuilder().declaresInnerClass(new InnerClass(factoryMetaClass));
+    }
+
+    return factoryMetaClass;
   }
 
   public static class Builder {
-    private TreeLogger treeLogger;
     private GeneratorContext generatorContext;
-    private Context context;
     private BuildMetaClass bootstrapClassInstance;
     private ClassStructureBuilder bootstrapBuilder;
+    private MetaClassFinder metaClassFinder;
     private BlockBuilder<?> blockBuilder;
-    private Set<String> packages;
-    private boolean gwtTarget;
+    private ErraiConfiguration erraiConfiguration;
+    private ResourceFilesFinder resourcesFilesFinder;
 
     public static Builder create() {
       return new Builder();
-    }
-
-    public Builder logger(final TreeLogger treeLogger) {
-      this.treeLogger = treeLogger;
-      return this;
     }
 
     public Builder generatorContext(final GeneratorContext generatorContext) {
@@ -92,8 +96,8 @@ public class IOCProcessingContext {
       return this;
     }
 
-    public Builder context(final Context context) {
-      this.context = context;
+    public Builder metaClassFinder(final MetaClassFinder metaClassFinder) {
+      this.metaClassFinder = metaClassFinder;
       return this;
     }
 
@@ -112,24 +116,23 @@ public class IOCProcessingContext {
       return this;
     }
 
-    public Builder packages(final Set<String> packages) {
-      this.packages = packages;
+    public Builder erraiConfiguration(final ErraiConfiguration erraiConfiguration) {
+      this.erraiConfiguration = erraiConfiguration;
       return this;
     }
 
-    public Builder gwtTarget(final boolean gwtTarget) {
-      this.gwtTarget = gwtTarget;
+    public Builder resourceFilesFinder(final ResourceFilesFinder resourceFilesFinder) {
+      this.resourcesFilesFinder = resourceFilesFinder;
       return this;
     }
 
     public IOCProcessingContext build() {
-      Assert.notNull("treeLogger cannot be null", treeLogger);
-      // Assert.notNull("sourceWriter cannot be null", sourceWriter);
-      Assert.notNull("context cannot be null", context);
       Assert.notNull("bootstrapClassInstance cannot be null", bootstrapClassInstance);
       Assert.notNull("bootstrapBuilder cannot be null", bootstrapBuilder);
       Assert.notNull("blockBuilder cannot be null", blockBuilder);
-      Assert.notNull("packages cannot be null", packages);
+      Assert.notNull("metaClassFinder cannot be null", metaClassFinder);
+      Assert.notNull("erraiConfiguration cannot be null", erraiConfiguration);
+      Assert.notNull("resourceFilesFinder cannot be null", resourcesFilesFinder);
 
       return new IOCProcessingContext(this);
     }
@@ -147,27 +150,6 @@ public class IOCProcessingContext {
      getBlockBuilder().insertBefore(statement);
   }
 
-
-  public void pushBlockBuilder(final BlockBuilder<?> blockBuilder) {
-    this.blockBuilder.push(blockBuilder);
-  }
-
-  public void popBlockBuilder() {
-    this.blockBuilder.pop();
-
-    if (this.blockBuilder.size() == 0) {
-      throw new AssertionError("block builder was over popped! something is wrong.");
-    }
-  }
-
-  public void appendToEnd(final Statement statement) {
-    appendToEnd.add(statement);
-  }
-
-  public List<Statement> getAppendToEnd() {
-    return appendToEnd;
-  }
-
   public BuildMetaClass getBootstrapClass() {
     return bootstrapClass;
   }
@@ -176,24 +158,19 @@ public class IOCProcessingContext {
     return bootstrapBuilder;
   }
 
-  public Context getContext() {
-    return context;
-  }
-
-  public Set<String> getPackages() {
-    return packages;
-  }
-
-  @SuppressWarnings("UnusedDeclaration")
-  public TreeLogger getTreeLogger() {
-    return treeLogger;
+  public MetaClassFinder metaClassFinder() {
+    return metaClassFinder;
   }
 
   public GeneratorContext getGeneratorContext() {
     return generatorContext;
   }
 
-  public boolean isGwtTarget() {
-    return gwtTarget;
+  public ErraiConfiguration erraiConfiguration() {
+    return erraiConfiguration;
+  }
+
+  public ResourceFilesFinder resourceFilesFinder() {
+    return resourceFilesFinder;
   }
 }

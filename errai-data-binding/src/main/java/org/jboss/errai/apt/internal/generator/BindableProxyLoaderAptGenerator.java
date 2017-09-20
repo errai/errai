@@ -16,37 +16,45 @@
 
 package org.jboss.errai.apt.internal.generator;
 
-import com.google.gwt.core.ext.GeneratorContext;
-import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.common.apt.ErraiAptExportedTypes;
-import org.jboss.errai.common.apt.ErraiAptGenerator;
-import org.jboss.errai.common.apt.configuration.ErraiModuleConfiguration;
+import org.jboss.errai.common.apt.ErraiAptGenerators;
+import org.jboss.errai.common.apt.MetaClassFinder;
+import org.jboss.errai.common.apt.configuration.AptErraiConfiguration;
+import org.jboss.errai.config.ErraiConfiguration;
 import org.jboss.errai.databinding.client.api.Bindable;
 import org.jboss.errai.databinding.rebind.BindableProxyLoaderGenerator;
-
-import java.lang.annotation.Annotation;
-import java.util.Collection;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * IMPORTANT: Do not move this class. ErraiAppAptGenerator depends on it being in this exact package.
  *
  * @author Tiago Bento <tfernand@redhat.com>
  */
-public class BindableProxyLoaderAptGenerator extends ErraiAptGenerator {
+public class BindableProxyLoaderAptGenerator extends ErraiAptGenerators.SingleFile {
+
+  private static final Logger log = LoggerFactory.getLogger(BindableProxyLoaderAptGenerator.class);
 
   private final BindableProxyLoaderGenerator bindableProxyLoaderGenerator;
-  private final ErraiModuleConfiguration erraiModuleConfiguration;
 
   // IMPORTANT: Do not remove. ErraiAppAptGenerator depends on this constructor
   public BindableProxyLoaderAptGenerator(final ErraiAptExportedTypes exportedTypes) {
     super(exportedTypes);
-    this.erraiModuleConfiguration = new ErraiModuleConfiguration(this::findAnnotatedMetaClasses);
     this.bindableProxyLoaderGenerator = new BindableProxyLoaderGenerator();
   }
 
   @Override
   public String generate() {
-    return bindableProxyLoaderGenerator.generate(this::findAnnotatedMetaClasses, null);
+    log.info("Generating {}...", getClassSimpleName());
+
+    final ErraiConfiguration erraiConfiguration = new AptErraiConfiguration(metaClassFinder());
+    final MetaClassFinder metaClassFinder = metaClassFinder().extend(Bindable.class,
+            erraiConfiguration.modules()::getBindableTypes);
+
+    final String generatedSource = bindableProxyLoaderGenerator.generate(metaClassFinder);
+
+    log.info("Generated {}", getClassSimpleName());
+    return generatedSource;
   }
 
   @Override
@@ -57,18 +65,6 @@ public class BindableProxyLoaderAptGenerator extends ErraiAptGenerator {
   @Override
   public String getClassSimpleName() {
     return bindableProxyLoaderGenerator.getClassSimpleName();
-  }
-
-  private Collection<MetaClass> findAnnotatedMetaClasses(final GeneratorContext context,
-          final Class<? extends Annotation> annotation) {
-
-    final Collection<MetaClass> annotatedMetaClasses = findAnnotatedMetaClasses(annotation);
-
-    if (annotation.equals(Bindable.class)) {
-      annotatedMetaClasses.addAll(erraiModuleConfiguration.getBindableTypes());
-    }
-
-    return annotatedMetaClasses;
   }
 
 }

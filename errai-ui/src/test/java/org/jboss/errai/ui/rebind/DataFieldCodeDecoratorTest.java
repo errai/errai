@@ -30,6 +30,7 @@ import java.util.Map;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
+import org.jboss.errai.codegen.meta.RuntimeAnnotation;
 import org.jboss.errai.common.client.dom.Div;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.Decorable;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.FactoryController;
@@ -59,7 +60,7 @@ public class DataFieldCodeDecoratorTest {
 
   @Before
   public void setup() {
-    when(decorable.getAnnotation()).thenReturn(new DataField() {
+    when(decorable.getAnnotation()).thenReturn(new RuntimeAnnotation(new DataField() {
 
       @Override
       public Class<? extends Annotation> annotationType() {
@@ -81,7 +82,7 @@ public class DataFieldCodeDecoratorTest {
         return ConflictStrategy.USE_TEMPLATE;
       }
 
-    });
+    }));
     final Map<String, Object> attrs = new HashMap<>();
     when(context.getAttribute(any())).then(invocation -> attrs.get(invocation.getArguments()[0]));
     doAnswer(invocation -> attrs.put((String) invocation.getArguments()[0], invocation.getArguments()[1]))

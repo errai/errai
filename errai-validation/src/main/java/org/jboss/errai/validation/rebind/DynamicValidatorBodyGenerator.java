@@ -55,7 +55,6 @@ import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.ioc.client.container.Factory;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.AbstractBodyGenerator;
-import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraph;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.Injectable;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.jboss.errai.validation.client.dynamic.DynamicValidator;
@@ -83,7 +82,7 @@ public class DynamicValidatorBodyGenerator extends AbstractBodyGenerator {
 
   @Override
   protected List<Statement> generateCreateInstanceStatements(final ClassStructureBuilder<?> bodyBlockBuilder,
-          final Injectable injectable, final DependencyGraph graph, final InjectionContext injectionContext) {
+          final Injectable injectable, final InjectionContext injectionContext) {
     final List<Statement> statements = new ArrayList<>(validators.size()+2);
     statements.add(Stmt.declareFinalVariable("dynamicValidator", DynamicValidator.class,
             ObjectBuilder.newInstanceOf(DynamicValidator.class)));

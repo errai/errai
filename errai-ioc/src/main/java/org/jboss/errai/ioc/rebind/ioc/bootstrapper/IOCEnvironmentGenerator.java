@@ -20,11 +20,13 @@ import com.google.gwt.core.ext.Generator;
 import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.UnableToCompleteException;
-import com.google.gwt.core.ext.typeinfo.JClassType;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.impl.ClassBuilder;
 import org.jboss.errai.codegen.util.Stmt;
+import org.jboss.errai.common.server.api.ErraiConfig;
+import org.jboss.errai.config.ErraiAppPropertiesConfiguration;
+import org.jboss.errai.config.ErraiConfiguration;
 import org.jboss.errai.config.rebind.EnvUtil;
 import org.jboss.errai.ioc.client.container.ClientBeanManager;
 import org.jboss.errai.ioc.client.container.IOCEnvironment;
@@ -33,28 +35,29 @@ import org.jboss.errai.ioc.client.container.async.AsyncBeanManagerImpl;
 
 import java.io.PrintWriter;
 
+import static org.jboss.errai.config.ErraiAppPropertiesErraiAppConfiguration.ERRAI_IOC_ASYNC_BEAN_MANAGER;
+
 /**
  * @author Mike Brock
  */
 public class IOCEnvironmentGenerator extends Generator {
 
+  public static final String PACKAGE_NAME = "org.jboss.errai.ioc.client.container";
+  public static final String CLASS_NAME = "IOCEnvironmentImpl";
 
   @Override
   public String generate(final TreeLogger logger,
                          final GeneratorContext context,
                          final String typeName) throws UnableToCompleteException {
     try {
-      final JClassType classType = context.getTypeOracle().getType(typeName);
-      final String packageName = classType.getPackage().getName();
-      final String className = classType.getSimpleSourceName() + "Impl";
 
       logger.log(TreeLogger.INFO, "Generating Extensions Bootstrapper...");
 
       // Generate class source code
-      generateIOCEnvironment(packageName, className, logger, context);
+      generateIOCEnvironment(logger, context);
 
       // return the fully qualified name of the class generated
-      return packageName + "." + className;
+      return PACKAGE_NAME + "." + CLASS_NAME;
     }
     catch (Throwable e) {
       // record sendNowWith logger that Map generation threw an exception
@@ -64,25 +67,25 @@ public class IOCEnvironmentGenerator extends Generator {
     }
   }
 
-  private void generateIOCEnvironment(final String packageName,
-                                      final String className,
-                                      final TreeLogger logger,
-                                      final GeneratorContext generatorContext) {
+  private void generateIOCEnvironment(final TreeLogger logger, final GeneratorContext generatorContext) {
 
-    final PrintWriter printWriter = generatorContext.tryCreate(logger, packageName, className);
+    final PrintWriter printWriter = generatorContext.tryCreate(logger, PACKAGE_NAME, CLASS_NAME);
     if (printWriter == null) {
       return;
     }
 
-    final boolean asyncBootstrap;
+    final String csq = generate(new ErraiAppPropertiesConfiguration());
 
-    final String s = EnvUtil.getEnvironmentConfig().getFrameworkOrSystemProperty("errai.ioc.async_bean_manager");
-    asyncBootstrap = s != null && Boolean.parseBoolean(s);
+    printWriter.append(csq);
+    generatorContext.commit(logger, printWriter);
+  }
 
+  public String generate(final ErraiConfiguration erraiConfiguration) {
+    final boolean asyncBootstrap = erraiConfiguration.app().asyncBeanManager();
     final Statement newBeanManager = asyncBootstrap ? Stmt.newObject(AsyncBeanManagerImpl.class) : Stmt.newObject(SyncBeanManagerImpl.class);
 
     final ClassStructureBuilder<? extends ClassStructureBuilder<?>> builder
-        = ClassBuilder.define(packageName + "." + className).publicScope()
+        = ClassBuilder.define(PACKAGE_NAME + "." + CLASS_NAME).publicScope()
         .implementsInterface(IOCEnvironment.class)
         .body()
         .publicMethod(boolean.class, "isAsync")
@@ -92,8 +95,6 @@ public class IOCEnvironmentGenerator extends Generator {
         .append(Stmt.nestedCall(newBeanManager).returnValue())
         .finish();
 
-    final String csq = builder.toJavaString();
-    printWriter.append(csq);
-    generatorContext.commit(logger, printWriter);
+    return builder.toJavaString();
   }
 }

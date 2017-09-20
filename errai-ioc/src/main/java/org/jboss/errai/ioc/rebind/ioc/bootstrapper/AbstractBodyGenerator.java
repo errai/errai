@@ -18,8 +18,6 @@ package org.jboss.errai.ioc.rebind.ioc.bootstrapper;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import com.google.gwt.core.ext.GeneratorContext;
-import com.google.gwt.core.ext.TreeLogger;
 import org.jboss.errai.codegen.BooleanOperator;
 import org.jboss.errai.codegen.InnerClass;
 import org.jboss.errai.codegen.Modifier;
@@ -37,6 +35,7 @@ import org.jboss.errai.codegen.builder.impl.ClassBuilder;
 import org.jboss.errai.codegen.builder.impl.StatementBuilder;
 import org.jboss.errai.codegen.literal.LiteralFactory;
 import org.jboss.errai.codegen.meta.HasAnnotations;
+import org.jboss.errai.codegen.meta.MetaAnnotation;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaConstructor;
@@ -58,7 +57,6 @@ import org.jboss.errai.ioc.client.container.FactoryHandleImpl;
 import org.jboss.errai.ioc.client.container.Proxy;
 import org.jboss.errai.ioc.client.container.ProxyHelper;
 import org.jboss.errai.ioc.client.container.ProxyHelperImpl;
-import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraph;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraphBuilder.Dependency;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraphBuilder.DependencyType;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraphBuilder.ParamDependency;
@@ -81,7 +79,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.Optional;
 
 import static org.jboss.errai.codegen.Parameter.finalOf;
 import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
@@ -125,7 +122,7 @@ public abstract class AbstractBodyGenerator implements FactoryBodyGenerator {
 
   /**
    * This is populated at the start of
-   * {@link #generate(ClassStructureBuilder, Injectable, DependencyGraph, InjectionContext, TreeLogger, GeneratorContext)}
+   * {@link FactoryBodyGenerator#generate(ClassStructureBuilder, Injectable, InjectionContext)}
    * .
    *
    * Calls to {@link FactoryController#addInvokeAfter(MetaMethod, Statement)},
@@ -564,29 +561,25 @@ public abstract class AbstractBodyGenerator implements FactoryBodyGenerator {
    * @param injectable
    *          Contains metadata (including dependencies) or the bean that the
    *          generated factory will produce.
-   * @param graph
-   *          The dependency graph that the {@link Injectable} parameter is
-   *          from.
    * @param injectionContext
    *          The single injection context shared between all
    *          {@link FactoryBodyGenerator FactoryBodyGenerators}.
    * @return A list of statements that will generated in the
    *         {@link Factory#createInstance(ContextManager)} method.
    */
-  protected abstract List<Statement> generateCreateInstanceStatements(ClassStructureBuilder<?> bodyBlockBuilder,
-          Injectable injectable, DependencyGraph graph, InjectionContext injectionContext);
+  protected abstract List<Statement> generateCreateInstanceStatements(final ClassStructureBuilder<?> bodyBlockBuilder,
+          final Injectable injectable, final InjectionContext injectionContext);
 
   @Override
-  public void generate(final ClassStructureBuilder<?> bodyBlockBuilder, final Injectable injectable,
-          final DependencyGraph graph, final InjectionContext injectionContext, final TreeLogger logger,
-          final GeneratorContext context) {
-    controller = new FactoryController(injectable.getInjectedType(), injectable.getFactoryName(), bodyBlockBuilder.getClassDefinition());
-    preGenerationHook(bodyBlockBuilder, injectable, graph, injectionContext);
+  public void generate(final ClassStructureBuilder<?> bodyBlockBuilder, final Injectable injectable, final InjectionContext injectionContext) {
 
-    final List<Statement> factoryInitStatements = generateFactoryInitStatements(bodyBlockBuilder, injectable, graph, injectionContext);
-    final List<Statement> createInstanceStatements = generateCreateInstanceStatements(bodyBlockBuilder, injectable, graph, injectionContext);
-    final List<Statement> destroyInstanceStatements = generateDestroyInstanceStatements(bodyBlockBuilder, injectable, graph, injectionContext);
-    final List<Statement> invokePostConstructStatements = generateInvokePostConstructsStatements(bodyBlockBuilder, injectable, graph, injectionContext);
+    controller = new FactoryController(injectable.getInjectedType(), injectable.getFactoryName(), bodyBlockBuilder.getClassDefinition());
+    preGenerationHook(bodyBlockBuilder, injectable, injectionContext);
+
+    final List<Statement> factoryInitStatements = generateFactoryInitStatements(bodyBlockBuilder, injectable, injectionContext);
+    final List<Statement> createInstanceStatements = generateCreateInstanceStatements(bodyBlockBuilder, injectable, injectionContext);
+    final List<Statement> destroyInstanceStatements = generateDestroyInstanceStatements(bodyBlockBuilder, injectable, injectionContext);
+    final List<Statement> invokePostConstructStatements = generateInvokePostConstructsStatements(bodyBlockBuilder, injectable, injectionContext);
 
     implementConstructor(bodyBlockBuilder, injectable);
     maybeImplementFactoryInit(bodyBlockBuilder, injectable, factoryInitStatements);
@@ -610,8 +603,7 @@ public abstract class AbstractBodyGenerator implements FactoryBodyGenerator {
     }
   }
 
-  protected void preGenerationHook(final ClassStructureBuilder<?> bodyBlockBuilder, final Injectable injectable,
-          final DependencyGraph graph, final InjectionContext injectionContext) {
+  protected void preGenerationHook(final ClassStructureBuilder<?> bodyBlockBuilder, final Injectable injectable, final InjectionContext injectionContext) {
   }
 
   /**
@@ -621,9 +613,6 @@ public abstract class AbstractBodyGenerator implements FactoryBodyGenerator {
    * @param injectable
    *          Contains metadata (including dependencies) or the bean that the
    *          generated factory will produce.
-   * @param graph
-   *          The dependency graph that the {@link Injectable} parameter is
-   *          from.
    * @param injectionContext
    *          The single injection context shared between all
    *          {@link FactoryBodyGenerator FactoryBodyGenerators}.
@@ -631,7 +620,7 @@ public abstract class AbstractBodyGenerator implements FactoryBodyGenerator {
    *         {@link Factory#init(Context)} method.
    */
   protected List<Statement> generateFactoryInitStatements(final ClassStructureBuilder<?> bodyBlockBuilder,
-          final Injectable injectable, final DependencyGraph graph, final InjectionContext injectionContext) {
+          final Injectable injectable, final InjectionContext injectionContext) {
     return Collections.emptyList();
   }
 
@@ -642,9 +631,6 @@ public abstract class AbstractBodyGenerator implements FactoryBodyGenerator {
    * @param injectable
    *          Contains metadata (including dependencies) or the bean that the
    *          generated factory will produce.
-   * @param graph
-   *          The dependency graph that the {@link Injectable} parameter is
-   *          from.
    * @param injectionContext
    *          The single injection context shared between all
    *          {@link FactoryBodyGenerator FactoryBodyGenerators}.
@@ -652,7 +638,7 @@ public abstract class AbstractBodyGenerator implements FactoryBodyGenerator {
    *         {@link Factory#invokePostConstructs(Object)} method.
    */
   protected List<Statement> generateInvokePostConstructsStatements(final ClassStructureBuilder<?> bodyBlockBuilder,
-          final Injectable injectable, final DependencyGraph graph, final InjectionContext injectionContext) {
+          final Injectable injectable, final InjectionContext injectionContext) {
     return Collections.emptyList();
   }
 
@@ -695,9 +681,6 @@ public abstract class AbstractBodyGenerator implements FactoryBodyGenerator {
    * @param injectable
    *          Contains metadata (including dependencies) or the bean that the
    *          generated factory will produce.
-   * @param graph
-   *          The dependency graph that the {@link Injectable} parameter is
-   *          from.
    * @param injectionContext
    *          The single injection context shared between all
    *          {@link FactoryBodyGenerator FactoryBodyGenerators}.
@@ -705,7 +688,7 @@ public abstract class AbstractBodyGenerator implements FactoryBodyGenerator {
    *         {@link Factory#destroyInstance(Object, ContextManager)} method.
    */
   protected List<Statement> generateDestroyInstanceStatements(final ClassStructureBuilder<?> bodyBlockBuilder,
-          final Injectable injectable, final DependencyGraph graph, final InjectionContext injectionContext) {
+          final Injectable injectable, final InjectionContext injectionContext) {
     return controller.getDestructionStatements();
   }
 
@@ -717,26 +700,24 @@ public abstract class AbstractBodyGenerator implements FactoryBodyGenerator {
 
     final org.jboss.errai.ioc.rebind.ioc.graph.api.Qualifier qualifier = injectable.getQualifier();
     if (!qualifier.isDefaultQualifier()) {
-      final AbstractStatementBuilder qualArray =
-              getAnnotationArrayStmt(qualifier);
-      con.append(loadVariable("handle").invoke("setQualifiers", qualArray));
+      con.append(loadVariable("handle").invoke("setQualifiers", getAnnotationArrayStmt(qualifier)));
     }
     con.finish();
   }
 
   public static AbstractStatementBuilder getAssignableTypesArrayStmt(final Injectable injectable) {
+    final MetaClass objectMetaclass = MetaClassFactory.get(Object.class);
     final Object[] assignableTypes =
             injectable.getAnnotatedObject()
-            .flatMap(annotated -> Optional.ofNullable(annotated.unsafeGetAnnotation(Typed.class)))
-            .map(typedAnno -> typedAnno.value())
+            .flatMap(annotated -> annotated.getAnnotation(Typed.class))
+            .map(s -> s.valueAsArray(MetaClass[].class))
             // Ensure that Object is an assignable type
             .map(beanTypes -> {
-              if (Arrays.stream(beanTypes).anyMatch(type -> Object.class.equals(type))) {
+              if (Arrays.stream(beanTypes).anyMatch(objectMetaclass::equals)) {
                 return (Object[]) beanTypes;
-              }
-              else {
-                final Class<?>[] copyWithObject = Arrays.copyOf(beanTypes, beanTypes.length+1);
-                copyWithObject[beanTypes.length] = Object.class;
+              } else {
+                final MetaClass[] copyWithObject = Arrays.copyOf(beanTypes, beanTypes.length+1);
+                copyWithObject[beanTypes.length] = objectMetaclass;
                 return (Object[]) copyWithObject;
               }
             })
@@ -751,8 +732,8 @@ public abstract class AbstractBodyGenerator implements FactoryBodyGenerator {
 
   protected Statement generateFactoryHandleStatement(final Injectable injectable) {
     final Statement newObject;
-    if (injectable.getInjectedType().unsafeIsAnnotationPresent(ActivatedBy.class)) {
-      final Class<? extends BeanActivator> activatorType = injectable.getInjectedType().unsafeGetAnnotation(ActivatedBy.class).value();
+    if (injectable.getInjectedType().isAnnotationPresent(ActivatedBy.class)) {
+      final MetaClass activatorType = injectable.getInjectedType().getAnnotation(ActivatedBy.class).get().value();
       newObject = newObject(FactoryHandleImpl.class, loadLiteral(injectable.getInjectedType()),
               injectable.getFactoryName(), injectable.getScope(), isEager(injectable.getInjectedType()),
               injectable.getBeanName(), !injectable.isContextual(), loadLiteral(activatorType));
@@ -765,14 +746,14 @@ public abstract class AbstractBodyGenerator implements FactoryBodyGenerator {
   }
 
   protected static Object isEager(final MetaClass injectedType) {
-    return injectedType.unsafeIsAnnotationPresent(EntryPoint.class) ||
+    return injectedType.isAnnotationPresent(EntryPoint.class) ||
             // TODO review this before adding any scopes other than app-scoped and depdendent
-            (!injectedType.unsafeIsAnnotationPresent(Dependent.class) && hasStartupAnnotation(injectedType));
+            (!injectedType.isAnnotationPresent(Dependent.class) && hasStartupAnnotation(injectedType));
   }
 
   protected static boolean hasStartupAnnotation(final MetaClass injectedType) {
-    for (final Annotation anno : injectedType.unsafeGetAnnotations()) {
-      if (anno.annotationType().getName().equals("javax.ejb.Startup")) {
+    for (final MetaAnnotation anno : injectedType.getAnnotations()) {
+      if (anno.annotationType().getFullyQualifiedName().equals("javax.ejb.Startup")) {
         return true;
       }
     }
@@ -780,21 +761,21 @@ public abstract class AbstractBodyGenerator implements FactoryBodyGenerator {
     return false;
   }
 
-  public static Statement annotationLiteral(final Annotation qual) {
-    if (qual.annotationType().equals(Any.class)) {
+  public static Statement annotationLiteral(final MetaAnnotation qual) {
+    if (qual.annotationType().equals(MetaClassFactory.get(Any.class))) {
       return loadStatic(QualifierUtil.class, "ANY_ANNOTATION");
-    } else if (qual.annotationType().equals(Default.class)) {
+    } else if (qual.annotationType().equals(MetaClassFactory.get(Default.class))) {
       return loadStatic(QualifierUtil.class, "DEFAULT_ANNOTATION");
-    } else if (qual.annotationType().equals(Named.class)) {
-      return invokeStatic(QualifierUtil.class, "createNamed", ((Named) qual).value());
+    } else if (qual.annotationType().equals(MetaClassFactory.get(Named.class))) {
+      return invokeStatic(QualifierUtil.class, "createNamed", qual.<String>value());
     } else {
       return LiteralFactory.getLiteral(qual);
     }
   }
 
-  protected Collection<Annotation> getQualifiers(final HasAnnotations injectedType) {
-    final Collection<Annotation> annos = new ArrayList<>();
-    for (final Annotation anno : injectedType.unsafeGetAnnotations()) {
+  protected Collection<MetaAnnotation> getQualifiers(final HasAnnotations injectedType) {
+    final Collection<MetaAnnotation> annos = new ArrayList<>();
+    for (final MetaAnnotation anno : injectedType.getAnnotations()) {
       if (anno.annotationType().isAnnotationPresent(Qualifier.class)) {
         annos.add(anno);
       }

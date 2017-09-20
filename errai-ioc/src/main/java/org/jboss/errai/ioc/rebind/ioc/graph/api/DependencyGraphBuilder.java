@@ -16,16 +16,10 @@
 
 package org.jboss.errai.ioc.rebind.ioc.graph.api;
 
-import java.lang.annotation.Annotation;
-import java.util.List;
-import java.util.function.Predicate;
-
-import javax.enterprise.inject.Produces;
-import javax.inject.Inject;
-import javax.inject.Scope;
-
+import jsinterop.annotations.JsType;
 import org.jboss.errai.codegen.meta.HasAnnotations;
 import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaClassMember;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
@@ -38,7 +32,12 @@ import org.jboss.errai.ioc.rebind.ioc.graph.impl.ResolutionPriority;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableProvider;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
 
-import jsinterop.annotations.JsType;
+import javax.enterprise.inject.Produces;
+import javax.inject.Inject;
+import javax.inject.Scope;
+import java.lang.annotation.Annotation;
+import java.util.List;
+import java.util.function.Predicate;
 
 /**
  * Builds and resolves a dependency graph.
@@ -81,8 +80,24 @@ public interface DependencyGraphBuilder {
    *
    * @return The newly added {@link Injectable}.
    */
-  Injectable addInjectable(MetaClass injectedType, Qualifier qualifier, Predicate<List<InjectableHandle>> pathPredicate, Class<? extends Annotation> literalScope,
-          InjectableType injectableType, WiringElementType... wiringTypes);
+  default Injectable addInjectable(MetaClass injectedType,
+          Qualifier qualifier,
+          Predicate<List<InjectableHandle>> pathPredicate,
+          Class<? extends Annotation> literalScope,
+          InjectableType injectableType,
+          WiringElementType... wiringTypes) {
+
+    return addInjectable(injectedType, qualifier, pathPredicate, MetaClassFactory.get(literalScope), injectableType,
+            wiringTypes);
+  }
+
+  Injectable addInjectable(MetaClass injectedType,
+          Qualifier qualifier,
+          Predicate<List<InjectableHandle>> pathPredicate,
+          MetaClass literalScope,
+          InjectableType injectableType,
+          WiringElementType... wiringTypes);
+
 
   /**
    * Some {@link IOCExtensionConfigurator IOC extensions} need to generate

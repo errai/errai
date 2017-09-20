@@ -16,21 +16,38 @@
 
 package org.jboss.errai.ioc.rebind.ioc.bootstrapper;
 
-import java.util.Collection;
-import java.util.Set;
-
-import org.jboss.errai.codegen.meta.MetaClass;
-import org.jboss.errai.codegen.meta.MetaClassFactory;
-import org.jboss.errai.common.metadata.RebindUtils;
-import org.jboss.errai.config.rebind.AbstractAsyncGenerator;
-import org.jboss.errai.config.rebind.EnvUtil;
-import org.jboss.errai.config.rebind.GenerateAsync;
-import org.jboss.errai.ioc.client.Bootstrapper;
-import org.jboss.errai.ioc.client.container.IOCEnvironment;
-
 import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.UnableToCompleteException;
+import com.google.gwt.core.ext.typeinfo.NotFoundException;
+import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaClassFactory;
+import org.jboss.errai.codegen.meta.MetaParameter;
+import org.jboss.errai.codegen.meta.impl.java.JavaReflectionClass;
+import org.jboss.errai.common.apt.MetaClassFinder;
+import org.jboss.errai.common.apt.ResourceFilesFinder;
+import org.jboss.errai.common.metadata.RebindUtils;
+import org.jboss.errai.common.metadata.ScannerSingleton;
+import org.jboss.errai.config.ErraiAppPropertiesConfiguration;
+import org.jboss.errai.config.ErraiConfiguration;
+import org.jboss.errai.config.rebind.AbstractAsyncGenerator;
+import org.jboss.errai.config.rebind.EnvUtil;
+import org.jboss.errai.config.rebind.GenerateAsync;
+import org.jboss.errai.config.util.ClassScanner;
+import org.jboss.errai.ioc.client.Bootstrapper;
+import org.jboss.errai.ioc.client.api.CodeDecorator;
+import org.jboss.errai.ioc.client.api.IOCExtension;
+import org.jboss.errai.ioc.client.container.IOCEnvironment;
+
+import javax.enterprise.event.Observes;
+import java.lang.annotation.Annotation;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static java.util.Arrays.asList;
+import static java.util.stream.Collectors.toSet;
 
 /**
  * The main generator class for the Errai IOC framework.
@@ -44,32 +61,62 @@ import com.google.gwt.core.ext.UnableToCompleteException;
  */
 @GenerateAsync(Bootstrapper.class)
 public class IOCGenerator extends AbstractAsyncGenerator {
-  private final String className = Bootstrapper.class.getSimpleName() + "Impl";
-  private final String packageName = Bootstrapper.class.getPackage().getName();
 
-  public static final boolean isTestMode = EnvUtil.isJUnitTest();
+  private final String packageName = "org.jboss.errai.ioc.client";
+  private final String className = "BootstrapperImpl";
 
   public IOCGenerator() {
   }
 
   @Override
-  public String generate(final TreeLogger logger,
-                         final GeneratorContext context,
-                         final String typeName)
-      throws UnableToCompleteException {
+  public String generate(final TreeLogger logger, final GeneratorContext context, final String typeName)
+          throws UnableToCompleteException {
 
     logger.log(TreeLogger.INFO, "generating ioc bootstrapping code...");
     return startAsyncGeneratorsAndWaitFor(Bootstrapper.class, context, logger, packageName, className);
   }
 
   @Override
-  protected String generate(TreeLogger logger, GeneratorContext context) {
+  protected String generate(final TreeLogger logger, final GeneratorContext context) {
     final Set<String> translatablePackages = RebindUtils.findTranslatablePackages(context);
+    final MetaClassFinder metaClassFinder = ann -> findMetaClasses(context, translatablePackages, ann);
+    final ErraiConfiguration erraiConfiguration = new ErraiAppPropertiesConfiguration();
+    final IocRelevantClassesFinder iocRelevantClasses = ann -> IocRelevantClassesUtil.findRelevantClasses();
+    final ResourceFilesFinder resourceFilesFinder = Thread.currentThread().getContextClassLoader()::getResource;
 
-    final IOCBootstrapGenerator iocBootstrapGenerator = new IOCBootstrapGenerator(context, logger,
-        translatablePackages, false);
+    return generate(context, metaClassFinder, erraiConfiguration, iocRelevantClasses, resourceFilesFinder);
+  }
 
-    return iocBootstrapGenerator.generate(packageName, className);
+  public String generate(final GeneratorContext context,
+          final MetaClassFinder metaClassFinder,
+          final ErraiConfiguration erraiConfiguration,
+          final IocRelevantClassesFinder relevantClasses,
+          final ResourceFilesFinder resourceFilesFinder) {
+
+    return new IOCBootstrapGenerator(metaClassFinder, resourceFilesFinder, context, erraiConfiguration, relevantClasses)
+            .generate(packageName, className);
+  }
+
+  private Set<MetaClass> findMetaClasses(final GeneratorContext context,
+          final Set<String> translatablePackages,
+          final Class<? extends Annotation> annotation) {
+
+    if (asList(IOCExtension.class, CodeDecorator.class).contains(annotation)) {
+      return ScannerSingleton.getOrCreateInstance()
+              .getTypesAnnotatedWith(annotation)
+              .stream()
+              .map(JavaReflectionClass::newUncachedInstance)
+              .collect(toSet());
+    }
+
+    if (Observes.class.equals(annotation)) {
+      return ClassScanner.getParametersAnnotatedWith(Observes.class, context)
+              .stream()
+              .map(MetaParameter::getType)
+              .collect(toSet());
+    }
+
+    return new HashSet<>(ClassScanner.getTypesAnnotatedWith(annotation, translatablePackages, context));
   }
 
   @Override
@@ -86,8 +133,24 @@ public class IOCGenerator extends AbstractAsyncGenerator {
       }
     }
 
-    boolean hasAnyChanges =  !newOrUpdated.isEmpty() || !MetaClassFactory.getAllDeletedClasses().isEmpty();
+    boolean hasAnyChanges = !newOrUpdated.isEmpty() || !MetaClassFactory.getAllDeletedClasses().isEmpty();
     return hasGenerationCache() && (EnvUtil.isProdMode() || !hasAnyChanges);
   }
 
+  public String getPackageName() {
+    return packageName;
+  }
+
+  public String getClassSimpleName() {
+    return className;
+  }
+
+  @Override
+  public boolean alreadyGeneratedSourcesViaAptGenerators(GeneratorContext context) {
+    try {
+      return context.getTypeOracle().getType(getPackageName() + "." + getClassSimpleName()) != null;
+    } catch (final NotFoundException e) {
+      return false;
+    }
+  }
 }

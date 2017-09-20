@@ -20,6 +20,7 @@ import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.meta.HasAnnotations;
 import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.databinding.client.api.Bindable;
 import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.ioc.client.api.IOCExtension;
 import org.jboss.errai.ioc.client.container.RefHolder;
@@ -28,7 +29,6 @@ import org.jboss.errai.ioc.rebind.ioc.bootstrapper.FactoryBodyGenerator;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCExtensionConfigurator;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.CustomFactoryInjectable;
-import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraph;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraphBuilder.InjectableType;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.Injectable;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.InjectionSite;
@@ -70,13 +70,16 @@ public class DataBindingIOCExtension implements IOCExtensionConfigurator {
   @Override
   public void afterInitialization(final IOCProcessingContext context, final InjectionContext injectionContext) {
 
-    final Collection<MetaClass> allBindableTypes = DataBindingUtil.getAllBindableTypes(context.getGeneratorContext());
     final Model anno = new Model() {
       @Override
       public Class<? extends Annotation> annotationType() {
         return Model.class;
       }
     };
+
+    final Collection<MetaClass> allBindableTypes = context.metaClassFinder()
+            .extend(Bindable.class, context.erraiConfiguration().modules()::getBindableTypes)
+            .findAnnotatedWith(Bindable.class);
 
     for (final MetaClass modelBean : allBindableTypes) {
       final InjectableHandle handle = new InjectableHandle(modelBean,
@@ -112,14 +115,14 @@ public class DataBindingIOCExtension implements IOCExtensionConfigurator {
 
         @Override
         public CustomFactoryInjectable getInjectable(final InjectionSite injectionSite, final FactoryNameGenerator nameGenerator) {
-          if (injectionSite.unsafeIsAnnotationPresent(Model.class)) {
+          if (injectionSite.isAnnotationPresent(Model.class)) {
             if (provided == null) {
               final FactoryBodyGenerator generator = new AbstractBodyGenerator() {
 
                 @Override
-                protected List<Statement> generateCreateInstanceStatements(
-                        final ClassStructureBuilder<?> bodyBlockBuilder, final Injectable injectable,
-                        final DependencyGraph graph, final InjectionContext injectionContext) {
+                protected List<Statement> generateCreateInstanceStatements(final ClassStructureBuilder<?> bodyBlockBuilder,
+                        final Injectable injectable,
+                        final InjectionContext injectionContext) {
                   final List<Statement> createInstanceStmts = new ArrayList<Statement>();
                   final MetaClass binderClass = parameterizedAs(DataBinder.class, typeParametersOf(modelBean));
                   final String dataBinderVar = "dataBinder";

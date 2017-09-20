@@ -115,6 +115,12 @@
       <artifactId>powermock-api-mockito</artifactId>
       <scope>test</scope>
     </dependency>
+
+    <dependency>
+      <groupId>org.jboss.errai</groupId>
+      <artifactId>errai-navigation-export-apt</artifactId>
+      <scope>compile</scope>
+    </dependency>
   </dependencies>
   
   <profiles>

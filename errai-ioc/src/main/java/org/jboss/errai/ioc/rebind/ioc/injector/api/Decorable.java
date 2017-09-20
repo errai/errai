@@ -27,6 +27,7 @@ import static org.jboss.errai.ioc.rebind.ioc.bootstrapper.FactoryGenerator.getLo
 
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
+import java.util.Optional;
 
 import javax.enterprise.context.Dependent;
 
@@ -35,6 +36,7 @@ import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.ContextualStatementBuilder;
 import org.jboss.errai.codegen.meta.HasAnnotations;
+import org.jboss.errai.codegen.meta.MetaAnnotation;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassMember;
 import org.jboss.errai.codegen.meta.MetaField;
@@ -240,14 +242,14 @@ public class Decorable {
   }
 
   private final HasAnnotations annotated;
-  private final Annotation annotation;
+  private final MetaAnnotation annotation;
   private final DecorableType decorableType;
   private final InjectionContext injectionContext;
   private final Context context;
   private final BuildMetaClass factory;
   private final Injectable injectable;
 
-  public Decorable(final HasAnnotations annotated, final Annotation annotation, final DecorableType decorableType,
+  public Decorable(final HasAnnotations annotated, final MetaAnnotation annotation, final DecorableType decorableType,
           final InjectionContext injectionContext, final Context context, final BuildMetaClass factory, final Injectable injectable) {
     this.annotated = annotated;
     this.annotation = annotation;
@@ -277,7 +279,7 @@ public class Decorable {
   /**
    * @return The annotation relevant to the {@link CodeDecorator} for which this {@link Decorable} was created.
    */
-  public Annotation getAnnotation() {
+  public MetaAnnotation getAnnotation() {
     return annotation;
   }
 

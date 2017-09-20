@@ -17,6 +17,8 @@
 package org.jboss.errai.common.apt.generator;
 
 import org.jboss.errai.common.apt.AnnotatedSourceElementsFinder;
+import org.jboss.errai.common.apt.AptAnnotatedSourceElementsFinder;
+import org.jboss.errai.common.apt.TestAnnotatedSourceElementsFinder;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -33,29 +35,37 @@ public class AbstractErraiModuleExportFileGeneratorTest {
 
   @Test
   public void testThrownExceptionDoesNotBreakIt() {
-    Assert.assertFalse(new AbstractErraiModuleExportFileGenerator() {
-      @Override
-      protected String getCamelCaseErraiModuleName() {
-        return "test";
-      }
+    try {
+      new AbstractErraiModuleExportFileGenerator() {
+        @Override
+        protected String getCamelCaseErraiModuleName() {
+          return "test";
+        }
 
-      @Override
-      void generateAndSaveExportFiles(Set<? extends TypeElement> exportableAnnotations,
-              AnnotatedSourceElementsFinder annotatedSourceElementsFinder,
-              Filer filer) {
-        throw new TestException();
-      }
-    }.process(null, null));
+        @Override
+        void generateAndSaveExportFiles(Set<? extends TypeElement> exportableAnnotations,
+                AnnotatedSourceElementsFinder annotatedSourceElementsFinder,
+                Filer filer) {
+          throw new TestException();
+        }
+      }.process(null, null, null, null, new TestAnnotatedSourceElementsFinder(null));
+    } catch (final Exception e) {
+      Assert.fail("No exception should've been thrown");
+    }
   }
 
   @Test
   public void testProcessForEmptyAnnotationsSet() {
-    Assert.assertFalse((new AbstractErraiModuleExportFileGenerator() {
-      @Override
-      protected String getCamelCaseErraiModuleName() {
-        return "test";
-      }
-    }).process(emptySet(), null));
+    try {
+      new AbstractErraiModuleExportFileGenerator() {
+        @Override
+        protected String getCamelCaseErraiModuleName() {
+          return "test";
+        }
+      }.process(emptySet(), null, null, null, new TestAnnotatedSourceElementsFinder());
+    } catch (final Exception e) {
+      Assert.fail("No exception should've been thrown");
+    }
   }
 
 }

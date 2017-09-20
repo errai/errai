@@ -17,6 +17,7 @@
 package org.jboss.errai.codegen.meta.impl;
 
 import org.jboss.errai.codegen.meta.BeanDescriptor;
+import org.jboss.errai.codegen.meta.MetaAnnotation;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaConstructor;
@@ -382,8 +383,8 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
   @Override
   public List<MetaMethod> getDeclaredMethodsAnnotatedWith(final Class<? extends Annotation> annotation) {
     return Arrays.stream(getDeclaredMethods())
-      .filter(m -> m.unsafeIsAnnotationPresent(annotation))
-      .collect(collectingAndThen(Collectors.toList(), l -> Collections.unmodifiableList(l)));
+      .filter(m -> m.isAnnotationPresent(annotation))
+      .collect(collectingAndThen(Collectors.toList(), Collections::unmodifiableList));
   }
 
   @Override
@@ -420,7 +421,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     MetaClass scanTarget = this;
     while (scanTarget != null) {
       for (final MetaField m : scanTarget.getDeclaredFields()) {
-        if (m.unsafeIsAnnotationPresent(annotation)) {
+        if (m.isAnnotationPresent(annotation)) {
           fields.add(m);
         }
       }
@@ -790,8 +791,8 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
   public int hashContent() {
     if (contentString == null) {
       final StringBuilder sb = new StringBuilder();
-      if (unsafeGetAnnotations() != null) {
-        for (final Annotation a : unsafeGetAnnotations()) {
+      if (getAnnotations() != null) {
+        for (final MetaAnnotation a : getAnnotations()) {
           sb.append(a.toString());
         }
       }

@@ -25,7 +25,8 @@ import org.jboss.errai.common.configuration.ErraiModule;
              serializableTypes = ErraiTestCustomModule2.Serializable2.class,
              nonSerializableTypes = ErraiTestCustomModule2.NonSerializable2.class,
              iocAlternatives = ErraiTestCustomModule2.IocAlternative2.class,
-             iocBlacklist = ErraiTestCustomModule2.IocBlacklisted2.class)
+             iocBlacklist = ErraiTestCustomModule2.IocBlacklisted2.class,
+             iocWhitelist = ErraiTestCustomModule2.IocWhitelisted2.class)
 class ErraiTestCustomModule2 {
 
   static class Serializable2 {
@@ -43,4 +44,6 @@ class ErraiTestCustomModule2 {
   static class IocBlacklisted2 {
   }
 
+  static class IocWhitelisted2 {
+  }
 }

@@ -786,6 +786,10 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
     return fieldRenderBuffer;
   }
 
+  @Override
+  public MetaClass getDeclaringClass() {
+    return null;
+  }
 
   @Override
   public boolean equals(final Object o) {

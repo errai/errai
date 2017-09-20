@@ -20,6 +20,7 @@ import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.TagName;
 import jsinterop.annotations.JsType;
 import org.jboss.errai.codegen.builder.ContextualStatementBuilder;
+import org.jboss.errai.codegen.meta.MetaAnnotation;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.util.Stmt;
@@ -34,11 +35,14 @@ import org.jboss.errai.ioc.rebind.ioc.graph.api.Qualifier;
 import org.jboss.errai.ioc.rebind.ioc.graph.impl.InjectableHandle;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 
+import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Stream;
 
 /**
  * Satisfies injection points for DOM elements.
@@ -92,7 +96,7 @@ public class ElementProviderExtension implements IOCExtensionConfigurator {
       return customElementTags;
     }
 
-    return Elemental2TagMapping.getTags(type.unsafeAsClass());
+    return Elemental2TagMapping.getTags(type);
   }
 
   private static ExactTypeInjectableProvider exactTypeInjectableProvider(final InjectionContext injectionContext,
@@ -118,19 +122,19 @@ public class ElementProviderExtension implements IOCExtensionConfigurator {
 
   private static Collection<String> getCustomElementTags(final MetaClass type) {
 
-    final Element elementAnnotation = type.unsafeGetAnnotation(Element.class);
-    if (elementAnnotation == null) {
+    final Optional<MetaAnnotation> elementAnnotation = type.getAnnotation(Element.class);
+    if (!elementAnnotation.isPresent()) {
       return Collections.emptyList();
     }
 
-    final JsType jsTypeAnnotation = type.unsafeGetAnnotation(JsType.class);
-    if (jsTypeAnnotation == null || !jsTypeAnnotation.isNative()) {
+    final Optional<MetaAnnotation> jsTypeAnnotation = type.getAnnotation(JsType.class);
+    if (!jsTypeAnnotation.isPresent() || !jsTypeAnnotation.get().<Boolean>value("isNative")) {
       final String element = Element.class.getSimpleName();
       final String jsType = JsType.class.getSimpleName();
       throw new RuntimeException(element + " is only valid on native " + jsType + "s.");
     }
 
-    return Arrays.asList(elementAnnotation.value());
+    return Arrays.asList(elementAnnotation.get().valueAsArray(String[].class));
   }
 
   private static class ExactTypeInjectableProvider {
@@ -151,16 +155,15 @@ public class ElementProviderExtension implements IOCExtensionConfigurator {
   }
 
   private static void processGwtUserElement(final InjectionContext injectionContext, final MetaClass type) {
-    final TagName gwtTagNameAnnotation = type.unsafeGetAnnotation(TagName.class);
-    if (gwtTagNameAnnotation != null) {
-      Arrays.stream(gwtTagNameAnnotation.value())
-              .map(tagName -> gwtExactTypeInjectableProvider(injectionContext, type, tagName))
-              .forEach(e -> registerExactTypeInjectableProvider(injectionContext, e));
-    }
+    type.getAnnotation(TagName.class)
+            .ifPresent(tagNameAnnotation -> Arrays.stream(tagNameAnnotation.valueAsArray(String[].class))
+                    .map(tagName -> gwtExactTypeInjectableProvider(injectionContext, type, tagName))
+                    .forEach(e -> registerExactTypeInjectableProvider(injectionContext, e)));
   }
 
   private static ExactTypeInjectableProvider gwtExactTypeInjectableProvider(final InjectionContext injectionContext,
-          final MetaClass type, final String tagName) {
+          final MetaClass type,
+          final String tagName) {
 
     final Qualifier qualifier = injectionContext.getQualifierFactory().forSource(new HasNamedAnnotation(tagName));
     final InjectableHandle handle = new InjectableHandle(type, qualifier);
@@ -186,17 +189,37 @@ public class ElementProviderExtension implements IOCExtensionConfigurator {
   private static Set<Property> getProperties(final MetaClass type) {
     final Set<Property> properties = new HashSet<>();
 
-    final Property declaredProperty = type.unsafeGetAnnotation(Property.class);
-    final Properties declaredProperties = type.unsafeGetAnnotation(Properties.class);
+    final Optional<MetaAnnotation> declaredProperty = type.getAnnotation(Property.class);
+    final Optional<MetaAnnotation> declaredProperties = type.getAnnotation(Properties.class);
 
-    if (declaredProperty != null) {
-      properties.add(declaredProperty);
-    }
+    declaredProperty.map(ElementProviderExtension::newProperty).ifPresent(properties::add);
 
-    if (declaredProperties != null) {
-      properties.addAll(Arrays.asList(declaredProperties.value()));
-    }
+    declaredProperties.map(a -> Arrays.stream(a.valueAsArray(MetaAnnotation[].class)))
+            .orElse(Stream.of())
+            .map(ElementProviderExtension::newProperty)
+            .forEach(properties::add);
 
     return properties;
+  }
+
+  @SuppressWarnings("unchecked")
+  private static Property newProperty(final MetaAnnotation m) {
+    return new Property() {
+
+      @Override
+      public Class<? extends Annotation> annotationType() {
+        return Property.class;
+      }
+
+      @Override
+      public String name() {
+        return m.value("name");
+      }
+
+      @Override
+      public String value() {
+        return m.value("value");
+      }
+    };
   }
 }

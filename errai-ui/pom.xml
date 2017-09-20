@@ -142,6 +142,13 @@
       <groupId>com.google.elemental2</groupId>
       <artifactId>elemental2-dom</artifactId>
     </dependency>
+
+    <dependency>
+      <groupId>org.jboss.errai</groupId>
+      <artifactId>errai-ui-export-apt</artifactId>
+      <scope>compile</scope>
+    </dependency>
+
   </dependencies>
 
   <build>

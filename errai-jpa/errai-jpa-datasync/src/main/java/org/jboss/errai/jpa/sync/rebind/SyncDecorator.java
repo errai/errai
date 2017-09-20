@@ -27,6 +27,7 @@ import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.AnonymousClassStructureBuilder;
 import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.exception.GenerationException;
+import org.jboss.errai.codegen.meta.MetaAnnotation;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaField;
@@ -74,7 +75,7 @@ public class SyncDecorator extends IOCDecoratorExtension<Sync> {
           + method.getDeclaringClass().getFullyQualifiedName());
     }
 
-    Sync syncAnnotation = (Sync) decorable.getAnnotation();
+    MetaAnnotation syncAnnotation = decorable.getAnnotation();
 
     controller.addInitializationStatements(createInitStatements(decorable.getDecorableDeclaringType(), "obj", syncAnnotation, decorable, controller));
 
@@ -95,7 +96,7 @@ public class SyncDecorator extends IOCDecoratorExtension<Sync> {
             .finish();
   }
 
-  private List<Statement> createInitStatements(final MetaClass type, final String initVar, final Sync syncAnnotation,
+  private List<Statement> createInitStatements(final MetaClass type, final String initVar, final MetaAnnotation syncAnnotation,
       final Decorable decorable, final FactoryController controller) {
 
     final List<Statement> statements = new ArrayList<Statement>();
@@ -107,9 +108,9 @@ public class SyncDecorator extends IOCDecoratorExtension<Sync> {
 
     queryParamCallback.append(Stmt.declareFinalVariable("paramsMap", Map.class, Stmt.newObject(HashMap.class)));
 
-    for (SyncParam param : syncAnnotation.params()) {
+    for (MetaAnnotation param : syncAnnotation.valueAsArray("params", MetaAnnotation[].class)) {
       Statement fieldValueStmt;
-      String val = param.val().trim();
+      String val = param.<String>value("val").trim();
       if (val.startsWith("{") && val.endsWith("}")) {
         String fieldName = val.substring(1, val.length() - 1);
         MetaField field = decorable.getDecorableDeclaringType().getInheritedField(fieldName);
@@ -119,7 +120,7 @@ public class SyncDecorator extends IOCDecoratorExtension<Sync> {
       else {
         fieldValueStmt = Stmt.loadLiteral(val);
       }
-      queryParamCallback.append(Stmt.loadVariable("paramsMap").invoke("put", param.name(), fieldValueStmt));
+      queryParamCallback.append(Stmt.loadVariable("paramsMap").invoke("put", param.value("name"), fieldValueStmt));
     }
     queryParamCallback.append(Stmt.loadVariable("paramsMap").returnValue());
 
@@ -127,7 +128,7 @@ public class SyncDecorator extends IOCDecoratorExtension<Sync> {
         QueryParamInitCallback.class, queryParamCallback.finish().finish()));
 
     statements.add(controller.setReferenceStmt("syncWorker", Stmt.invokeStatic(ClientSyncWorker.class, "create",
-            syncAnnotation.query(), Stmt.loadVariable("objectClass"), null)));
+            syncAnnotation.value("query"), Stmt.loadVariable("objectClass"), null)));
 
     final Statement syncWorkerRef = controller.getReferenceStmt("syncWorker", ClientSyncWorker.class);
     statements.add(

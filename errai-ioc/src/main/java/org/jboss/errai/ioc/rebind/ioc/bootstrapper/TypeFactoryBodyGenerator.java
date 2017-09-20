@@ -21,6 +21,7 @@ import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.ContextualStatementBuilder;
 import org.jboss.errai.codegen.meta.HasAnnotations;
+import org.jboss.errai.codegen.meta.MetaAnnotation;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassMember;
 import org.jboss.errai.codegen.meta.MetaConstructor;
@@ -29,7 +30,6 @@ import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
 import org.jboss.errai.ioc.client.api.CodeDecorator;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCDecoratorExtension;
-import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraph;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraphBuilder.Dependency;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraphBuilder.DependencyType;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraphBuilder.FieldDependency;
@@ -55,6 +55,8 @@ import java.util.List;
 import java.util.Queue;
 import java.util.Set;
 
+import static java.util.Comparator.comparing;
+import static java.util.stream.Collectors.toList;
 import static org.jboss.errai.codegen.util.PrivateAccessUtil.getPrivateFieldAccessorName;
 import static org.jboss.errai.codegen.util.PrivateAccessUtil.getPrivateMethodName;
 import static org.jboss.errai.codegen.util.Stmt.castTo;
@@ -75,20 +77,19 @@ import static org.jboss.errai.ioc.rebind.ioc.bootstrapper.FactoryGenerator.getLo
 class TypeFactoryBodyGenerator extends AbstractBodyGenerator {
 
   @Override
-  protected void preGenerationHook(final ClassStructureBuilder<?> bodyBlockBuilder, final Injectable injectable,
-          final DependencyGraph graph, final InjectionContext injectionContext) {
+  protected void preGenerationHook(final ClassStructureBuilder<?> bodyBlockBuilder, final Injectable injectable, final InjectionContext injectionContext) {
     runDecorators(injectable, injectionContext, bodyBlockBuilder);
   }
 
   @Override
   protected List<Statement> generateFactoryInitStatements(final ClassStructureBuilder<?> bodyBlockBuilder,
-          final Injectable injectable, final DependencyGraph graph, final InjectionContext injectionContext) {
+          final Injectable injectable, final InjectionContext injectionContext) {
     return controller.getFactoryInitializaionStatements();
   }
 
   @Override
   protected List<Statement> generateCreateInstanceStatements(final ClassStructureBuilder<?> bodyBlockBuilder,
-          final Injectable injectable, final DependencyGraph graph, final InjectionContext injectionContext) {
+          final Injectable injectable, final InjectionContext injectionContext) {
     final Multimap<DependencyType, Dependency> dependenciesByType = separateByType(injectable.getDependencies());
 
     final Collection<Dependency> constructorDependencies = dependenciesByType.get(DependencyType.Constructor);
@@ -98,7 +99,7 @@ class TypeFactoryBodyGenerator extends AbstractBodyGenerator {
     final List<Statement> createInstanceStatements = new ArrayList<>();
 
     constructInstance(injectable, constructorDependencies, createInstanceStatements);
-    injectFieldDependencies(injectable, fieldDependencies, createInstanceStatements, bodyBlockBuilder);
+    injectFieldDependencies(fieldDependencies, createInstanceStatements);
     injectSetterMethodDependencies(injectable, setterDependencies, createInstanceStatements, bodyBlockBuilder);
     addInitializationStatements(createInstanceStatements);
     addReturnStatement(createInstanceStatements);
@@ -108,19 +109,19 @@ class TypeFactoryBodyGenerator extends AbstractBodyGenerator {
 
   @Override
   protected List<Statement> generateDestroyInstanceStatements(final ClassStructureBuilder<?> bodyBlockBuilder,
-          final Injectable injectable, final DependencyGraph graph, final InjectionContext injectionContext) {
+          final Injectable injectable, final InjectionContext injectionContext) {
     final List<Statement> destructionStmts = new ArrayList<>();
 
     maybeInvokePreDestroys(injectable, destructionStmts, bodyBlockBuilder);
     destructionStmts
-            .addAll(super.generateDestroyInstanceStatements(bodyBlockBuilder, injectable, graph, injectionContext));
+            .addAll(super.generateDestroyInstanceStatements(bodyBlockBuilder, injectable, injectionContext));
 
     return destructionStmts;
   }
 
   @Override
   protected List<Statement> generateInvokePostConstructsStatements(final ClassStructureBuilder<?> bodyBlockBuilder,
-          final Injectable injectable, final DependencyGraph graph, final InjectionContext injectionContext) {
+          final Injectable injectable, final InjectionContext injectionContext) {
     final List<Statement> stmts = new ArrayList<>();
     final Queue<MetaMethod> postConstructMethods = gatherPostConstructs(injectable);
     for (final MetaMethod postConstruct : postConstructMethods) {
@@ -185,7 +186,7 @@ class TypeFactoryBodyGenerator extends AbstractBodyGenerator {
           final DecoratorRunnable decoratorRunnable = new DecoratorRunnable(
                   decorator.getClass().getAnnotation(CodeDecorator.class).order(), elemType,
                   () -> {
-                    final Decorable decorable = new Decorable(annotated, annotated.unsafeGetAnnotation(annoType),
+                    final Decorable decorable = new Decorable(annotated, annotated.getAnnotation(annoType).get(),
                             Decorable.DecorableType.fromElementType(elemType), injectionContext,
                             builder.getClassDefinition().getContext(), builder.getClassDefinition(), injectable);
                     if (isNonPublicField(annotated) && !createdAccessors.contains(annotated)) {
@@ -232,7 +233,7 @@ class TypeFactoryBodyGenerator extends AbstractBodyGenerator {
       annotatedItems = type.getParametersAnnotatedWith(annoType);
       break;
     case TYPE:
-      annotatedItems = (type.unsafeIsAnnotationPresent(annoType)) ? Collections.singletonList(type) : Collections.emptyList();
+      annotatedItems = (type.isAnnotationPresent(annoType)) ? Collections.singletonList(type) : Collections.emptyList();
       break;
     default:
       throw new RuntimeException("Not yet implemented.");
@@ -312,8 +313,9 @@ class TypeFactoryBodyGenerator extends AbstractBodyGenerator {
     return postConstructs;
   }
 
-  private void injectFieldDependencies(final Injectable injectable, final Collection<Dependency> fieldDependencies,
-          final List<Statement> createInstanceStatements, final ClassStructureBuilder<?> bodyBlockBuilder) {
+  private void injectFieldDependencies(final Collection<Dependency> fieldDependencies,
+          final List<Statement> createInstanceStatements) {
+
     for (final Dependency dep : fieldDependencies) {
       final FieldDependency fieldDep = FieldDependency.class.cast(dep);
       final MetaField field = fieldDep.getField();
@@ -322,7 +324,7 @@ class TypeFactoryBodyGenerator extends AbstractBodyGenerator {
       final ContextualStatementBuilder injectedValue;
       if (depInjectable.isContextual()) {
         final MetaClass[] typeArgsClasses = getTypeArguments(field.getType());
-        final Annotation[] qualifiers = getQualifiers(field).toArray(new Annotation[0]);
+        final MetaAnnotation[] qualifiers = getQualifiers(field).toArray(new MetaAnnotation[0]);
         injectedValue = castTo(depInjectable.getInjectedType(),
                 loadVariable("contextManager").invoke("getContextualInstance",
                         loadLiteral(depInjectable.getFactoryName()), typeArgsClasses, qualifiers));
@@ -359,7 +361,7 @@ class TypeFactoryBodyGenerator extends AbstractBodyGenerator {
       final ContextualStatementBuilder injectedValue;
       if (depInjectable.isContextual()) {
         final MetaClass[] typeArgsClasses = getTypeArguments(setter.getParameters()[0].getType());
-        final Annotation[] qualifiers = getQualifiers(setter).toArray(new Annotation[0]);
+        final MetaAnnotation[] qualifiers = getQualifiers(setter).toArray(new MetaAnnotation[0]);
         injectedValue = castTo(depInjectable.getInjectedType(),
                 loadVariable("contextManager").invoke("getContextualInstance",
                         loadLiteral(depInjectable.getFactoryName()), typeArgsClasses, qualifiers));
@@ -444,7 +446,7 @@ class TypeFactoryBodyGenerator extends AbstractBodyGenerator {
 
     if (depInjectable.isContextual()) {
       final MetaClass[] typeArgsClasses = getTypeArguments(paramDep.getParameter().getType());
-      final Annotation[] qualifiers = getQualifiers(paramDep.getParameter()).toArray(new Annotation[0]);
+      final MetaAnnotation[] qualifiers = getQualifiers(paramDep.getParameter()).toArray(new MetaAnnotation[0]);
 
       injectedValue = castTo(depInjectable.getInjectedType(),
               loadVariable("contextManager").invoke("getContextualInstance",

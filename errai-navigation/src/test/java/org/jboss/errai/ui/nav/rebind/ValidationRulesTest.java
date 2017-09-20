@@ -20,7 +20,10 @@ import com.google.gwt.core.ext.GeneratorContext;
 import org.jboss.errai.codegen.exception.GenerationException;
 import org.jboss.errai.codegen.meta.HasAnnotations;
 import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaClassFactory;
+import org.jboss.errai.codegen.meta.RuntimeAnnotation;
 import org.jboss.errai.codegen.meta.impl.java.JavaReflectionClass;
+import org.jboss.errai.common.apt.MetaClassFinder;
 import org.jboss.errai.common.client.api.IsElement;
 import org.jboss.errai.common.client.dom.HTMLElement;
 import org.jboss.errai.config.util.ClassScanner;
@@ -51,7 +54,12 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -112,10 +120,10 @@ public class ValidationRulesTest {
     when(toRoleAnno.annotationType()).thenReturn((Class) org.jboss.errai.ui.nav.client.local.api.TransitionToRole.class);
     when(qualFactory.forSource(Mockito.any())).then(invocation -> {
       final HasAnnotations hasAnno = (HasAnnotations) invocation.getArguments()[0];
-      if (hasAnno.unsafeIsAnnotationPresent(org.jboss.errai.ui.nav.client.local.api.TransitionToRole.class)) {
+      if (hasAnno.isAnnotationPresent(org.jboss.errai.ui.nav.client.local.api.TransitionToRole.class)) {
         return transitionToRole;
       }
-      else if (hasAnno.unsafeIsAnnotationPresent(org.jboss.errai.ui.nav.client.local.api.TransitionTo.class)) {
+      else if (hasAnno.isAnnotationPresent(org.jboss.errai.ui.nav.client.local.api.TransitionTo.class)) {
         return transitionTo;
       }
       else {
@@ -143,14 +151,6 @@ public class ValidationRulesTest {
       assertTrue(message.contains(StartPage2.class.getName()));
     }
     verify(ClassScanner.class);
-  }
-
-  private List<MetaClass> createMetaClassList(final Class<?>... classes) {
-    final List<MetaClass> result = new ArrayList<MetaClass>(classes.length);
-    for (final Class<?> aClass : classes) {
-      result.add(JavaReflectionClass.newInstance(aClass));
-    }
-    return result;
   }
 
   @Test
@@ -219,8 +219,8 @@ public class ValidationRulesTest {
     transitionProvider.afterInitialization(procContext, injContext);
 
     final InjectableProvider transitionToRoleProvider = getTransitionToRoleProvider();
-    when(injSite.unsafeIsAnnotationPresent(org.jboss.errai.ui.nav.client.local.api.TransitionToRole.class)).thenReturn(true);
-    when(injSite.unsafeGetAnnotation(org.jboss.errai.ui.nav.client.local.api.TransitionToRole.class)).thenReturn(toRoleAnno);
+    when(injSite.isAnnotationPresent(org.jboss.errai.ui.nav.client.local.api.TransitionToRole.class)).thenReturn(true);
+    when(injSite.getAnnotation(org.jboss.errai.ui.nav.client.local.api.TransitionToRole.class)).thenReturn(Optional.of(new RuntimeAnnotation(toRoleAnno)));
     when(toRoleAnno.value()).thenReturn((Class) MyUniquePageRole.class);
 
     transitionToRoleProvider.getInjectable(injSite, nameGenerator);
@@ -233,8 +233,8 @@ public class ValidationRulesTest {
     transitionProvider.afterInitialization(procContext, injContext);
 
     final InjectableProvider transitionToRoleProvider = getTransitionToRoleProvider();
-    when(injSite.unsafeIsAnnotationPresent(org.jboss.errai.ui.nav.client.local.api.TransitionToRole.class)).thenReturn(true);
-    when(injSite.unsafeGetAnnotation(org.jboss.errai.ui.nav.client.local.api.TransitionToRole.class)).thenReturn(toRoleAnno);
+    when(injSite.isAnnotationPresent(org.jboss.errai.ui.nav.client.local.api.TransitionToRole.class)).thenReturn(true);
+    when(injSite.getAnnotation(org.jboss.errai.ui.nav.client.local.api.TransitionToRole.class)).thenReturn(Optional.of(new RuntimeAnnotation(toRoleAnno)));
     when(toRoleAnno.value()).thenReturn((Class) MyUniquePageRole.class);
 
     transitionToRoleProvider.getInjectable(injSite, nameGenerator);
@@ -254,8 +254,15 @@ public class ValidationRulesTest {
 
 
   private void mockClassScanner(final Class<?>... pages) {
+    final Set<MetaClass> pagesMetaClasses = Arrays.stream(pages)
+            .map(JavaReflectionClass::newUncachedInstance)
+            .collect(Collectors.toSet());
+
     PowerMockito.mockStatic(ClassScanner.class);
-    when(ClassScanner.getTypesAnnotatedWith(Page.class, null)).thenReturn(createMetaClassList(pages));
+    when(ClassScanner.getTypesAnnotatedWith(Page.class, null)).thenReturn(pagesMetaClasses);
+
+    final MetaClassFinder baseMetaClassFinder = ann -> Collections.emptySet();
+    when(procContext.metaClassFinder()).thenReturn(baseMetaClassFinder.extend(Page.class, () -> pagesMetaClasses));
   }
 
   private void overrideBlacklistedClassNames(final String... names) throws SecurityException, NoSuchFieldException,

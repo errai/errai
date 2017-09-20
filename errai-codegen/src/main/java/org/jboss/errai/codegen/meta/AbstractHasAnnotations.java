@@ -40,7 +40,7 @@ public abstract class AbstractHasAnnotations implements HasAnnotations {
   /**
    * Checks if the provided annotation is present on this element (type, method,
    * field or parameter).
-   * 
+   *
    * @param annotation
    *          the annotation type, must not be null.
    * @return true if annotation is present, otherwise false.

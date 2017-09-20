@@ -16,11 +16,15 @@
 
 package org.jboss.errai.ioc.rebind.ioc.bootstrapper;
 
+import org.jboss.errai.config.ErraiAppPropertiesConfiguration;
+import org.jboss.errai.config.ErraiConfiguration;
+import org.jboss.errai.config.ErraiModulesConfiguration;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import static org.junit.Assert.*;
@@ -32,6 +36,9 @@ public class PropertyValueTest {
 
     @Mock
     private InjectionContext context;
+
+    @Spy
+    private ErraiConfiguration erraiConfiguration = new ErraiAppPropertiesConfiguration();
 
     @InjectMocks
     private IOCProcessor processor;

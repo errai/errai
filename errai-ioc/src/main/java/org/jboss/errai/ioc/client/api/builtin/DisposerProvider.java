@@ -26,12 +26,14 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.lang.annotation.Annotation;
 
+import static org.jboss.errai.config.ErraiAppPropertiesErraiAppConfiguration.ERRAI_IOC_ASYNC_BEAN_MANAGER;
+
 /**
  * @author Mike Brock
  */
 @IOCProvider
 @Singleton
-@EnabledByProperty(value = "errai.ioc.async_bean_manager", negated = true)
+@EnabledByProperty(value = ERRAI_IOC_ASYNC_BEAN_MANAGER, negated = true)
 public class DisposerProvider implements ContextualTypeProvider<Disposer> {
   @Inject
   SyncBeanManager beanManager;

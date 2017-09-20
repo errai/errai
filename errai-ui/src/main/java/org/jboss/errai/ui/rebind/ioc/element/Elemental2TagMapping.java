@@ -84,6 +84,8 @@ import elemental2.dom.HTMLTitleElement;
 import elemental2.dom.HTMLTrackElement;
 import elemental2.dom.HTMLUListElement;
 import elemental2.dom.HTMLVideoElement;
+import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaClassFactory;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -93,102 +95,106 @@ import java.util.Collections;
  */
 class Elemental2TagMapping {
 
-  private static final Multimap<Class<?>, String> TAG_NAMES_BY_DOM_INTERFACE;
+  private static final Multimap<MetaClass, String> TAG_NAMES_BY_DOM_INTERFACE;
 
-  static Collection<String> getTags(final Class<?> elemental2ElementClass) {
+  static Collection<String> getTags(final MetaClass elemental2ElementClass) {
 
-    if (elemental2ElementClass == null || Element.class.equals(elemental2ElementClass)) {
+    if (elemental2ElementClass == null || metaClass(Element.class).equals(elemental2ElementClass)) {
       return Collections.emptyList();
     }
 
     final Collection<String> tags = TAG_NAMES_BY_DOM_INTERFACE.get(elemental2ElementClass);
 
     if (tags.isEmpty()) {
-      return getTags(elemental2ElementClass.getSuperclass());
+      return getTags(elemental2ElementClass.getSuperClass());
     }
 
     return tags;
   }
 
   static {
-    TAG_NAMES_BY_DOM_INTERFACE = ImmutableMultimap.<Class<?>, String>builder()
+    TAG_NAMES_BY_DOM_INTERFACE = ImmutableMultimap.<MetaClass, String>builder()
 
-            .put(HTMLAnchorElement.class, "a")
-            .put(HTMLAppletElement.class, "applet")
-            .put(HTMLAreaElement.class, "area")
-            .put(HTMLAudioElement.class, "audio")
-            .put(HTMLBaseElement.class, "base")
-            .put(HTMLBaseFontElement.class, "basefont")
-            .put(HTMLBodyElement.class, "body")
-            .put(HTMLBRElement.class, "br")
-            .put(HTMLButtonElement.class, "button")
-            .put(HTMLCanvasElement.class, "canvas")
-            .put(HTMLDataListElement.class, "datalist")
-            .put(HTMLDetailsElement.class, "details")
-            .put(HTMLDialogElement.class, "dialog")
-            .put(HTMLDirectoryElement.class, "dir")
-            .put(HTMLDivElement.class, "div")
-            .put(HTMLDListElement.class, "dl")
-            .put(HTMLEmbedElement.class, "embed")
-            .put(HTMLFieldSetElement.class, "fieldset")
-            .put(HTMLFontElement.class, "font")
-            .put(HTMLFormElement.class, "form")
-            .put(HTMLFrameElement.class, "frame")
-            .put(HTMLFrameSetElement.class, "frameset")
-            .put(HTMLHeadElement.class, "head")
-            .put(HTMLHeadingElement.class, "h1")
-            .put(HTMLHeadingElement.class, "h2")
-            .put(HTMLHeadingElement.class, "h3")
-            .put(HTMLHeadingElement.class, "h4")
-            .put(HTMLHeadingElement.class, "h5")
-            .put(HTMLHeadingElement.class, "h6")
-            .put(HTMLHRElement.class, "hr")
-            .put(HTMLHtmlElement.class, "html")
-            .put(HTMLIFrameElement.class, "iframe")
-            .put(HTMLImageElement.class, "img")
-            .put(HTMLInputElement.class, "input")
-            .put(HTMLIsIndexElement.class, "isindex")
-            .put(HTMLLabelElement.class, "label")
-            .put(HTMLLegendElement.class, "legend")
-            .put(HTMLLIElement.class, "li")
-            .put(HTMLLinkElement.class, "link")
-            .put(HTMLMapElement.class, "map")
-            .put(HTMLMenuElement.class, "menu")
-            .put(HTMLMetaElement.class, "meta")
-            .put(HTMLMeterElement.class, "meter")
-            .put(HTMLModElement.class, "del")
-            .put(HTMLModElement.class, "ins")
-            .put(HTMLObjectElement.class, "object")
-            .put(HTMLOListElement.class, "ol")
-            .put(HTMLOptGroupElement.class, "optgroup")
-            .put(HTMLOptionElement.class, "option")
-            .put(HTMLOutputElement.class, "output")
-            .put(HTMLParagraphElement.class, "p")
-            .put(HTMLParamElement.class, "param")
-            .put(HTMLPreElement.class, "pre")
-            .put(HTMLProgressElement.class, "progress")
-            .put(HTMLQuoteElement.class, "blockquote")
-            .put(HTMLQuoteElement.class, "q")
-            .put(HTMLScriptElement.class, "script")
-            .put(HTMLSelectElement.class, "select")
-            .put(HTMLSourceElement.class, "source")
-            .put(HTMLStyleElement.class, "style")
-            .put(HTMLTableCaptionElement.class, "caption")
-            .put(HTMLTableCellElement.class, "td")
-            .put(HTMLTableCellElement.class, "th")
-            .put(HTMLTableColElement.class, "col")
-            .put(HTMLTableColElement.class, "colgroup")
-            .put(HTMLTableElement.class, "table")
-            .put(HTMLTableRowElement.class, "tr")
-            .put(HTMLTableSectionElement.class, "tbody")
-            .put(HTMLTableSectionElement.class, "tfoot")
-            .put(HTMLTableSectionElement.class, "thead")
-            .put(HTMLTemplateElement.class, "template")
-            .put(HTMLTextAreaElement.class, "textarea")
-            .put(HTMLTitleElement.class, "title")
-            .put(HTMLTrackElement.class, "track")
-            .put(HTMLUListElement.class, "ul")
-            .put(HTMLVideoElement.class, "video")
+            .put(metaClass(HTMLAnchorElement.class), "a")
+            .put(metaClass(HTMLAppletElement.class), "applet")
+            .put(metaClass(HTMLAreaElement.class), "area")
+            .put(metaClass(HTMLAudioElement.class), "audio")
+            .put(metaClass(HTMLBaseElement.class), "base")
+            .put(metaClass(HTMLBaseFontElement.class), "basefont")
+            .put(metaClass(HTMLBodyElement.class), "body")
+            .put(metaClass(HTMLBRElement.class), "br")
+            .put(metaClass(HTMLButtonElement.class), "button")
+            .put(metaClass(HTMLCanvasElement.class), "canvas")
+            .put(metaClass(HTMLDataListElement.class), "datalist")
+            .put(metaClass(HTMLDetailsElement.class), "details")
+            .put(metaClass(HTMLDialogElement.class), "dialog")
+            .put(metaClass(HTMLDirectoryElement.class), "dir")
+            .put(metaClass(HTMLDivElement.class), "div")
+            .put(metaClass(HTMLDListElement.class), "dl")
+            .put(metaClass(HTMLEmbedElement.class), "embed")
+            .put(metaClass(HTMLFieldSetElement.class), "fieldset")
+            .put(metaClass(HTMLFontElement.class), "font")
+            .put(metaClass(HTMLFormElement.class), "form")
+            .put(metaClass(HTMLFrameElement.class), "frame")
+            .put(metaClass(HTMLFrameSetElement.class), "frameset")
+            .put(metaClass(HTMLHeadElement.class), "head")
+            .put(metaClass(HTMLHeadingElement.class), "h1")
+            .put(metaClass(HTMLHeadingElement.class), "h2")
+            .put(metaClass(HTMLHeadingElement.class), "h3")
+            .put(metaClass(HTMLHeadingElement.class), "h4")
+            .put(metaClass(HTMLHeadingElement.class), "h5")
+            .put(metaClass(HTMLHeadingElement.class), "h6")
+            .put(metaClass(HTMLHRElement.class), "hr")
+            .put(metaClass(HTMLHtmlElement.class), "html")
+            .put(metaClass(HTMLIFrameElement.class), "iframe")
+            .put(metaClass(HTMLImageElement.class), "img")
+            .put(metaClass(HTMLInputElement.class), "input")
+            .put(metaClass(HTMLIsIndexElement.class), "isindex")
+            .put(metaClass(HTMLLabelElement.class), "label")
+            .put(metaClass(HTMLLegendElement.class), "legend")
+            .put(metaClass(HTMLLIElement.class), "li")
+            .put(metaClass(HTMLLinkElement.class), "link")
+            .put(metaClass(HTMLMapElement.class), "map")
+            .put(metaClass(HTMLMenuElement.class), "menu")
+            .put(metaClass(HTMLMetaElement.class), "meta")
+            .put(metaClass(HTMLMeterElement.class), "meter")
+            .put(metaClass(HTMLModElement.class), "del")
+            .put(metaClass(HTMLModElement.class), "ins")
+            .put(metaClass(HTMLObjectElement.class), "object")
+            .put(metaClass(HTMLOListElement.class), "ol")
+            .put(metaClass(HTMLOptGroupElement.class), "optgroup")
+            .put(metaClass(HTMLOptionElement.class), "option")
+            .put(metaClass(HTMLOutputElement.class), "output")
+            .put(metaClass(HTMLParagraphElement.class), "p")
+            .put(metaClass(HTMLParamElement.class), "param")
+            .put(metaClass(HTMLPreElement.class), "pre")
+            .put(metaClass(HTMLProgressElement.class), "progress")
+            .put(metaClass(HTMLQuoteElement.class), "blockquote")
+            .put(metaClass(HTMLQuoteElement.class), "q")
+            .put(metaClass(HTMLScriptElement.class), "script")
+            .put(metaClass(HTMLSelectElement.class), "select")
+            .put(metaClass(HTMLSourceElement.class), "source")
+            .put(metaClass(HTMLStyleElement.class), "style")
+            .put(metaClass(HTMLTableCaptionElement.class), "caption")
+            .put(metaClass(HTMLTableCellElement.class), "td")
+            .put(metaClass(HTMLTableCellElement.class), "th")
+            .put(metaClass(HTMLTableColElement.class), "col")
+            .put(metaClass(HTMLTableColElement.class), "colgroup")
+            .put(metaClass(HTMLTableElement.class), "table")
+            .put(metaClass(HTMLTableRowElement.class), "tr")
+            .put(metaClass(HTMLTableSectionElement.class), "tbody")
+            .put(metaClass(HTMLTableSectionElement.class), "tfoot")
+            .put(metaClass(HTMLTableSectionElement.class), "thead")
+            .put(metaClass(HTMLTemplateElement.class), "template")
+            .put(metaClass(HTMLTextAreaElement.class), "textarea")
+            .put(metaClass(HTMLTitleElement.class), "title")
+            .put(metaClass(HTMLTrackElement.class), "track")
+            .put(metaClass(HTMLUListElement.class), "ul")
+            .put(metaClass(HTMLVideoElement.class), "video")
             .build();
+  }
+
+  private static MetaClass metaClass(final Class<?> clazz) {
+    return MetaClassFactory.get(clazz);
   }
 }

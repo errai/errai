@@ -19,6 +19,6 @@ package org.jboss.errai.codegen.meta.impl.apt;
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
-@TestAnnotation("foo")
+@TestAnnotation(value = "foo", clazz = Long.class, enun = TestEnum.Bar, ann = @TestInnerAnnotation("foo"))
 class TestAnnotatedClass2 {
 }

@@ -31,7 +31,7 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 import java.lang.annotation.Annotation;
-import java.util.Collection;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -57,14 +57,17 @@ public final class ErraiAptExportedTypes {
   private final Types types;
   private final Elements elements;
   private final AnnotatedSourceElementsFinder annotatedSourceElementsFinder;
+  private final ResourceFilesFinder resourcesFilesFinder;
 
   public ErraiAptExportedTypes(final Types types,
           final Elements elements,
-          final AnnotatedSourceElementsFinder annotatedSourceElementsFinder) {
+          final AnnotatedSourceElementsFinder annotatedSourceElementsFinder,
+          final ResourceFilesFinder resourceFilesFinder) {
 
     this.types = types;
     this.elements = elements;
     this.annotatedSourceElementsFinder = annotatedSourceElementsFinder;
+    this.resourcesFilesFinder = resourceFilesFinder;
 
     // Loads all exported types from ExportFiles
     exportedClassesByAnnotationClassName = getExportedTypesFromExportFilesInExportFilesPackage();
@@ -134,19 +137,23 @@ public final class ErraiAptExportedTypes {
   }
 
   private String getAnnotationNameFromExportFile(final ExportFile exportFile) {
-    return exportFile.annotation.getQualifiedName().toString();
+    return exportFile.annotation().getQualifiedName().toString();
   }
 
   private Stream<TypeMirror> getExportedTypesFromExportFile(final ExportFile exportFile) {
-    return exportFile.exportedTypes.stream().map(Element::asType);
+    return exportFile.exportedTypes().stream().map(Element::asType);
   }
 
-  public Collection<MetaClass> findAnnotatedMetaClasses(final Class<? extends Annotation> annotation) {
+  public Set<MetaClass> findAnnotatedMetaClasses(final Class<? extends Annotation> annotation) {
     return exportedClassesByAnnotationClassName.getOrDefault(annotation.getName(), emptySet())
             .stream()
             .filter(s -> s.getKind().equals(TypeKind.DECLARED))
             .map(APTClass::new)
             .collect(toSet());
+  }
+
+  public ResourceFilesFinder resourceFilesFinder() {
+    return resourcesFilesFinder;
   }
 
   // Java 9 will implement this method, so when it's released and we upgrade, this can be removed.

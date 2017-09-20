@@ -47,8 +47,8 @@ public class ExportFileGeneratorTest extends ErraiAptTest {
 
     Assert.assertEquals(1, exportFiles.size());
     final ExportFile exportFile = exportFiles.stream().findFirst().get();
-    Assert.assertEquals(testAnnotation, exportFile.annotation);
-    Assert.assertEquals(singleton(testExportedType), exportFile.exportedTypes);
+    Assert.assertEquals(testAnnotation, exportFile.annotation());
+    Assert.assertEquals(singleton(testExportedType), exportFile.exportedTypes());
   }
 
   @Test

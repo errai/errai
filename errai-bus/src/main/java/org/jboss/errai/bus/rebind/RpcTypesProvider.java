@@ -37,8 +37,12 @@ import org.jboss.errai.config.util.ClassScanner;
 public class RpcTypesProvider implements ExposedTypesProvider {
   @Override
   public Collection<MetaClass> provideTypesToExpose() {
-    final Set<MetaClass> types = new HashSet<MetaClass>();
-    for (final MetaClass metaClass : ClassScanner.getTypesAnnotatedWith(Remote.class)) {
+    return returnTypesAndParametersTypes(ClassScanner.getTypesAnnotatedWith(Remote.class));
+  }
+
+  public Collection<MetaClass> returnTypesAndParametersTypes(final Collection<MetaClass> typesAnnotatedWith) {
+    final Set<MetaClass> types = new HashSet<>();
+    for (final MetaClass metaClass : typesAnnotatedWith) {
       for (final MetaMethod method : metaClass.getDeclaredMethods()) {
         if (!method.getReturnType().isVoid()) {
           types.add(method.getReturnType().getErased());

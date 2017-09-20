@@ -91,15 +91,14 @@ public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator 
     final BlockStatement instanceInitializer = context.getBootstrapClass().getInstanceInitializer();
     final Set<MetaClass> knownObserverTypes = new HashSet<>();
 
-    for (final MetaParameter parameter : ClassScanner.getParametersAnnotatedWith(Observes.class,
-            context.getGeneratorContext())) {
-      knownObserverTypes.add(parameter.getType());
-    }
+    knownObserverTypes.addAll(context.metaClassFinder().findAnnotatedWith(Observes.class));
 
     final Set<MetaClass> knownTypesWithSuperTypes = new HashSet<>(knownObserverTypes);
-    for (final MetaClass cls : knownObserverTypes) {
-      for (final MetaClass subClass : ClassScanner.getSubTypesOf(cls, context.getGeneratorContext())) {
-        knownTypesWithSuperTypes.add(subClass);
+
+    if (!context.erraiConfiguration().app().isAptEnvironment()) {
+      //FIXME: Query a generated map of subtypes of all @Observes annotated types using GWT.create()
+      for (final MetaClass cls : knownObserverTypes) {
+        knownTypesWithSuperTypes.addAll(ClassScanner.getSubTypesOf(cls, context.getGeneratorContext()));
       }
     }
 

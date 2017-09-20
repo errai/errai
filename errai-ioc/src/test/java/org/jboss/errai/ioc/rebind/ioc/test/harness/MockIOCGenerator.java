@@ -16,24 +16,28 @@
 
 package org.jboss.errai.ioc.rebind.ioc.test.harness;
 
-
-import com.google.gwt.core.ext.TreeLogger;
+import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.dev.javac.testing.GeneratorContextBuilder;
 import org.jboss.errai.codegen.util.ClassChangeUtil;
 import org.jboss.errai.common.client.api.Assert;
 import org.jboss.errai.common.metadata.RebindUtils;
+import org.jboss.errai.config.ErraiAppPropertiesConfiguration;
 import org.jboss.errai.config.util.ClassScanner;
 import org.jboss.errai.ioc.client.Bootstrapper;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCBootstrapGenerator;
+import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IocRelevantClassesUtil;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class MockIOCGenerator {
+
+  private static final ErraiAppPropertiesConfiguration ERRAI_CONFIGURATION = new ErraiAppPropertiesConfiguration();
 
   private final Set<String> packages;
 
@@ -46,28 +50,12 @@ public class MockIOCGenerator {
 
     final String packageName = Bootstrapper.class.getPackage().getName();
     final String className = "MockBootstrapperImpl";
+    final GeneratorContext context = GeneratorContextBuilder.newCoreBasedBuilder().buildGeneratorContext();
 
-    final IOCBootstrapGenerator bootstrapGenerator = new IOCBootstrapGenerator(GeneratorContextBuilder.newCoreBasedBuilder().buildGeneratorContext(),
-            new TreeLogger() {
-                  @Override
-                  public TreeLogger branch(final Type type, final String msg, final Throwable caught, final HelpInfo helpInfo) {
-                    return null;
-                  }
-
-                  @Override
-                  public boolean isLoggable(final Type type) {
-                    return false;
-                  }
-
-                  @Override
-                  public void log(final Type type, final String msg, final Throwable caught, final HelpInfo helpInfo) {
-                    System.out.println(type.getLabel() + ": " + msg);
-                    if (caught != null) {
-                      caught.printStackTrace();
-                    }
-                  }
-                }, packages, true);
-
+    final IOCBootstrapGenerator bootstrapGenerator = new IOCBootstrapGenerator(
+            ann -> new HashSet<>(ClassScanner.getTypesAnnotatedWith(ann, packages, context)),
+            Thread.currentThread().getContextClassLoader()::getResource, context, ERRAI_CONFIGURATION,
+            (a) -> IocRelevantClassesUtil.findRelevantClasses());
 
     final String classStr = bootstrapGenerator.generate(packageName, className);
 

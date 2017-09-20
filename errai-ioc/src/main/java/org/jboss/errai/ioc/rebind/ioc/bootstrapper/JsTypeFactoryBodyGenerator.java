@@ -28,7 +28,6 @@ import org.jboss.errai.ioc.client.api.ActivatedBy;
 import org.jboss.errai.ioc.client.api.builtin.DummyJsTypeProvider;
 import org.jboss.errai.ioc.client.container.BeanActivator;
 import org.jboss.errai.ioc.client.container.FactoryHandleImpl;
-import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraph;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.Injectable;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 
@@ -58,7 +57,7 @@ public class JsTypeFactoryBodyGenerator extends AbstractBodyGenerator {
 
   @Override
   protected List<Statement> generateFactoryInitStatements(final ClassStructureBuilder<?> bodyBlockBuilder,
-          final Injectable injectable, final DependencyGraph graph, final InjectionContext injectionContext) {
+          final Injectable injectable, final InjectionContext injectionContext) {
     final MetaClass type = injectable.getInjectedType();
     if (IOCProcessor.isJsInteropSupportEnabled() && requiresAntiInliningDummy(type)) {
       final int count = numberOfRequiredAntiInliningDummies(type);
@@ -104,7 +103,7 @@ public class JsTypeFactoryBodyGenerator extends AbstractBodyGenerator {
 
   @Override
   protected List<Statement> generateCreateInstanceStatements(final ClassStructureBuilder<?> bodyBlockBuilder,
-          final Injectable injectable, final DependencyGraph graph, final InjectionContext injectionContext) {
+          final Injectable injectable, final InjectionContext injectionContext) {
     return Collections.<Statement> singletonList(
             Stmt.castTo(injectable.getInjectedType(), invokeStatic(WindowInjectionContextStorage.class, "createOrGet")
                     .invoke("getBean", injectable.getInjectedType().getFullyQualifiedName())).returnValue());
@@ -113,8 +112,8 @@ public class JsTypeFactoryBodyGenerator extends AbstractBodyGenerator {
   @Override
   protected Statement generateFactoryHandleStatement(final Injectable injectable) {
     final Object[] args;
-    if (injectable.getInjectedType().unsafeIsAnnotationPresent(ActivatedBy.class)) {
-      final Class<? extends BeanActivator> activatorType = injectable.getInjectedType().unsafeGetAnnotation(ActivatedBy.class).value();
+    if (injectable.getInjectedType().isAnnotationPresent(ActivatedBy.class)) {
+      final MetaClass activatorType = injectable.getInjectedType().getAnnotation(ActivatedBy.class).get().value();
       args =  new Object[] {
           loadLiteral(injectable.getInjectedType()),
           injectable.getFactoryName(),

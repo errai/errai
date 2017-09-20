@@ -22,4 +22,10 @@ package org.jboss.errai.codegen.meta.impl.apt;
 @interface TestAnnotation {
 
   String value() default "";
+
+  Class clazz() default String.class;
+
+  TestInnerAnnotation ann() default @TestInnerAnnotation;
+
+  TestEnum enun() default TestEnum.Foo;
 }

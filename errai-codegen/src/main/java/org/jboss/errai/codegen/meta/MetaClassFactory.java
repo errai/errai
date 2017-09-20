@@ -628,4 +628,12 @@ public final class MetaClassFactory {
   public static boolean hasAnyChanges() {
     return !getAllNewOrUpdatedClasses().isEmpty() || !getAllDeletedClasses().isEmpty();
   }
+
+  public static MetaClass getUncached(final Class clazz) {
+    return JavaReflectionClass.newUncachedInstance(clazz);
+  }
+
+  public static MetaClass getUncached(final String fqcn) {
+    return JavaReflectionClass.newUncachedInstance(loadClass(fqcn));
+  }
 }

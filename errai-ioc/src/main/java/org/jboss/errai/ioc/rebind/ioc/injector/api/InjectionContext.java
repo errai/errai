@@ -16,30 +16,13 @@
 
 package org.jboss.errai.ioc.rebind.ioc.injector.api;
 
-import static java.util.Collections.unmodifiableCollection;
-
-import java.lang.annotation.Annotation;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Target;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.enterprise.context.NormalScope;
-import javax.enterprise.inject.Stereotype;
-import javax.inject.Qualifier;
-import javax.inject.Scope;
-
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
 import org.jboss.errai.codegen.meta.HasAnnotations;
+import org.jboss.errai.codegen.meta.MetaAnnotation;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.common.client.api.Assert;
-import org.jboss.errai.config.util.ClassScanner;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.FactoryBodyGenerator;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.FactoryGenerator;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
@@ -54,9 +37,24 @@ import org.jboss.errai.reflections.util.SimplePackageFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Multimaps;
+import javax.enterprise.context.NormalScope;
+import javax.enterprise.inject.Stereotype;
+import javax.inject.Qualifier;
+import javax.inject.Scope;
+import java.lang.annotation.Annotation;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Target;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import static java.util.Collections.unmodifiableCollection;
 
 /**
  * At every rebind phase, a single {@link InjectionContext} is used. It contains
@@ -99,11 +97,7 @@ public class InjectionContext {
 
   private InjectionContext(final Builder builder) {
     this.processingContext = Assert.notNull(builder.processingContext);
-    if (builder.qualifierFactory == null) {
-      this.qualifierFactory = new DefaultQualifierFactory();
-    } else {
-      this.qualifierFactory = builder.qualifierFactory;
-    }
+    this.qualifierFactory = new DefaultQualifierFactory();
     this.whitelist = Assert.notNull(builder.whitelist);
     this.blacklist = Assert.notNull(builder.blacklist);
     this.async = builder.async;
@@ -112,7 +106,6 @@ public class InjectionContext {
   public static class Builder {
     private IOCProcessingContext processingContext;
     private boolean async;
-    private QualifierFactory qualifierFactory;
     private final HashSet<String> enabledAlternatives = new HashSet<String>();
     private final HashSet<String> whitelist = new HashSet<String>();
     private final HashSet<String> blacklist = new HashSet<String>();
@@ -121,28 +114,23 @@ public class InjectionContext {
       return new Builder();
     }
 
-    public Builder qualifierFactory(final QualifierFactory qualifierFactory) {
-      this.qualifierFactory = qualifierFactory;
-      return this;
-    }
-
     public Builder processingContext(final IOCProcessingContext processingContext) {
       this.processingContext = processingContext;
       return this;
     }
 
-    public Builder enabledAlternative(final String fqcn) {
-      enabledAlternatives.add(fqcn);
+    public Builder enabledAlternatives(final Collection<String> fqcn) {
+      enabledAlternatives.addAll(fqcn);
       return this;
     }
 
-    public Builder addToWhitelist(final String item) {
-      whitelist.add(item);
+    public Builder addToWhitelist(final Collection<String> items) {
+      whitelist.addAll(items);
       return this;
     }
 
-    public Builder addToBlacklist(final String item) {
-      blacklist.add(item);
+    public Builder addToBlacklist(final Collection<String> items) {
+      blacklist.addAll(items);
       return this;
     }
 
@@ -223,10 +211,6 @@ public class InjectionContext {
     return qualifierFactory;
   }
 
-  public boolean isIncluded(final MetaClass type) {
-    return isWhitelisted(type) && !isBlacklisted(type);
-  }
-
   public boolean isWhitelisted(final MetaClass type) {
     if (whitelist.isEmpty()) {
       return true;
@@ -258,8 +242,7 @@ public class InjectionContext {
           // type is a meta-annotation. so we need to map all annotations with this
           // meta-annotation to the decorator extension.
 
-          for (final MetaClass annotationClazz : ClassScanner.getTypesAnnotatedWith(annotation,
-                  processingContext.getGeneratorContext())) {
+          for (final MetaClass annotationClazz : processingContext.metaClassFinder().findAnnotatedWith(annotation)) {
             if (Annotation.class.isAssignableFrom(annotationClazz.unsafeAsClass())) {
               final Class<? extends Annotation> javaAnnoCls = annotationClazz.unsafeAsClass().asSubclass(Annotation.class);
               decorators.get(javaAnnoCls).add(iocExtension);
@@ -303,10 +286,6 @@ public class InjectionContext {
     }
   }
 
-  public boolean isMetaAnnotationFor(final Class<? extends Annotation> alias, final Class<? extends Annotation> forAnno) {
-    return metaAnnotationAliases.containsEntry(alias, forAnno);
-  }
-
   private void sortDecorators() {
     for (final Class<? extends Annotation> a : getDecoratorAnnotations()) {
       if (a.isAnnotationPresent(Target.class)) {
@@ -334,105 +313,17 @@ public class InjectionContext {
     return unmodifiableCollection(elementBindings.get(type));
   }
 
-  public boolean isAnyKnownElementType(final HasAnnotations hasAnnotations) {
-    return isAnyOfElementTypes(hasAnnotations, WiringElementType.values());
-  }
 
-  public boolean isAnyOfElementTypes(final HasAnnotations hasAnnotations, final WiringElementType... types) {
-    for (final WiringElementType t : types) {
-      if (isElementType(t, hasAnnotations))
-        return true;
-    }
-    return false;
-  }
-
-  public boolean isElementType(final WiringElementType type, final HasAnnotations hasAnnotations) {
-    final Annotation matchingAnnotation = getMatchingAnnotationForElementType(type, hasAnnotations);
-    if (matchingAnnotation != null && type == WiringElementType.NotSupported) {
-      log.error(hasAnnotations + " was annotated with " + matchingAnnotation.annotationType().getName()
-          + " which is not supported in client-side Errai code!");
-    }
-
-    return matchingAnnotation != null;
+  public boolean isElementType(final WiringElementType type, final MetaClass annotationType) {
+    return getAnnotationsForElementType(type).stream().anyMatch(annotationType::instanceOf);
   }
 
   public boolean isElementType(final WiringElementType type, final Class<? extends Annotation> annotation) {
     return getAnnotationsForElementType(type).contains(annotation);
   }
 
-  /**
-   * Overloaded version to check GWT's JClassType classes.
-   *
-   * @param type
-   * @param hasAnnotations
-   *
-   * @return
-   */
-  public boolean isElementType(final WiringElementType type,
-                               final com.google.gwt.core.ext.typeinfo.HasAnnotations hasAnnotations) {
-    final Collection<Class<? extends Annotation>> annotationsForElementType = getAnnotationsForElementType(type);
-    for (final Annotation a : hasAnnotations.getAnnotations()) {
-      if (annotationsForElementType.contains(a.annotationType())) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  public Annotation getMatchingAnnotationForElementType(final WiringElementType type,
-                                                        final HasAnnotations hasAnnotations) {
-
-    final Collection<Class<? extends Annotation>> annotationsForElementType = getAnnotationsForElementType(type);
-
-    for (final Annotation a : hasAnnotations.unsafeGetAnnotations()) {
-      if (annotationsForElementType.contains(a.annotationType())) {
-        return a;
-      }
-    }
-
-    final Set<Annotation> annotationSet = new HashSet<Annotation>();
-
-    fillInStereotypes(annotationSet, hasAnnotations.unsafeGetAnnotations(), false);
-
-    for (final Annotation a : annotationSet) {
-      if (annotationsForElementType.contains(a.annotationType())) {
-        return a;
-      }
-    }
-    return null;
-  }
-
-  private static void fillInStereotypes(final Set<Annotation> annotationSet,
-                                        final Annotation[] from,
-                                        boolean filterScopes) {
-
-    final List<Class<? extends Annotation>> stereotypes
-        = new ArrayList<Class<? extends Annotation>>();
-
-    for (final Annotation a : from) {
-      final Class<? extends Annotation> aClass = a.annotationType();
-      if (aClass.isAnnotationPresent(Stereotype.class)) {
-        stereotypes.add(aClass);
-      }
-      else if (!filterScopes &&
-          aClass.isAnnotationPresent(NormalScope.class) ||
-          aClass.isAnnotationPresent(Scope.class)) {
-        filterScopes = true;
-
-        annotationSet.add(a);
-      }
-      else if (aClass.isAnnotationPresent(Qualifier.class)) {
-        annotationSet.add(a);
-      }
-    }
-
-    for (final Class<? extends Annotation> stereotype : stereotypes) {
-      fillInStereotypes(annotationSet, stereotype.getAnnotations(), filterScopes);
-    }
-  }
-
-  public Collection<Map.Entry<WiringElementType, Class<? extends Annotation>>> getAllElementMappings() {
-    return unmodifiableCollection(elementBindings.entries());
+  public Collection<Class<? extends Annotation>> getAllElementBindingRegisteredAnnotations() {
+    return elementBindings.values();
   }
 
   public void setAttribute(final String name, final Object value) {
@@ -441,10 +332,6 @@ public class InjectionContext {
 
   public Object getAttribute(final String name) {
     return attributeMap.get(name);
-  }
-
-  public boolean hasAttribute(final String name) {
-    return attributeMap.containsKey(name);
   }
 
   public boolean isAsync() {

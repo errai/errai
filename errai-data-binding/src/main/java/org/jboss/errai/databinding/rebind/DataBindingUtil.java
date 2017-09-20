@@ -16,24 +16,17 @@
 
 package org.jboss.errai.databinding.rebind;
 
-import static java.util.stream.Collectors.toCollection;
 import static org.jboss.errai.codegen.util.Stmt.invokeStatic;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Target;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.PropertyResourceBundle;
-import java.util.ResourceBundle;
 import java.util.Set;
 
 import org.jboss.errai.codegen.Statement;
@@ -46,10 +39,10 @@ import org.jboss.errai.codegen.meta.MetaConstructor;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
+import org.jboss.errai.codegen.meta.MetaParameterizedType;
+import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.util.PrivateAccessUtil;
-import org.jboss.errai.common.metadata.RebindUtils;
-import org.jboss.errai.config.rebind.EnvUtil;
-import org.jboss.errai.config.util.ClassScanner;
+import org.jboss.errai.config.ErraiAppPropertiesConfiguration;
 import org.jboss.errai.databinding.client.api.Bindable;
 import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraphBuilder.Dependency;
@@ -59,13 +52,8 @@ import org.jboss.errai.ioc.rebind.ioc.graph.api.Injectable;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.Decorable;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.Decorable.DecorableType;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.FactoryController;
-import org.jboss.errai.reflections.util.SimplePackageFilter;
 import org.jboss.errai.ui.shared.api.annotations.AutoBound;
 import org.jboss.errai.ui.shared.api.annotations.Model;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.gwt.core.ext.GeneratorContext;
 
 /**
  * Utility to retrieve a data binder reference. The reference is either to an
@@ -76,19 +64,10 @@ import com.google.gwt.core.ext.GeneratorContext;
  * @author Mike Brock
  */
 public class DataBindingUtil {
-  private static final Logger log = LoggerFactory.getLogger(DataBindingUtil.class);
+
   public static final String BINDER_VAR_NAME = "DataModelBinder";
   public static final String MODEL_VAR_NAME = "DataModel";
   public static final String BINDER_MODEL_TYPE_VALUE = "DataBinderModelType";
-
-  public static final Annotation[] MODEL_QUALIFICATION = new Annotation[] {
-    new Model() {
-      @Override
-      public Class<? extends Annotation> annotationType() {
-        return Model.class;
-      }
-    }
-  };
 
   private DataBindingUtil() {}
 
@@ -122,8 +101,11 @@ public class DataBindingUtil {
    *
    * @return the data binder reference or null if not found.
    */
-  public static DataBinderRef lookupDataBinderRef(final Decorable decorable, final FactoryController controller) {
-    DataBinderRef ref = lookupBinderForModel(decorable, controller);
+  public static DataBinderRef lookupDataBinderRef(final Decorable decorable,
+          final FactoryController controller,
+          final Set<MetaClass> allConfiguredBindableTypes) {
+
+    DataBinderRef ref = lookupBinderForModel(decorable, controller, allConfiguredBindableTypes);
     if (ref == null) {
       ref = lookupAutoBoundBinder(decorable, controller);
     }
@@ -138,7 +120,10 @@ public class DataBindingUtil {
    *
    * @return the data binder reference or null if not found.
    */
-  private static DataBinderRef lookupBinderForModel(final Decorable decorable, final FactoryController controller) {
+  private static DataBinderRef lookupBinderForModel(final Decorable decorable,
+          final FactoryController controller,
+          final Set<MetaClass> allConfiguredBindableTypes) {
+
     Statement dataBinderRef;
     MetaClass dataModelType;
 
@@ -149,14 +134,14 @@ public class DataBindingUtil {
       if (allAnnotated.size() > 1) {
         throw new GenerationException("Multiple @Models injected in " + enclosingType);
       }
-      else if (allAnnotated.size() == 1) {
+      else {
         final HasAnnotations annotated = allAnnotated.iterator().next();
 
         if (annotated instanceof MetaParameter) {
           final MetaParameter mp = (MetaParameter) annotated;
 
           dataModelType = mp.getType();
-          assertTypeIsBindable(dataModelType);
+          assertTypeIsBindable(dataModelType, allConfiguredBindableTypes);
           controller.addInitializationStatements(
                   Collections.<Statement>singletonList(
                           controller.setReferenceStmt(MODEL_VAR_NAME, DecorableType.PARAM.getAccessStatement(mp, decorable.getFactoryMetaClass()))));
@@ -168,7 +153,7 @@ public class DataBindingUtil {
           final MetaField field = (MetaField) allAnnotated.iterator().next();
 
           dataModelType = field.getType();
-          assertTypeIsBindable(dataModelType);
+          assertTypeIsBindable(dataModelType, allConfiguredBindableTypes);
 
           if (!field.isPublic()) {
             controller.exposedFieldStmt(field);
@@ -262,14 +247,14 @@ public class DataBindingUtil {
         final MetaParameter mp = (MetaParameter) annotated;
 
         assertTypeIsDataBinder(mp.getType());
-        dataModelType = (MetaClass) mp.getType().getParameterizedType().getTypeParameters()[0];
+        dataModelType = getFirstErasedTypeParameterClass(mp.getType());
         dataBinderRef = getAccessStatementForAutoBoundDataBinder(decorable, controller);
       }
       else {
         final MetaField field = (MetaField) allAnnotated.iterator().next();
 
         assertTypeIsDataBinder(field.getType());
-        dataModelType = (MetaClass) field.getType().getParameterizedType().getTypeParameters()[0];
+        dataModelType = getFirstErasedTypeParameterClass(field.getType());
         dataBinderRef = DecorableType.FIELD.getAccessStatement(field, decorable.getFactoryMetaClass());
         if (!field.isPublic()) {
           controller.addExposedField(field);
@@ -291,6 +276,16 @@ public class DataBindingUtil {
     }
 
     return (dataBinderRef != null) ? new DataBinderRef(dataModelType, dataBinderRef) : null;
+  }
+
+  private static MetaClass getFirstErasedTypeParameterClass(final MetaClass metaClass) {
+    final MetaType typeParameter = metaClass.getParameterizedType().getTypeParameters()[0];
+
+    if (typeParameter instanceof MetaParameterizedType) {
+      return (MetaClass) ((MetaParameterizedType) typeParameter).getRawType();
+    }
+
+    return (MetaClass) typeParameter;
   }
 
   private static Statement getAccessStatementForAutoBoundDataBinder(final Decorable decorable, final FactoryController controller) {
@@ -350,117 +345,9 @@ public class DataBindingUtil {
    * @param type
    *          the type to check
    */
-  private static void assertTypeIsBindable(final MetaClass type) {
-    if (!type.isAnnotationPresent(Bindable.class) && !getConfiguredBindableTypes().contains(type)) {
+  private static void assertTypeIsBindable(final MetaClass type, final Set<MetaClass> allConfiguredBindableTypes) {
+    if (!type.isAnnotationPresent(Bindable.class) && !allConfiguredBindableTypes.contains(type)) {
       throw new GenerationException(type.getName() + " must be a @Bindable type when used as @Model");
     }
-  }
-
-  /**
-   * Returns all bindable types on the classpath.
-   *
-   * @param context
-   *          the current generator context
-   *
-   * @return a set of meta classes representing the all bindable types (both
-   *         annotated and configured in ErraiApp.properties).
-   */
-  public static Set<MetaClass> getAllBindableTypes(final GeneratorContext context) {
-    final Collection<MetaClass> annotatedBindableTypes = ClassScanner.getTypesAnnotatedWith(Bindable.class,
-            RebindUtils.findTranslatablePackages(context), context);
-
-    final Set<MetaClass> bindableTypes = new HashSet<>(annotatedBindableTypes);
-    bindableTypes.addAll(DataBindingUtil.getConfiguredBindableTypes());
-    return bindableTypes;
-  }
-
-  private static Set<MetaClass> configuredBindableTypes = null;
-
-  /**
-   * Reads bindable types from all ErraiApp.properties files on the classpath.
-   *
-   * @return a set of meta classes representing the configured bindable types.
-   */
-  public static Set<MetaClass> getConfiguredBindableTypes() {
-    if (configuredBindableTypes != null) {
-      configuredBindableTypes = refreshConfiguredBindableTypes();
-    } else {
-      configuredBindableTypes = findConfiguredBindableTypes();
-    }
-
-    return configuredBindableTypes;
-  }
-
-  private static Set<MetaClass> refreshConfiguredBindableTypes() {
-    final Set<MetaClass> refreshedTypes = new HashSet<>(configuredBindableTypes.size());
-
-    for (final MetaClass clazz : configuredBindableTypes) {
-      refreshedTypes.add(MetaClassFactory.get(clazz.getFullyQualifiedName()));
-    }
-
-    return refreshedTypes;
-  }
-
-  private static Set<MetaClass> findConfiguredBindableTypes() {
-    final Set<MetaClass> bindableTypes = new HashSet<>();
-
-    for (final URL url : EnvUtil.getErraiAppPropertiesFilesUrls()) {
-      InputStream inputStream = null;
-      try {
-        log.debug("Checking " + url.getFile() + " for bindable types...");
-        inputStream = url.openStream();
-
-        final ResourceBundle props = new PropertyResourceBundle(inputStream);
-        for (final String key : props.keySet()) {
-          if (key.equals(EnvUtil.CONFIG_ERRAI_BINDABLE_TYPES)) {
-            final Set<String> patterns = new LinkedHashSet<>();
-
-            for (final String s : props.getString(key).split(" ")) {
-              final String singleValue = s.trim();
-              if (singleValue.endsWith("*")) {
-                patterns.add(singleValue);
-              }
-              else {
-                try {
-                  bindableTypes.add(MetaClassFactory.get(s.trim()));
-                } catch (final Exception e) {
-                  throw new RuntimeException("Could not find class defined in ErraiApp.properties as bindable type: " + s);
-                }
-              }
-            }
-
-            if (!patterns.isEmpty()) {
-              final SimplePackageFilter filter = new SimplePackageFilter(patterns);
-              MetaClassFactory
-                  .getAllCachedClasses()
-                  .stream()
-                  .filter(mc -> filter.apply(mc.getFullyQualifiedName()) && validateWildcard(mc))
-                  .collect(toCollection(() -> bindableTypes));
-            }
-            break;
-          }
-        }
-      } catch (final IOException e) {
-        throw new RuntimeException("Error reading ErraiApp.properties", e);
-      } finally {
-        if (inputStream != null) {
-          try {
-            inputStream.close();
-          } catch (final IOException e) {
-            log.warn("Failed to close input stream", e);
-          }
-        }
-      }
-    }
-
-    return bindableTypes;
-  }
-
-  private static boolean validateWildcard(MetaClass bindable) {
-    if (bindable.isFinal()) {
-      log.debug("@Bindable types cannot be final, ignoring: {}", bindable.getFullyQualifiedName());
-      return false;
-    }
-    return true;
   }
 }

@@ -22,6 +22,7 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.exception.GenerationException;
+import org.jboss.errai.codegen.meta.MetaAnnotation;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.client.api.IsElement;
@@ -61,9 +62,9 @@ public class DataFieldCodeDecorator extends IOCDecoratorExtension<DataField> {
   public void generateDecorator(final Decorable decorable, final FactoryController controller) {
     controller.ensureMemberExposed(decorable.get());
     Statement instance = decorable.getAccessStatement();
-    final String name = getTemplateDataFieldName((DataField) decorable.getAnnotation(), decorable.getName());
+    final String name = getTemplateDataFieldName(decorable.getAnnotation(), decorable.getName());
     final boolean isWidget = decorable.getType().isAssignableTo(Widget.class);
-    if (!isWidget && decorable.getType().unsafeIsAnnotationPresent(Templated.class)) {
+    if (!isWidget && decorable.getType().isAnnotationPresent(Templated.class)) {
       instance = Stmt.invokeStatic(TemplateWidgetMapper.class, "get", instance);
     } else if (decorable.getType().isAssignableTo(Element.class)) {
       instance = Stmt.invokeStatic(ElementWrapperWidget.class, "getWidget", instance);
@@ -95,10 +96,10 @@ public class DataFieldCodeDecorator extends IOCDecoratorExtension<DataField> {
   private void saveDataField(final Decorable decorable, final MetaClass type, final String name, final String fieldName, final Statement instance) {
     dataFieldMap(decorable.getInjectionContext(), decorable.getDecorableDeclaringType()).put(name, instance);
     dataFieldTypeMap(decorable.getInjectionContext(), decorable.getDecorableDeclaringType()).put(name, type);
-    dataFieldAnnotationMap(decorable.getInjectionContext(), decorable.getDecorableDeclaringType()).put(name, (DataField) decorable.getAnnotation());
+    dataFieldAnnotationMap(decorable.getInjectionContext(), decorable.getDecorableDeclaringType()).put(name, decorable.getAnnotation());
   }
 
-  private String getTemplateDataFieldName(final DataField annotation, final String deflt) {
+  private String getTemplateDataFieldName(final MetaAnnotation annotation, final String deflt) {
     final String value = Strings.nullToEmpty(annotation.value()).trim();
     return value.isEmpty() ? deflt : value;
   }
@@ -140,11 +141,11 @@ public class DataFieldCodeDecorator extends IOCDecoratorExtension<DataField> {
   /**
    * Get the map of {@link DataField} fields/parameters to {@link DataField} instances.
    */
-  private static Map<String, DataField> dataFieldAnnotationMap(final InjectionContext context, final MetaClass templateType) {
+  private static Map<String, MetaAnnotation> dataFieldAnnotationMap(final InjectionContext context, final MetaClass templateType) {
     final String dataFieldAnnoMapName = dataFieldAnnotationMapName(templateType);
 
     @SuppressWarnings("unchecked")
-    Map<String, DataField> dataFieldTypes = (Map<String, DataField>) context.getAttribute(dataFieldAnnoMapName);
+    Map<String, MetaAnnotation> dataFieldTypes = (Map<String, MetaAnnotation>) context.getAttribute(dataFieldAnnoMapName);
     if (dataFieldTypes == null) {
       dataFieldTypes = new LinkedHashMap<>();
       context.setAttribute(dataFieldAnnoMapName, dataFieldTypes);
@@ -204,16 +205,16 @@ public class DataFieldCodeDecorator extends IOCDecoratorExtension<DataField> {
    * Get the aggregate map of {@link DataField} names to instances for the given {@link MetaClass} component type and
    * all ancestors returned by {@link MetaClass#getSuperClass()}.
    */
-  public static Map<String, DataField> aggregateDataFieldAnnotationMap(final Decorable decorable, final MetaClass componentType) {
+  public static Map<String, MetaAnnotation> aggregateDataFieldAnnotationMap(final Decorable decorable, final MetaClass componentType) {
 
-    final Map<String, DataField> result = new LinkedHashMap<>();
+    final Map<String, MetaAnnotation> result = new LinkedHashMap<>();
 
     if (componentType.getSuperClass() != null) {
       result.putAll(aggregateDataFieldAnnotationMap(decorable, componentType.getSuperClass()));
     }
 
     @SuppressWarnings("unchecked")
-    final Map<String, DataField> dataFields = (Map<String, DataField>) decorable.getInjectionContext().getAttribute(
+    final Map<String, MetaAnnotation> dataFields = (Map<String, MetaAnnotation>) decorable.getInjectionContext().getAttribute(
         dataFieldAnnotationMapName(componentType));
 
     if (dataFields != null) {
