@@ -47,4 +47,14 @@ public abstract class Window {
      */
     @JsMethod(namespace = JsPackage.GLOBAL)
     public static native String atob(String encodedStr);
+
+    /**
+     * Displays a dialog box with a specified message, along with an OK and a Cancel button.
+     * @param message Specifies the text to display in the confirm box.
+     * @return true if the user clicked "OK", return false otherwise.
+     * @see <a href="https://www.w3schools.com/jsref/met_win_confirm.asp">Window confirm() Method</a>
+     */
+    @JsMethod(namespace = JsPackage.GLOBAL)
+    public static native boolean confirm(String message);
+
 }
