@@ -25,6 +25,7 @@ import org.jboss.errai.common.apt.generator.ExportFileGenerator;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
@@ -84,7 +85,8 @@ public final class ErraiAptExportedTypes {
   }
 
   private String getAnnotationNameFromExportFileElement(final Element e) {
-    return ExportFileName.decodeAnnotationClassNameFromExportFileName(e.asType().toString());
+    final TypeElement typeElement = (TypeElement) e;
+    return ExportFileName.decodeAnnotationClassNameFromExportFileName(typeElement.getQualifiedName().toString());
   }
 
   private Stream<TypeMirror> getExportedTypesFromExportFileElement(final Element exportFile) {
