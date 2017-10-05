@@ -52,6 +52,7 @@ public class GWTMetaClassTest extends AbstractMetaClassTest {
     f.addTestClass("org.jboss.errai.codegen.test.model.ClassWithGenericCollections");
     f.addTestClass("org.jboss.errai.codegen.test.model.ParameterizedClass");
     f.addTestClass("org.jboss.errai.codegen.test.model.ClassWithGenericMethods");
+    f.addTestClass("org.jboss.errai.codegen.test.model.ClassWithMethodsWithGenericParameters");
     f.addTestClass("org.jboss.errai.codegen.test.model.HasManyConstructors");
     f.addTestClass("org.jboss.errai.codegen.test.model.GenericSuperClass");
     f.addTestClass("org.jboss.errai.codegen.test.model.GenericArraySubclass");
