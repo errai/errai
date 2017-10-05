@@ -34,6 +34,7 @@ import org.jboss.errai.codegen.test.model.ClassWithAnnotations;
 import org.jboss.errai.codegen.test.model.ClassWithArrayGenerics;
 import org.jboss.errai.codegen.test.model.ClassWithGenericCollections;
 import org.jboss.errai.codegen.test.model.ClassWithGenericMethods;
+import org.jboss.errai.codegen.test.model.ClassWithMethodsWithGenericParameters;
 import org.jboss.errai.codegen.test.model.HasManyConstructors;
 import org.jboss.errai.codegen.test.model.MultipleValues;
 import org.jboss.errai.codegen.test.model.Nested;
@@ -795,6 +796,75 @@ public abstract class AbstractMetaClassTest {
     // Sole type parameter should be <? extends String>
     assertTrue(mpReturnType.getTypeParameters()[0] instanceof MetaWildcardType);
     final MetaWildcardType typeParam = (MetaWildcardType) mpReturnType.getTypeParameters()[0];
+    assertArrayEquals(new MetaType[] { getMetaClass(String.class) }, typeParam.getLowerBounds());
+    assertArrayEquals(new MetaType[] { getMetaClass(Object.class) }, typeParam.getUpperBounds());
+  }
+
+  @Test
+  public void testParameterTypeWithWildcardParameter() {
+    final MetaClass c = getMetaClass(ClassWithMethodsWithGenericParameters.class);
+    final MetaMethod method = c.getMethod("methodWithUnboundedWildcardCollectionParameter", Collection.class);
+
+    // TODO (ERRAI-459) decide whether it's correct to have the type param present or not
+    // then adjust this assertion to strict equality rather than startsWith()
+    assertTrue(method.getParameters()[0].getType().getFullyQualifiedNameWithTypeParms().startsWith("java.util.Collection"));
+
+    final MetaType genericParameterType = method.getGenericParameterTypes()[0];
+    assertNotNull(genericParameterType);
+    assertTrue("Got unexpected return type type " + genericParameterType.getClass(),
+            genericParameterType instanceof MetaParameterizedType);
+    final MetaParameterizedType mpParameterType = (MetaParameterizedType) genericParameterType;
+    assertEquals(1, mpParameterType.getTypeParameters().length);
+
+    // Sole type parameter should be <?>
+    assertTrue(mpParameterType.getTypeParameters()[0] instanceof MetaWildcardType);
+    final MetaWildcardType typeParam = (MetaWildcardType) mpParameterType.getTypeParameters()[0];
+    assertArrayEquals(new MetaType[] {}, typeParam.getLowerBounds());
+    assertArrayEquals(new MetaType[] { getMetaClass(Object.class) }, typeParam.getUpperBounds());
+  }
+
+  @Test
+  public void tesParameterTypeWithUpperBoundedWildcardParameter() {
+    final MetaClass c = getMetaClass(ClassWithMethodsWithGenericParameters.class);
+    final MetaMethod method = c.getMethod("methodWithUpperBoundedWildcardCollectionParameter", Collection.class);
+
+    // TODO (ERRAI-459) decide whether it's correct to have the type param present or not
+    // then adjust this assertion to strict equality rather than startsWith()
+    assertTrue(method.getParameters()[0].getType().getFullyQualifiedNameWithTypeParms().startsWith("java.util.Collection"));
+
+    final MetaType genericParameterType = method.getGenericParameterTypes()[0];
+    assertNotNull(genericParameterType);
+    assertTrue("Got unexpected return type type " + genericParameterType.getClass(),
+            genericParameterType instanceof MetaParameterizedType);
+    final MetaParameterizedType mpParameterType = (MetaParameterizedType) genericParameterType;
+    assertEquals(1, mpParameterType.getTypeParameters().length);
+
+    // Sole type parameter should be <? extends String>
+    assertTrue(mpParameterType.getTypeParameters()[0] instanceof MetaWildcardType);
+    final MetaWildcardType typeParam = (MetaWildcardType) mpParameterType.getTypeParameters()[0];
+    assertArrayEquals(new MetaType[] {}, typeParam.getLowerBounds());
+    assertArrayEquals(new MetaType[] { getMetaClass(String.class) }, typeParam.getUpperBounds());
+  }
+
+  @Test
+  public void testParameterTypeWithLowerBoundedWildcardParameter() {
+    final MetaClass c = getMetaClass(ClassWithMethodsWithGenericParameters.class);
+    final MetaMethod method = c.getMethod("methodWithLowerBoundedWildcardCollectionParameter", Collection.class);
+
+    // TODO (ERRAI-459) decide whether it's correct to have the type param present or not
+    // then adjust this assertion to strict equality rather than startsWith()
+    assertTrue(method.getParameters()[0].getType().getFullyQualifiedNameWithTypeParms().startsWith("java.util.Collection"));
+
+    final MetaType genericParameterType = method.getGenericParameterTypes()[0];
+    assertNotNull(genericParameterType);
+    assertTrue("Got unexpected return type type " + genericParameterType.getClass(),
+            genericParameterType instanceof MetaParameterizedType);
+    final MetaParameterizedType mpParameterType = (MetaParameterizedType) genericParameterType;
+    assertEquals(1, mpParameterType.getTypeParameters().length);
+
+    // Sole type parameter should be <? extends String>
+    assertTrue(mpParameterType.getTypeParameters()[0] instanceof MetaWildcardType);
+    final MetaWildcardType typeParam = (MetaWildcardType) mpParameterType.getTypeParameters()[0];
     assertArrayEquals(new MetaType[] { getMetaClass(String.class) }, typeParam.getLowerBounds());
     assertArrayEquals(new MetaType[] { getMetaClass(Object.class) }, typeParam.getUpperBounds());
   }
