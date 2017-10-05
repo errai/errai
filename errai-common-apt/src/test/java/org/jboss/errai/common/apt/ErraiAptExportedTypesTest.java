@@ -16,12 +16,15 @@
 
 package org.jboss.errai.common.apt;
 
+import com.google.common.collect.ImmutableSet;
 import org.jboss.errai.codegen.apt.test.ErraiAptTest;
 import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.impl.apt.APTClass;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Collection;
+import java.util.Set;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
@@ -33,7 +36,7 @@ public class ErraiAptExportedTypesTest extends ErraiAptTest {
     final ErraiAptExportedTypes erraiAptExportedTypes = new ErraiAptExportedTypes(types, elements,
             new TestAnnotatedSourceElementsFinder());
 
-    Collection<MetaClass> annotatedMetaClasses = erraiAptExportedTypes.findAnnotatedMetaClasses(
+    final Collection<MetaClass> annotatedMetaClasses = erraiAptExportedTypes.findAnnotatedMetaClasses(
             ErraiAptExportedTypesUnusedTestAnnotation.class);
 
     Assert.assertEquals(0, annotatedMetaClasses.size());
@@ -41,12 +44,16 @@ public class ErraiAptExportedTypesTest extends ErraiAptTest {
 
   @Test
   public void testFindAnnotatedMetaClassesWithNoLocallyExportableTypes() {
-    final ErraiAptExportedTypes erraiAptExportedTypes = new ErraiAptExportedTypes(types, elements, new TestAnnotatedSourceElementsFinder());
+    final ErraiAptExportedTypes erraiAptExportedTypes = new ErraiAptExportedTypes(types, elements,
+            new TestAnnotatedSourceElementsFinder());
 
-    Collection<MetaClass> annotatedMetaClasses = erraiAptExportedTypes.findAnnotatedMetaClasses(
+    final Collection<MetaClass> annotatedMetaClasses = erraiAptExportedTypes.findAnnotatedMetaClasses(
             ErraiAptExportedTypesTestAnnotation.class);
 
-    Assert.assertEquals(1, annotatedMetaClasses.size());
+    final Set<APTClass> expected = ImmutableSet.of(
+            new APTClass(getTypeElement(ErraiAptExportedTypesTestExportedType.class).asType()));
+
+    Assert.assertEquals(expected, annotatedMetaClasses);
   }
 
   @Test
@@ -54,10 +61,13 @@ public class ErraiAptExportedTypesTest extends ErraiAptTest {
     final ErraiAptExportedTypes erraiAptExportedTypes = new ErraiAptExportedTypes(types, elements,
             new TestAnnotatedSourceElementsFinder(getTypeElement(ErraiAptExportedTypesTestExportedType.class)));
 
-    Collection<MetaClass> annotatedMetaClasses = erraiAptExportedTypes.findAnnotatedMetaClasses(
+    final Collection<MetaClass> annotatedMetaClasses = erraiAptExportedTypes.findAnnotatedMetaClasses(
             ErraiAptExportedTypesTestAnnotation.class);
 
-    Assert.assertEquals(1, annotatedMetaClasses.size());
+    final Set<APTClass> expected = ImmutableSet.of(
+            new APTClass(getTypeElement(ErraiAptExportedTypesTestExportedType.class).asType()));
+
+    Assert.assertEquals(expected, annotatedMetaClasses);
   }
 
   @Test
@@ -65,10 +75,14 @@ public class ErraiAptExportedTypesTest extends ErraiAptTest {
     final ErraiAptExportedTypes erraiAptExportedTypes = new ErraiAptExportedTypes(types, elements,
             new TestAnnotatedSourceElementsFinder(getTypeElement(ErraiAptExportedTypesLocallyExportableType2.class)));
 
-    Collection<MetaClass> annotatedMetaClasses = erraiAptExportedTypes.findAnnotatedMetaClasses(
+    final Collection<MetaClass> annotatedMetaClasses = erraiAptExportedTypes.findAnnotatedMetaClasses(
             ErraiAptExportedTypesTestAnnotation.class);
 
-    Assert.assertEquals(2, annotatedMetaClasses.size());
+    final Collection<MetaClass> expected = ImmutableSet.of(
+            new APTClass(getTypeElement(ErraiAptExportedTypesTestExportedType.class).asType()),
+            new APTClass(getTypeElement(ErraiAptExportedTypesLocallyExportableType2.class).asType()));
+
+    Assert.assertEquals(expected, annotatedMetaClasses);
   }
 
 }
