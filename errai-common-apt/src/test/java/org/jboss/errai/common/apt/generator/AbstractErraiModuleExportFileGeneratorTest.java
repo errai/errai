@@ -48,7 +48,7 @@ public class AbstractErraiModuleExportFileGeneratorTest {
                 Filer filer) {
           throw new TestException();
         }
-      }.process(null, null, null, null, new TestAnnotatedSourceElementsFinder(null));
+      }.process(null, null, null, null, null);
     } catch (final Exception e) {
       Assert.fail("No exception should've been thrown");
     }
