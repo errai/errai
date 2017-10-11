@@ -14,26 +14,14 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.codegen.meta;
+package org.jboss.errai.codegen.meta.impl.apt;
+
+import static org.jboss.errai.codegen.meta.impl.apt.TestEnum.Bar;
+import static org.jboss.errai.codegen.meta.impl.apt.TestEnum.Foo;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
-public class RuntimeEnum extends MetaEnum {
-
-  private final Enum enumInstance;
-
-  public RuntimeEnum(final Enum enumInstance) {
-    this.enumInstance = enumInstance;
-  }
-
-  @Override
-  public MetaClass getDeclaringClass() {
-    return MetaClassFactory.getUncached(enumInstance.getDeclaringClass());
-  }
-
-  @Override
-  public String name() {
-    return enumInstance.name();
-  }
+@TestAnnotationWithArrayProperties(enums = { Foo, Bar })
+class TestAnnotatedClass5 {
 }

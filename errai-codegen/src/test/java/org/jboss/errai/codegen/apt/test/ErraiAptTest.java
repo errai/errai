@@ -40,7 +40,7 @@ public abstract class ErraiAptTest extends AbstractCodegenTest {
   protected Types types;
 
   @Before
-  public void before() {
+  public void beforeErraiAptTest() {
     elements = rule.getElements();
     types = rule.getTypes();
     APTClassUtil.init(types, elements);

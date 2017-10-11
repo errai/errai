@@ -21,8 +21,6 @@ package org.jboss.errai.codegen.meta;
  */
 public abstract class MetaEnum {
 
-  public abstract boolean instanceOf(final Enum enumInstance);
-
   public abstract MetaClass getDeclaringClass();
 
   public abstract String name();
