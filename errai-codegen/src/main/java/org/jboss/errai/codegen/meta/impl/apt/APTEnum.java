@@ -33,12 +33,6 @@ public class APTEnum extends MetaEnum {
   }
 
   @Override
-  public boolean instanceOf(final Enum enumInstance) {
-    return getDeclaringClass().getFullyQualifiedName().equals(enumInstance.getDeclaringClass().getName())
-            && value.getSimpleName().toString().equals(enumInstance.name());
-  }
-
-  @Override
   public MetaClass getDeclaringClass() {
     return new APTClass(value.asType());
   }

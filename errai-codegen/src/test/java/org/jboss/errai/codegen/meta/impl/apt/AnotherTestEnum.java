@@ -14,26 +14,10 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.codegen.meta;
+package org.jboss.errai.codegen.meta.impl.apt;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
-public class RuntimeEnum extends MetaEnum {
-
-  private final Enum enumInstance;
-
-  public RuntimeEnum(final Enum enumInstance) {
-    this.enumInstance = enumInstance;
-  }
-
-  @Override
-  public MetaClass getDeclaringClass() {
-    return MetaClassFactory.getUncached(enumInstance.getDeclaringClass());
-  }
-
-  @Override
-  public String name() {
-    return enumInstance.name();
-  }
+public enum AnotherTestEnum {
 }

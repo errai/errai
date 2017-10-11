@@ -372,8 +372,8 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
         final MetaAnnotation dataField = entry.getValue();
         Statement dataFieldMetaInstance;
         final MetaAnnotation[] attributeRules = dataField.valueAsArray("attributeRules", MetaAnnotation[].class);
-        final MetaEnum defaultStrategy = dataField.value("defaultStrategy");
-        if (attributeRules.length == 0 && defaultStrategy.instanceOf(ConflictStrategy.USE_TEMPLATE)) {
+        final ConflictStrategy defaultStrategy = dataField.<MetaEnum>value("defaultStrategy").as(ConflictStrategy.class);
+        if (attributeRules.length == 0 && defaultStrategy.equals(ConflictStrategy.USE_TEMPLATE)) {
           dataFieldMetaInstance = newObject(DataFieldMeta.class);
         }
         else {

@@ -248,8 +248,8 @@ public class IOCBootstrapGenerator {
     //Configure IocBootstrapTasks
     for (final MetaClass metaClass : metaClassFinder.findAnnotatedWith(IOCBootstrapTask.class)) {
       final MetaAnnotation task = metaClass.getAnnotation(IOCBootstrapTask.class).get();
-      final MetaEnum taskOrder = task.value();
-      if (taskOrder.instanceOf(TaskOrder.Before)) {
+      final TaskOrder taskOrder = task.<MetaEnum>value().as(TaskOrder.class);
+      if (taskOrder.equals(TaskOrder.Before)) {
         beforeTasks.add(metaClass);
       } else {
         afterTasks.add(metaClass);

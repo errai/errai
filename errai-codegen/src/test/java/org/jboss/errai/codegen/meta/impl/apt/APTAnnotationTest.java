@@ -124,6 +124,15 @@ public class APTAnnotationTest extends ErraiAptTest {
     Assert.assertEquals(expectedValue, actualValue);
   }
 
+  @Test
+  public void testInstanceOf() {
+    final Optional<MetaAnnotation> annotation = new APTClass(
+            getTypeElement(TestAnnotatedClass4.class).asType()).getAnnotation(TestAnnotationWithArrayProperties.class);
+
+    Assert.assertTrue(annotation.isPresent());
+    Assert.assertTrue(annotation.get().instanceOf(TestAnnotationWithArrayProperties.class));
+  }
+
   private MetaAnnotation newRuntimeTestAnnotation(final String string) {
     return new RuntimeAnnotation(new TestInnerAnnotation() {
 
