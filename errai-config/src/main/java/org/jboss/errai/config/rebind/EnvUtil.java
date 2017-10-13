@@ -145,7 +145,23 @@ public abstract class EnvUtil {
         inputStream = url.openStream();
 
         final ResourceBundle props = new PropertyResourceBundle(inputStream);
-        processErraiAppPropertiesBundle(frameworkProps, props);
+        for (final String key : props.keySet()) {
+          final String value = props.getString(key);
+          if (frameworkProps.containsKey(key)) {
+            if (isListValuedProperty(key)) {
+              // TODO should validate that different values don't conflict
+              final String oldValue = frameworkProps.get(key);
+              final String newValue = oldValue + " " + value;
+              log.debug("Merging property {} = {}", key, newValue);
+              frameworkProps.put(key, newValue);
+            } else {
+              log.warn("The property {} has been set multiple times.", key);
+              frameworkProps.put(key, value);
+            }
+          } else {
+            frameworkProps.put(key, value);
+          }
+        }
       } catch (final IOException e) {
         throw new RuntimeException("error reading ErraiApp.properties", e);
       } finally {
@@ -162,33 +178,6 @@ public abstract class EnvUtil {
     return new EnvironmentConfig(frameworkProps);
   }
 
-  private static void processErraiAppPropertiesBundle(final Map<String, String> frameworkProps,
-          final ResourceBundle props) {
-    for (final String key : props.keySet()) {
-      final String value = props.getString(key);
-      updateFrameworkProperties(frameworkProps, key, value);
-    }
-  }
-
-  private static void updateFrameworkProperties(final Map<String, String> frameworkProps,
-          final String key,
-          final String value) {
-    if (frameworkProps.containsKey(key)) {
-      if (isListValuedProperty(key)) {
-        // TODO should validate that different values don't conflict
-        final String oldValue = frameworkProps.get(key);
-        final String newValue = oldValue + " " + value;
-        log.debug("Merging property {} = {}", key, newValue);
-        frameworkProps.put(key, newValue);
-      } else {
-        log.warn("The property {} has been set multiple times.", key);
-        frameworkProps.put(key, value);
-      }
-    } else {
-      frameworkProps.put(key, value);
-    }
-  }
-
   private static boolean isListValuedProperty(final String key) {
     return key.equals(ErraiAppPropertiesErraiModulesConfiguration.IOC_ENABLED_ALTERNATIVES) || key.equals(
             ErraiAppPropertiesErraiModulesConfiguration.BINDABLE_TYPES) || key.equals(
@@ -197,7 +186,7 @@ public abstract class EnvUtil {
             ErraiAppPropertiesErraiModulesConfiguration.MAPPING_ALIASES);
   }
 
-  //
+  //FIXME: tiago: remove or move this methods below
 
   public static boolean isPortableType(final Class<?> cls) {
     final MetaClass mc = MetaClassFactory.get(cls);
