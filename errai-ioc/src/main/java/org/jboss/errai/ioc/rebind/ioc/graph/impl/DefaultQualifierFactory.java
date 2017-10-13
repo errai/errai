@@ -39,7 +39,7 @@ import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaClassMember;
 import org.jboss.errai.codegen.meta.MetaParameter;
-import org.jboss.errai.codegen.meta.RuntimeAnnotation;
+import org.jboss.errai.codegen.meta.impl.java.JavaReflectionAnnotation;
 import org.jboss.errai.codegen.util.CDIAnnotationUtils;
 import org.jboss.errai.ioc.util.MetaAnnotationSerializer;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.Qualifier;
@@ -71,7 +71,7 @@ public class DefaultQualifierFactory implements QualifierFactory {
     }
   };
 
-  private static final AnnotationWrapper ANY_WRAPPER = new AnnotationWrapper(new RuntimeAnnotation(ANY));
+  private static final AnnotationWrapper ANY_WRAPPER = new AnnotationWrapper(new JavaReflectionAnnotation(ANY));
 
   private static final Default DEFAULT = new Default() {
     @Override
@@ -88,7 +88,7 @@ public class DefaultQualifierFactory implements QualifierFactory {
     }
   };
 
-  private static final AnnotationWrapper DEFAULT_WRAPPER = new AnnotationWrapper(new RuntimeAnnotation(DEFAULT));
+  private static final AnnotationWrapper DEFAULT_WRAPPER = new AnnotationWrapper(new JavaReflectionAnnotation(DEFAULT));
 
   private static final Qualifier UNIVERSAL = new Universal();
 
@@ -154,7 +154,7 @@ public class DefaultQualifierFactory implements QualifierFactory {
   }
 
   private AnnotationWrapper createNamed(final String defaultName) {
-    return new AnnotationWrapper(new RuntimeAnnotation(new Named() {
+    return new AnnotationWrapper(new JavaReflectionAnnotation(new Named() {
       @Override
       public Class<? extends Annotation> annotationType() {
         return Named.class;

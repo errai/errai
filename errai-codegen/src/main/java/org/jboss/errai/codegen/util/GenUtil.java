@@ -486,6 +486,7 @@ public class GenUtil {
             bestScore = score;
           }
 
+          // Always prefer non-varargs methods
           if (score != 0 && score == bestScore && bestCandidate.isVarArgs()) {
             bestCandidate = meth;
           }

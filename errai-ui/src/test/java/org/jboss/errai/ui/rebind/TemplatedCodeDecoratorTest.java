@@ -22,7 +22,7 @@ import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
-import org.jboss.errai.codegen.meta.RuntimeAnnotation;
+import org.jboss.errai.codegen.meta.impl.java.JavaReflectionAnnotation;
 import org.jboss.errai.codegen.meta.impl.build.BuildMetaClass;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.Decorable;
@@ -119,7 +119,7 @@ public class TemplatedCodeDecoratorTest {
     decorator = new TemplatedCodeDecorator(Templated.class);
 
     when(templatedClass.getAnnotation(Templated.class)).thenReturn(
-            Optional.of(new RuntimeAnnotation(defaultTemplatedAnno)));
+            Optional.of(new JavaReflectionAnnotation(defaultTemplatedAnno)));
     when(templatedClass.getFullyQualifiedName()).thenReturn("org.foo.TestTemplated");
     when(templatedClass.getPackageName()).thenReturn("org.foo");
     when(templatedClass.getName()).thenReturn("TestTemplated");
@@ -130,7 +130,7 @@ public class TemplatedCodeDecoratorTest {
 
     when(context.getProcessingContext()).thenReturn(iocProcessingContext);
 
-    when(decorable.getAnnotation()).thenReturn(new RuntimeAnnotation(defaultTemplatedAnno));
+    when(decorable.getAnnotation()).thenReturn(new JavaReflectionAnnotation(defaultTemplatedAnno));
     when(decorable.getDecorableDeclaringType()).thenReturn(templatedClass);
     when(decorable.getType()).thenReturn(templatedClass);
     when(decorable.getInjectionContext()).thenReturn(context);
@@ -146,7 +146,7 @@ public class TemplatedCodeDecoratorTest {
 
     when(templatedClass.getMethodsAnnotatedWith(EventHandler.class)).thenReturn(singletonList(handlerMethod));
     when(handlerMethod.getAnnotation(EventHandler.class)).thenReturn(
-            Optional.of(new RuntimeAnnotation(defaultHandlerAnno)));
+            Optional.of(new JavaReflectionAnnotation(defaultHandlerAnno)));
     when(handlerMethod.getParameters()).thenReturn(new MetaParameter[] { eventParam });
     when(eventParam.getType()).thenReturn(elemental2EventClass);
     when(eventParam.getAnnotation(any())).thenReturn(Optional.empty());

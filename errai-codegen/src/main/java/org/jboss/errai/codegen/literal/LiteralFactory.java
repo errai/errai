@@ -33,7 +33,7 @@ import org.jboss.errai.codegen.exception.NotLiteralizableException;
 import org.jboss.errai.codegen.meta.MetaAnnotation;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
-import org.jboss.errai.codegen.meta.RuntimeAnnotation;
+import org.jboss.errai.codegen.meta.impl.java.JavaReflectionAnnotation;
 import org.jboss.errai.codegen.meta.impl.apt.APTAnnotation;
 
 /**
@@ -109,8 +109,8 @@ public class LiteralFactory {
 
       if (o instanceof MetaClass) {
         result = new MetaClassLiteral((MetaClass) o);
-      } else if (o instanceof RuntimeAnnotation) {
-        result = getLiteralValue(((RuntimeAnnotation) o).getAnnotation());
+      } else if (o instanceof JavaReflectionAnnotation) {
+        result = getLiteralValue(((JavaReflectionAnnotation) o).getAnnotation());
       } else if (o instanceof APTAnnotation) {
         result = getLiteralValue((APTAnnotation) o);
       } else if (o instanceof Annotation) {
