@@ -22,13 +22,13 @@ import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaEnum;
 
-import javax.enterprise.util.Nonbinding;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.TypeMirror;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -128,13 +128,6 @@ public class APTAnnotation extends MetaAnnotation {
 
   @Override
   public Map<String, Object> values() {
-    return values.entrySet()
-            .stream()
-            .filter(e -> !isNonbinding(e.getKey()))
-            .collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
-  }
-
-  private boolean isNonbinding(final String methodName) {
-    return annotationType().getDeclaredMethod(methodName, new MetaClass[0]).isAnnotationPresent(Nonbinding.class);
+    return Collections.unmodifiableMap(values);
   }
 }
