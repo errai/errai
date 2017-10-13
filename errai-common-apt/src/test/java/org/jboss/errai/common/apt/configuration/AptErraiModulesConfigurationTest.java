@@ -30,12 +30,10 @@ import java.util.Set;
 import static org.jboss.errai.common.apt.configuration.ErraiTestCustomModule1.Bindable1;
 import static org.jboss.errai.common.apt.configuration.ErraiTestCustomModule1.IocAlternative1;
 import static org.jboss.errai.common.apt.configuration.ErraiTestCustomModule1.IocBlacklisted1;
-import static org.jboss.errai.common.apt.configuration.ErraiTestCustomModule1.NonSerializable1;
 import static org.jboss.errai.common.apt.configuration.ErraiTestCustomModule1.Serializable1;
 import static org.jboss.errai.common.apt.configuration.ErraiTestCustomModule2.Bindable2;
 import static org.jboss.errai.common.apt.configuration.ErraiTestCustomModule2.IocBlacklisted2;
 import static org.jboss.errai.common.apt.configuration.ErraiTestCustomModule2.IocWhitelisted2;
-import static org.jboss.errai.common.apt.configuration.ErraiTestCustomModule2.NonSerializable2;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -52,7 +50,7 @@ public class AptErraiModulesConfigurationTest extends ErraiAptTest {
     assertTrue(config.getIocEnabledAlternatives().isEmpty());
     assertTrue(config.getIocBlacklist().isEmpty());
     assertTrue(config.getIocWhitelist().isEmpty());
-    assertTrue(config.getSerializableTypes().isEmpty());
+    assertTrue(config.getExposedPortableTypes().isEmpty());
   }
 
   @Test
@@ -64,7 +62,7 @@ public class AptErraiModulesConfigurationTest extends ErraiAptTest {
     assertContainsOnly(config.getIocEnabledAlternatives(), aptClass(IocAlternative1.class));
     assertContainsOnly(config.getIocBlacklist(), aptClass(IocBlacklisted1.class));
     assertContainsOnly(config.getIocWhitelist(), aptClass(IocWhitelisted1.class));
-    assertContainsOnly(config.getSerializableTypes(), aptClass(Serializable1.class));
+    assertContainsOnly(config.getExposedPortableTypes(), aptClass(Serializable1.class));
   }
 
   @Test
@@ -79,7 +77,7 @@ public class AptErraiModulesConfigurationTest extends ErraiAptTest {
     assertContainsOnly(config.getIocEnabledAlternatives(), aptClass(IocAlternative1.class), aptClass(IocAlternative2.class));
     assertContainsOnly(config.getIocBlacklist(), aptClass(IocBlacklisted1.class), aptClass(IocBlacklisted2.class));
     assertContainsOnly(config.getIocWhitelist(), aptClass(IocWhitelisted1.class), aptClass(IocWhitelisted2.class));
-    assertContainsOnly(config.getSerializableTypes(), aptClass(Serializable1.class), aptClass(Serializable2.class));
+    assertContainsOnly(config.getExposedPortableTypes(), aptClass(Serializable1.class), aptClass(Serializable2.class));
   }
 
   private static void assertContainsOnly(final Set<?> configValue, final Object... objects) {

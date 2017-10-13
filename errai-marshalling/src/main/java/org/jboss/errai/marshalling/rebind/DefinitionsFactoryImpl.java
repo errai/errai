@@ -26,7 +26,6 @@ import org.jboss.errai.common.metadata.ScannerSingleton;
 import org.jboss.errai.config.ErraiAppPropertiesConfiguration;
 import org.jboss.errai.config.ErraiConfiguration;
 import org.jboss.errai.config.rebind.EnvUtil;
-import org.jboss.errai.config.rebind.EnvironmentConfig;
 import org.jboss.errai.config.util.ClassScanner;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
@@ -92,8 +91,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.Stream.Builder;
-
-import static org.jboss.errai.config.rebind.EnvUtil.getEnvironmentConfig;
 
 /**
  * The default implementation of {@link DefinitionsFactory}. This implementation covers the detection and mapping of
@@ -199,7 +196,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
     final MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
 
     EnvUtil.clearCache();
-    final Set<MetaClass> envExposedClasses = erraiConfiguration.modules().getSerializableTypes(); //FIXME: tiago: add annotated types with its inner classes
+    final Set<MetaClass> envExposedClasses = erraiConfiguration.modules().getExposedPortableTypes();
 
     for (final Class<?> cls : findCustomMappings(scanner)) {
       if (!MappingDefinition.class.isAssignableFrom(cls)) {

@@ -208,18 +208,17 @@ public class ErraiAppPropertiesErraiModulesConfiguration implements ErraiModules
   private static Set<MetaClass> allSerializableTypes;
 
   @Override
-  public Set<MetaClass> getSerializableTypes() {
+  public Set<MetaClass> getExposedPortableTypes() {
 
     if (allSerializableTypes == null) {
       final Set<MetaClass> exposedClasses = new HashSet<>();
-      final Set<MetaClass> portableNonExposed = new HashSet<>();
       final Set<MetaClass> nonportableClasses = new HashSet<>();
 
       nonportableClasses.addAll(ClassScanner.getTypesAnnotatedWith(NonPortable.class));
       final Set<MetaClass> exposedFromScanner = new HashSet<>(ClassScanner.getTypesAnnotatedWith(Portable.class));
 
-      //FIXME: find inner classes of exposed annotated types
       addExposedInnerClasses(exposedClasses, exposedFromScanner);
+      exposedClasses.addAll(exposedFromScanner);
 
       processErraiAppPropertiesFiles(exposedClasses, nonportableClasses);
       processEnvironmentConfigExtensions(exposedClasses);
@@ -227,18 +226,22 @@ public class ErraiAppPropertiesErraiModulesConfiguration implements ErraiModules
       // must do this before filling in interfaces and supertypes!
       exposedClasses.removeAll(nonportableClasses);
 
-      for (final MetaClass cls : exposedClasses) {
-        fillInInterfacesAndSuperTypes(portableNonExposed, cls);
-      }
-
       final Set<MetaClass> serializableTypes = new HashSet<>();
       serializableTypes.addAll(exposedClasses);
-      serializableTypes.addAll(portableNonExposed);
 
       allSerializableTypes = serializableTypes;
     }
 
     return allSerializableTypes;
+  }
+
+  @Override
+  public Set<MetaClass> getNonExposedPortableTypes() {
+    final Set<MetaClass> portableNonExposed = new HashSet<>();
+    for (final MetaClass cls : getExposedPortableTypes()) {
+      fillInInterfacesAndSuperTypes(portableNonExposed, cls);
+    }
+    return portableNonExposed;
   }
 
   private static void processEnvironmentConfigExtensions(final Set<MetaClass> exposedClasses) {

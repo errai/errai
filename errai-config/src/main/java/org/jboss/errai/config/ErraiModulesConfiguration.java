@@ -16,10 +16,13 @@
 
 package org.jboss.errai.config;
 
+import org.jboss.errai.codegen.meta.MetaClass;
+
+import java.util.Set;
+
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
 public interface ErraiModulesConfiguration extends ErraiSeparateModuleConfiguration.Ioc,
         ErraiSeparateModuleConfiguration.DataBinding, ErraiSeparateModuleConfiguration.Marshalling {
-
 }

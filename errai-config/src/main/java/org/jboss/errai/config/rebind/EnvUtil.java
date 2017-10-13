@@ -206,10 +206,17 @@ public abstract class EnvUtil {
 
   public static boolean isPortableType(final MetaClass mc) {
 
-    final Set<MetaClass> serializableTypes = new ErraiAppPropertiesConfiguration().modules().getSerializableTypes();
+    final Set<MetaClass> exposedPortableTypes = new ErraiAppPropertiesConfiguration().modules()
+            .getExposedPortableTypes();
 
-    return mc.isAnnotationPresent(Portable.class) || serializableTypes.contains(mc) || String.class.getName()
-            .equals(mc.getFullyQualifiedName()) || TypeHandlerFactory.getHandler(mc.unsafeAsClass()) != null;
+    final Set<MetaClass> nonExposedPortableTypes = new ErraiAppPropertiesConfiguration().modules()
+            .getNonExposedPortableTypes();
+
+    return mc.isAnnotationPresent(Portable.class)
+            || exposedPortableTypes.contains(mc)
+            || nonExposedPortableTypes.contains(mc)
+            || String.class.getName().equals(mc.getFullyQualifiedName())
+            || TypeHandlerFactory.getHandler(mc.unsafeAsClass()) != null;
   }
 
 }

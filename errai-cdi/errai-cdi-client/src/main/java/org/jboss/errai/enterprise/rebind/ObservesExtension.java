@@ -276,7 +276,8 @@ public class ObservesExtension extends IOCDecoratorExtension<Observes> {
           final ErraiConfiguration erraiConfiguration) {
 
     return metaClassFinder.extend(Portable.class, () -> allRemoteTypesReturnTypesAndParametersTypes(metaClassFinder))
-            .extend(Portable.class, erraiConfiguration.modules()::getSerializableTypes)
+            .extend(Portable.class, erraiConfiguration.modules()::getExposedPortableTypes)
+            .extend(Portable.class, erraiConfiguration.modules()::getNonExposedPortableTypes)
             .findAnnotatedWith(Portable.class);
   }
 

@@ -23,6 +23,7 @@ import org.jboss.errai.common.configuration.ErraiModule;
 import org.jboss.errai.config.ErraiModulesConfiguration;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -59,7 +60,7 @@ public class AptErraiModulesConfiguration implements ErraiModulesConfiguration {
   }
 
   @Override
-  public Set<MetaClass> getSerializableTypes() {
+  public Set<MetaClass> getExposedPortableTypes() {
     return getConfiguredArrayProperty(a -> stream(a.valueAsArray(SERIALIZABLE_TYPES, MetaClass[].class)));
   }
 
@@ -85,6 +86,27 @@ public class AptErraiModulesConfiguration implements ErraiModulesConfiguration {
 
   private <V> Set<V> getConfiguredArrayProperty(final Function<MetaAnnotation, Stream<V>> getter) {
     return erraiModules.stream().flatMap(getter).collect(toSet());
+  }
+
+  //FIXME: tiago: duplicated
+  @Override
+  public Set<MetaClass> getNonExposedPortableTypes() {
+    final Set<MetaClass> portableNonExposed = new HashSet<>();
+    for (final MetaClass cls : getExposedPortableTypes()) {
+      fillInInterfacesAndSuperTypes(portableNonExposed, cls);
+    }
+    return portableNonExposed;
+  }
+
+  //FIXME: tiago: duplicated
+  private static void fillInInterfacesAndSuperTypes(final Set<MetaClass> set, final MetaClass type) {
+    for (final MetaClass iface : type.getInterfaces()) {
+      set.add(iface);
+      fillInInterfacesAndSuperTypes(set, iface);
+    }
+    if (type.getSuperClass() != null) {
+      fillInInterfacesAndSuperTypes(set, type.getSuperClass());
+    }
   }
 
 }
