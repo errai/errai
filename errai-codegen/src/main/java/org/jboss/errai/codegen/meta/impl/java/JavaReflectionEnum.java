@@ -14,16 +14,20 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.codegen.meta;
+package org.jboss.errai.codegen.meta.impl.java;
+
+import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaClassFactory;
+import org.jboss.errai.codegen.meta.MetaEnum;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
-public class RuntimeEnum extends MetaEnum {
+public class JavaReflectionEnum extends MetaEnum {
 
   private final Enum enumInstance;
 
-  public RuntimeEnum(final Enum enumInstance) {
+  public JavaReflectionEnum(final Enum enumInstance) {
     this.enumInstance = enumInstance;
   }
 

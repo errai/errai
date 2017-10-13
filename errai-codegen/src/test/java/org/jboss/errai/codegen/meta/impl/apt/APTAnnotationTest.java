@@ -20,8 +20,8 @@ import org.jboss.errai.codegen.apt.test.ErraiAptTest;
 import org.jboss.errai.codegen.meta.MetaAnnotation;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaEnum;
-import org.jboss.errai.codegen.meta.RuntimeEnum;
-import org.jboss.errai.codegen.meta.RuntimeAnnotation;
+import org.jboss.errai.codegen.meta.impl.java.JavaReflectionEnum;
+import org.jboss.errai.codegen.meta.impl.java.JavaReflectionAnnotation;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -105,7 +105,7 @@ public class APTAnnotationTest extends ErraiAptTest {
 
     Assert.assertTrue(annotation.isPresent());
 
-    final List<MetaEnum> expectedValue = asList(new RuntimeEnum(Foo), new RuntimeEnum(Bar));
+    final List<MetaEnum> expectedValue = asList(new JavaReflectionEnum(Foo), new JavaReflectionEnum(Bar));
     final List<MetaEnum> actualValue = asList(annotation.get().valueAsArray("enums", MetaEnum[].class));
 
     Assert.assertEquals(expectedValue, actualValue);
@@ -134,7 +134,7 @@ public class APTAnnotationTest extends ErraiAptTest {
   }
 
   private MetaAnnotation newRuntimeTestAnnotation(final String string) {
-    return new RuntimeAnnotation(new TestInnerAnnotation() {
+    return new JavaReflectionAnnotation(new TestInnerAnnotation() {
 
       @Override
       public Class<? extends Annotation> annotationType() {

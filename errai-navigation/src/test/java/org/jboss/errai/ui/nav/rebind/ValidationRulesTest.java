@@ -20,8 +20,7 @@ import com.google.gwt.core.ext.GeneratorContext;
 import org.jboss.errai.codegen.exception.GenerationException;
 import org.jboss.errai.codegen.meta.HasAnnotations;
 import org.jboss.errai.codegen.meta.MetaClass;
-import org.jboss.errai.codegen.meta.MetaClassFactory;
-import org.jboss.errai.codegen.meta.RuntimeAnnotation;
+import org.jboss.errai.codegen.meta.impl.java.JavaReflectionAnnotation;
 import org.jboss.errai.codegen.meta.impl.java.JavaReflectionClass;
 import org.jboss.errai.common.apt.MetaClassFinder;
 import org.jboss.errai.common.client.api.IsElement;
@@ -52,10 +51,8 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -220,7 +217,7 @@ public class ValidationRulesTest {
 
     final InjectableProvider transitionToRoleProvider = getTransitionToRoleProvider();
     when(injSite.isAnnotationPresent(org.jboss.errai.ui.nav.client.local.api.TransitionToRole.class)).thenReturn(true);
-    when(injSite.getAnnotation(org.jboss.errai.ui.nav.client.local.api.TransitionToRole.class)).thenReturn(Optional.of(new RuntimeAnnotation(toRoleAnno)));
+    when(injSite.getAnnotation(org.jboss.errai.ui.nav.client.local.api.TransitionToRole.class)).thenReturn(Optional.of(new JavaReflectionAnnotation(toRoleAnno)));
     when(toRoleAnno.value()).thenReturn((Class) MyUniquePageRole.class);
 
     transitionToRoleProvider.getInjectable(injSite, nameGenerator);
@@ -234,7 +231,7 @@ public class ValidationRulesTest {
 
     final InjectableProvider transitionToRoleProvider = getTransitionToRoleProvider();
     when(injSite.isAnnotationPresent(org.jboss.errai.ui.nav.client.local.api.TransitionToRole.class)).thenReturn(true);
-    when(injSite.getAnnotation(org.jboss.errai.ui.nav.client.local.api.TransitionToRole.class)).thenReturn(Optional.of(new RuntimeAnnotation(toRoleAnno)));
+    when(injSite.getAnnotation(org.jboss.errai.ui.nav.client.local.api.TransitionToRole.class)).thenReturn(Optional.of(new JavaReflectionAnnotation(toRoleAnno)));
     when(toRoleAnno.value()).thenReturn((Class) MyUniquePageRole.class);
 
     transitionToRoleProvider.getInjectable(injSite, nameGenerator);

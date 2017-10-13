@@ -16,6 +16,8 @@
 
 package org.jboss.errai.codegen.meta;
 
+import org.jboss.errai.codegen.meta.impl.java.JavaReflectionAnnotation;
+
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.Collection;
@@ -58,7 +60,7 @@ public interface HasAnnotations {
   }
 
   default Optional<MetaAnnotation> getAnnotation(final Class<? extends Annotation> annotationClass) {
-    return Optional.ofNullable(unsafeGetAnnotation(annotationClass)).map(RuntimeAnnotation::new);
+    return Optional.ofNullable(unsafeGetAnnotation(annotationClass)).map(JavaReflectionAnnotation::new);
   }
 
   @SuppressWarnings("unchecked")
@@ -67,7 +69,7 @@ public interface HasAnnotations {
   }
 
   default Collection<MetaAnnotation> getAnnotations() {
-    return Arrays.stream(unsafeGetAnnotations()).map(RuntimeAnnotation::new).collect(toList());
+    return Arrays.stream(unsafeGetAnnotations()).map(JavaReflectionAnnotation::new).collect(toList());
   }
 
   default Boolean isAnnotationPresent(final Class<? extends Annotation> annotationClass) {

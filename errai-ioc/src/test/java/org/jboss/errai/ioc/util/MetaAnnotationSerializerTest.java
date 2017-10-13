@@ -16,7 +16,7 @@
 
 package org.jboss.errai.ioc.util;
 
-import org.jboss.errai.codegen.meta.RuntimeAnnotation;
+import org.jboss.errai.codegen.meta.impl.java.JavaReflectionAnnotation;
 import org.jboss.errai.ioc.client.util.AnnotationAttrAnnotation;
 import org.jboss.errai.ioc.client.util.AbstractAnnotationSerializerTest;
 import org.jboss.errai.ioc.client.util.OneAttrAnnotation;
@@ -34,7 +34,7 @@ public class MetaAnnotationSerializerTest extends AbstractAnnotationSerializerTe
 
   @Override
   public String serialize(final Annotation annotation) {
-    return MetaAnnotationSerializer.serialize(new RuntimeAnnotation(annotation));
+    return MetaAnnotationSerializer.serialize(new JavaReflectionAnnotation(annotation));
   }
 
   @Test

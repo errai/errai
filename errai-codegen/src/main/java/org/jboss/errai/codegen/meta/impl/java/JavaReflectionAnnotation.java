@@ -14,7 +14,12 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.codegen.meta;
+package org.jboss.errai.codegen.meta.impl.java;
+
+import org.jboss.errai.codegen.meta.MetaAnnotation;
+import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaClassFactory;
+import org.jboss.errai.codegen.meta.MetaEnum;
 
 import javax.enterprise.util.Nonbinding;
 import java.lang.annotation.Annotation;
@@ -27,11 +32,11 @@ import static java.util.stream.Collectors.toMap;
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
-public class RuntimeAnnotation extends MetaAnnotation {
+public class JavaReflectionAnnotation extends MetaAnnotation {
 
   private final Annotation annotation;
 
-  public RuntimeAnnotation(final Annotation annotation) {
+  public JavaReflectionAnnotation(final Annotation annotation) {
     this.annotation = annotation;
   }
 
@@ -43,7 +48,7 @@ public class RuntimeAnnotation extends MetaAnnotation {
       method.setAccessible(true);
       final Object value = method.invoke(annotation);
       return (V) convertValue(value);
-    } catch (Exception e) {
+    } catch (final Exception e) {
       throw new RuntimeException(e);
     }
   }
@@ -52,15 +57,15 @@ public class RuntimeAnnotation extends MetaAnnotation {
     if (value instanceof Class[]) {
       return Arrays.stream((Class[]) value).map(MetaClassFactory::get).toArray(MetaClass[]::new);
     } else if (value instanceof Annotation[]) {
-      return Arrays.stream((Annotation[]) value).map(RuntimeAnnotation::new).toArray(MetaAnnotation[]::new);
-    } else if (value instanceof MetaEnum[]) {
-      return Arrays.stream((Enum[]) value).map(RuntimeEnum::new).toArray(MetaEnum[]::new);
+      return Arrays.stream((Annotation[]) value).map(JavaReflectionAnnotation::new).toArray(MetaAnnotation[]::new);
+    } else if (value instanceof Enum[]) {
+      return Arrays.stream((Enum[]) value).map(JavaReflectionEnum::new).toArray(MetaEnum[]::new);
     } else if (value instanceof Class) {
       return MetaClassFactory.get((Class) value);
     } else if (value instanceof Annotation) {
-      return new RuntimeAnnotation((Annotation) value);
+      return new JavaReflectionAnnotation((Annotation) value);
     } else if (value instanceof Enum) {
-      return new RuntimeEnum((Enum) value);
+      return new JavaReflectionEnum((Enum) value);
     } else {
       return value;
     }
