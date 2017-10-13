@@ -132,7 +132,7 @@ public class ErraiAppPropertiesErraiModulesConfiguration implements ErraiModules
       configuredBindableTypes = refreshedTypes;
     } else {
 
-      Set<MetaClass> bindableTypes = null;
+      Set<MetaClass> bindableTypes = new HashSet<>();
 
       for (final URL url : EnvUtil.getErraiAppPropertiesFilesUrls()) {
         InputStream inputStream = null;
@@ -143,7 +143,7 @@ public class ErraiAppPropertiesErraiModulesConfiguration implements ErraiModules
           final ResourceBundle props = new PropertyResourceBundle(inputStream);
           for (final String key : props.keySet()) {
             if (key.equals(ErraiAppPropertiesErraiModulesConfiguration.BINDABLE_TYPES)) {
-              bindableTypes = asdfBindableTypes(props, key);
+              bindableTypes.addAll(asdfBindableTypes(props, key));
             }
           }
         } catch (final IOException e) {
