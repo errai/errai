@@ -23,6 +23,8 @@ import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.common.client.api.annotations.Portable;
 import org.jboss.errai.common.metadata.MetaDataScanner;
 import org.jboss.errai.common.metadata.ScannerSingleton;
+import org.jboss.errai.config.ErraiAppPropertiesConfiguration;
+import org.jboss.errai.config.ErraiConfiguration;
 import org.jboss.errai.config.rebind.EnvUtil;
 import org.jboss.errai.config.rebind.EnvironmentConfig;
 import org.jboss.errai.config.util.ClassScanner;
@@ -191,13 +193,13 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
   }
 
   private void loadCustomMappings() {
+    ErraiConfiguration erraiConfiguration = new ErraiAppPropertiesConfiguration();
     exposedClasses.add(MetaClassFactory.get(Object.class));
 
     final MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
 
     EnvUtil.clearCache();
-    final EnvironmentConfig environmentConfig = getEnvironmentConfig();
-    final Set<MetaClass> envExposedClasses = environmentConfig.getExposedClasses();
+    final Set<MetaClass> envExposedClasses = erraiConfiguration.modules().getSerializableTypes(); //FIXME: tiago: add annotated types with its inner classes
 
     for (final Class<?> cls : findCustomMappings(scanner)) {
       if (!MappingDefinition.class.isAssignableFrom(cls)) {
@@ -346,13 +348,13 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
         while (cur.getSuperClass() != null && !cur.getSuperClass().getFullyQualifiedName().equals(Object.class.getName())) {
           builder.accept((cur = cur.getSuperClass()));
         }
-        return builder.build().filter(superType -> superType.isConcrete());
+        return builder.build().filter(MetaClass::isConcrete);
       })
       .collect(Collectors.toList());
     exposedClasses.addAll(exposedSuperTypes);
 
     final Map<String, String> configuredMappingAliases = new HashMap<>();
-    configuredMappingAliases.putAll(environmentConfig.getMappingAliases());
+    configuredMappingAliases.putAll(erraiConfiguration.modules().getMappingAliases());
     configuredMappingAliases.putAll(defaultMappingAliases());
 
     mappingAliases.putAll(configuredMappingAliases);

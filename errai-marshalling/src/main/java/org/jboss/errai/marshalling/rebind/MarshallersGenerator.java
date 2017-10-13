@@ -16,8 +16,10 @@
 
 package org.jboss.errai.marshalling.rebind;
 
-import java.io.File;
-
+import com.google.gwt.core.ext.Generator;
+import com.google.gwt.core.ext.GeneratorContext;
+import com.google.gwt.core.ext.TreeLogger;
+import com.google.gwt.core.ext.UnableToCompleteException;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.util.ClassChangeUtil;
 import org.jboss.errai.common.metadata.RebindUtils;
@@ -30,10 +32,7 @@ import org.jboss.errai.marshalling.rebind.util.OutputDirectoryUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.gwt.core.ext.Generator;
-import com.google.gwt.core.ext.GeneratorContext;
-import com.google.gwt.core.ext.TreeLogger;
-import com.google.gwt.core.ext.UnableToCompleteException;
+import java.io.File;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -128,15 +127,8 @@ public class MarshallersGenerator extends AbstractAsyncGenerator {
         return _clientMarshallerCache;
       }
 
-      return _clientMarshallerCache
-          = MarshallerGeneratorFactory.getFor(context, MarshallerOutputTarget.GWT)
-          .generate(packageName, className, new MarshallerGenerationCallback() {
-
-            @Override
-            public void callback(final MetaClass marshalledType) {
-              addCacheRelevantClass(marshalledType);
-            }
-          });
+      return _clientMarshallerCache = MarshallerGeneratorFactory.getFor(context, MarshallerOutputTarget.GWT)
+              .generate(packageName, className, this::addCacheRelevantClass);
     }
   }
 

@@ -22,6 +22,8 @@ import org.jboss.errai.common.apt.MetaClassFinder;
 import org.jboss.errai.common.configuration.ErraiModule;
 import org.jboss.errai.config.ErraiModulesConfiguration;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
@@ -62,11 +64,6 @@ public class AptErraiModulesConfiguration implements ErraiModulesConfiguration {
   }
 
   @Override
-  public Set<MetaClass> getNonSerializableTypes() {
-    return getConfiguredArrayProperty(a -> stream(a.valueAsArray(NON_SERIALIZABLE_TYPES, MetaClass[].class)));
-  }
-
-  @Override
   public Set<MetaClass> getIocEnabledAlternatives() {
     return getConfiguredArrayProperty(a -> stream(a.valueAsArray(IOC_ALTERNATIVES, MetaClass[].class)));
   }
@@ -79,6 +76,11 @@ public class AptErraiModulesConfiguration implements ErraiModulesConfiguration {
   @Override
   public Set<MetaClass> getIocWhitelist() {
     return getConfiguredArrayProperty(a -> stream(a.valueAsArray(IOC_WHITELIST, MetaClass[].class)));
+  }
+
+  @Override
+  public Map<String, String> getMappingAliases() {
+    return new HashMap<>();
   }
 
   private <V> Set<V> getConfiguredArrayProperty(final Function<MetaAnnotation, Stream<V>> getter) {

@@ -20,9 +20,14 @@ import com.google.common.collect.Multimap;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.impl.java.JavaReflectionClass;
+import org.jboss.errai.common.client.api.annotations.NonPortable;
+import org.jboss.errai.common.client.api.annotations.Portable;
 import org.jboss.errai.common.metadata.MetaDataScanner;
 import org.jboss.errai.common.metadata.ScannerSingleton;
 import org.jboss.errai.config.rebind.EnvUtil;
+import org.jboss.errai.config.rebind.EnvironmentConfigExtension;
+import org.jboss.errai.config.rebind.ExposedTypesProvider;
+import org.jboss.errai.config.util.ClassScanner;
 import org.jboss.errai.reflections.util.SimplePackageFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,8 +37,10 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
 import java.util.Set;
@@ -49,6 +56,7 @@ public class ErraiAppPropertiesErraiModulesConfiguration implements ErraiModules
 
   public static final String SERIALIZABLE_TYPES = "errai.marshalling.serializableTypes";
   public static final String NON_SERIALIZABLE_TYPES = "errai.marshalling.nonserializableTypes";
+  public static final String MAPPING_ALIASES = "errai.marshalling.mappingAliases";
   private static final String QUALIFYING_METADATA_FACTORY = "errai.ioc.QualifyingMetaDataFactory";
   public static final String IOC_ENABLED_ALTERNATIVES = "errai.ioc.enabled.alternatives";
   private static final String IOC_WHITELIST_PROPERTY = "errai.ioc.whitelist";
@@ -124,7 +132,7 @@ public class ErraiAppPropertiesErraiModulesConfiguration implements ErraiModules
       configuredBindableTypes = refreshedTypes;
     } else {
 
-      final Set<MetaClass> bindableTypes = new HashSet<>();
+      Set<MetaClass> bindableTypes = null;
 
       for (final URL url : EnvUtil.getErraiAppPropertiesFilesUrls()) {
         InputStream inputStream = null;
@@ -135,26 +143,7 @@ public class ErraiAppPropertiesErraiModulesConfiguration implements ErraiModules
           final ResourceBundle props = new PropertyResourceBundle(inputStream);
           for (final String key : props.keySet()) {
             if (key.equals(ErraiAppPropertiesErraiModulesConfiguration.BINDABLE_TYPES)) {
-              final Set<String> patterns = new LinkedHashSet<>();
-
-              for (final String s : props.getString(key).split(" ")) {
-                final String singleValue = s.trim();
-                if (singleValue.endsWith("*")) {
-                  patterns.add(singleValue);
-                } else {
-                  try {
-                    bindableTypes.add(MetaClassFactory.get(s.trim()));
-                  } catch (final Exception e) {
-                    throw new RuntimeException(
-                            "Could not find class defined in ErraiApp.properties as bindable type: " + s);
-                  }
-                }
-              }
-
-              if (!patterns.isEmpty()) {
-                addPatternsToSet(bindableTypes, patterns);
-              }
-              break;
+              bindableTypes = asdfBindableTypes(props, key);
             }
           }
         } catch (final IOException e) {
@@ -176,6 +165,29 @@ public class ErraiAppPropertiesErraiModulesConfiguration implements ErraiModules
     return configuredBindableTypes;
   }
 
+  private Set<MetaClass> asdfBindableTypes(ResourceBundle props, String key) {
+    Set<MetaClass> objects = new HashSet<>();
+    final Set<String> patterns = new LinkedHashSet<>();
+
+    for (final String s : props.getString(key).split(" ")) {
+      final String singleValue = s.trim();
+      if (singleValue.endsWith("*")) {
+        patterns.add(singleValue);
+      } else {
+        try {
+          objects.add(MetaClassFactory.get(s.trim()));
+        } catch (final Exception e) {
+          throw new RuntimeException("Could not find class defined in ErraiApp.properties as bindable type: " + s);
+        }
+      }
+    }
+
+    if (!patterns.isEmpty()) {
+      addPatternsToSet(objects, patterns);
+    }
+    return objects;
+  }
+
   private void addPatternsToSet(final Set<MetaClass> list, final Set<String> patterns) {
     final SimplePackageFilter filter = new SimplePackageFilter(patterns);
     MetaClassFactory.getAllCachedClasses()
@@ -184,24 +196,237 @@ public class ErraiAppPropertiesErraiModulesConfiguration implements ErraiModules
             .collect(toCollection(() -> list));
   }
 
-  @Override
-  public Set<MetaClass> getSerializableTypes() {
-    final Set<MetaClass> serializableTypes = new HashSet<>();
-    serializableTypes.addAll(EnvUtil.getEnvironmentConfig().getExposedClasses());
-    serializableTypes.addAll(EnvUtil.getEnvironmentConfig().getPortableSuperTypes());
-    return serializableTypes;
-  }
-
-  @Override
-  public Set<MetaClass> getNonSerializableTypes() {
-    return Collections.emptySet();
-  }
-
   private static boolean validateWildcard(MetaClass bindable) {
     if (bindable.isFinal()) {
       log.debug("@Bindable types cannot be final, ignoring: {}", bindable.getFullyQualifiedName());
       return false;
     }
     return true;
+  }
+
+  // Serializable types
+  private static Set<MetaClass> allSerializableTypes;
+
+  @Override
+  public Set<MetaClass> getSerializableTypes() {
+
+    if (allSerializableTypes == null) {
+      final Set<MetaClass> exposedClasses = new HashSet<>();
+      final Set<MetaClass> portableNonExposed = new HashSet<>();
+      final Set<MetaClass> nonportableClasses = new HashSet<>();
+
+      nonportableClasses.addAll(ClassScanner.getTypesAnnotatedWith(NonPortable.class));
+      final Set<MetaClass> exposedFromScanner = new HashSet<>(ClassScanner.getTypesAnnotatedWith(Portable.class));
+
+      //FIXME: find inner classes of exposed annotated types
+      addExposedInnerClasses(exposedClasses, exposedFromScanner);
+
+      processErraiAppPropertiesFiles(exposedClasses, nonportableClasses);
+      processEnvironmentConfigExtensions(exposedClasses);
+
+      // must do this before filling in interfaces and supertypes!
+      exposedClasses.removeAll(nonportableClasses);
+
+      for (final MetaClass cls : exposedClasses) {
+        fillInInterfacesAndSuperTypes(portableNonExposed, cls);
+      }
+
+      final Set<MetaClass> serializableTypes = new HashSet<>();
+      serializableTypes.addAll(exposedClasses);
+      serializableTypes.addAll(portableNonExposed);
+
+      allSerializableTypes = serializableTypes;
+    }
+
+    return allSerializableTypes;
+  }
+
+  private static void processEnvironmentConfigExtensions(final Set<MetaClass> exposedClasses) {
+    final Collection<MetaClass> exts = ClassScanner.getTypesAnnotatedWith(EnvironmentConfigExtension.class, true);
+    for (final MetaClass cls : exts) {
+      try {
+        final Class<? extends ExposedTypesProvider> providerClass = cls.unsafeAsClass()
+                .asSubclass(ExposedTypesProvider.class);
+        for (final MetaClass exposedType : providerClass.newInstance().provideTypesToExpose()) {
+          if (exposedType.isPrimitive()) {
+            exposedClasses.add(exposedType.asBoxed());
+          } else if (exposedType.isConcrete()) {
+            exposedClasses.add(exposedType);
+          }
+        }
+      } catch (final Throwable e) {
+        throw new RuntimeException("unable to load environment extension: " + cls.getFullyQualifiedName(), e);
+      }
+    }
+  }
+
+  private static void processErraiAppPropertiesFiles(final Set<MetaClass> exposedClasses,
+          final Set<MetaClass> nonportableClasses) {
+
+    for (final URL url : EnvUtil.getErraiAppPropertiesFilesUrls()) {
+      InputStream inputStream = null;
+      try {
+        log.debug("checking " + url.getFile() + " for configured types ...");
+        inputStream = url.openStream();
+
+        final ResourceBundle props = new PropertyResourceBundle(inputStream);
+
+        for (final String key : props.keySet()) {
+          final String value = props.getString(key);
+
+          if (key.equals(ErraiAppPropertiesErraiModulesConfiguration.SERIALIZABLE_TYPES)) {
+            addSerializableTypes(exposedClasses, value);
+          } else if (key.equals(ErraiAppPropertiesErraiModulesConfiguration.NON_SERIALIZABLE_TYPES)) {
+            addNonSerializableTypes(exposedClasses, nonportableClasses, value);
+          }
+        }
+      } catch (final IOException e) {
+        throw new RuntimeException("error reading ErraiApp.properties", e);
+      } finally {
+        if (inputStream != null) {
+          try {
+            inputStream.close();
+          } catch (final IOException e) {
+            //
+          }
+        }
+      }
+    }
+  }
+
+  private static void addNonSerializableTypes(final Set<MetaClass> exposedClasses,
+          final Set<MetaClass> nonportableClasses,
+          final String value) {
+
+    final Set<String> patterns = new LinkedHashSet<>();
+    for (final String s : value.split(" ")) {
+      final String singleValue = s.trim();
+      if (singleValue.endsWith("*")) {
+        patterns.add(singleValue);
+      } else {
+        try {
+          nonportableClasses.add(MetaClassFactory.get(singleValue));
+        } catch (final Exception e) {
+          throw new RuntimeException("could not find class defined in ErraiApp.properties as nonserializable: " + s, e);
+        }
+      }
+    }
+    if (!patterns.isEmpty()) {
+      final SimplePackageFilter filter = new SimplePackageFilter(patterns);
+      MetaClassFactory.getAllCachedClasses()
+              .stream()
+              .filter(mc -> filter.apply(mc.getFullyQualifiedName()))
+              .collect(toCollection(() -> exposedClasses));
+    }
+  }
+
+  private static void addSerializableTypes(final Set<MetaClass> exposedClasses, final String value) {
+    final Set<String> patterns = new LinkedHashSet<>();
+    for (final String s : value.split(" ")) {
+      final String singleValue = s.trim();
+      if (singleValue.isEmpty()) {
+        continue;
+      }
+      if (singleValue.endsWith("*")) {
+        patterns.add(singleValue);
+      } else {
+        try {
+          exposedClasses.add(MetaClassFactory.get(singleValue));
+        } catch (final Exception e) {
+          throw new RuntimeException("could not find class defined in ErraiApp.properties for serialization: " + s, e);
+        }
+      }
+    }
+    if (!patterns.isEmpty()) {
+      final SimplePackageFilter filter = new SimplePackageFilter(patterns);
+      MetaClassFactory.getAllCachedClasses()
+              .stream()
+              .filter(mc -> filter.apply(mc.getFullyQualifiedName()) && validateWildcardSerializable(mc))
+              .collect(toCollection(() -> exposedClasses));
+    }
+  }
+
+  private static boolean validateWildcardSerializable(MetaClass mc) {
+    if (mc.isInterface() || (mc.isAbstract() && !mc.isEnum())) {
+      log.debug("Serializable types cannot be an interface or abstract, ignoring: {}", mc.getFullyQualifiedName());
+      return false;
+    }
+    return true;
+  }
+
+  private static void addExposedInnerClasses(final Set<MetaClass> exposedClasses,
+          final Set<MetaClass> exposedFromScanner) {
+    for (final MetaClass cls : exposedFromScanner) {
+      for (final MetaClass decl : cls.getDeclaredClasses()) {
+        if (decl.isSynthetic()) {
+          continue;
+        }
+        exposedClasses.add(decl);
+      }
+    }
+  }
+
+  private static void fillInInterfacesAndSuperTypes(final Set<MetaClass> set, final MetaClass type) {
+    for (final MetaClass iface : type.getInterfaces()) {
+      set.add(iface);
+      fillInInterfacesAndSuperTypes(set, iface);
+    }
+    if (type.getSuperClass() != null) {
+      fillInInterfacesAndSuperTypes(set, type.getSuperClass());
+    }
+  }
+
+  // Mapping aliases
+  @Override
+  public Map<String, String> getMappingAliases() {
+    final Map<String, String> mappingAliases = new HashMap<>();
+
+    for (final URL url : EnvUtil.getErraiAppPropertiesFilesUrls()) {
+      InputStream inputStream = null;
+      try {
+        log.debug("checking " + url.getFile() + " for configured types ...");
+        inputStream = url.openStream();
+
+        final ResourceBundle props = new PropertyResourceBundle(inputStream);
+
+        for (final String key : props.keySet()) {
+          final String value = props.getString(key);
+          if (key.equals(ErraiAppPropertiesErraiModulesConfiguration.MAPPING_ALIASES)) {
+            addMappingAliases(mappingAliases, value);
+          }
+        }
+      } catch (final IOException e) {
+        throw new RuntimeException("error reading ErraiApp.properties", e);
+      } finally {
+        if (inputStream != null) {
+          try {
+            inputStream.close();
+          } catch (final IOException e) {
+            //
+          }
+        }
+      }
+    }
+
+    return mappingAliases;
+  }
+
+  private static void addMappingAliases(final Map<String, String> mappingAliases, final String value) {
+    for (final String s : value.split(" ")) {
+      try {
+        final String[] mapping = s.split("->");
+
+        if (mapping.length != 2) {
+          throw new RuntimeException("syntax error: mapping for marshalling alias: " + s);
+        }
+
+        final Class<?> fromMapping = Class.forName(mapping[0].trim());
+        final Class<?> toMapping = Class.forName(mapping[1].trim());
+
+        mappingAliases.put(fromMapping.getName(), toMapping.getName());
+      } catch (final Exception e) {
+        throw new RuntimeException("could not find class defined in ErraiApp.properties for mapping: " + s, e);
+      }
+    }
   }
 }

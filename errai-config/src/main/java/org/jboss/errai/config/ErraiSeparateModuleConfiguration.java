@@ -18,6 +18,7 @@ package org.jboss.errai.config;
 
 import org.jboss.errai.codegen.meta.MetaClass;
 
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -34,7 +35,7 @@ interface ErraiSeparateModuleConfiguration {
 
     Set<MetaClass> getSerializableTypes();
 
-    Set<MetaClass> getNonSerializableTypes();
+    Map<String, String> getMappingAliases();
   }
 
   interface Ioc {

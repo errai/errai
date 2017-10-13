@@ -53,9 +53,6 @@ public class AptErraiModulesConfigurationTest extends ErraiAptTest {
     assertTrue(config.getIocBlacklist().isEmpty());
     assertTrue(config.getIocWhitelist().isEmpty());
     assertTrue(config.getSerializableTypes().isEmpty());
-    assertTrue(config.getNonSerializableTypes().isEmpty());
-    assertTrue(config.getNonSerializableTypes().isEmpty());
-    assertTrue(config.getNonSerializableTypes().isEmpty());
   }
 
   @Test
@@ -68,7 +65,6 @@ public class AptErraiModulesConfigurationTest extends ErraiAptTest {
     assertContainsOnly(config.getIocBlacklist(), aptClass(IocBlacklisted1.class));
     assertContainsOnly(config.getIocWhitelist(), aptClass(IocWhitelisted1.class));
     assertContainsOnly(config.getSerializableTypes(), aptClass(Serializable1.class));
-    assertContainsOnly(config.getNonSerializableTypes(), aptClass(NonSerializable1.class));
   }
 
   @Test
@@ -84,8 +80,6 @@ public class AptErraiModulesConfigurationTest extends ErraiAptTest {
     assertContainsOnly(config.getIocBlacklist(), aptClass(IocBlacklisted1.class), aptClass(IocBlacklisted2.class));
     assertContainsOnly(config.getIocWhitelist(), aptClass(IocWhitelisted1.class), aptClass(IocWhitelisted2.class));
     assertContainsOnly(config.getSerializableTypes(), aptClass(Serializable1.class), aptClass(Serializable2.class));
-    assertContainsOnly(config.getNonSerializableTypes(), aptClass(NonSerializable1.class),
-            aptClass(NonSerializable2.class));
   }
 
   private static void assertContainsOnly(final Set<?> configValue, final Object... objects) {
