@@ -25,8 +25,6 @@ import org.jboss.errai.codegen.meta.MetaAnnotation;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaMethod;
-import org.jboss.errai.codegen.meta.impl.java.JavaReflectionAnnotation;
-import org.jboss.errai.codegen.meta.impl.apt.APTAnnotation;
 import org.jboss.errai.common.metadata.MetaDataScanner;
 import org.jboss.errai.common.metadata.ScannerSingleton;
 
@@ -38,9 +36,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toSet;
 
 /**
  * <p>
@@ -137,86 +136,6 @@ public class CDIAnnotationUtils {
     public CDIAnnotationUtils() {
     }
 
-    //-----------------------------------------------------------------------
-    /**
-     * <p>Checks if two annotations are equal using the criteria for equality
-     * presented in the {@link Annotation#equals(Object)} API docs.</p>
-     *
-     * @param a1 the first Annotation to compare, {@code null} returns
-     * {@code false} unless both are {@code null}
-     * @param a2 the second Annotation to compare, {@code null} returns
-     * {@code false} unless both are {@code null}
-     * @return {@code true} if the two annotations are {@code equal} or both
-     * {@code null}
-     */
-    public static boolean equals(Annotation a1, Annotation a2) {
-        if (a1 == a2) {
-            return true;
-        }
-        if (a1 == null || a2 == null) {
-            return false;
-        }
-        final Class<? extends Annotation> type = a1.annotationType();
-        final Class<? extends Annotation> type2 = a2.annotationType();
-        Validate.notNull(type, "Annotation %s with null annotationType()", a1);
-        Validate.notNull(type2, "Annotation %s with null annotationType()", a2);
-        if (!type.equals(type2)) {
-            return false;
-        }
-        try {
-            for (final Method m : type.getDeclaredMethods()) {
-                if (m.getParameterTypes().length == 0
-                        && isValidAnnotationMemberType(m.getReturnType())
-                        && !m.isAnnotationPresent(Nonbinding.class)) {
-                    final Object v1 = m.invoke(a1);
-                    final Object v2 = m.invoke(a2);
-                    if (!memberEquals(m.getReturnType(), v1, v2)) {
-                        return false;
-                    }
-                }
-            }
-        } catch (final IllegalAccessException ex) {
-            return false;
-        } catch (final InvocationTargetException ex) {
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * <p>Generate a hash code for the given annotation using the algorithm
-     * presented in the {@link Annotation#hashCode()} API docs.</p>
-     *
-     * @param a the Annotation for a hash code calculation is desired, not
-     * {@code null}
-     * @return the calculated hash code
-     * @throws RuntimeException if an {@code Exception} is encountered during
-     * annotation member access
-     * @throws IllegalStateException if an annotation method invocation returns
-     * {@code null}
-     */
-    public static int hashCode(Annotation a) {
-        int result = 0;
-        final Class<? extends Annotation> type = a.annotationType();
-        for (final Method m : type.getDeclaredMethods()) {
-            if (!m.isAnnotationPresent(Nonbinding.class)) {
-              try {
-                final Object value = m.invoke(a);
-                if (value == null) {
-                  throw new IllegalStateException(
-                          String.format("Annotation method %s returned null", m));
-                }
-                result += hashMember(m.getName(), value);
-              } catch (final RuntimeException ex) {
-                throw ex;
-              } catch (final Exception ex) {
-                throw new RuntimeException(ex);
-              }
-            }
-        }
-        return result;
-    }
-
     /**
      * <p>Generate a string representation of an Annotation, as suggested by
      * {@link Annotation#toString()}.</p>
@@ -253,7 +172,7 @@ public class CDIAnnotationUtils {
      * @param type the type to check, {@code null}
      * @return {@code true} if the type is a valid type to use in an annotation
      */
-    public static boolean isValidAnnotationMemberType(Class<?> type) {
+    private static boolean isValidAnnotationMemberType(Class<?> type) {
         if (type == null) {
             return false;
         }
@@ -273,16 +192,16 @@ public class CDIAnnotationUtils {
      * @return a hash code for this member
      */
     private static int hashMember(String name, Object value) {
-        final int part1 = name.hashCode() * 127;
-        if (value.getClass().isArray()) {
-            return part1 ^ arrayMemberHash(value.getClass().getComponentType(), value);
-        }
-        if (value instanceof Annotation) {
-            return part1 ^ hashCode((Annotation) value);
-        } else if (value instanceof MetaAnnotation){
-          return part1 ^ hashCode((MetaAnnotation) value);
-        }
-        return part1 ^ value.hashCode();
+      final int part1 = name.hashCode() * 127;
+      if (value.getClass().isArray()) {
+        return part1 ^ arrayMemberHash(value.getClass().getComponentType(), value);
+      }
+      if (value instanceof Annotation) {
+        return part1 ^ hashCode((Annotation) value);
+      } else if (value instanceof MetaAnnotation) {
+        return part1 ^ hashCode((MetaAnnotation) value);
+      }
+      return part1 ^ value.hashCode();
     }
 
     /**
@@ -424,7 +343,8 @@ public class CDIAnnotationUtils {
 
     public static Set<MetaClass> getQualifiers() {
       final Set<Class<?>> qualifiersAsClasses = getQualifiersAsClasses();
-      final Set<MetaClass> qualifiersAsMetaClasses = qualifiersAsClasses.stream().map(MetaClassFactory::get).collect(Collectors.toSet());
+      final Set<MetaClass> qualifiersAsMetaClasses = qualifiersAsClasses.stream().map(MetaClassFactory::get).collect(
+              toSet());
 
       if (qualifiersAsClasses.size() > qualifiersAsMetaClasses.size()) {
         throw new RuntimeException("Lost some qualifiers when converting from Class to MetaClass");
@@ -437,58 +357,128 @@ public class CDIAnnotationUtils {
 
   public static Collection<MetaMethod> getAnnotationAttributes(final MetaClass annoClass) {
     return Arrays.stream(annoClass.getDeclaredMethods())
-            .filter(CDIAnnotationUtils::relevantForSerialization)
+            .filter(CDIAnnotationUtils::isPublicDeclaredAndNonNonbinding)
             .collect(Collectors.toList());
   }
 
-  public static boolean relevantForSerialization(final MetaMethod method) {
+  public static boolean isPublicDeclaredAndNonNonbinding(final MetaMethod method) {
     return !method.isAnnotationPresent(Nonbinding.class)
             && method.isPublic()
             && !method.getName().equals("equals")
             && !method.getName().equals("hashCode");
   }
 
-  public static boolean equals(final MetaAnnotation anno1, final MetaAnnotation anno2) {
-
-    if (anno1 instanceof JavaReflectionAnnotation && anno2 instanceof JavaReflectionAnnotation) {
-      return equals(((JavaReflectionAnnotation) anno1).getAnnotation(), ((JavaReflectionAnnotation) anno2).getAnnotation());
+  /**
+   * <p>Checks if two annotations are equal using the criteria for equality
+   * presented in the {@link Annotation#equals(Object)} API docs.</p>
+   *
+   * @param a1 the first Annotation to compare, {@code null} returns
+   * {@code false} unless both are {@code null}
+   * @param a2 the second Annotation to compare, {@code null} returns
+   * {@code false} unless both are {@code null}
+   * @return {@code true} if the two annotations are {@code equal} or both
+   * {@code null}
+   */
+  public static boolean equals(final Annotation a1, final Annotation a2) {
+    if (a1 == a2) {
+      return true;
     }
-
-    if (anno1 instanceof APTAnnotation && anno2 instanceof APTAnnotation) {
-      for (Map.Entry<String, Object> e : anno1.values().entrySet()) {
-        final Object o = anno2.values().get(e.getKey());
-        if (o == null || !o.equals(e.getValue())) {
-          return false;
+    if (a1 == null || a2 == null) {
+      return false;
+    }
+    final Class<? extends Annotation> type = a1.annotationType();
+    final Class<? extends Annotation> type2 = a2.annotationType();
+    Validate.notNull(type, "Annotation %s with null annotationType()", a1);
+    Validate.notNull(type2, "Annotation %s with null annotationType()", a2);
+    if (!type.equals(type2)) {
+      return false;
+    }
+    try {
+      for (final Method m : type.getDeclaredMethods()) {
+        if (m.getParameterTypes().length == 0
+                && isValidAnnotationMemberType(m.getReturnType())
+                && !m.isAnnotationPresent(Nonbinding.class)) {
+          final Object v1 = m.invoke(a1);
+          final Object v2 = m.invoke(a2);
+          if (!memberEquals(m.getReturnType(), v1, v2)) {
+            return false;
+          }
         }
       }
+    } catch (final IllegalAccessException | InvocationTargetException ex) {
+      return false;
+    }
+    return true;
+  }
+
+  public static boolean equals(final MetaAnnotation anno1, final MetaAnnotation anno2) {
+
+    if (!anno1.annotationType().equals(anno2.annotationType())) {
+      return false;
     }
 
-    final MetaAnnotation apt = anno1 instanceof APTAnnotation ? anno1 : anno2;
-    final MetaAnnotation runtime = anno2 instanceof APTAnnotation ? anno1 : anno2;
+    final Set<String> members1 = getCdiRelevantMemberNames(anno1);
+    final Set<String> members2 = getCdiRelevantMemberNames(anno2);
 
-    if (apt instanceof APTAnnotation && runtime instanceof JavaReflectionAnnotation) {
-      for (Map.Entry<String, Object> entry : apt.values().entrySet()) {
-        final String key = entry.getKey();
-        if (runtime.annotationType().getMethod(key, new MetaClass[0]).isAnnotationPresent(Nonbinding.class)) {
-          continue;
-        }
-        Object runtimeValue = runtime.value(entry.getKey());
-        Object aptValue = apt.value(entry.getKey());
-        if (runtimeValue == null || !runtimeValue.equals(aptValue)) {
-          return false;
-        }
+    if (members1.size() != members2.size()) {
+      return false;
+    }
+
+    for (final String memberName : members1) {
+      final Object value1 = anno1.value(memberName);
+      final Object value2 = anno2.value(memberName);
+      if (!memberEquals(value1.getClass(), value1, value2)) {
+        return false;
       }
     }
 
     return true;
   }
 
+  public static Set<String> getCdiRelevantMemberNames(final MetaAnnotation metaAnnotation) {
+    return metaAnnotation.values()
+            .keySet()
+            .stream()
+            .filter(memberName -> !metaAnnotation.annotationType()
+                    .getMethod(memberName, new MetaClass[0])
+                    .isAnnotationPresent(Nonbinding.class))
+            .collect(toSet());
+  }
+
+  /**
+   * <p>Generate a hash code for the given annotation using the algorithm
+   * presented in the {@link Annotation#hashCode()} API docs.</p>
+   *
+   * @param a the Annotation for a hash code calculation is desired, not
+   * {@code null}
+   * @return the calculated hash code
+   * @throws RuntimeException if an {@code Exception} is encountered during
+   * annotation member access
+   * @throws IllegalStateException if an annotation method invocation returns
+   * {@code null}
+   */
+  public static int hashCode(final Annotation a) {
+    int result = 0;
+    final Class<? extends Annotation> type = a.annotationType();
+    for (final Method m : type.getDeclaredMethods()) {
+      if (!m.isAnnotationPresent(Nonbinding.class)) {
+        try {
+          final Object value = m.invoke(a);
+          if (value == null) {
+            throw new IllegalStateException(String.format("Annotation method %s returned null", m));
+          }
+          result += hashMember(m.getName(), value);
+        } catch (final RuntimeException ex) {
+          throw ex;
+        } catch (final Exception ex) {
+          throw new RuntimeException(ex);
+        }
+      }
+    }
+    return result;
+  }
 
   public static int hashCode(final MetaAnnotation a) {
-    if (a instanceof JavaReflectionAnnotation) {
-      return hashCode(((JavaReflectionAnnotation) a).getAnnotation());
-    }
-
     int result = 0;
     final MetaClass type = a.annotationType();
     for (final MetaMethod m : type.getDeclaredMethods()) {

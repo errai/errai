@@ -21,8 +21,8 @@ import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaEnum;
 
-import javax.enterprise.util.Nonbinding;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Map;
@@ -61,7 +61,7 @@ public class JavaReflectionAnnotation extends MetaAnnotation {
     } else if (value instanceof Enum[]) {
       return Arrays.stream((Enum[]) value).map(JavaReflectionEnum::new).toArray(MetaEnum[]::new);
     } else if (value instanceof Class) {
-      return MetaClassFactory.get((Class) value);
+      return JavaReflectionClass.newUncachedInstance((Class) value);
     } else if (value instanceof Annotation) {
       return new JavaReflectionAnnotation((Annotation) value);
     } else if (value instanceof Enum) {
@@ -83,7 +83,6 @@ public class JavaReflectionAnnotation extends MetaAnnotation {
   @Override
   public Map<String, Object> values() {
     return Arrays.stream(annotation.annotationType().getDeclaredMethods())
-            .filter(m -> !m.isAnnotationPresent(Nonbinding.class))
             .collect(toMap(Method::getName, this::methodValue));
   }
 

@@ -19,6 +19,7 @@ package org.jboss.errai.ioc.util;
 import org.jboss.errai.codegen.meta.MetaAnnotation;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaEnum;
+import org.jboss.errai.codegen.util.CDIAnnotationUtils;
 import org.jboss.errai.ioc.client.util.ClientAnnotationSerializer;
 
 import java.util.Arrays;
@@ -39,7 +40,7 @@ public class MetaAnnotationSerializer {
 
   public static String serialize(final MetaAnnotation qualifier) {
     final StringBuilder builder = new StringBuilder(qualifier.annotationType().getFullyQualifiedName());
-    final Set<String> keys = qualifier.values().keySet();
+    final Set<String> keys = CDIAnnotationUtils.getCdiRelevantMemberNames(qualifier);
 
     if (!keys.isEmpty()) {
       builder.append('(');

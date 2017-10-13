@@ -27,7 +27,6 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.stream.Collectors;
 
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
@@ -73,7 +72,7 @@ public class DynamicEventQualifierSerializer extends EventQualifierSerializer {
 
   private Collection<Method> getSerializableMethods(final Class<? extends Annotation> annotationClass) {
     return Arrays.stream(annotationClass.getDeclaredMethods())
-            .filter(m -> CDIAnnotationUtils.relevantForSerialization(new JavaReflectionMethod(m)))
+            .filter(m -> CDIAnnotationUtils.isPublicDeclaredAndNonNonbinding(new JavaReflectionMethod(m)))
             .collect(toList());
   }
 }
