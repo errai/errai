@@ -18,13 +18,16 @@ package org.jboss.errai.config;
 
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
+import org.jboss.errai.common.client.api.annotations.NonPortable;
 import org.jboss.errai.common.client.api.annotations.Portable;
 import org.jboss.errai.common.client.types.TypeHandler;
 import org.jboss.errai.common.client.types.TypeHandlerFactory;
 import org.jboss.errai.config.rebind.EnvironmentConfigExtension;
 import org.jboss.errai.config.rebind.ExposedTypesProvider;
+import org.jboss.errai.config.util.ClassScanner;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -50,29 +53,23 @@ public class MarshallingConfiguration {
                   .collect(toMap(x -> MetaClassFactory.get(x.getKey()), Map.Entry::getValue))));
 
   @Deprecated
-  //FIXME: tiago: make it work with annoation configuration too
+  //FIXME: tiago: make it work with annotation configuration too
   public static boolean isPortableType(final Class<?> cls) {
     final MetaClass mc = MetaClassFactory.get(cls);
     final ErraiAppPropertiesConfiguration erraiAppPropertiesConfiguration = new ErraiAppPropertiesConfiguration();
+    final MetaClassFinder metaClassFinder = a -> new HashSet<>(ClassScanner.getTypesAnnotatedWith(a));
 
-    final Set<MetaClass> exposedPortableTypes = erraiAppPropertiesConfiguration.modules()
-            .getExposedPortableTypes();
+    final Set<MetaClass> portableTypes = allPortableTypes(erraiAppPropertiesConfiguration, metaClassFinder);
 
-    final Set<MetaClass> nonExposedPortableTypes = erraiAppPropertiesConfiguration.modules()
-            .getNonExposedPortableTypes();
-
-    return mc.isAnnotationPresent(Portable.class)
-            || exposedPortableTypes.contains(mc)
-            || nonExposedPortableTypes.contains(mc)
-            || String.class.getName().equals(mc.getFullyQualifiedName())
-            || TypeHandlerFactory.getHandler(mc.unsafeAsClass()) != null;
+    return mc.isAnnotationPresent(Portable.class) || portableTypes.contains(mc) || String.class.getName()
+            .equals(mc.getFullyQualifiedName()) || TypeHandlerFactory.getHandler(mc.unsafeAsClass()) != null;
   }
 
   public static Set<MetaClass> allPortableConcreteSubtypes(final ErraiConfiguration erraiConfiguration,
           final MetaClassFinder metaClassFinder,
           final MetaClass metaClass) {
 
-    final Set<MetaClass> allPortableConcreteSubtypes = allPortableTypes(metaClassFinder, erraiConfiguration).stream()
+    final Set<MetaClass> allPortableConcreteSubtypes = allPortableTypes(erraiConfiguration, metaClassFinder).stream()
             .filter(s -> !s.isInterface())
             .filter(s -> s.isAssignableTo(metaClass))
             .collect(toSet());
@@ -88,35 +85,101 @@ public class MarshallingConfiguration {
           final ErraiConfiguration erraiConfiguration,
           final MetaClass metaClass) {
 
-    return metaClass.instanceOf(String.class) || isBuiltinPortable(metaClass) || allPortableTypes(metaClassFinder,
-            erraiConfiguration).contains(metaClass);
+    return metaClass.instanceOf(String.class) || isBuiltinPortable(metaClass) || allPortableTypes(erraiConfiguration,
+            metaClassFinder).contains(metaClass);
   }
 
-  private static Set<MetaClass> allPortableTypes(final MetaClassFinder metaClassFinder,
-          final ErraiConfiguration erraiConfiguration) {
+  private static Set<MetaClass> allPortableTypes(final ErraiConfiguration erraiConfiguration,
+          final MetaClassFinder metaClassFinder) {
 
-    return metaClassFinder.extend(Portable.class, () -> allRemoteTypesReturnTypesAndParametersTypes(metaClassFinder))
-            .extend(Portable.class, erraiConfiguration.modules()::getExposedPortableTypes)
-            .extend(Portable.class, erraiConfiguration.modules()::getNonExposedPortableTypes)
+    return metaClassFinder.extend(Portable.class, () -> allExposedPortableTypes(erraiConfiguration, metaClassFinder))
+            .extend(Portable.class, () -> allNonExposedPortableTypes(erraiConfiguration, metaClassFinder))
             .findAnnotatedWith(Portable.class);
   }
 
-  private static Collection<MetaClass> allRemoteTypesReturnTypesAndParametersTypes(final MetaClassFinder metaClassFinder) {
-    return metaClassFinder.findAnnotatedWith(EnvironmentConfigExtension.class).stream().map(s -> {
-      try {
-        return Class.forName(s.getFullyQualifiedName()).asSubclass(ExposedTypesProvider.class).newInstance();
-      } catch (final Exception e) {
-        throw new RuntimeException(e); //FIXME: tiago:
-      }
-    }).flatMap(p -> p.provideTypesToExpose().stream()).collect(toSet());
+  public static Set<MetaClass> allExposedPortableTypes(final ErraiConfiguration erraiConfiguration,
+          final MetaClassFinder metaClassFinder) {
+
+    final Set<MetaClass> exposedTypes = erraiConfiguration.modules().portableTypes();
+    final Set<MetaClass> nonPortableTypes = erraiConfiguration.modules().nonPortableTypes();
+
+    final Set<MetaClass> annotatedNonPortableTypes = metaClassFinder.findAnnotatedWith(NonPortable.class);
+    final Set<MetaClass> annotatedPortableTypes = metaClassFinder.findAnnotatedWith(Portable.class);
+
+    nonPortableTypes.addAll(annotatedNonPortableTypes);
+
+    addExposedInnerClasses(exposedTypes, annotatedPortableTypes);
+    exposedTypes.addAll(annotatedPortableTypes);
+
+    processEnvironmentConfigExtensions(exposedTypes, metaClassFinder);
+
+    // must do this before filling in interfaces and supertypes!
+    exposedTypes.removeAll(nonPortableTypes);
+
+    return exposedTypes;
   }
 
-  //FIXME: Cache this map
+  private static Set<MetaClass> allNonExposedPortableTypes(final ErraiConfiguration erraiConfiguration,
+          final MetaClassFinder metaClassFinder) {
+
+    final Set<MetaClass> nonExposedPortableTypes = new HashSet<>();
+
+    for (final MetaClass cls : allExposedPortableTypes(erraiConfiguration, metaClassFinder)) {
+      fillInInterfacesAndSuperTypes(nonExposedPortableTypes, cls);
+    }
+
+    return nonExposedPortableTypes;
+  }
+
   private static boolean isBuiltinPortable(final MetaClass metaClass) {
     if (!TYPE_HANDLERS.containsKey(metaClass) && TYPE_HANDLERS_INHERITANCE_MAP.containsKey(metaClass)) {
       return isBuiltinPortable(TYPE_HANDLERS_INHERITANCE_MAP.get(metaClass));
     } else {
       return TYPE_HANDLERS.get(metaClass) != null;
+    }
+  }
+
+  private static void processEnvironmentConfigExtensions(final Set<MetaClass> exposedClasses,
+          final MetaClassFinder metaClassFinder) {
+
+    final Collection<MetaClass> exts = metaClassFinder.findAnnotatedWith(EnvironmentConfigExtension.class);
+    for (final MetaClass cls : exts) {
+      try {
+        final Class<? extends ExposedTypesProvider> providerClass = Class.forName(cls.getFullyQualifiedName())
+                .asSubclass(ExposedTypesProvider.class);
+
+        for (final MetaClass exposedType : providerClass.newInstance().provideTypesToExpose()) {
+          if (exposedType.isPrimitive()) {
+            exposedClasses.add(exposedType.asBoxed());
+          } else if (exposedType.isConcrete()) {
+            exposedClasses.add(exposedType);
+          }
+        }
+      } catch (final Throwable e) {
+        throw new RuntimeException("unable to load environment extension: " + cls.getFullyQualifiedName(), e);
+      }
+    }
+  }
+
+  private static void addExposedInnerClasses(final Set<MetaClass> exposedClasses,
+          final Set<MetaClass> exposedFromScanner) {
+    for (final MetaClass cls : exposedFromScanner) {
+      for (final MetaClass decl : cls.getDeclaredClasses()) {
+        if (decl.isSynthetic()) {
+          continue;
+        }
+        exposedClasses.add(decl);
+      }
+    }
+  }
+
+  private static void fillInInterfacesAndSuperTypes(final Set<MetaClass> set, final MetaClass type) {
+    for (final MetaClass iface : type.getInterfaces()) {
+      set.add(iface);
+      fillInInterfacesAndSuperTypes(set, iface);
+    }
+    if (type.getSuperClass() != null) {
+      fillInInterfacesAndSuperTypes(set, type.getSuperClass());
     }
   }
 }

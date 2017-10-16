@@ -18,6 +18,7 @@ package org.jboss.errai.apt.internal.export.annotation;
 
 import org.jboss.errai.common.client.api.annotations.NonPortable;
 import org.jboss.errai.common.client.api.annotations.Portable;
+import org.jboss.errai.config.rebind.EnvironmentConfigExtension;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
@@ -29,5 +30,8 @@ public final class ErraiMarshallingExportedAnnotations {
 
   private Portable portable;
   private NonPortable nonPortable;
+
+  //FIXME: tiago: not ideal to be here, but errai-marshalling is really the only place where it's used
+  private EnvironmentConfigExtension environmentConfigExtension;
 }
 

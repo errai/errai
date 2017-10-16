@@ -33,9 +33,9 @@ interface ErraiSeparateModuleConfiguration {
 
   interface Marshalling {
 
-    Set<MetaClass> getExposedPortableTypes();
+    Set<MetaClass> portableTypes();
 
-    Set<MetaClass> getNonExposedPortableTypes();
+    Set<MetaClass> nonPortableTypes();
 
     Map<String, String> getMappingAliases();
   }

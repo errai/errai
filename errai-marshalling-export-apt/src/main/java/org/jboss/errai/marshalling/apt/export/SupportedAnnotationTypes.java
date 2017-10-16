@@ -23,4 +23,6 @@ interface SupportedAnnotationTypes {
 
   String PORTABLE = "org.jboss.errai.common.client.api.annotations.Portable";
   String NON_PORTABLE = "org.jboss.errai.common.client.api.annotations.NonPortable";
+
+  String ENVIRONMENT_CONFIG_EXTENSION = "org.jboss.errai.config.rebind.EnvironmentConfigExtension";
 }

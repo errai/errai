@@ -36,6 +36,7 @@ import static org.jboss.errai.common.configuration.ErraiModule.Property.BINDABLE
 import static org.jboss.errai.common.configuration.ErraiModule.Property.IOC_ALTERNATIVES;
 import static org.jboss.errai.common.configuration.ErraiModule.Property.IOC_BLACKLIST;
 import static org.jboss.errai.common.configuration.ErraiModule.Property.IOC_WHITELIST;
+import static org.jboss.errai.common.configuration.ErraiModule.Property.NON_SERIALIZABLE_TYPES;
 import static org.jboss.errai.common.configuration.ErraiModule.Property.SERIALIZABLE_TYPES;
 
 /**
@@ -59,8 +60,13 @@ public class AptErraiModulesConfiguration implements ErraiModulesConfiguration {
   }
 
   @Override
-  public Set<MetaClass> getExposedPortableTypes() {
+  public Set<MetaClass> portableTypes() {
     return getConfiguredArrayProperty(a -> stream(a.valueAsArray(SERIALIZABLE_TYPES, MetaClass[].class)));
+  }
+
+  @Override
+  public Set<MetaClass> nonPortableTypes() {
+    return getConfiguredArrayProperty(a -> stream(a.valueAsArray(NON_SERIALIZABLE_TYPES, MetaClass[].class)));
   }
 
   @Override
@@ -87,26 +93,4 @@ public class AptErraiModulesConfiguration implements ErraiModulesConfiguration {
   private <V> Set<V> getConfiguredArrayProperty(final Function<MetaAnnotation, Stream<V>> getter) {
     return erraiModules.stream().flatMap(getter).collect(toSet());
   }
-
-  //FIXME: tiago: duplicated
-  @Override
-  public Set<MetaClass> getNonExposedPortableTypes() {
-    final Set<MetaClass> portableNonExposed = new HashSet<>();
-    for (final MetaClass cls : getExposedPortableTypes()) {
-      fillInInterfacesAndSuperTypes(portableNonExposed, cls);
-    }
-    return portableNonExposed;
-  }
-
-  //FIXME: tiago: duplicated
-  private static void fillInInterfacesAndSuperTypes(final Set<MetaClass> set, final MetaClass type) {
-    for (final MetaClass iface : type.getInterfaces()) {
-      set.add(iface);
-      fillInInterfacesAndSuperTypes(set, iface);
-    }
-    if (type.getSuperClass() != null) {
-      fillInInterfacesAndSuperTypes(set, type.getSuperClass());
-    }
-  }
-
 }

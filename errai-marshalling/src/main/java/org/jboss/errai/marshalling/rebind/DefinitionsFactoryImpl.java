@@ -26,6 +26,7 @@ import org.jboss.errai.common.metadata.MetaDataScanner;
 import org.jboss.errai.common.metadata.ScannerSingleton;
 import org.jboss.errai.config.ErraiAppPropertiesConfiguration;
 import org.jboss.errai.config.ErraiConfiguration;
+import org.jboss.errai.config.MarshallingConfiguration;
 import org.jboss.errai.config.rebind.EnvUtil;
 import org.jboss.errai.config.util.ClassScanner;
 import org.jboss.errai.marshalling.client.api.Marshaller;
@@ -200,7 +201,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
     final MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
 
     EnvUtil.clearCache();
-    final Set<MetaClass> envExposedClasses = erraiConfiguration.modules().getExposedPortableTypes();
+    final Set<MetaClass> envExposedClasses = MarshallingConfiguration.allExposedPortableTypes(erraiConfiguration, a -> new HashSet<>(ClassScanner.getTypesAnnotatedWith(a)));
 
     for (final Class<?> cls : findCustomMappings(scanner)) {
       if (!MappingDefinition.class.isAssignableFrom(cls)) {

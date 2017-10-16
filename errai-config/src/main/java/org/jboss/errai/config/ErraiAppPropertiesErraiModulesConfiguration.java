@@ -204,63 +204,25 @@ public class ErraiAppPropertiesErraiModulesConfiguration implements ErraiModules
     return true;
   }
 
-  // Serializable types
-  private static Set<MetaClass> allSerializableTypes;
-
   @Override
-  public Set<MetaClass> getExposedPortableTypes() {
+  public Set<MetaClass> portableTypes() {
 
-    if (allSerializableTypes == null) {
       final Set<MetaClass> exposedClasses = new HashSet<>();
       final Set<MetaClass> nonportableClasses = new HashSet<>();
 
-      nonportableClasses.addAll(ClassScanner.getTypesAnnotatedWith(NonPortable.class));
-      final Set<MetaClass> exposedFromScanner = new HashSet<>(ClassScanner.getTypesAnnotatedWith(Portable.class));
-
-      addExposedInnerClasses(exposedClasses, exposedFromScanner);
-      exposedClasses.addAll(exposedFromScanner);
-
       processErraiAppPropertiesFiles(exposedClasses, nonportableClasses);
-      processEnvironmentConfigExtensions(exposedClasses);
 
-      // must do this before filling in interfaces and supertypes!
-      exposedClasses.removeAll(nonportableClasses);
-
-      final Set<MetaClass> serializableTypes = new HashSet<>();
-      serializableTypes.addAll(exposedClasses);
-
-      allSerializableTypes = serializableTypes;
-    }
-
-    return allSerializableTypes;
+      return exposedClasses;
   }
 
   @Override
-  public Set<MetaClass> getNonExposedPortableTypes() {
-    final Set<MetaClass> portableNonExposed = new HashSet<>();
-    for (final MetaClass cls : getExposedPortableTypes()) {
-      fillInInterfacesAndSuperTypes(portableNonExposed, cls);
-    }
-    return portableNonExposed;
-  }
+  public Set<MetaClass> nonPortableTypes() {
+    final Set<MetaClass> exposedClasses = new HashSet<>();
+    final Set<MetaClass> nonportableClasses = new HashSet<>();
 
-  private static void processEnvironmentConfigExtensions(final Set<MetaClass> exposedClasses) {
-    final Collection<MetaClass> exts = ClassScanner.getTypesAnnotatedWith(EnvironmentConfigExtension.class, true);
-    for (final MetaClass cls : exts) {
-      try {
-        final Class<? extends ExposedTypesProvider> providerClass = cls.unsafeAsClass()
-                .asSubclass(ExposedTypesProvider.class);
-        for (final MetaClass exposedType : providerClass.newInstance().provideTypesToExpose()) {
-          if (exposedType.isPrimitive()) {
-            exposedClasses.add(exposedType.asBoxed());
-          } else if (exposedType.isConcrete()) {
-            exposedClasses.add(exposedType);
-          }
-        }
-      } catch (final Throwable e) {
-        throw new RuntimeException("unable to load environment extension: " + cls.getFullyQualifiedName(), e);
-      }
-    }
+    processErraiAppPropertiesFiles(exposedClasses, nonportableClasses);
+
+    return nonportableClasses;
   }
 
   private static void processErraiAppPropertiesFiles(final Set<MetaClass> exposedClasses,
@@ -355,28 +317,6 @@ public class ErraiAppPropertiesErraiModulesConfiguration implements ErraiModules
       return false;
     }
     return true;
-  }
-
-  private static void addExposedInnerClasses(final Set<MetaClass> exposedClasses,
-          final Set<MetaClass> exposedFromScanner) {
-    for (final MetaClass cls : exposedFromScanner) {
-      for (final MetaClass decl : cls.getDeclaredClasses()) {
-        if (decl.isSynthetic()) {
-          continue;
-        }
-        exposedClasses.add(decl);
-      }
-    }
-  }
-
-  private static void fillInInterfacesAndSuperTypes(final Set<MetaClass> set, final MetaClass type) {
-    for (final MetaClass iface : type.getInterfaces()) {
-      set.add(iface);
-      fillInInterfacesAndSuperTypes(set, iface);
-    }
-    if (type.getSuperClass() != null) {
-      fillInInterfacesAndSuperTypes(set, type.getSuperClass());
-    }
   }
 
   // Mapping aliases
