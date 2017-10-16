@@ -20,6 +20,7 @@ import com.google.gwt.core.ext.Generator;
 import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.UnableToCompleteException;
+import com.google.gwt.core.ext.typeinfo.NotFoundException;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.util.ClassChangeUtil;
 import org.jboss.errai.common.metadata.RebindUtils;
@@ -41,38 +42,27 @@ import java.io.File;
 @GenerateAsync(MarshallerFactory.class)
 public class MarshallersGenerator extends AbstractAsyncGenerator {
 
-  static final Logger logger = LoggerFactory.getLogger(Generator.class);
+  private static final Logger logger = LoggerFactory.getLogger(Generator.class);
+  private static final Logger log = LoggerFactory.getLogger(MarshallersGenerator.class);
 
-  public static final String SERVER_MARSHALLER_PACKAGE_NAME = "org.jboss.errai";
-  public static final String SERVER_MARSHALLER_CLASS_NAME = "ServerMarshallingFactoryImpl";
   private static final String SERVER_MARSHALLER_OUTPUT_DIR_PROP = "errai.marshalling.server.classOutput";
   private static final String SERVER_MARSHALLER_OUTPUT_ENABLED_PROP = "errai.marshalling.server.classOutput.enabled";
-
-  private static final String SERVER_MARSHALLER_OUTPUT_DIR =
-      System.getProperty(SERVER_MARSHALLER_OUTPUT_DIR_PROP) != null ?
-          System.getProperty(SERVER_MARSHALLER_OUTPUT_DIR_PROP) :
-          null;
+  private static final String SERVER_MARSHALLER_OUTPUT_DIR = System.getProperty(SERVER_MARSHALLER_OUTPUT_DIR_PROP);
 
   private static final boolean SERVER_MARSHALLER_OUTPUT_ENABLED =
       Boolean.valueOf(System.getProperty(SERVER_MARSHALLER_OUTPUT_ENABLED_PROP, "true"));
 
-  private static final Logger log = LoggerFactory.getLogger(MarshallersGenerator.class);
-
-  /**
-   * Simple name of class to be generated
-   */
-  private final String className = MarshallerFactory.class.getSimpleName() + "Impl";
-
-  /**
-   * Package name of class to be generated
-   */
-  private final String packageName = MarshallerFactory.class.getPackage().getName();
+  public static final String SERVER_PACKAGE_NAME = "org.jboss.errai";
+  public static final String SERVER_CLASS_NAME = "ServerMarshallingFactoryImpl";
+  public static final String CLIENT_PACKAGE_NAME = "org.jboss.errai.marshalling.client.api";
+  public static final String CLIENT_CLASS_NAME = "MarshallerFactoryImpl";
 
   @Override
   public String generate(final TreeLogger logger, final GeneratorContext context, final String typeName)
       throws UnableToCompleteException {
     logger.log(TreeLogger.INFO, "Generating Marshallers Bootstrapper...");
-    return startAsyncGeneratorsAndWaitFor(MarshallerFactory.class, context, logger, packageName, className);
+    return startAsyncGeneratorsAndWaitFor(MarshallerFactory.class, context, logger, CLIENT_PACKAGE_NAME,
+            CLIENT_CLASS_NAME);
   }
 
   private static final String sourceOutputTemp = RebindUtils.getTempDirectory() + "/errai.marshalling/gen/";
@@ -94,7 +84,7 @@ public class MarshallersGenerator extends AbstractAsyncGenerator {
         }
         else {
           serverSource = MarshallerGeneratorFactory.getFor(context, MarshallerOutputTarget.Java)
-              .generate(SERVER_MARSHALLER_PACKAGE_NAME, SERVER_MARSHALLER_CLASS_NAME);
+              .generate(SERVER_PACKAGE_NAME, SERVER_CLASS_NAME);
           _serverMarshallerCache = serverSource;
         }
 
@@ -104,7 +94,7 @@ public class MarshallersGenerator extends AbstractAsyncGenerator {
             log.info("*** using temporary path: " + tmpLocation + " ***");
 
             try {
-              OutputDirectoryUtil.generateClassFileInTmpDir(SERVER_MARSHALLER_PACKAGE_NAME, SERVER_MARSHALLER_CLASS_NAME, serverSource, tmpLocation);
+              OutputDirectoryUtil.generateClassFileInTmpDir(SERVER_PACKAGE_NAME, SERVER_CLASS_NAME, serverSource, tmpLocation);
             }
             catch (final Throwable t) {
               throw new RuntimeException("failed to load server marshallers", t);
@@ -113,7 +103,7 @@ public class MarshallersGenerator extends AbstractAsyncGenerator {
         }
         else if (SERVER_MARSHALLER_OUTPUT_DIR != null || OutputDirectoryUtil.OUTPUT_DIR.isPresent()) {
           final String outputDir = (SERVER_MARSHALLER_OUTPUT_DIR != null ? SERVER_MARSHALLER_OUTPUT_DIR : OutputDirectoryUtil.OUTPUT_DIR.get());
-          ClassChangeUtil.generateClassFile(SERVER_MARSHALLER_PACKAGE_NAME, SERVER_MARSHALLER_CLASS_NAME, sourceOutputTemp, serverSource, outputDir);
+          ClassChangeUtil.generateClassFile(SERVER_PACKAGE_NAME, SERVER_CLASS_NAME, sourceOutputTemp, serverSource, outputDir);
           logger.info("** deposited marshaller class in : " + new File(outputDir).getAbsolutePath());
         }
         else {
@@ -129,16 +119,25 @@ public class MarshallersGenerator extends AbstractAsyncGenerator {
       }
 
       return _clientMarshallerCache = MarshallerGeneratorFactory.getFor(context, MarshallerOutputTarget.GWT)
-              .generate(packageName, className, this::addCacheRelevantClass);
+              .generate(CLIENT_PACKAGE_NAME, CLIENT_CLASS_NAME, this::addCacheRelevantClass);
     }
   }
 
   private static void writeServerSideMarshallerToDiscoveredOutputDirs(final GeneratorContext context, final String source) {
-    OutputDirectoryUtil.generateClassFileInDiscoveredDirs(context, SERVER_MARSHALLER_PACKAGE_NAME, SERVER_MARSHALLER_CLASS_NAME, sourceOutputTemp, source);
+    OutputDirectoryUtil.generateClassFileInDiscoveredDirs(context, SERVER_PACKAGE_NAME, SERVER_CLASS_NAME, sourceOutputTemp, source);
   }
 
   @Override
   protected boolean isRelevantClass(final MetaClass clazz) {
     return MarshallingConfiguration.isPortableType(clazz.unsafeAsClass());
+  }
+
+  @Override
+  public boolean alreadyGeneratedSourcesViaAptGenerators(final GeneratorContext context) {
+    try {
+      return context.getTypeOracle().getType(CLIENT_PACKAGE_NAME + "." + CLIENT_CLASS_NAME) != null;
+    } catch (final NotFoundException e) {
+      return false;
+    }
   }
 }

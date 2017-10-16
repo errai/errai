@@ -50,6 +50,7 @@ public class MarshallingConfiguration {
                   .collect(toMap(x -> MetaClassFactory.get(x.getKey()), Map.Entry::getValue))));
 
   @Deprecated
+  //FIXME: tiago: make it work with annoation configuration too
   public static boolean isPortableType(final Class<?> cls) {
     final MetaClass mc = MetaClassFactory.get(cls);
 

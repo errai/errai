@@ -38,8 +38,8 @@ public abstract class ServerMarshallUtil {
 
   @SuppressWarnings("unchecked")
   public static Class<? extends MarshallerFactory> getGeneratedMarshallerFactoryForServer() {
-    final String packageName = MarshallersGenerator.SERVER_MARSHALLER_PACKAGE_NAME;
-    final String simpleClassName = MarshallersGenerator.SERVER_MARSHALLER_CLASS_NAME;
+    final String packageName = MarshallersGenerator.SERVER_PACKAGE_NAME;
+    final String simpleClassName = MarshallersGenerator.SERVER_CLASS_NAME;
     final String fullyQualifiedClassName = packageName + "." + simpleClassName;
 
     final Optional<Class<?>> generatedMarshaller = ClassChangeUtil.loadClassIfPresent(packageName, simpleClassName);

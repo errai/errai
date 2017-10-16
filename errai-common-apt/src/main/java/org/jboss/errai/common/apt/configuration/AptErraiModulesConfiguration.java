@@ -80,6 +80,7 @@ public class AptErraiModulesConfiguration implements ErraiModulesConfiguration {
 
   @Override
   public Map<String, String> getMappingAliases() {
+    //FIXME: tiago: implement
     return new HashMap<>();
   }
 

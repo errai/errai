@@ -145,7 +145,7 @@ public class IOCGenerator extends AbstractAsyncGenerator {
   }
 
   @Override
-  public boolean alreadyGeneratedSourcesViaAptGenerators(GeneratorContext context) {
+  public boolean alreadyGeneratedSourcesViaAptGenerators(final GeneratorContext context) {
     try {
       return context.getTypeOracle().getType(getPackageName() + "." + getClassSimpleName()) != null;
     } catch (final NotFoundException e) {
