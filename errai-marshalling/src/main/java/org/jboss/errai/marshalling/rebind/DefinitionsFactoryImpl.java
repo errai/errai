@@ -24,9 +24,9 @@ import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.common.client.api.annotations.Portable;
 import org.jboss.errai.common.metadata.MetaDataScanner;
 import org.jboss.errai.common.metadata.ScannerSingleton;
-import org.jboss.errai.config.ErraiAppPropertiesConfiguration;
 import org.jboss.errai.config.ErraiConfiguration;
 import org.jboss.errai.config.MarshallingConfiguration;
+import org.jboss.errai.config.MetaClassFinder;
 import org.jboss.errai.config.rebind.EnvUtil;
 import org.jboss.errai.config.util.ClassScanner;
 import org.jboss.errai.marshalling.client.api.Marshaller;
@@ -124,10 +124,12 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
       = HashMultimap.create();
 
   private final ErraiConfiguration erraiConfiguration;
+  private final MetaClassFinder metaClassFinder;
 
-  DefinitionsFactoryImpl(final ErraiConfiguration erraiConfiguration) {
+  DefinitionsFactoryImpl(final ErraiConfiguration erraiConfiguration, MetaClassFinder metaClassFinder) {
     this.erraiConfiguration = erraiConfiguration;
-    loadCustomMappings(erraiConfiguration);
+    this.metaClassFinder = metaClassFinder;
+    loadCustomMappings();
   }
 
   @Override
@@ -195,13 +197,13 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
     return getDefinition(clazz.getName());
   }
 
-  private void loadCustomMappings(final ErraiConfiguration erraiConfiguration) {
+  private void loadCustomMappings() {
     exposedClasses.add(MetaClassFactory.get(Object.class));
 
     final MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
 
     EnvUtil.clearCache();
-    final Set<MetaClass> envExposedClasses = MarshallingConfiguration.allExposedPortableTypes(erraiConfiguration, a -> new HashSet<>(ClassScanner.getTypesAnnotatedWith(a, true)));
+    final Set<MetaClass> envExposedClasses = MarshallingConfiguration.allExposedPortableTypes(erraiConfiguration, metaClassFinder);
 
     for (final Class<?> cls : findCustomMappings(scanner)) {
       if (!MappingDefinition.class.isAssignableFrom(cls)) {
@@ -668,7 +670,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
     this.mappingAliases.clear();
     this.mappingDefinitions.clear();
     this.typesWithBuiltInMarshallers.clear();
-    loadCustomMappings(erraiConfiguration);
+    loadCustomMappings();
   }
 
   @Override

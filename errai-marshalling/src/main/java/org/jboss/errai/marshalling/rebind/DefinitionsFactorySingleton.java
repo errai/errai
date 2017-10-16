@@ -17,6 +17,7 @@
 package org.jboss.errai.marshalling.rebind;
 
 import org.jboss.errai.config.ErraiConfiguration;
+import org.jboss.errai.config.MetaClassFinder;
 
 /**
  * @author Mike Brock
@@ -25,13 +26,13 @@ public class DefinitionsFactorySingleton {
 
   private static DefinitionsFactory factory;
 
-  public static synchronized DefinitionsFactory get(final ErraiConfiguration erraiConfiguration) {
+  public static synchronized DefinitionsFactory get(final ErraiConfiguration erraiConfiguration,
+          final MetaClassFinder metaClassFinder) {
 
     if (factory == null) {
       try {
-        factory = newInstance(erraiConfiguration);
-      }
-      catch (Exception e) {
+        factory = newInstance(erraiConfiguration, metaClassFinder);
+      } catch (Exception e) {
         // This exception will probably be swallowed by the VM, which is why we print the stack trace here.
         System.err.println("Failed to bootstrap errai marshalling system!");
         e.printStackTrace();
@@ -42,7 +43,8 @@ public class DefinitionsFactorySingleton {
     return factory;
   }
 
-  public static DefinitionsFactory newInstance(final ErraiConfiguration erraiConfiguration) {
-    return new DefinitionsFactoryImpl(erraiConfiguration);
+  public static DefinitionsFactory newInstance(final ErraiConfiguration erraiConfiguration,
+          MetaClassFinder metaClassFinder) {
+    return new DefinitionsFactoryImpl(erraiConfiguration, metaClassFinder);
   }
 }

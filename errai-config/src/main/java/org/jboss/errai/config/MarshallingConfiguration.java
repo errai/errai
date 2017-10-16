@@ -58,10 +58,9 @@ public class MarshallingConfiguration {
     final MetaClass mc = MetaClassFactory.get(cls);
     final ErraiAppPropertiesConfiguration erraiAppPropertiesConfiguration = new ErraiAppPropertiesConfiguration();
     final MetaClassFinder metaClassFinder = a -> new HashSet<>(ClassScanner.getTypesAnnotatedWith(a));
+    final Set<MetaClass> allPortableTypes = allPortableTypes(erraiAppPropertiesConfiguration, metaClassFinder);
 
-    final Set<MetaClass> portableTypes = allPortableTypes(erraiAppPropertiesConfiguration, metaClassFinder);
-
-    return mc.isAnnotationPresent(Portable.class) || portableTypes.contains(mc) || String.class.getName()
+    return mc.isAnnotationPresent(Portable.class) || allPortableTypes.contains(mc) || String.class.getName()
             .equals(mc.getFullyQualifiedName()) || TypeHandlerFactory.getHandler(mc.unsafeAsClass()) != null;
   }
 

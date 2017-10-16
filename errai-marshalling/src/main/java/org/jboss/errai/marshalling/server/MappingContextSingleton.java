@@ -19,6 +19,7 @@ package org.jboss.errai.marshalling.server;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.config.ErraiAppPropertiesConfiguration;
+import org.jboss.errai.config.MetaClassFinder;
 import org.jboss.errai.config.util.ClassScanner;
 import org.jboss.errai.marshalling.client.MarshallingSessionProviderFactory;
 import org.jboss.errai.marshalling.client.api.Marshaller;
@@ -42,6 +43,7 @@ import org.jboss.errai.marshalling.server.util.ServerMarshallUtil;
 import org.slf4j.Logger;
 
 import java.io.IOException;
+import java.util.HashSet;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -52,6 +54,7 @@ public class MappingContextSingleton {
   private static final ServerMappingContext context;
   private static final Logger log = getLogger("ErraiMarshalling");
   private static final ErraiAppPropertiesConfiguration ERRAI_CONFIGURATION = new ErraiAppPropertiesConfiguration();
+  private static final MetaClassFinder META_CLASS_FINDER = a -> new HashSet<>(ClassScanner.getTypesAnnotatedWith(a));
 
   static {
     ClassScanner.setReflectionsScanning(true);
@@ -141,7 +144,7 @@ public class MappingContextSingleton {
 
       @Override
       public DefinitionsFactory getDefinitionsFactory() {
-        return DefinitionsFactorySingleton.get(ERRAI_CONFIGURATION);
+        return DefinitionsFactorySingleton.get(ERRAI_CONFIGURATION, META_CLASS_FINDER);
       }
 
       @Override
@@ -182,7 +185,8 @@ public class MappingContextSingleton {
     dynamicMarshallingWarning();
 
     return new ServerMappingContext() {
-      private final DefinitionsFactory factory = DefinitionsFactorySingleton.newInstance(ERRAI_CONFIGURATION);
+      private final DefinitionsFactory factory = DefinitionsFactorySingleton.newInstance(ERRAI_CONFIGURATION,
+              a -> new HashSet<>(ClassScanner.getTypesAnnotatedWith(a)));
 
       {
         MarshallingSessionProviderFactory.setMarshallingSessionProvider(new MarshallingSessionProvider() {

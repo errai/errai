@@ -22,8 +22,8 @@ import org.jboss.errai.codegen.meta.MetaClassMember;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.util.PrivateAccessUtil;
-import org.jboss.errai.config.ErraiAppPropertiesConfiguration;
 import org.jboss.errai.config.ErraiConfiguration;
+import org.jboss.errai.config.MetaClassFinder;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.rebind.DefinitionsFactory;
 import org.jboss.errai.marshalling.rebind.DefinitionsFactorySingleton;
@@ -54,9 +54,10 @@ public class GeneratorMappingContext implements ServerMappingContext {
   public GeneratorMappingContext(final MarshallerGeneratorFactory marshallerGeneratorFactory,
           final ClassStructureBuilder<?> classStructureBuilder,
           final ArrayMarshallerCallback callback,
-          final ErraiConfiguration erraiConfiguration) {
+          final ErraiConfiguration erraiConfiguration,
+          final MetaClassFinder metaClassFinder) {
 
-    this.definitionsFactory = DefinitionsFactorySingleton.get(erraiConfiguration);
+    this.definitionsFactory = DefinitionsFactorySingleton.get(erraiConfiguration, metaClassFinder);
     this.marshallerGeneratorFactory = marshallerGeneratorFactory;
     this.arrayMarshallerCallback = callback;
     this.classStructureBuilder = classStructureBuilder;
