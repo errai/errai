@@ -20,7 +20,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.spi.EventMetadata;
 
-import org.jboss.errai.config.rebind.EnvUtil;
+import org.jboss.errai.config.MarshallingConfiguration;
 
 /**
  * Managed bean that observes all server-side events and dispatches them to the
@@ -45,7 +45,7 @@ public class AnyEventObserver {
 
     // Check if the event is a portable Errai CDI event and should be forwarded
     // to all listening clients
-    if (EnvUtil.isPortableType(event.getClass())) {
+    if (MarshallingConfiguration.isPortableType(event.getClass())) {
       eventDispatcher.sendEventToClients(event, emd);
     }
 

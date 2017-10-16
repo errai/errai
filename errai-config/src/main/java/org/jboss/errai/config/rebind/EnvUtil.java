@@ -185,27 +185,4 @@ public abstract class EnvUtil {
             ErraiAppPropertiesErraiModulesConfiguration.NON_SERIALIZABLE_TYPES) || key.equals(
             ErraiAppPropertiesErraiModulesConfiguration.MAPPING_ALIASES);
   }
-
-  //FIXME: tiago: remove or move this methods below
-
-  public static boolean isPortableType(final Class<?> cls) {
-    final MetaClass mc = MetaClassFactory.get(cls);
-    return isPortableType(mc);
-  }
-
-  public static boolean isPortableType(final MetaClass mc) {
-
-    final Set<MetaClass> exposedPortableTypes = new ErraiAppPropertiesConfiguration().modules()
-            .getExposedPortableTypes();
-
-    final Set<MetaClass> nonExposedPortableTypes = new ErraiAppPropertiesConfiguration().modules()
-            .getNonExposedPortableTypes();
-
-    return mc.isAnnotationPresent(Portable.class)
-            || exposedPortableTypes.contains(mc)
-            || nonExposedPortableTypes.contains(mc)
-            || String.class.getName().equals(mc.getFullyQualifiedName())
-            || TypeHandlerFactory.getHandler(mc.unsafeAsClass()) != null;
-  }
-
 }

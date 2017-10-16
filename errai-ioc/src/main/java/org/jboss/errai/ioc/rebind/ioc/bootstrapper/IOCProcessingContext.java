@@ -23,7 +23,7 @@ import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.impl.ClassBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
-import org.jboss.errai.common.apt.MetaClassFinder;
+import org.jboss.errai.config.MetaClassFinder;
 import org.jboss.errai.codegen.meta.impl.build.BuildMetaClass;
 import org.jboss.errai.common.apt.ResourceFilesFinder;
 import org.jboss.errai.config.ErraiConfiguration;

@@ -143,7 +143,7 @@ public class ErraiAppPropertiesErraiModulesConfiguration implements ErraiModules
           final ResourceBundle props = new PropertyResourceBundle(inputStream);
           for (final String key : props.keySet()) {
             if (key.equals(ErraiAppPropertiesErraiModulesConfiguration.BINDABLE_TYPES)) {
-              bindableTypes.addAll(asdfBindableTypes(props, key));
+              bindableTypes.addAll(allBindableTypes(props, key));
             }
           }
         } catch (final IOException e) {
@@ -165,7 +165,7 @@ public class ErraiAppPropertiesErraiModulesConfiguration implements ErraiModules
     return configuredBindableTypes;
   }
 
-  private Set<MetaClass> asdfBindableTypes(ResourceBundle props, String key) {
+  private Set<MetaClass> allBindableTypes(ResourceBundle props, String key) {
     Set<MetaClass> objects = new HashSet<>();
     final Set<String> patterns = new LinkedHashSet<>();
 

@@ -18,7 +18,7 @@ package org.jboss.errai.common.apt.configuration;
 
 import org.jboss.errai.codegen.meta.MetaAnnotation;
 import org.jboss.errai.codegen.meta.MetaClass;
-import org.jboss.errai.common.apt.MetaClassFinder;
+import org.jboss.errai.config.MetaClassFinder;
 import org.jboss.errai.common.configuration.ErraiModule;
 import org.jboss.errai.config.ErraiModulesConfiguration;
 
@@ -36,7 +36,6 @@ import static org.jboss.errai.common.configuration.ErraiModule.Property.BINDABLE
 import static org.jboss.errai.common.configuration.ErraiModule.Property.IOC_ALTERNATIVES;
 import static org.jboss.errai.common.configuration.ErraiModule.Property.IOC_BLACKLIST;
 import static org.jboss.errai.common.configuration.ErraiModule.Property.IOC_WHITELIST;
-import static org.jboss.errai.common.configuration.ErraiModule.Property.NON_SERIALIZABLE_TYPES;
 import static org.jboss.errai.common.configuration.ErraiModule.Property.SERIALIZABLE_TYPES;
 
 /**

@@ -26,6 +26,7 @@ import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.config.rebind.AbstractAsyncGenerator;
 import org.jboss.errai.config.rebind.EnvUtil;
 import org.jboss.errai.config.rebind.GenerateAsync;
+import org.jboss.errai.config.MarshallingConfiguration;
 import org.jboss.errai.marshalling.client.api.MarshallerFactory;
 import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
 import org.jboss.errai.marshalling.rebind.util.OutputDirectoryUtil;
@@ -138,6 +139,6 @@ public class MarshallersGenerator extends AbstractAsyncGenerator {
 
   @Override
   protected boolean isRelevantClass(final MetaClass clazz) {
-    return EnvUtil.isPortableType(clazz);
+    return MarshallingConfiguration.isPortableType(clazz.unsafeAsClass());
   }
 }

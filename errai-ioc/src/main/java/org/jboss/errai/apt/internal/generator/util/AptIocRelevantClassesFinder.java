@@ -17,7 +17,7 @@
 package org.jboss.errai.apt.internal.generator.util;
 
 import org.jboss.errai.codegen.meta.MetaClass;
-import org.jboss.errai.common.apt.MetaClassFinder;
+import org.jboss.errai.config.MetaClassFinder;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IocRelevantClassesFinder;
 
 import java.lang.annotation.Annotation;

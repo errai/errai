@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.config.rebind;
+package org.jboss.errai.marshalling.rebind;
+
+import org.jboss.errai.config.rebind.EnvUtil;
 
 import java.util.Map;
 
