@@ -36,7 +36,7 @@ public class MappingDefinition {
   private boolean lazy;
   private final boolean doNotGenerate;
 
-  private Class<? extends Marshaller> clientMarshallerClass;
+  private MetaClass clientMarshallerClass;
   private Class<? extends Marshaller> serverMarshallerClass;
 
   private Marshaller<Object> marshallerInstance;
@@ -65,7 +65,7 @@ public class MappingDefinition {
     this.toMap = toMap;
     setInstantiationMapping(new SimpleConstructorMapping());
     this.doNotGenerate = doNotGenerate;
-    this.memberMappings = new ArrayList<MemberMapping>();
+    this.memberMappings = new ArrayList<>();
   }
 
 
@@ -73,11 +73,11 @@ public class MappingDefinition {
     return toMap;
   }
 
-  public Class<? extends Marshaller> getClientMarshallerClass() {
+  public MetaClass getClientMarshallerClass() {
     return clientMarshallerClass;
   }
 
-  public void setClientMarshallerClass(final Class<? extends Marshaller> clientMarshallerClass) {
+  public void setClientMarshallerClass(final MetaClass clientMarshallerClass) {
     this.clientMarshallerClass = clientMarshallerClass;
   }
 

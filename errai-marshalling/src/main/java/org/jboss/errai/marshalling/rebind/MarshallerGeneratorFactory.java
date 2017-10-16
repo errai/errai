@@ -38,6 +38,7 @@ import org.jboss.errai.codegen.util.If;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.rebind.NameUtil;
 import org.jboss.errai.common.rebind.UniqueNameGenerator;
+import org.jboss.errai.config.ErraiConfiguration;
 import org.jboss.errai.marshalling.client.api.DeferredMarshallerCreationCallback;
 import org.jboss.errai.marshalling.client.api.GeneratedMarshaller;
 import org.jboss.errai.marshalling.client.api.Marshaller;
@@ -138,6 +139,8 @@ public class MarshallerGeneratorFactory {
   private final Set<String> arrayMarshallers = new HashSet<>();
   private final Set<String> unlazyMarshallers = new HashSet<>();
 
+  private final ErraiConfiguration erraiConfiguration;
+
   private static final Logger log = LoggerFactory.getLogger(MarshallerGeneratorFactory.class);
   private static boolean refresh = false;
 
@@ -146,13 +149,19 @@ public class MarshallerGeneratorFactory {
 
   long startTime;
 
-  private MarshallerGeneratorFactory(final GeneratorContext context, final MarshallerOutputTarget target) {
+  private MarshallerGeneratorFactory(final GeneratorContext context,
+          final MarshallerOutputTarget target,
+          final ErraiConfiguration erraiConfiguration) {
+
     this.context = context;
     this.target = target;
+    this.erraiConfiguration = erraiConfiguration;
   }
 
-  public static MarshallerGeneratorFactory getFor(final GeneratorContext context, final MarshallerOutputTarget target) {
-    return new MarshallerGeneratorFactory(context, target);
+  public static MarshallerGeneratorFactory getFor(final GeneratorContext context,
+          final MarshallerOutputTarget target,
+          final ErraiConfiguration erraiConfiguration) {
+    return new MarshallerGeneratorFactory(context, target, erraiConfiguration);
   }
 
   public String generate(final String packageName, final String clazzName) {
@@ -164,7 +173,7 @@ public class MarshallerGeneratorFactory {
     log.info("generating marshaller factory class for " + (((target == MarshallerOutputTarget.GWT) ? "client" : "server") + "..."));
     final long time = System.currentTimeMillis();
     if (target == MarshallerOutputTarget.GWT && refresh) {
-      DefinitionsFactorySingleton.get().resetDefinitionsAndReload();
+      DefinitionsFactorySingleton.get(erraiConfiguration).resetDefinitionsAndReload();
     }
     gen = _generate(packageName, clazzName, callback);
     log.info("generated marshaller factory class in " + (System.currentTimeMillis() - time) + "ms.");
@@ -176,7 +185,7 @@ public class MarshallerGeneratorFactory {
 
     classStructureBuilder = implement(MarshallerFactory.class, packageName, clazzName);
     classContext = classStructureBuilder.getClassDefinition().getContext();
-    mappingContext = GeneratorMappingContextFactory.create(context, target, this, classStructureBuilder, new ArrayMarshallerCallbackImpl());
+    mappingContext = GeneratorMappingContextFactory.create(context, target, this, classStructureBuilder, new ArrayMarshallerCallbackImpl(), erraiConfiguration);
 
     classStructureBuilder.getClassDefinition().addAnnotation(() -> Dependent.class);
 
@@ -316,8 +325,8 @@ public class MarshallerGeneratorFactory {
 
     final MappingDefinition definition = mappingContext.getDefinitionsFactory().getDefinition(clsName);
     @SuppressWarnings("rawtypes")
-    final Class<? extends Marshaller> marshallerCls = (target == MarshallerOutputTarget.GWT) ?
-            definition.getClientMarshallerClass() : definition.getServerMarshallerClass();
+    final MetaClass marshallerCls = (target == MarshallerOutputTarget.GWT) ?
+            definition.getClientMarshallerClass() : MetaClassFactory.get(definition.getServerMarshallerClass());
 
     if (marshallerCls == null) {
       return;
@@ -423,7 +432,7 @@ public class MarshallerGeneratorFactory {
 
   private void addMarshaller(final BuildMetaClass marshaller, final MetaClass type) {
     if (target == MarshallerOutputTarget.GWT) {
-      if (type.unsafeIsAnnotationPresent(AlwaysQualify.class)) {
+      if (type.isAnnotationPresent(AlwaysQualify.class)) {
         addConditionalAssignment(
             type,
             Stmt.nestedCall(
@@ -437,7 +446,7 @@ public class MarshallerGeneratorFactory {
       }
     }
     else {
-      if (type.unsafeIsAnnotationPresent(AlwaysQualify.class)) {
+      if (type.isAnnotationPresent(AlwaysQualify.class)) {
         addConditionalAssignment(
               type,
               Stmt.newObject(QualifyingMarshallerWrapper.class, marshaller, type));
@@ -468,8 +477,7 @@ public class MarshallerGeneratorFactory {
       classStructureBuilder.declaresInnerClass(arrayMarshaller);
 
       addConditionalAssignment(type, 
-          Stmt.newObject(QualifyingMarshallerWrapper.class, Stmt.newObject(arrayMarshaller.getType()), type
-              .unsafeAsClass()));
+          Stmt.newObject(QualifyingMarshallerWrapper.class, Stmt.newObject(arrayMarshaller.getType()), type));
     }
     arrayMarshallers.add(varName);
 
@@ -499,7 +507,7 @@ public class MarshallerGeneratorFactory {
     }
   }
 
-  static BuildMetaClass generateArrayMarshaller(final MetaClass arrayType, final String marshallerClassName, final boolean gwtTarget) {
+  BuildMetaClass generateArrayMarshaller(final MetaClass arrayType, final String marshallerClassName, final boolean gwtTarget) {
     final MetaClass toMap = arrayType.getOuterComponentType();
 
     final int dimensions = GenUtil.getArrayDimensions(arrayType);
@@ -557,7 +565,7 @@ public class MarshallerGeneratorFactory {
     return classStructureBuilder.getClassDefinition();
   }
 
-  static void arrayDemarshallCode(final MetaClass toMap,
+  void arrayDemarshallCode(final MetaClass toMap,
                                    final int dim,
                                    final ClassStructureBuilder<?> classBuilder,
                                    final BlockBuilder<?> initMethod) {
@@ -568,7 +576,7 @@ public class MarshallerGeneratorFactory {
     final MetaClass arrayType = toMap.asArrayOf(dim);
 
     String marshallerVarName;
-    if (DefinitionsFactorySingleton.get().shouldUseObjectMarshaller(toMap)) {
+    if (DefinitionsFactorySingleton.get(erraiConfiguration).shouldUseObjectMarshaller(toMap)) {
       marshallerVarName = getVarName(MetaClassFactory.get(Object.class));
       MarshallingGenUtil.ensureMarshallerFieldCreated(classBuilder, toMap, MetaClassFactory.get(Object.class), initMethod);
     }
@@ -577,7 +585,7 @@ public class MarshallerGeneratorFactory {
       MarshallingGenUtil.ensureMarshallerFieldCreated(classBuilder, null, toMap, initMethod);
     }
 
-    final Statement demarshallerStatement = Stmt.castTo(toMap.asBoxed().unsafeAsClass(),
+    final Statement demarshallerStatement = Stmt.castTo(toMap.asBoxed(),
         Stmt.loadVariable(marshallerVarName).invoke("demarshall", loadVariable("a0")
             .invoke("get", loadVariable("i")), Stmt.loadVariable("a1")));
 

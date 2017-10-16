@@ -45,12 +45,7 @@ public class MarshallerFramework implements EntryPoint {
     InitVotes.waitFor(MarshallerFramework.class);
     marshallerFactory = GWT.create(MarshallerFactory.class);
 
-    ParserFactory.registerParser(new Parser() {
-      @Override
-      public EJValue parse(final String input) {
-        return GWTJSON.wrap(JSONParser.parseStrict(input));
-      }
-    });
+    ParserFactory.registerParser(input -> GWTJSON.wrap(JSONParser.parseStrict(input)));
 
     InitVotes.voteFor(MarshallerFramework.class);
   }

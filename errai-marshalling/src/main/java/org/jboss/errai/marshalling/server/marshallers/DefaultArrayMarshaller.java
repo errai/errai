@@ -49,11 +49,6 @@ public class DefaultArrayMarshaller implements Marshaller<Object> {
     this.dimensions = dim;
   }
 
-  @SuppressWarnings("unchecked")
-  public Class<Object> getTypeHandled() {
-    return (Class<Object>) arrayType.unsafeAsClass();
-  }
-
   public Object demarshall(final EJValue a0, final MarshallingSession a1) {
     if (a0.isNull()) {
       return null;

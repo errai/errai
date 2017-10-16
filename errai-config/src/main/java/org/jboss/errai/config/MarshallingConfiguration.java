@@ -53,11 +53,12 @@ public class MarshallingConfiguration {
   //FIXME: tiago: make it work with annoation configuration too
   public static boolean isPortableType(final Class<?> cls) {
     final MetaClass mc = MetaClassFactory.get(cls);
+    final ErraiAppPropertiesConfiguration erraiAppPropertiesConfiguration = new ErraiAppPropertiesConfiguration();
 
-    final Set<MetaClass> exposedPortableTypes = new ErraiAppPropertiesConfiguration().modules()
+    final Set<MetaClass> exposedPortableTypes = erraiAppPropertiesConfiguration.modules()
             .getExposedPortableTypes();
 
-    final Set<MetaClass> nonExposedPortableTypes = new ErraiAppPropertiesConfiguration().modules()
+    final Set<MetaClass> nonExposedPortableTypes = erraiAppPropertiesConfiguration.modules()
             .getNonExposedPortableTypes();
 
     return mc.isAnnotationPresent(Portable.class)

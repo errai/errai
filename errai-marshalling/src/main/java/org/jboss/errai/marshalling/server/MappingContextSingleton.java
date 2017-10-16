@@ -16,18 +16,14 @@
 
 package org.jboss.errai.marshalling.server;
 
-import static org.slf4j.LoggerFactory.getLogger;
-
-import java.io.IOException;
-
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
+import org.jboss.errai.config.ErraiAppPropertiesConfiguration;
 import org.jboss.errai.config.util.ClassScanner;
 import org.jboss.errai.marshalling.client.MarshallingSessionProviderFactory;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallerFactory;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
-import org.jboss.errai.marshalling.client.api.Parser;
 import org.jboss.errai.marshalling.client.api.ParserFactory;
 import org.jboss.errai.marshalling.client.api.annotations.AlwaysQualify;
 import org.jboss.errai.marshalling.client.api.exceptions.MarshallingException;
@@ -45,23 +41,22 @@ import org.jboss.errai.marshalling.server.marshallers.DefaultArrayMarshaller;
 import org.jboss.errai.marshalling.server.util.ServerMarshallUtil;
 import org.slf4j.Logger;
 
+import java.io.IOException;
+
+import static org.slf4j.LoggerFactory.getLogger;
+
 /**
  * @author Mike Brock
  */
 public class MappingContextSingleton {
   private static final ServerMappingContext context;
   private static final Logger log = getLogger("ErraiMarshalling");
+  private static final ErraiAppPropertiesConfiguration ERRAI_CONFIGURATION = new ErraiAppPropertiesConfiguration();
 
   static {
     ClassScanner.setReflectionsScanning(true);
 
-    ParserFactory.registerParser(
-        new Parser() {
-          @Override
-          public EJValue parse(final String input) {
-            return JSONDecoder.decode(input);
-          }
-        });
+    ParserFactory.registerParser(JSONDecoder::decode);
 
     ServerMappingContext sContext;
 
@@ -104,7 +99,7 @@ public class MappingContextSingleton {
 
   public static ServerMappingContext loadPrecompiledMarshallers() throws Exception {
 
-    final Class<? extends MarshallerFactory> cls = ServerMarshallUtil.getGeneratedMarshallerFactoryForServer();
+    final Class<? extends MarshallerFactory> cls = ServerMarshallUtil.getGeneratedMarshallerFactoryForServer(ERRAI_CONFIGURATION);
 
     if (cls == null) {
       return loadDynamicMarshallers();
@@ -146,7 +141,7 @@ public class MappingContextSingleton {
 
       @Override
       public DefinitionsFactory getDefinitionsFactory() {
-        return DefinitionsFactorySingleton.get();
+        return DefinitionsFactorySingleton.get(ERRAI_CONFIGURATION);
       }
 
       @Override
@@ -187,7 +182,7 @@ public class MappingContextSingleton {
     dynamicMarshallingWarning();
 
     return new ServerMappingContext() {
-      private final DefinitionsFactory factory = DefinitionsFactorySingleton.newInstance();
+      private final DefinitionsFactory factory = DefinitionsFactorySingleton.newInstance(ERRAI_CONFIGURATION);
 
       {
         MarshallingSessionProviderFactory.setMarshallingSessionProvider(new MarshallingSessionProvider() {
@@ -230,8 +225,8 @@ public class MappingContextSingleton {
                   def.getServerMarshallerClass().asSubclass(Marshaller.class).newInstance();
 
               if (def.getServerMarshallerClass().isAnnotationPresent(AlwaysQualify.class)) {
-                def.setMarshallerInstance(new QualifyingMarshallerWrapper<Object>(marshallerInstance,
-                    (Class<Object>) def.getMappingClass().unsafeAsClass()));
+                def.setMarshallerInstance(new QualifyingMarshallerWrapper<>(marshallerInstance,
+                        (Class<Object>) def.getMappingClass().unsafeAsClass()));
               }
               else {
                 def.setMarshallerInstance(marshallerInstance);

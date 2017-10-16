@@ -18,7 +18,9 @@ package org.jboss.errai.apt.internal.generator;
 
 import org.jboss.errai.common.apt.ErraiAptExportedTypes;
 import org.jboss.errai.common.apt.ErraiAptGenerators;
+import org.jboss.errai.common.apt.configuration.AptErraiConfiguration;
 import org.jboss.errai.common.apt.generator.ErraiAptGeneratedSourceFile;
+import org.jboss.errai.config.ErraiConfiguration;
 import org.jboss.errai.marshalling.rebind.MarshallerGeneratorFactory;
 
 import java.util.Arrays;
@@ -46,13 +48,15 @@ public class MarshallersAptGenerator extends ErraiAptGenerators.MultipleFiles {
   @Override
   public Collection<ErraiAptGeneratedSourceFile> files() {
 
+    final ErraiConfiguration erraiConfiguration = new AptErraiConfiguration(metaClassFinder());
+
     final ErraiAptGeneratedSourceFile client = new ErraiAptGeneratedSourceFile(CLIENT_PACKAGE_NAME, CLIENT_CLASS_NAME,
-            MarshallerGeneratorFactory.getFor(null, GWT).generate(CLIENT_PACKAGE_NAME, CLIENT_CLASS_NAME));
+            MarshallerGeneratorFactory.getFor(null, GWT, erraiConfiguration).generate(CLIENT_PACKAGE_NAME, CLIENT_CLASS_NAME));
 
-    final ErraiAptGeneratedSourceFile server = new ErraiAptGeneratedSourceFile(SERVER_PACKAGE_NAME, SERVER_CLASS_NAME,
-            MarshallerGeneratorFactory.getFor(null, Java).generate(SERVER_PACKAGE_NAME, SERVER_CLASS_NAME));
+//    final ErraiAptGeneratedSourceFile server = new ErraiAptGeneratedSourceFile(SERVER_PACKAGE_NAME, SERVER_CLASS_NAME,
+//            MarshallerGeneratorFactory.getFor(null, Java).generate(SERVER_PACKAGE_NAME, SERVER_CLASS_NAME));
 
-    return Arrays.asList(client, server);
+    return Arrays.asList(client);
   }
 
 }

@@ -24,10 +24,12 @@ import com.google.gwt.core.ext.typeinfo.NotFoundException;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.util.ClassChangeUtil;
 import org.jboss.errai.common.metadata.RebindUtils;
+import org.jboss.errai.config.ErraiAppPropertiesConfiguration;
+import org.jboss.errai.config.ErraiConfiguration;
+import org.jboss.errai.config.MarshallingConfiguration;
 import org.jboss.errai.config.rebind.AbstractAsyncGenerator;
 import org.jboss.errai.config.rebind.EnvUtil;
 import org.jboss.errai.config.rebind.GenerateAsync;
-import org.jboss.errai.config.MarshallingConfiguration;
 import org.jboss.errai.marshalling.client.api.MarshallerFactory;
 import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
 import org.jboss.errai.marshalling.rebind.util.OutputDirectoryUtil;
@@ -75,6 +77,7 @@ public class MarshallersGenerator extends AbstractAsyncGenerator {
   protected String generate(final TreeLogger treeLogger, final GeneratorContext context) {
     synchronized (generatorLock) {
       final boolean junitOrDevMode = !EnvUtil.isProdMode();
+      final ErraiConfiguration erraiConfiguration = new ErraiAppPropertiesConfiguration();
 
       if (SERVER_MARSHALLER_OUTPUT_ENABLED && MarshallingGenUtil.isUseStaticMarshallers()) {
 
@@ -83,7 +86,7 @@ public class MarshallersGenerator extends AbstractAsyncGenerator {
           serverSource = _serverMarshallerCache;
         }
         else {
-          serverSource = MarshallerGeneratorFactory.getFor(context, MarshallerOutputTarget.Java)
+          serverSource = MarshallerGeneratorFactory.getFor(context, MarshallerOutputTarget.Java, erraiConfiguration)
               .generate(SERVER_PACKAGE_NAME, SERVER_CLASS_NAME);
           _serverMarshallerCache = serverSource;
         }
@@ -118,8 +121,8 @@ public class MarshallersGenerator extends AbstractAsyncGenerator {
         return _clientMarshallerCache;
       }
 
-      return _clientMarshallerCache = MarshallerGeneratorFactory.getFor(context, MarshallerOutputTarget.GWT)
-              .generate(CLIENT_PACKAGE_NAME, CLIENT_CLASS_NAME, this::addCacheRelevantClass);
+      return _clientMarshallerCache = MarshallerGeneratorFactory.getFor(context, MarshallerOutputTarget.GWT,
+              erraiConfiguration).generate(CLIENT_PACKAGE_NAME, CLIENT_CLASS_NAME, this::addCacheRelevantClass);
     }
   }
 

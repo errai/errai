@@ -741,7 +741,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
 
       if (toType.equals(MetaClassFactory.get(Object.class))) {
         return Stmt.castTo(ObjectMarshaller.class, Stmt.loadVariable(varName))
-            .invoke("demarshall", targetType.unsafeAsClass(), valueStatement, loadVariable("a1"));
+            .invoke("demarshall", targetType, valueStatement, loadVariable("a1"));
       }
 
       return Stmt.loadVariable(varName)
