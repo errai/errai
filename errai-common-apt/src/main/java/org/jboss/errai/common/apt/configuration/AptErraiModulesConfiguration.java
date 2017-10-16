@@ -18,12 +18,10 @@ package org.jboss.errai.common.apt.configuration;
 
 import org.jboss.errai.codegen.meta.MetaAnnotation;
 import org.jboss.errai.codegen.meta.MetaClass;
-import org.jboss.errai.config.MetaClassFinder;
 import org.jboss.errai.common.configuration.ErraiModule;
 import org.jboss.errai.config.ErraiModulesConfiguration;
+import org.jboss.errai.config.MetaClassFinder;
 
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -31,11 +29,13 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.stream;
+import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
 import static org.jboss.errai.common.configuration.ErraiModule.Property.BINDABLE_TYPES;
 import static org.jboss.errai.common.configuration.ErraiModule.Property.IOC_ALTERNATIVES;
 import static org.jboss.errai.common.configuration.ErraiModule.Property.IOC_BLACKLIST;
 import static org.jboss.errai.common.configuration.ErraiModule.Property.IOC_WHITELIST;
+import static org.jboss.errai.common.configuration.ErraiModule.Property.MAPPING_ALIASES;
 import static org.jboss.errai.common.configuration.ErraiModule.Property.NON_SERIALIZABLE_TYPES;
 import static org.jboss.errai.common.configuration.ErraiModule.Property.SERIALIZABLE_TYPES;
 
@@ -86,8 +86,9 @@ public class AptErraiModulesConfiguration implements ErraiModulesConfiguration {
 
   @Override
   public Map<String, String> getMappingAliases() {
-    //FIXME: tiago: implement
-    return new HashMap<>();
+    return getConfiguredArrayProperty(x -> stream(x.valueAsArray(MAPPING_ALIASES, MetaAnnotation[].class))).stream()
+            .collect(toMap(a -> a.<MetaClass>value("from").getFullyQualifiedName(),
+                    a -> a.<MetaClass>value("to").getFullyQualifiedName()));
   }
 
   private <V> Set<V> getConfiguredArrayProperty(final Function<MetaAnnotation, Stream<V>> getter) {

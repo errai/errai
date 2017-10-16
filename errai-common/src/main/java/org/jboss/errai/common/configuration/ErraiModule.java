@@ -35,6 +35,8 @@ public @interface ErraiModule {
 
   Class<?>[] iocWhitelist() default {};
 
+  MappingAlias[] mappingAliases() default {};
+
   interface Property {
     String BINDABLE_TYPES = "bindableTypes";
     String SERIALIZABLE_TYPES = "serializableTypes";
@@ -42,6 +44,7 @@ public @interface ErraiModule {
     String IOC_ALTERNATIVES = "iocAlternatives";
     String IOC_BLACKLIST = "iocBlacklist";
     String IOC_WHITELIST = "iocWhitelist";
+    String MAPPING_ALIASES = "mappingAliases";
   }
 
 }

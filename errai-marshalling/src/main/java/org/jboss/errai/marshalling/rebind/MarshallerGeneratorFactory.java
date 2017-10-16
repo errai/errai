@@ -417,20 +417,21 @@ public class MarshallerGeneratorFactory {
             ClassBuilder
                 .define(MARSHALLER_NAME_PREFIX + getVarName(type)).packageScope()
                 .abstractClass()
-                .implementsInterface(
-                    MetaClassFactory.get(GeneratedMarshaller.class))
+                .implementsInterface(GeneratedMarshaller.class)
                 .body().getClassDefinition();
       }
       else {
         final MappingStrategy strategy = MappingStrategyFactory
             .createStrategy(false, GeneratorMappingContextFactory.getFor(context, target), type);
 
-        final String marshallerClassName = generateMarshallerImplClassName(type, target == MarshallerOutputTarget.GWT);
+        final String marshallerClassName = generateMarshallerImplClassName(type, false);
 
         final ClassStructureBuilder<?> marshaller = strategy.getMapper().getMarshaller(marshallerClassName);
         customMarshaller = marshaller.getClassDefinition();
       }
-      classStructureBuilder.declaresInnerClass(new InnerClass(customMarshaller));
+      if (!erraiConfiguration.app().isAptEnvironment()) {
+        classStructureBuilder.declaresInnerClass(new InnerClass(customMarshaller));
+      }
       addMarshaller(customMarshaller, type);
     }
   }
@@ -654,17 +655,13 @@ public class MarshallerGeneratorFactory {
     }
   }
 
-
   public static BuildMetaClass createArrayMarshallerClass(final MetaClass type) {
-    final BuildMetaClass arrayMarshaller =
-        ClassBuilder
-            .define(MARSHALLER_NAME_PREFIX + getVarName(type)).packageScope()
+    return ClassBuilder.define(MARSHALLER_NAME_PREFIX + getVarName(type))
+            .packageScope()
             .abstractClass()
-            .implementsInterface(
-                MetaClassFactory.get(GeneratedMarshaller.class))
-            .body().getClassDefinition();
-
-    return arrayMarshaller;
+            .implementsInterface(GeneratedMarshaller.class)
+            .body()
+            .getClassDefinition();
   }
 
   private void addConditionalAssignment(final MetaClass type, final Statement assignment) {
