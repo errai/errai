@@ -201,7 +201,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
     final MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
 
     EnvUtil.clearCache();
-    final Set<MetaClass> envExposedClasses = MarshallingConfiguration.allExposedPortableTypes(erraiConfiguration, a -> new HashSet<>(ClassScanner.getTypesAnnotatedWith(a)));
+    final Set<MetaClass> envExposedClasses = MarshallingConfiguration.allExposedPortableTypes(erraiConfiguration, a -> new HashSet<>(ClassScanner.getTypesAnnotatedWith(a, true)));
 
     for (final Class<?> cls : findCustomMappings(scanner)) {
       if (!MappingDefinition.class.isAssignableFrom(cls)) {
