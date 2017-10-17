@@ -39,7 +39,7 @@ public class DefaultArrayMarshaller implements Marshaller<Object> {
             arrayType.getOuterComponentType().getFullyQualifiedName(),
             outerMarshaller);
 
-    Class<?> type = arrayType.unsafeAsClass();
+    MetaClass type = arrayType;
     int dim = 0;
     while (type.isArray()) {
       dim++;

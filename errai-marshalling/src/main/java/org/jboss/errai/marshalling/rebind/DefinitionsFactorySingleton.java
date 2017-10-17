@@ -44,7 +44,7 @@ public class DefinitionsFactorySingleton {
   }
 
   public static DefinitionsFactory newInstance(final ErraiConfiguration erraiConfiguration,
-          MetaClassFinder metaClassFinder) {
+          final MetaClassFinder metaClassFinder) {
     return new DefinitionsFactoryImpl(erraiConfiguration, metaClassFinder);
   }
 }

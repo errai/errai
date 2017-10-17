@@ -154,18 +154,29 @@ public class MarshallerGeneratorFactory {
 
   private MarshallerGeneratorFactory(final GeneratorContext context,
           final MarshallerOutputTarget target,
-          final ErraiConfiguration erraiConfiguration) {
+          final ErraiConfiguration erraiConfiguration,
+          final MetaClassFinder metaClassFinder) {
 
     this.context = context;
     this.target = target;
     this.erraiConfiguration = erraiConfiguration;
-    this.metaClassFinder = a -> new HashSet<>(ClassScanner.getTypesAnnotatedWith(a));
+    this.metaClassFinder = metaClassFinder;
   }
 
   public static MarshallerGeneratorFactory getFor(final GeneratorContext context,
           final MarshallerOutputTarget target,
           final ErraiConfiguration erraiConfiguration) {
-    return new MarshallerGeneratorFactory(context, target, erraiConfiguration);
+
+    final MetaClassFinder metaClassFinder = a -> new HashSet<>(ClassScanner.getTypesAnnotatedWith(a));
+    return getFor(context, target, erraiConfiguration, metaClassFinder);
+  }
+
+  public static MarshallerGeneratorFactory getFor(final GeneratorContext context,
+          final MarshallerOutputTarget target,
+          final ErraiConfiguration erraiConfiguration,
+          final MetaClassFinder metaClassFinder) {
+
+    return new MarshallerGeneratorFactory(context, target, erraiConfiguration, metaClassFinder);
   }
 
   public String generate(final String packageName, final String clazzName) {

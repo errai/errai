@@ -21,7 +21,7 @@ import org.jboss.errai.common.apt.AnnotatedSourceElementsFinder;
 import org.jboss.errai.common.apt.AptAnnotatedSourceElementsFinder;
 import org.jboss.errai.common.apt.AptResourceFilesFinder;
 import org.jboss.errai.common.apt.ErraiAptExportedTypes;
-import org.jboss.errai.common.apt.generator.ErraiAptGeneratedSourceFile;
+import org.jboss.errai.common.apt.generator.AptGeneratedSourceFile;
 import org.jboss.errai.common.apt.ErraiAptGenerators;
 
 import javax.annotation.processing.AbstractProcessor;
@@ -119,7 +119,7 @@ public class ErraiAppAptGenerator extends AbstractProcessor {
     }
   }
 
-  private void saveFile(final ErraiAptGeneratedSourceFile file) {
+  private void saveFile(final AptGeneratedSourceFile file) {
     try {
       // By saving .java source files as resources we skip javac compilation. This behavior is desirable since all
       // generated code is client code and will be compiled by the GWT/J2CL compiler.

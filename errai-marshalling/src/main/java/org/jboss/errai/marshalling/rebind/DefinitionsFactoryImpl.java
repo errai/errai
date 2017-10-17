@@ -18,6 +18,7 @@ package org.jboss.errai.marshalling.rebind;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+import org.jboss.errai.apt.internal.generator.MarshallerAptGenerator;
 import org.jboss.errai.codegen.meta.MetaAnnotation;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;

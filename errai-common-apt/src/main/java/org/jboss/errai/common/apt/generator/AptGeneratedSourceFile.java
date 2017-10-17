@@ -19,12 +19,12 @@ package org.jboss.errai.common.apt.generator;
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
-public class ErraiAptGeneratedSourceFile {
+public class AptGeneratedSourceFile {
   private final String packageName;
   private final String classSimpleName;
   private final String sourceCode;
 
-  public ErraiAptGeneratedSourceFile(final String packageName, final String classSimpleName, final String sourceCode) {
+  public AptGeneratedSourceFile(final String packageName, final String classSimpleName, final String sourceCode) {
     this.packageName = packageName;
     this.classSimpleName = classSimpleName;
     this.sourceCode = sourceCode;
