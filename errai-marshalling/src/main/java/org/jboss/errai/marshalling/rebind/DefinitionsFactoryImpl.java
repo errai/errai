@@ -18,7 +18,6 @@ package org.jboss.errai.marshalling.rebind;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import org.jboss.errai.apt.internal.generator.MarshallerAptGenerator;
 import org.jboss.errai.codegen.meta.MetaAnnotation;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
@@ -29,7 +28,6 @@ import org.jboss.errai.config.ErraiConfiguration;
 import org.jboss.errai.config.MarshallingConfiguration;
 import org.jboss.errai.config.MetaClassFinder;
 import org.jboss.errai.config.rebind.EnvUtil;
-import org.jboss.errai.config.util.ClassScanner;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
 import org.jboss.errai.marshalling.client.api.annotations.ImplementationAliases;
@@ -255,7 +253,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
       mergeDefinition(def);
     }
 
-    final Collection<MetaClass> cliMarshallers = ClassScanner.getTypesAnnotatedWith(ClientMarshaller.class, true);
+    final Collection<MetaClass> cliMarshallers = metaClassFinder.findAnnotatedWith(ClientMarshaller.class);
     final MetaClass Marshaller_MC = MetaClassFactory.get(Marshaller.class);
 
     for (final MetaClass marshallerMetaClass : cliMarshallers) {
@@ -291,44 +289,45 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
 
     final Set<Class<?>> serverMarshallers = findServerMarshallers(scanner);
 
-    for (final Class<?> marshallerCls : serverMarshallers) {
-      if (Marshaller.class.isAssignableFrom(marshallerCls)) {
+    Set<MetaClass> serverMarshallersMeta = metaClassFinder.findAnnotatedWith(ServerMarshaller.class);
+    for (final MetaClass marshallerCls : serverMarshallersMeta) {
+      if (marshallerCls.isAssignableTo(Marshaller.class)) {
         try {
-          final Class<?> type = marshallerCls.getAnnotation(ServerMarshaller.class).value();
+          final MetaClass type = marshallerCls.getAnnotation(ServerMarshaller.class).get().value();
           final MappingDefinition definition;
 
           if (hasDefinition(type)) {
             definition = getDefinition(type);
-            definition.setServerMarshallerClass(marshallerCls.asSubclass(Marshaller.class));
+            definition.setServerMarshallerClass(marshallerCls);
           }
           else {
             definition = new MappingDefinition(type, true);
-            definition.setServerMarshallerClass(marshallerCls.asSubclass(Marshaller.class));
+            definition.setServerMarshallerClass(marshallerCls);
             addDefinition(definition);
 
-            exposedClasses.add(MetaClassFactory.get(type).asBoxed());
-            typesWithBuiltInMarshallers.add(MetaClassFactory.get(type).asBoxed());
+            exposedClasses.add(type.asBoxed());
+            typesWithBuiltInMarshallers.add(type.asBoxed());
           }
 
           if (marshallerCls.isAnnotationPresent(ImplementationAliases.class)) {
-            for (final Class<?> aliasCls : marshallerCls.getAnnotation(ImplementationAliases.class).value()) {
+            for (final MetaClass aliasCls : marshallerCls.getAnnotation(ImplementationAliases.class).get().valueAsArray(MetaClass[].class)) {
               if (hasDefinition(aliasCls)) {
-                getDefinition(aliasCls).setServerMarshallerClass(marshallerCls.asSubclass(Marshaller.class));
+                getDefinition(aliasCls).setServerMarshallerClass(marshallerCls);
               }
               else {
                 final MappingDefinition aliasMappingDef = new MappingDefinition(aliasCls, true);
-                aliasMappingDef.setServerMarshallerClass(marshallerCls.asSubclass(Marshaller.class));
+                aliasMappingDef.setServerMarshallerClass(marshallerCls);
                 addDefinition(aliasMappingDef);
 
-                exposedClasses.add(MetaClassFactory.get(aliasCls));
-                typesWithBuiltInMarshallers.add(MetaClassFactory.get(type).asBoxed());
-                mappingAliases.put(aliasCls.getName(), type.getName());
+                exposedClasses.add(aliasCls);
+                typesWithBuiltInMarshallers.add(type.asBoxed());
+                mappingAliases.put(aliasCls.getFullyQualifiedName(), type.getFullyQualifiedName());
               }
             }
           }
         }
         catch (final Throwable t) {
-          throw new RuntimeException("could not instantiate marshaller class: " + marshallerCls.getName(), t);
+          throw new RuntimeException("could not instantiate marshaller class: " + marshallerCls.getFullyQualifiedName(), t);
         }
       }
       else {

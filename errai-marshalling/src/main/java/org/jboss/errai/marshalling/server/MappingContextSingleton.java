@@ -221,25 +221,20 @@ public class MappingContextSingleton {
         factory.getDefinition(Object.class).setMarshallerInstance(new ObjectMarshaller());
 
         for (final MappingDefinition def : factory.getMappingDefinitions()) {
-          if (def.getMarshallerInstance() != null) {
-          }
-          else if (def.getServerMarshallerClass() != null) {
+          if (def.getMarshallerInstance() == null && def.getServerMarshallerClass() != null) {
             try {
-              final Marshaller<Object> marshallerInstance =
-                  def.getServerMarshallerClass().asSubclass(Marshaller.class).newInstance();
+              final Marshaller<Object> marshallerInstance = def.getServerMarshallerClass()
+                      .unsafeAsClass()
+                      .asSubclass(Marshaller.class)
+                      .newInstance();
 
               if (def.getServerMarshallerClass().isAnnotationPresent(AlwaysQualify.class)) {
                 def.setMarshallerInstance(new QualifyingMarshallerWrapper<>(marshallerInstance,
                         (Class<Object>) def.getMappingClass().unsafeAsClass()));
-              }
-              else {
+              } else {
                 def.setMarshallerInstance(marshallerInstance);
               }
-            }
-            catch (InstantiationException e) {
-              e.printStackTrace();
-            }
-            catch (IllegalAccessException e) {
+            } catch (InstantiationException | IllegalAccessException e) {
               e.printStackTrace();
             }
           }

@@ -342,7 +342,7 @@ public class MarshallerGeneratorFactory {
     final MappingDefinition definition = mappingContext.getDefinitionsFactory().getDefinition(clsName);
     @SuppressWarnings("rawtypes")
     final MetaClass marshallerCls = (target == MarshallerOutputTarget.GWT) ?
-            definition.getClientMarshallerClass() : MetaClassFactory.get(definition.getServerMarshallerClass());
+            definition.getClientMarshallerClass() : definition.getServerMarshallerClass();
 
     if (marshallerCls == null) {
       return;
@@ -612,7 +612,7 @@ public class MarshallerGeneratorFactory {
 
     final BlockBuilder<?> dmBuilder =
         classBuilder.privateMethod(arrayType, "_demarshall" + dim)
-            .parameters(EJArray.class, MarshallingSession.class).body();
+            .parameters(MetaClassFactory.getUncached(EJArray.class), MetaClassFactory.getUncached(MarshallingSession.class)).body();
 
     if (initMethod != null) {
       dmBuilder.append(Stmt.loadVariable("this").invoke("lazyInit"));
