@@ -52,13 +52,14 @@ public class MarshallingConfiguration {
                   .stream()
                   .collect(toMap(x -> MetaClassFactory.get(x.getKey()), Map.Entry::getValue))));
 
+  private static final ErraiAppPropertiesConfiguration ERRAI_APP_PROPERTIES_CONFIGURATION = new ErraiAppPropertiesConfiguration();
+
   @Deprecated
   //FIXME: tiago: make it work with annotation configuration too
   public static boolean isPortableType(final Class<?> cls) {
     final MetaClass mc = MetaClassFactory.get(cls);
-    final ErraiAppPropertiesConfiguration erraiAppPropertiesConfiguration = new ErraiAppPropertiesConfiguration();
     final MetaClassFinder metaClassFinder = a -> new HashSet<>(ClassScanner.getTypesAnnotatedWith(a));
-    final Set<MetaClass> allPortableTypes = allPortableTypes(erraiAppPropertiesConfiguration, metaClassFinder);
+    final Set<MetaClass> allPortableTypes = allPortableTypes(ERRAI_APP_PROPERTIES_CONFIGURATION, metaClassFinder);
 
     return mc.isAnnotationPresent(Portable.class) || allPortableTypes.contains(mc) || String.class.getName()
             .equals(mc.getFullyQualifiedName()) || TypeHandlerFactory.getHandler(mc.unsafeAsClass()) != null;

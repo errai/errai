@@ -23,7 +23,6 @@ import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.common.client.api.annotations.Portable;
 import org.jboss.errai.common.metadata.MetaDataScanner;
-import org.jboss.errai.common.metadata.ScannerSingleton;
 import org.jboss.errai.config.ErraiConfiguration;
 import org.jboss.errai.config.MarshallingConfiguration;
 import org.jboss.errai.config.MetaClassFinder;
@@ -90,9 +89,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.Stream.Builder;
+
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 
 /**
  * The default implementation of {@link DefinitionsFactory}. This implementation covers the detection and mapping of
@@ -199,12 +200,10 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
   private void loadCustomMappings() {
     exposedClasses.add(MetaClassFactory.get(Object.class));
 
-    final MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
-
     EnvUtil.clearCache();
     final Set<MetaClass> envExposedClasses = MarshallingConfiguration.allExposedPortableTypes(erraiConfiguration, metaClassFinder);
 
-    for (final Class<?> cls : findCustomMappings(scanner)) {
+    for (final Class<?> cls : findCustomMappings()) {
       if (!MappingDefinition.class.isAssignableFrom(cls)) {
         throw new RuntimeException("@CustomMapping class: " + cls.getName() + " does not inherit "
             + MappingDefinition.class.getName());
@@ -287,10 +286,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
       }
     }
 
-    final Set<Class<?>> serverMarshallers = findServerMarshallers(scanner);
-
-    Set<MetaClass> serverMarshallersMeta = metaClassFinder.findAnnotatedWith(ServerMarshaller.class);
-    for (final MetaClass marshallerCls : serverMarshallersMeta) {
+    for (final MetaClass marshallerCls : metaClassFinder.findAnnotatedWith(ServerMarshaller.class)) {
       if (marshallerCls.isAssignableTo(Marshaller.class)) {
         try {
           final MetaClass type = marshallerCls.getAnnotation(ServerMarshaller.class).get().value();
@@ -350,7 +346,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
         }
         return builder.build().filter(MetaClass::isConcrete);
       })
-      .collect(Collectors.toList());
+      .collect(toList());
     exposedClasses.addAll(exposedSuperTypes);
 
     final Map<String, String> configuredMappingAliases = new HashMap<>();
@@ -395,8 +391,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
 
     for (final MetaClass enumType : enums) {
       if (!hasDefinition(enumType)) {
-        final MappingDefinition enumDef = DefaultJavaDefinitionMapper
-            .map(enumType, this);
+        final MappingDefinition enumDef = DefaultJavaDefinitionMapper.map(enumType, this);
         enumDef.setMarshallerInstance(new DefaultDefinitionMarshaller(enumDef));
         addDefinition(enumDef);
         exposedClasses.add(enumType);
@@ -462,58 +457,12 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
     log.debug("comprehended " + exposedClasses.size() + " classes");
   }
 
-  private Set<Class<?>> findCustomMappings(final MetaDataScanner scanner) {
-    Set<Class<?>> scannedMappings = scanner.getTypesAnnotatedWith(CustomMapping.class, true);
-    if (scannedMappings.isEmpty()) {
-      // This should only happen in OSGI environments where we can't get classpath URLs
-      log.warn("Unable to scan classpath for CustomMappings. Falling back to default.");
-      scannedMappings = new HashSet<>();
-      scannedMappings.add(ThrowableDefinition.class);
-      scannedMappings.add(StackTraceElementDefinition.class);
-    }
-
-    return scannedMappings;
-  }
-
-  private Set<Class<?>> findServerMarshallers(final MetaDataScanner scanner) {
-    Set<Class<?>> serverMarshallers = scanner.getTypesAnnotatedWith(ServerMarshaller.class, true);
-
-    if (serverMarshallers.isEmpty()) {
-      // This should only happen in OSGI environments where we can't get classpath URLs
-      log.warn("Unable to scan classpath for ServerMarshallers. Falling back to default.");
-      serverMarshallers = new HashSet<>();
-      serverMarshallers.add(BigDecimalMarshaller.class);
-      serverMarshallers.add(BigIntegerMarshaller.class);
-      serverMarshallers.add(BooleanMarshaller.class);
-      serverMarshallers.add(ByteMarshaller.class);
-      serverMarshallers.add(CharacterMarshaller.class);
-      serverMarshallers.add(DateMarshaller.class);
-      serverMarshallers.add(DoubleMarshaller.class);
-      serverMarshallers.add(FloatMarshaller.class);
-      serverMarshallers.add(IntegerMarshaller.class);
-      serverMarshallers.add(LinkedHashSetMarshaller.class);
-      serverMarshallers.add(LinkedListMarshaller.class);
-      serverMarshallers.add(LinkedMapMarshaller.class);
-      serverMarshallers.add(ListMarshaller.class);
-      serverMarshallers.add(LongMarshaller.class);
-      serverMarshallers.add(MapMarshaller.class);
-      serverMarshallers.add(ObjectMarshaller.class);
-      serverMarshallers.add(PriorityQueueMarshaller.class);
-      serverMarshallers.add(QueueMarshaller.class);
-      serverMarshallers.add(SetMarshaller.class);
-      serverMarshallers.add(ShortMarshaller.class);
-      serverMarshallers.add(SortedMapMarshaller.class);
-      serverMarshallers.add(SortedSetMarshaller.class);
-      serverMarshallers.add(SQLDateMarshaller.class);
-      serverMarshallers.add(StringBufferMarshaller.class);
-      serverMarshallers.add(StringBuilderMarshaller.class);
-      serverMarshallers.add(StringMarshaller.class);
-      serverMarshallers.add(TimeMarshaller.class);
-      serverMarshallers.add(TimestampMarshaller.class);
-      serverMarshallers.add(ServerClassMarshaller.class);
-      serverMarshallers.add(OptionalMarshaller.class);
-    }
-    return serverMarshallers;
+  private Set<Class<?>> findCustomMappings() {
+    //FIXME: tiago: remove unsafe method usa
+    return metaClassFinder.findAnnotatedWith(CustomMapping.class)
+            .stream()
+            .map(MetaClass::unsafeAsClass)
+            .collect(toSet());
   }
 
   @Override

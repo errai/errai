@@ -50,7 +50,7 @@ public class MappingDefinition {
     setMarshallerInstance(marshaller);
     instantiationMapping = new NoConstructMapping();
     this.doNotGenerate = doNotGenerate;
-    this.memberMappings = new ArrayList<MemberMapping>();
+    this.memberMappings = new ArrayList<>();
   }
 
   protected MappingDefinition(final Class<?> toMap) {
