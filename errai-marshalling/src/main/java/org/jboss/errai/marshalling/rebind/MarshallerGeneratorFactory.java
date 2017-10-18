@@ -18,6 +18,7 @@ package org.jboss.errai.marshalling.rebind;
 
 import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.shared.GWT;
+import org.jboss.errai.apt.internal.generator.MarshallerAptGenerator;
 import org.jboss.errai.codegen.Context;
 import org.jboss.errai.codegen.InnerClass;
 import org.jboss.errai.codegen.Parameter;
@@ -41,7 +42,6 @@ import org.jboss.errai.common.rebind.NameUtil;
 import org.jboss.errai.common.rebind.UniqueNameGenerator;
 import org.jboss.errai.config.ErraiConfiguration;
 import org.jboss.errai.config.MetaClassFinder;
-import org.jboss.errai.config.rebind.EnvironmentConfig;
 import org.jboss.errai.config.rebind.EnvironmentConfigExtension;
 import org.jboss.errai.config.util.ClassScanner;
 import org.jboss.errai.marshalling.client.api.DeferredMarshallerCreationCallback;
@@ -479,6 +479,8 @@ public class MarshallerGeneratorFactory {
       }
       if (!erraiConfiguration.app().isAptEnvironment()) {
         classStructureBuilder.declaresInnerClass(new InnerClass(customMarshaller));
+      } else {
+        MarshallerAptGenerator.addExposedClass(type);
       }
       addMarshaller(customMarshaller, type);
     }

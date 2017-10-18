@@ -26,6 +26,7 @@ import org.jboss.errai.config.rebind.EnvironmentConfigExtension;
 import org.jboss.errai.config.rebind.ExposedTypesProvider;
 import org.jboss.errai.config.util.ClassScanner;
 
+import java.lang.reflect.Constructor;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
@@ -148,7 +149,10 @@ public class MarshallingConfiguration {
         final Class<? extends ExposedTypesProvider> providerClass = Class.forName(cls.getFullyQualifiedName())
                 .asSubclass(ExposedTypesProvider.class);
 
-        for (final MetaClass exposedType : providerClass.newInstance().provideTypesToExpose()) {
+        final Constructor<? extends ExposedTypesProvider> constructor = providerClass.getConstructor(MetaClassFinder.class);
+        constructor.setAccessible(true);
+
+        for (final MetaClass exposedType : constructor.newInstance(metaClassFinder).provideTypesToExpose()) {
           if (exposedType.isPrimitive()) {
             exposedClasses.add(exposedType.asBoxed());
           } else if (exposedType.isConcrete()) {

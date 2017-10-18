@@ -16,9 +16,10 @@
 
 package org.jboss.errai.config.rebind;
 
-import java.util.Collection;
-
 import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.config.MetaClassFinder;
+
+import java.util.Collection;
 
 /**
  * An <tt>ExposedTypesProvider</tt> is an environment extension component that can be automatically discovered
@@ -27,7 +28,13 @@ import org.jboss.errai.codegen.meta.MetaClass;
  *
  * @author Mike Brock
  */
-public interface ExposedTypesProvider {
+public abstract class ExposedTypesProvider {
+
+  private final MetaClassFinder metaClassFinder;
+
+  public ExposedTypesProvider(final MetaClassFinder metaClassFinder) {
+    this.metaClassFinder = metaClassFinder;
+  }
 
   /**
    * Returns the list of types that should be exposed as portable. The returned
@@ -37,5 +44,9 @@ public interface ExposedTypesProvider {
    * @return a collection of types that will need to be marshallable, based on
    *         the type of inspection performed by the underlying implementation.
    */
-  public Collection<MetaClass> provideTypesToExpose();
+  public abstract Collection<MetaClass> provideTypesToExpose();
+
+  public MetaClassFinder metaClassFinder() {
+    return metaClassFinder;
+  }
 }

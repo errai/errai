@@ -18,6 +18,7 @@ package org.jboss.errai.marshalling.rebind;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+import org.jboss.errai.apt.internal.generator.MarshallerAptGenerator;
 import org.jboss.errai.codegen.meta.MetaAnnotation;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
@@ -461,7 +462,13 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
     //FIXME: tiago: remove unsafe method usa
     return metaClassFinder.findAnnotatedWith(CustomMapping.class)
             .stream()
-            .map(MetaClass::unsafeAsClass)
+            .map(s -> {
+              try {
+                return Class.forName(s.getFullyQualifiedName());
+              } catch (final ClassNotFoundException e) {
+                throw new RuntimeException(e);
+              }
+            })
             .collect(toSet());
   }
 

@@ -36,7 +36,7 @@ import org.jboss.errai.security.shared.exception.UnauthorizedException;
  * 
  * @author Max Barkley <mbarkley@redhat.com>
  */
-@CustomMapping(value = SecurityException.class)
+@CustomMapping(SecurityException.class)
 @InheritedMappings(
         value = { UnauthenticatedException.class, UnauthorizedException.class, AuthenticationException.class })
 public class SecurityExceptionMapping extends MappingDefinition {

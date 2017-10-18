@@ -21,6 +21,7 @@ import org.jboss.errai.common.client.api.annotations.Portable;
 import org.jboss.errai.config.rebind.EnvironmentConfigExtension;
 import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
 import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
+import org.jboss.errai.marshalling.rebind.api.CustomMapping;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
@@ -34,6 +35,7 @@ public final class ErraiMarshallingExportedAnnotations {
   private NonPortable nonPortable;
   private ClientMarshaller clientMarshaller;
   private ServerMarshaller serverMarshaller;
+  private CustomMapping customMapping;
 
   //FIXME: tiago: not ideal to be here, but errai-marshalling is really the only place where it's used
   private EnvironmentConfigExtension environmentConfigExtension;

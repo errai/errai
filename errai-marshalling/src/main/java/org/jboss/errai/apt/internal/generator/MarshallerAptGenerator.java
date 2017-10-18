@@ -22,11 +22,11 @@ import org.jboss.errai.common.apt.ErraiAptGenerators;
 import org.jboss.errai.common.apt.configuration.AptErraiConfiguration;
 import org.jboss.errai.common.apt.generator.AptGeneratedSourceFile;
 import org.jboss.errai.config.ErraiConfiguration;
-import org.jboss.errai.config.MarshallingConfiguration;
 import org.jboss.errai.marshalling.rebind.MarshallerGenerator;
 import org.jboss.errai.marshalling.rebind.MarshallerGeneratorFactory;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
 
 import static java.util.stream.Collectors.toSet;
@@ -39,6 +39,8 @@ import static org.jboss.errai.marshalling.rebind.MarshallerGenerator.PACKAGE_NAM
  */
 public class MarshallerAptGenerator extends ErraiAptGenerators.MultipleFiles {
 
+  private static Set<MetaClass> exposedClasses = new HashSet<>();
+
   // IMPORTANT: Do not remove. ErraiAppAptGenerator depends on this constructor
   public MarshallerAptGenerator(final ErraiAptExportedTypes exportedTypes) {
     super(exportedTypes);
@@ -47,10 +49,7 @@ public class MarshallerAptGenerator extends ErraiAptGenerators.MultipleFiles {
   @Override
   public Collection<AptGeneratedSourceFile> files() {
     final ErraiConfiguration erraiConfiguration = new AptErraiConfiguration(metaClassFinder());
-    return MarshallingConfiguration.allExposedPortableTypes(erraiConfiguration, metaClassFinder())
-            .stream()
-            .map(type -> getGeneratedFile(erraiConfiguration, type))
-            .collect(toSet());
+    return exposedClasses.stream().map(type -> getGeneratedFile(erraiConfiguration, type)).collect(toSet());
   }
 
   private AptGeneratedSourceFile getGeneratedFile(final ErraiConfiguration erraiConfiguration, final MetaClass type) {
@@ -73,5 +72,9 @@ public class MarshallerAptGenerator extends ErraiAptGenerators.MultipleFiles {
   public int priority() {
     //Has to run after MarshallersGenerator because it sets the exposedClasses
     return 1;
+  }
+
+  public static void addExposedClass(final MetaClass type) {
+    exposedClasses.add(type);
   }
 }

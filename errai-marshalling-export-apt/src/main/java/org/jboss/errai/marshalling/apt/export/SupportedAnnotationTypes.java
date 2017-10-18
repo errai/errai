@@ -25,6 +25,7 @@ interface SupportedAnnotationTypes {
   String NON_PORTABLE = "org.jboss.errai.common.client.api.annotations.NonPortable";
   String CLIENT_MARSHALLER = "org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller";
   String SERVER_MARSHALLER = "org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller";
+  String CUSTOM_MAPPING = "org.jboss.errai.marshalling.rebind.api.CustomMapping";
 
   String ENVIRONMENT_CONFIG_EXTENSION = "org.jboss.errai.config.rebind.EnvironmentConfigExtension";
 }
