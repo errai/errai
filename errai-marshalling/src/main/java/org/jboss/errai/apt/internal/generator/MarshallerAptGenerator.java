@@ -25,11 +25,12 @@ import org.jboss.errai.config.ErraiConfiguration;
 import org.jboss.errai.marshalling.rebind.MarshallerGenerator;
 import org.jboss.errai.marshalling.rebind.MarshallerGeneratorFactory;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
-import static java.util.stream.Collectors.toSet;
 import static org.jboss.errai.marshalling.rebind.MarshallerGenerator.PACKAGE_NAME;
 
 /**
@@ -39,7 +40,7 @@ import static org.jboss.errai.marshalling.rebind.MarshallerGenerator.PACKAGE_NAM
  */
 public class MarshallerAptGenerator extends ErraiAptGenerators.MultipleFiles {
 
-  private static Set<MetaClass> exposedClasses = new HashSet<>();
+  private static final List<MetaClass> exposedClasses = new ArrayList<>();
 
   // IMPORTANT: Do not remove. ErraiAppAptGenerator depends on this constructor
   public MarshallerAptGenerator(final ErraiAptExportedTypes exportedTypes) {
@@ -49,7 +50,15 @@ public class MarshallerAptGenerator extends ErraiAptGenerators.MultipleFiles {
   @Override
   public Collection<AptGeneratedSourceFile> files() {
     final ErraiConfiguration erraiConfiguration = new AptErraiConfiguration(metaClassFinder());
-    return exposedClasses.stream().map(type -> getGeneratedFile(erraiConfiguration, type)).collect(toSet());
+    final Set<AptGeneratedSourceFile> files = new HashSet<>();
+
+    //We need to use this iterate using an index here because we add elements to exposedClasses during iteration
+    for (int i = 0; i < exposedClasses.size(); i++) {
+      final MetaClass metaClass = exposedClasses.get(i);
+      files.add(getGeneratedFile(erraiConfiguration, metaClass));
+    }
+
+    return files;
   }
 
   private AptGeneratedSourceFile getGeneratedFile(final ErraiConfiguration erraiConfiguration, final MetaClass type) {
@@ -75,6 +84,8 @@ public class MarshallerAptGenerator extends ErraiAptGenerators.MultipleFiles {
   }
 
   public static void addExposedClass(final MetaClass type) {
-    exposedClasses.add(type);
+    if (!exposedClasses.contains(type)) {
+      exposedClasses.add(type);
+    }
   }
 }

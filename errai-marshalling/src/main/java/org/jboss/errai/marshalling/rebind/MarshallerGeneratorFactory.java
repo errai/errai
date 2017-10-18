@@ -131,6 +131,8 @@ public class MarshallerGeneratorFactory {
 
     if (!erraiConfiguration.app().isAptEnvironment()) {
       return marshaller;
+    } else {
+      MarshallerAptGenerator.addExposedClass(type);
     }
 
     return ClassBuilder.define(getMarshallerImplClassName(type, true))
@@ -487,15 +489,13 @@ public class MarshallerGeneratorFactory {
         final MappingStrategy strategy = MappingStrategyFactory
             .createStrategy(false, GeneratorMappingContextFactory.getFor(context, target), type, erraiConfiguration);
 
-        final String marshallerClassName = generateMarshallerImplClassName(type, false);
+        final String marshallerClassName = getMarshallerImplClassName(type, false);
 
         final ClassStructureBuilder<?> marshaller = strategy.getMapper().getMarshaller(marshallerClassName);
         customMarshaller = marshaller.getClassDefinition();
       }
       if (!erraiConfiguration.app().isAptEnvironment()) {
         classStructureBuilder.declaresInnerClass(new InnerClass(customMarshaller));
-      } else {
-        MarshallerAptGenerator.addExposedClass(type);
       }
       addMarshaller(customMarshaller, type);
     }
@@ -548,8 +548,6 @@ public class MarshallerGeneratorFactory {
 
       if (!erraiConfiguration.app().isAptEnvironment()) {
         classStructureBuilder.declaresInnerClass(arrayMarshaller);
-      } else {
-        MarshallerAptGenerator.addExposedClass(type);
       }
 
       addConditionalAssignment(type, 
