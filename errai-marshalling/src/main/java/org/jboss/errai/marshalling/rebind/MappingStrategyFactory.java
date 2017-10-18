@@ -17,6 +17,7 @@
 package org.jboss.errai.marshalling.rebind;
 
 import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.config.ErraiConfiguration;
 import org.jboss.errai.marshalling.rebind.api.GeneratorMappingContext;
 import org.jboss.errai.marshalling.rebind.api.MappingStrategy;
 import org.jboss.errai.marshalling.rebind.api.impl.defaultjava.DefaultJavaMappingStrategy;
@@ -26,16 +27,18 @@ import org.jboss.errai.marshalling.rebind.api.impl.defaultjava.DefaultJavaMappin
  */
 public class MappingStrategyFactory {
   static MappingStrategy createStrategy(final boolean gwtTarget,
-                                        final GeneratorMappingContext context,
-                                        final MetaClass clazz) {
+          final GeneratorMappingContext context,
+          final MetaClass clazz,
+          final ErraiConfiguration erraiConfiguration) {
 
-    return defaultStrategy(gwtTarget, context, clazz);
+    return defaultStrategy(gwtTarget, context, clazz, erraiConfiguration);
   }
 
   private static MappingStrategy defaultStrategy(final boolean gwtTarget,
-                                                 final GeneratorMappingContext context,
-                                                 final MetaClass clazz) {
+          final GeneratorMappingContext context,
+          final MetaClass clazz,
+          final ErraiConfiguration erraiConfiguration) {
 
-    return new DefaultJavaMappingStrategy(gwtTarget, context, clazz);
+    return new DefaultJavaMappingStrategy(gwtTarget, context, clazz, erraiConfiguration);
   }
 }

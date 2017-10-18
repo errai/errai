@@ -16,15 +16,6 @@
 
 package org.jboss.errai.marshalling.rebind.api.impl.defaultjava;
 
-import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
-import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
-import static org.jboss.errai.codegen.util.Stmt.loadVariable;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import javax.enterprise.util.TypeLiteral;
-
 import org.jboss.errai.codegen.Cast;
 import org.jboss.errai.codegen.InnerClass;
 import org.jboss.errai.codegen.Parameter;
@@ -56,6 +47,7 @@ import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.codegen.util.Str;
 import org.jboss.errai.common.client.protocols.SerializationParts;
+import org.jboss.errai.config.ErraiConfiguration;
 import org.jboss.errai.marshalling.client.api.GeneratedMarshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.exceptions.InvalidMappingException;
@@ -76,6 +68,15 @@ import org.jboss.errai.marshalling.rebind.api.model.MappingDefinition;
 import org.jboss.errai.marshalling.rebind.api.model.MemberMapping;
 import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
 
+import javax.enterprise.util.TypeLiteral;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
+import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
+import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
+import static org.jboss.errai.codegen.util.Stmt.loadVariable;
+
 /**
  * The Errai default Java-to-JSON-to-Java marshaling strategy.
  *
@@ -87,13 +88,16 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
   private final GeneratorMappingContext context;
   private final MetaClass toMap;
   private final boolean gwtTarget;
+  private final ErraiConfiguration erraiConfiguration;
 
   public DefaultJavaMappingStrategy(final boolean gwtTarget,
-                                    final GeneratorMappingContext context,
-                                    final MetaClass toMap) {
+          final GeneratorMappingContext context,
+          final MetaClass toMap,
+          final ErraiConfiguration erraiConfiguration) {
     this.gwtTarget = gwtTarget;
     this.context = context;
     this.toMap = toMap;
+    this.erraiConfiguration = erraiConfiguration;
   }
 
   @Override
@@ -193,7 +197,8 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
                   if (gwtTarget) {
                     BuildMetaClass arrayMarshaller = MarshallerGeneratorFactory.createArrayMarshallerClass(type);
 
-                    if (!containsInnerClass(classStructureBuilder, arrayMarshaller)) {
+                    if (!containsInnerClass(classStructureBuilder, arrayMarshaller) && !erraiConfiguration.app()
+                            .isAptEnvironment()) {
                       classStructureBuilder.declaresInnerClass(new InnerClass(arrayMarshaller));
                     }
                     Statement deferred = context.getArrayMarshallerCallback().deferred(type, arrayMarshaller);
@@ -314,7 +319,8 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
               BuildMetaClass arrayMarshaller =
                   MarshallerGeneratorFactory.createArrayMarshallerClass(memberMapping.getType().asBoxed());
 
-              if (!containsInnerClass(classStructureBuilder, arrayMarshaller)) {
+              if (!containsInnerClass(classStructureBuilder, arrayMarshaller) && !erraiConfiguration.app()
+                      .isAptEnvironment()) {
                 classStructureBuilder.declaresInnerClass(new InnerClass(arrayMarshaller));
               }
               Statement deferred =

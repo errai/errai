@@ -2,15 +2,23 @@
         "http://google-web-toolkit.googlecode.com/svn/releases/2.0/distro-source/core/src/gwt-module.dtd">
 <module>
   <inherits name="com.google.gwt.user.User" />
+  <inherits name="org.jboss.errai.common.apt.ErraiCommonApt" />
 
   <entry-point class="org.jboss.errai.marshalling.client.api.MarshallerFramework" />
 
+  <replace-with class="org.jboss.errai.marshalling.client.api.MarshallerFactoryImpl">
+    <when-type-assignable class="org.jboss.errai.marshalling.client.api.MarshallerFactory" />
+    <when-property-is name="errai.useAptGenerators" value="true" />
+  </replace-with>
+
   <generate-with class="org.jboss.errai.marshalling.rebind.MarshallersGenerator">
     <when-type-assignable class="org.jboss.errai.marshalling.client.api.MarshallerFactory" />
+    <when-property-is name="errai.useAptGenerators" value="false" />
   </generate-with>
 
   <generate-with class="org.jboss.errai.marshalling.rebind.MarshallerGenerator">
     <when-type-assignable class="org.jboss.errai.marshalling.client.api.GeneratedMarshaller" />
+    <when-property-is name="errai.useAptGenerators" value="false" />
   </generate-with>
 
 </module>

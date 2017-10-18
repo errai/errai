@@ -114,7 +114,7 @@ public class MarshallerGenerator extends IncrementalGenerator {
     final String marshallerTypeName = getMarshallerTypeName(className);
     final MarshallerOutputTarget target = MarshallerOutputTarget.GWT;
     final GeneratorMappingContext generatorMappingContext = GeneratorMappingContextFactory.getFor(context, target);
-    final MappingStrategy strategy = MappingStrategyFactory.createStrategy(true, generatorMappingContext, type);
+    final MappingStrategy strategy = MappingStrategyFactory.createStrategy(true, generatorMappingContext, type, erraiConfiguration);
 
     if (type.isArray()) {
       return MarshallerGeneratorFactory.getFor(context, target, erraiConfiguration)
