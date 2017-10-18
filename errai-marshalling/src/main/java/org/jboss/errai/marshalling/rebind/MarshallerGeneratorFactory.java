@@ -112,18 +112,33 @@ public class MarshallerGeneratorFactory {
 
     @Override
     public Statement deferred(final MetaClass type, final MetaClass marshaller) {
+
       return
       Stmt.newObject(parameterizedAs(DeferredMarshallerCreationCallback.class, typeParametersOf(type)))
           .extend()
           .publicOverridesMethod("create", Parameter.of(Class.class, "type"))
           .append(
               Stmt.nestedCall(
-                  Stmt.newObject(QualifyingMarshallerWrapper.class,
-                      Stmt.castTo(Marshaller.class, Stmt.invokeStatic(GWT.class, "create", marshaller)), type))
+                  Stmt.newObject(QualifyingMarshallerWrapper.class, Stmt.castTo(Marshaller.class,
+                          Stmt.invokeStatic(GWT.class, "create", getMarshallerMetaClass(type, marshaller))), type))
                   .returnValue())
           .finish()
           .finish();
     }
+  }
+
+  private MetaClass getMarshallerMetaClass(final MetaClass type, final MetaClass marshaller) {
+
+    if (!erraiConfiguration.app().isAptEnvironment()) {
+      return marshaller;
+    }
+
+    return ClassBuilder.define(getMarshallerImplClassName(type, true))
+            .publicScope()
+            .implementsInterface(GeneratedMarshaller.class)
+            .body()
+            .getClassDefinition();
+
   }
 
   public static final String MARSHALLER_NAME_PREFIX = "Marshaller_for_";
@@ -492,13 +507,13 @@ public class MarshallerGeneratorFactory {
         addConditionalAssignment(
             type,
             Stmt.nestedCall(
-                Stmt.newObject(QualifyingMarshallerWrapper.class,
-                    Stmt.castTo(Marshaller.class, Stmt.invokeStatic(GWT.class, "create", marshaller)), type)));
+                Stmt.newObject(QualifyingMarshallerWrapper.class, Stmt.castTo(Marshaller.class,
+                        Stmt.invokeStatic(GWT.class, "create", getMarshallerMetaClass(type, marshaller))), type)));
       }
       else {
         addConditionalAssignment(
             type,
-            Stmt.invokeStatic(GWT.class, "create", marshaller));
+            Stmt.invokeStatic(GWT.class, "create", getMarshallerMetaClass(type, marshaller)));
       }
     }
     else {
