@@ -132,6 +132,7 @@ public abstract class MetaField extends AbstractHasAnnotations implements MetaCl
    *           if the field or its containing class cannot be located using Java
    *           Reflection.
    */
+  @Deprecated
   public Field asField() {
     try {
       final Class<?> aClass = getDeclaringClass().unsafeAsClass();

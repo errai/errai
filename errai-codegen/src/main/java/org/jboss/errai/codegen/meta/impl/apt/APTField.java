@@ -23,22 +23,26 @@ import org.jboss.errai.codegen.meta.MetaType;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeMirror;
 import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.Optional;
 
 import static org.jboss.errai.codegen.meta.impl.apt.APTClassUtil.fromTypeMirror;
+import static org.jboss.errai.codegen.meta.impl.apt.APTClassUtil.types;
 
 /**
- *
  * @author Max Barkley <mbarkley@redhat.com>
  */
 public class APTField extends MetaField implements APTMember {
 
   private final VariableElement field;
+  private final APTClass declaringClass;
 
-  public APTField(final VariableElement field) {
+  public APTField(final VariableElement field, final APTClass declaringClass) {
     this.field = field;
+    this.declaringClass = declaringClass;
   }
 
   @Override
@@ -48,7 +52,9 @@ public class APTField extends MetaField implements APTMember {
 
   @Override
   public MetaClass getType() {
-    return new APTClass(field.asType());
+    final DeclaredType declaringClassType = (DeclaredType) declaringClass.getEnclosedMetaObject();
+    final TypeMirror typeMirror = types.asMemberOf(declaringClassType, field);
+    return new APTClass(typeMirror);
   }
 
   @Override

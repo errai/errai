@@ -38,7 +38,7 @@ public class APTParameter extends MetaParameter {
   private final VariableElement parameter;
   private final TypeMirror actualParameterType;
 
-  public APTParameter(final VariableElement parameter, final TypeMirror actualParameterType) {
+  APTParameter(final VariableElement parameter, final TypeMirror actualParameterType) {
     this.parameter = parameter;
     this.actualParameterType = actualParameterType;
   }
@@ -50,7 +50,7 @@ public class APTParameter extends MetaParameter {
 
   @Override
   public MetaClass getType() {
-    return new APTClass(actualParameterType).getErased();
+    return new APTClass(actualParameterType);
   }
 
   @Override

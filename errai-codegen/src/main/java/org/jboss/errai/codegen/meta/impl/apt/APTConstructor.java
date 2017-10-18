@@ -22,12 +22,10 @@ import org.jboss.errai.codegen.meta.MetaConstructor;
 import org.jboss.errai.codegen.meta.MetaParameter;
 import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.meta.MetaTypeVariable;
-import org.jboss.errai.codegen.meta.impl.AbstractMetaClass;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.type.DeclaredType;
-import javax.lang.model.type.TypeMirror;
 import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.Optional;
@@ -38,15 +36,11 @@ import java.util.Optional;
 public class APTConstructor extends MetaConstructor implements APTMember {
 
   private final ExecutableElement ctor;
-  private final DeclaredType enclosedMetaObject;
+  private final APTClass declaringClass;
 
-  @SuppressWarnings("unchecked")
-  public APTConstructor(final ExecutableElement ctor, final MetaClass metaClass) {
+  APTConstructor(final ExecutableElement ctor, final APTClass metaClass) {
     this.ctor = ctor;
-
-    //We know for sure that every MetaClass is an AbstractMetaClass
-    final AbstractMetaClass<TypeMirror> abstractMetaClass = (AbstractMetaClass<TypeMirror>) metaClass;
-    this.enclosedMetaObject = (DeclaredType) abstractMetaClass.getEnclosedMetaObject();
+    this.declaringClass = metaClass;
   }
 
   @Override
@@ -56,7 +50,7 @@ public class APTConstructor extends MetaConstructor implements APTMember {
 
   @Override
   public MetaClass getReturnType() {
-    return new APTClass(ctor.getReturnType());
+    return declaringClass;
   }
 
   @Override
@@ -71,7 +65,7 @@ public class APTConstructor extends MetaConstructor implements APTMember {
 
   @Override
   public MetaParameter[] getParameters() {
-    return APTClassUtil.getParameters(ctor, enclosedMetaObject);
+    return APTClassUtil.getParameters(ctor, (DeclaredType) declaringClass.getEnclosedMetaObject());
   }
 
   @Override
@@ -92,6 +86,11 @@ public class APTConstructor extends MetaConstructor implements APTMember {
   @Override
   public String getName() {
     return "";
+  }
+
+  @Override
+  public boolean isStatic() {
+    return true;
   }
 
   @Override

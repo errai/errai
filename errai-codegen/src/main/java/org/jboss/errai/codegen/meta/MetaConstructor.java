@@ -26,6 +26,7 @@ public abstract class MetaConstructor extends MetaMethod implements MetaClassMem
 
   public abstract boolean isVarArgs();
 
+  @Deprecated
   public Constructor asConstructor() {
     try {
       final Class cls = Class.forName(getDeclaringClass().getFullyQualifiedName());

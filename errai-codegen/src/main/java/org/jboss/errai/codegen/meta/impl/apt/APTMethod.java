@@ -44,13 +44,9 @@ public class APTMethod extends MetaMethod implements APTMember {
   private final ExecutableElement method;
   private final DeclaredType enclosedMetaObject;
 
-  @SuppressWarnings("unchecked")
-  public APTMethod(final ExecutableElement method, final MetaClass metaClass) {
+  APTMethod(final ExecutableElement method, final APTClass metaClass) {
     this.method = method;
-
-    //We know for sure that every MetaClass is an AbstractMetaClass
-    final AbstractMetaClass<TypeMirror> abstractMetaClass = (AbstractMetaClass<TypeMirror>) metaClass;
-    this.enclosedMetaObject = (DeclaredType) abstractMetaClass.getEnclosedMetaObject();
+    this.enclosedMetaObject = (DeclaredType) metaClass.getEnclosedMetaObject();
   }
 
   @Override

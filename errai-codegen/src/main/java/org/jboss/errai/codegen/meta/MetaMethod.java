@@ -83,6 +83,7 @@ public abstract class MetaMethod extends AbstractHasAnnotations implements MetaC
             .collect(Collectors.collectingAndThen(Collectors.toList(), Collections::unmodifiableList));
   }
 
+  @Deprecated
   public Method asMethod() {
     try {
       final Class cls = Class.forName(getDeclaringClass().getFullyQualifiedName());
