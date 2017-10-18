@@ -16,7 +16,6 @@
 
 package org.jboss.errai.marshalling.tests;
 
-import junit.framework.Assert;
 import org.jboss.errai.marshalling.client.MarshallingSessionProviderFactory;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
@@ -40,6 +39,7 @@ import org.jboss.errai.marshalling.tests.res.Outer2;
 import org.jboss.errai.marshalling.tests.res.SType;
 import org.jboss.errai.marshalling.tests.res.shared.Role;
 import org.jboss.errai.marshalling.tests.res.shared.User;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.File;
@@ -110,7 +110,7 @@ public class ServerMarshallingTest {
     int len1 = Array.getLength(array1);
     int len2 = Array.getLength(array2);
 
-    if (len1 != len2) Assert.failNotEquals("different length arrays!", array1, array2);
+    if (len1 != len2) Assert.assertEquals("different length arrays!", array1, array2);
 
     Object el1, el2;
 
@@ -119,7 +119,7 @@ public class ServerMarshallingTest {
       el2 = Array.get(array2, i);
 
       if ((el1 == null || el2 == null) && el1 != null) {
-        Assert.failNotEquals("different values", array1, array2);
+        Assert.assertEquals("different values", array1, array2);
       }
       else if (el1 != null) {
         assertEquals(el1, el2);

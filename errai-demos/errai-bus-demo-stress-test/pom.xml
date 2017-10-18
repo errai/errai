@@ -148,6 +148,12 @@
       <artifactId>javax.inject</artifactId>
     </dependency>
 
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-log4j12</artifactId>
+      <scope>compile</scope>
+    </dependency>
+
   </dependencies>
 
   <build>
@@ -174,9 +180,8 @@
           <extraJvmArgs>-Xmx1g</extraJvmArgs>
           <jvm></jvm>
           <style>DETAILED</style>
-          <soyc>false</soyc>
+          <soycDetailed>false</soycDetailed>
           <hostedWebapp>src/main/webapp/</hostedWebapp>
-          <treeLogger>true</treeLogger>
           <strict>true</strict>
           <module>org.jboss.errai.demo.busstress.${gwt.module.prefix}App</module>
         </configuration>
