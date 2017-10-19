@@ -52,9 +52,16 @@ public class APTField extends MetaField implements APTMember {
 
   @Override
   public MetaClass getType() {
-    final DeclaredType declaringClassType = (DeclaredType) declaringClass.getEnclosedMetaObject();
-    final TypeMirror typeMirror = types.asMemberOf(declaringClassType, field);
-    return new APTClass(typeMirror);
+    final TypeMirror type = field.asType();
+    switch (type.getKind()) {
+    case WILDCARD:
+    case TYPEVAR:
+      final DeclaredType declaringClassType = (DeclaredType) declaringClass.getEnclosedMetaObject();
+      final TypeMirror typeMirror = types.asMemberOf(declaringClassType, field);
+      return new APTClass(typeMirror);
+    default:
+      return new APTClass(type);
+    }
   }
 
   @Override

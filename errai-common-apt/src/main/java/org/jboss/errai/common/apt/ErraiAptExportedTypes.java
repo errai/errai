@@ -25,13 +25,11 @@ import org.jboss.errai.common.apt.generator.ExportFileGenerator;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 import java.lang.annotation.Annotation;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -97,9 +95,11 @@ public final class ErraiAptExportedTypes {
   }
 
   private void addLocalExportableTypesWhichHaveNotBeenExported() {
+    final long start = System.currentTimeMillis();
     System.out.println("Exporting local exportable types..");
     exportedAnnotationsPackageElement(elements).map(this::getAllExportedAnnotations)
             .ifPresent(this::addAllExportableTypes);
+    System.out.println("Exported local exportable types in " + (System.currentTimeMillis() - start) + "ms");
   }
 
   private Set<TypeElement> getAllExportedAnnotations(final PackageElement exportedAnnotationsPackageElement) {

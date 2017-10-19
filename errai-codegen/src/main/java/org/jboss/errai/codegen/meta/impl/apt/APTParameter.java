@@ -50,7 +50,14 @@ public class APTParameter extends MetaParameter {
 
   @Override
   public MetaClass getType() {
-    return new APTClass(actualParameterType).getErased();
+    final APTClass aptClass = new APTClass(actualParameterType);
+    switch (actualParameterType.getKind()) {
+    case TYPEVAR:
+    case WILDCARD:
+      return aptClass.getErased();
+    default:
+      return aptClass;
+    }
   }
 
   @Override
