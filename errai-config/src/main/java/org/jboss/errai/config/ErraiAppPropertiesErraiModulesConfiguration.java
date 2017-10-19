@@ -57,29 +57,12 @@ public class ErraiAppPropertiesErraiModulesConfiguration implements ErraiModules
   public static final String SERIALIZABLE_TYPES = "errai.marshalling.serializableTypes";
   public static final String NON_SERIALIZABLE_TYPES = "errai.marshalling.nonserializableTypes";
   public static final String MAPPING_ALIASES = "errai.marshalling.mappingAliases";
-  private static final String QUALIFYING_METADATA_FACTORY = "errai.ioc.QualifyingMetaDataFactory";
   public static final String IOC_ENABLED_ALTERNATIVES = "errai.ioc.enabled.alternatives";
   private static final String IOC_WHITELIST_PROPERTY = "errai.ioc.whitelist";
   private static final String IOC_BLACKLIST_PROPERTY = "errai.ioc.blacklist";
   public static final String BINDABLE_TYPES = "errai.ui.bindableTypes";
 
   private static final Logger log = LoggerFactory.getLogger(ErraiAppPropertiesErraiModulesConfiguration.class);
-
-  ErraiAppPropertiesErraiModulesConfiguration() {
-    final MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
-    final Multimap<String, String> props = scanner.getErraiProperties();
-
-    if (props != null) {
-      log.info("Checking ErraiApp.properties for configured types ...");
-
-      //FIXME: Unused property?
-      final Collection<String> qualifyingMetadataFactoryProperties = props.get(QUALIFYING_METADATA_FACTORY);
-
-      if (qualifyingMetadataFactoryProperties.size() > 1) {
-        throw new RuntimeException("the property '" + QUALIFYING_METADATA_FACTORY + "' is set in more than one place");
-      }
-    }
-  }
 
   @Override
   public Set<MetaClass> getIocEnabledAlternatives() {

@@ -55,18 +55,6 @@ public class MarshallingConfiguration {
 
   private static ErraiAppPropertiesConfiguration erraiAppPropertiesConfiguration;
 
-  @Deprecated
-  //FIXME: tiago: make it work with annotation configuration too
-  public static boolean isPortableType(final Class<?> cls) {
-    final MetaClass mc = MetaClassFactory.get(cls);
-    final MetaClassFinder metaClassFinder = a -> new HashSet<>(ClassScanner.getTypesAnnotatedWith(a));
-    final ErraiConfiguration erraiConfiguration = getErraiAppPropertiesConfiguration();
-    final Set<MetaClass> allPortableTypes = allPortableTypes(erraiConfiguration, metaClassFinder);
-
-    return mc.isAnnotationPresent(Portable.class) || allPortableTypes.contains(mc) || String.class.getName()
-            .equals(mc.getFullyQualifiedName()) || isBuiltinPortable(mc);
-  }
-
   private static ErraiAppPropertiesConfiguration getErraiAppPropertiesConfiguration() {
 
     if (erraiAppPropertiesConfiguration == null) {
@@ -92,12 +80,21 @@ public class MarshallingConfiguration {
     return allPortableConcreteSubtypes;
   }
 
+  @Deprecated
+  //FIXME: tiago: make it work with annotation configuration too
+  public static boolean isPortableType(final Class<?> cls) {
+    final MetaClassFinder metaClassFinder = a -> new HashSet<>(ClassScanner.getTypesAnnotatedWith(a));
+    final ErraiConfiguration erraiConfiguration = getErraiAppPropertiesConfiguration();
+
+    return isPortableType(metaClassFinder, erraiConfiguration, MetaClassFactory.get(cls));
+  }
+
   public static boolean isPortableType(final MetaClassFinder metaClassFinder,
           final ErraiConfiguration erraiConfiguration,
           final MetaClass metaClass) {
 
-    return metaClass.instanceOf(String.class) || isBuiltinPortable(metaClass) || allPortableTypes(erraiConfiguration,
-            metaClassFinder).contains(metaClass);
+    return metaClass.isAnnotationPresent(Portable.class) || metaClass.instanceOf(String.class) || isBuiltinPortable(
+            metaClass) || allPortableTypes(erraiConfiguration, metaClassFinder).contains(metaClass);
   }
 
   private static Set<MetaClass> allPortableTypes(final ErraiConfiguration erraiConfiguration,
