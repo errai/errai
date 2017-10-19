@@ -17,7 +17,6 @@
 package org.jboss.errai.marshalling.rebind.api;
 
 import com.google.gwt.core.ext.GeneratorContext;
-import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.exception.GenerationException;
 import org.jboss.errai.config.ErraiConfiguration;
 import org.jboss.errai.config.MetaClassFinder;
@@ -58,13 +57,12 @@ public class GeneratorMappingContextFactory {
   public static GeneratorMappingContext create(final GeneratorContext context,
           final MarshallerOutputTarget target,
           final MarshallerGeneratorFactory marshallerGeneratorFactory,
-          final ClassStructureBuilder<?> classStructureBuilder,
           final ArrayMarshallerCallback arrayMarshallerCallback,
           final ErraiConfiguration erraiConfiguration,
           final MetaClassFinder metaClassFinder) {
 
     GeneratorMappingContext mappingContext =
-        new GeneratorMappingContext(marshallerGeneratorFactory, classStructureBuilder, arrayMarshallerCallback, erraiConfiguration, metaClassFinder);
+        new GeneratorMappingContext(marshallerGeneratorFactory, arrayMarshallerCallback, erraiConfiguration, metaClassFinder);
 
     if (target == MarshallerOutputTarget.GWT) {
       gwtContexts.put(context, mappingContext);

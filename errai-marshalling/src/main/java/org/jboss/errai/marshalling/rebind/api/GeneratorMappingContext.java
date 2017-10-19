@@ -16,7 +16,6 @@
 
 package org.jboss.errai.marshalling.rebind.api;
 
-import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassMember;
 import org.jboss.errai.codegen.meta.MetaField;
@@ -46,13 +45,11 @@ public class GeneratorMappingContext implements ServerMappingContext {
   private final Set<String> generatedMarshallers = new HashSet<String>();
   private final List<String> renderedMarshallers = new ArrayList<String>();
 
-  private final ClassStructureBuilder<?> classStructureBuilder;
   private final ArrayMarshallerCallback arrayMarshallerCallback;
 
   private final Set<String> exposedMembers = new HashSet<String>();
 
-  public GeneratorMappingContext(final MarshallerGeneratorFactory marshallerGeneratorFactory,
-          final ClassStructureBuilder<?> classStructureBuilder,
+  GeneratorMappingContext(final MarshallerGeneratorFactory marshallerGeneratorFactory,
           final ArrayMarshallerCallback callback,
           final ErraiConfiguration erraiConfiguration,
           final MetaClassFinder metaClassFinder) {
@@ -60,7 +57,6 @@ public class GeneratorMappingContext implements ServerMappingContext {
     this.definitionsFactory = DefinitionsFactorySingleton.get(erraiConfiguration, metaClassFinder);
     this.marshallerGeneratorFactory = marshallerGeneratorFactory;
     this.arrayMarshallerCallback = callback;
-    this.classStructureBuilder = classStructureBuilder;
   }
 
   public MarshallerGeneratorFactory getMarshallerGeneratorFactory() {
@@ -122,9 +118,5 @@ public class GeneratorMappingContext implements ServerMappingContext {
 
   public boolean isExposed(final MetaClassMember member, final String marshallerClass) {
     return exposedMembers.contains(marshallerClass  + "." + getPrivateMemberName(member));
-  }
-
-  public ClassStructureBuilder<?> getClassStructureBuilder() {
-    return classStructureBuilder;
   }
 }

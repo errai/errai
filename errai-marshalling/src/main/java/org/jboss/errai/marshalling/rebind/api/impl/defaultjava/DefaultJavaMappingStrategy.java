@@ -56,7 +56,6 @@ import org.jboss.errai.marshalling.client.api.exceptions.NoAvailableMarshallerEx
 import org.jboss.errai.marshalling.client.api.json.EJObject;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
 import org.jboss.errai.marshalling.client.marshallers.ObjectMarshaller;
-import org.jboss.errai.marshalling.rebind.MarshallerGeneratorFactory;
 import org.jboss.errai.marshalling.rebind.api.GeneratorMappingContext;
 import org.jboss.errai.marshalling.rebind.api.MappingStrategy;
 import org.jboss.errai.marshalling.rebind.api.ObjectMapper;
@@ -195,7 +194,8 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
                 }
                 if (context.canMarshal(toMap.getFullyQualifiedName())) {
                   if (gwtTarget) {
-                    BuildMetaClass arrayMarshaller = MarshallerGeneratorFactory.createArrayMarshallerClass(type);
+                    BuildMetaClass arrayMarshaller = context.getMarshallerGeneratorFactory()
+                            .createArrayMarshallerClass(type);
 
                     if (!containsInnerClass(classStructureBuilder, arrayMarshaller) && !erraiConfiguration.app()
                             .isAptEnvironment()) {
@@ -316,8 +316,8 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
           BlockBuilder<?> lazyInitMethod = (needsLazyInit(memberMapping.getType())) ? initMethod : null;
           if (memberMapping.getType().isArray()) {
             if (gwtTarget) {
-              BuildMetaClass arrayMarshaller =
-                  MarshallerGeneratorFactory.createArrayMarshallerClass(memberMapping.getType().asBoxed());
+              BuildMetaClass arrayMarshaller = context.getMarshallerGeneratorFactory()
+                      .createArrayMarshallerClass(memberMapping.getType().asBoxed());
 
               if (!containsInnerClass(classStructureBuilder, arrayMarshaller) && !erraiConfiguration.app()
                       .isAptEnvironment()) {

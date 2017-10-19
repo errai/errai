@@ -50,13 +50,13 @@ public class MarshallersAptGenerator extends ErraiAptGenerators.MultipleFiles {
 
     final ErraiConfiguration erraiConfiguration = new AptErraiConfiguration(metaClassFinder());
 
-    final AptGeneratedSourceFile client = new AptGeneratedSourceFile(CLIENT_PACKAGE_NAME, CLIENT_CLASS_NAME,
-            MarshallerGeneratorFactory.getFor(null, GWT, erraiConfiguration, metaClassFinder())
-                    .generate(CLIENT_PACKAGE_NAME, CLIENT_CLASS_NAME));
-
     final AptGeneratedSourceFile server = new AptGeneratedSourceFile(SERVER_PACKAGE_NAME, SERVER_CLASS_NAME,
             MarshallerGeneratorFactory.getFor(null, Java, erraiConfiguration, metaClassFinder())
                     .generate(SERVER_PACKAGE_NAME, SERVER_CLASS_NAME));
+
+    final AptGeneratedSourceFile client = new AptGeneratedSourceFile(CLIENT_PACKAGE_NAME, CLIENT_CLASS_NAME,
+            MarshallerGeneratorFactory.getFor(null, GWT, erraiConfiguration, metaClassFinder())
+                    .generate(CLIENT_PACKAGE_NAME, CLIENT_CLASS_NAME));
 
     return Arrays.asList(client, server);
   }

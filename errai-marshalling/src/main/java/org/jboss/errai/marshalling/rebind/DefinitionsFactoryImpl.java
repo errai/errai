@@ -18,12 +18,10 @@ package org.jboss.errai.marshalling.rebind;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import org.jboss.errai.apt.internal.generator.MarshallerAptGenerator;
 import org.jboss.errai.codegen.meta.MetaAnnotation;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.common.client.api.annotations.Portable;
-import org.jboss.errai.common.metadata.MetaDataScanner;
 import org.jboss.errai.config.ErraiConfiguration;
 import org.jboss.errai.config.MarshallingConfiguration;
 import org.jboss.errai.config.MetaClassFinder;
@@ -33,35 +31,6 @@ import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
 import org.jboss.errai.marshalling.client.api.annotations.ImplementationAliases;
 import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
 import org.jboss.errai.marshalling.client.api.exceptions.InvalidMappingException;
-import org.jboss.errai.marshalling.client.marshallers.BigDecimalMarshaller;
-import org.jboss.errai.marshalling.client.marshallers.BigIntegerMarshaller;
-import org.jboss.errai.marshalling.client.marshallers.BooleanMarshaller;
-import org.jboss.errai.marshalling.client.marshallers.ByteMarshaller;
-import org.jboss.errai.marshalling.client.marshallers.CharacterMarshaller;
-import org.jboss.errai.marshalling.client.marshallers.DateMarshaller;
-import org.jboss.errai.marshalling.client.marshallers.DoubleMarshaller;
-import org.jboss.errai.marshalling.client.marshallers.FloatMarshaller;
-import org.jboss.errai.marshalling.client.marshallers.IntegerMarshaller;
-import org.jboss.errai.marshalling.client.marshallers.LinkedHashSetMarshaller;
-import org.jboss.errai.marshalling.client.marshallers.LinkedListMarshaller;
-import org.jboss.errai.marshalling.client.marshallers.LinkedMapMarshaller;
-import org.jboss.errai.marshalling.client.marshallers.ListMarshaller;
-import org.jboss.errai.marshalling.client.marshallers.LongMarshaller;
-import org.jboss.errai.marshalling.client.marshallers.MapMarshaller;
-import org.jboss.errai.marshalling.client.marshallers.ObjectMarshaller;
-import org.jboss.errai.marshalling.client.marshallers.OptionalMarshaller;
-import org.jboss.errai.marshalling.client.marshallers.PriorityQueueMarshaller;
-import org.jboss.errai.marshalling.client.marshallers.QueueMarshaller;
-import org.jboss.errai.marshalling.client.marshallers.SQLDateMarshaller;
-import org.jboss.errai.marshalling.client.marshallers.SetMarshaller;
-import org.jboss.errai.marshalling.client.marshallers.ShortMarshaller;
-import org.jboss.errai.marshalling.client.marshallers.SortedMapMarshaller;
-import org.jboss.errai.marshalling.client.marshallers.SortedSetMarshaller;
-import org.jboss.errai.marshalling.client.marshallers.StringBufferMarshaller;
-import org.jboss.errai.marshalling.client.marshallers.StringBuilderMarshaller;
-import org.jboss.errai.marshalling.client.marshallers.StringMarshaller;
-import org.jboss.errai.marshalling.client.marshallers.TimeMarshaller;
-import org.jboss.errai.marshalling.client.marshallers.TimestampMarshaller;
 import org.jboss.errai.marshalling.rebind.api.CustomMapping;
 import org.jboss.errai.marshalling.rebind.api.InheritedMappings;
 import org.jboss.errai.marshalling.rebind.api.impl.defaultjava.DefaultJavaDefinitionMapper;
@@ -71,10 +40,7 @@ import org.jboss.errai.marshalling.rebind.api.model.Mapping;
 import org.jboss.errai.marshalling.rebind.api.model.MappingDefinition;
 import org.jboss.errai.marshalling.rebind.api.model.MemberMapping;
 import org.jboss.errai.marshalling.rebind.api.model.impl.SimpleConstructorMapping;
-import org.jboss.errai.marshalling.rebind.mappings.builtin.StackTraceElementDefinition;
-import org.jboss.errai.marshalling.rebind.mappings.builtin.ThrowableDefinition;
 import org.jboss.errai.marshalling.server.marshallers.DefaultDefinitionMarshaller;
-import org.jboss.errai.marshalling.server.marshallers.ServerClassMarshaller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -459,17 +425,14 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
   }
 
   private Set<Class<?>> findCustomMappings() {
-    //FIXME: tiago: remove unsafe method usa
-    return metaClassFinder.findAnnotatedWith(CustomMapping.class)
-            .stream()
-            .map(s -> {
-              try {
-                return Class.forName(s.getFullyQualifiedName());
-              } catch (final ClassNotFoundException e) {
-                throw new RuntimeException(e);
-              }
-            })
-            .collect(toSet());
+    //FIXME: tiago: what to do?
+    return metaClassFinder.findAnnotatedWith(CustomMapping.class).stream().map(s -> {
+      try {
+        return Class.forName(s.getFullyQualifiedName());
+      } catch (final ClassNotFoundException e) {
+        throw new RuntimeException(e);
+      }
+    }).collect(toSet());
   }
 
   @Override

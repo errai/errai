@@ -254,8 +254,7 @@ public class MarshallerGeneratorFactory {
 
     classStructureBuilder = implement(MarshallerFactory.class, packageName, clazzName);
     classContext = classStructureBuilder.getClassDefinition().getContext();
-    mappingContext = GeneratorMappingContextFactory.create(context, target, this, classStructureBuilder,
-            new ArrayMarshallerCallbackImpl(), erraiConfiguration, metaClassFinder);
+    mappingContext = GeneratorMappingContextFactory.create(context, target, this, new ArrayMarshallerCallbackImpl(), erraiConfiguration, metaClassFinder);
 
     classStructureBuilder.getClassDefinition().addAnnotation(() -> Dependent.class);
 
@@ -723,7 +722,7 @@ public class MarshallerGeneratorFactory {
     }
   }
 
-  public static BuildMetaClass createArrayMarshallerClass(final MetaClass type) {
+  public BuildMetaClass createArrayMarshallerClass(final MetaClass type) {
     return ClassBuilder.define(MARSHALLER_NAME_PREFIX + getVarName(type))
             .packageScope()
             .abstractClass()
