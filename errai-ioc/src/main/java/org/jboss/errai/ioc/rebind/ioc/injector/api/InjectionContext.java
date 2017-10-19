@@ -19,9 +19,11 @@ package org.jboss.errai.ioc.rebind.ioc.injector.api;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
-import org.jboss.errai.codegen.meta.HasAnnotations;
-import org.jboss.errai.codegen.meta.MetaAnnotation;
 import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaClassFactory;
+import org.jboss.errai.codegen.meta.MetaEnum;
+import org.jboss.errai.codegen.meta.impl.java.JavaReflectionAnnotation;
+import org.jboss.errai.codegen.meta.impl.java.JavaReflectionClass;
 import org.jboss.errai.common.client.api.Assert;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.FactoryBodyGenerator;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.FactoryGenerator;
@@ -37,10 +39,6 @@ import org.jboss.errai.reflections.util.SimplePackageFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.enterprise.context.NormalScope;
-import javax.enterprise.inject.Stereotype;
-import javax.inject.Qualifier;
-import javax.inject.Scope;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Target;
@@ -50,7 +48,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -76,7 +73,7 @@ public class InjectionContext {
   private final Multimap<InjectableHandle, InjectableProvider> injectableProviders = HashMultimap.create();
   private final Multimap<InjectableHandle, InjectableProvider> exactTypeInjectableProviders = HashMultimap.create();
 
-  private final Collection<ExtensionTypeCallback> extensionTypeCallbacks = new ArrayList<ExtensionTypeCallback>();
+  private final Collection<ExtensionTypeCallback> extensionTypeCallbacks = new ArrayList<>();
 
   private final boolean async;
 
@@ -87,12 +84,10 @@ public class InjectionContext {
 
   private static final String[] implicitWhitelist = { "org.jboss.errai.*", "com.google.gwt.*" };
 
-  private final Multimap<Class<? extends Annotation>, IOCDecoratorExtension<? extends Annotation>> decorators = HashMultimap.create();
-  private final Multimap<ElementType, Class<? extends Annotation>> decoratorsByElementType = HashMultimap.create();
-  private final Multimap<Class<? extends Annotation>, Class<? extends Annotation>> metaAnnotationAliases
-      = HashMultimap.create();
+  private final Multimap<MetaClass, IOCDecoratorExtension<? extends Annotation>> decorators = HashMultimap.create();
+  private final Multimap<ElementType, MetaClass> decoratorsByElementType = HashMultimap.create();
 
-  private final Map<String, Object> attributeMap = new HashMap<String, Object>();
+  private final Map<String, Object> attributeMap = new HashMap<>();
 
 
   private InjectionContext(final Builder builder) {
@@ -231,9 +226,9 @@ public class InjectionContext {
   }
 
   public void registerDecorator(final IOCDecoratorExtension<?> iocExtension) {
-    final Class<? extends Annotation> annotation = iocExtension.decoratesWith();
+    final Class<? extends Annotation> annotationClasS = iocExtension.decoratesWith();
 
-    final Target target = annotation.getAnnotation(Target.class);
+    final Target target = annotationClasS.getAnnotation(Target.class);
     if (target != null) {
       final boolean oneTarget = target.value().length == 1;
 
@@ -242,14 +237,9 @@ public class InjectionContext {
           // type is a meta-annotation. so we need to map all annotations with this
           // meta-annotation to the decorator extension.
 
-          for (final MetaClass annotationClazz : processingContext.metaClassFinder().findAnnotatedWith(annotation)) {
-            if (Annotation.class.isAssignableFrom(annotationClazz.unsafeAsClass())) {
-              final Class<? extends Annotation> javaAnnoCls = annotationClazz.unsafeAsClass().asSubclass(Annotation.class);
-              decorators.get(javaAnnoCls).add(iocExtension);
-
-              if (oneTarget) {
-                metaAnnotationAliases.put(javaAnnoCls, annotation);
-              }
+          for (final MetaClass annotationMetaClass : processingContext.metaClassFinder().findAnnotatedWith(annotationClasS)) {
+            if (annotationMetaClass.isAssignableTo(Annotation.class)) {
+              decorators.get(annotationMetaClass).add(iocExtension);
             }
           }
           if (oneTarget) {
@@ -258,23 +248,17 @@ public class InjectionContext {
         }
       }
     }
-    decorators.get(annotation).add(iocExtension);
+    decorators.get(MetaClassFactory.getUncached(annotationClasS)).add(iocExtension);
   }
 
-  public Set<Class<? extends Annotation>> getDecoratorAnnotations() {
-    return Collections.unmodifiableSet(decorators.keySet());
-  }
-
-  public <A extends Annotation> IOCDecoratorExtension<A>[] getDecorators(final Class<A> annotation) {
-    final Collection<IOCDecoratorExtension<?>> decs = decorators.get(annotation);
-    @SuppressWarnings("unchecked")
-    final IOCDecoratorExtension<A>[] da = new IOCDecoratorExtension[decs.size()];
+  public IOCDecoratorExtension[] getDecorators(final MetaClass annotationClass) {
+    final Collection<IOCDecoratorExtension<?>> decs = decorators.get(annotationClass);
+    final IOCDecoratorExtension[] da = new IOCDecoratorExtension[decs.size()];
     decs.toArray(da);
-
     return da;
   }
 
-  public Collection<Class<? extends Annotation>> getDecoratorAnnotationsBy(final ElementType type) {
+  public Collection<MetaClass> getDecoratorAnnotationsBy(final ElementType type) {
     if (decoratorsByElementType.size() == 0) {
       sortDecorators();
     }
@@ -287,10 +271,11 @@ public class InjectionContext {
   }
 
   private void sortDecorators() {
-    for (final Class<? extends Annotation> a : getDecoratorAnnotations()) {
+    for (final MetaClass a : decorators.keySet()) {
       if (a.isAnnotationPresent(Target.class)) {
-        for (final ElementType type : a.getAnnotation(Target.class).value()) {
-          decoratorsByElementType.get(type).add(a);
+        for (final MetaEnum type : a.getAnnotation(Target.class).get().valueAsArray(MetaEnum[].class)) {
+          final ElementType elementType = type.as(ElementType.class);
+          decoratorsByElementType.get(elementType).add(a);
         }
       }
       else {

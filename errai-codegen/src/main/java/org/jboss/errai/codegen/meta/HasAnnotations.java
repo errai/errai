@@ -64,6 +64,11 @@ public interface HasAnnotations {
   }
 
   @SuppressWarnings("unchecked")
+  default Optional<MetaAnnotation> getAnnotation(final MetaClass annotationClass) {
+    return Optional.ofNullable(unsafeGetAnnotation((Class<? extends Annotation>) annotationClass.unsafeAsClass())).map(JavaReflectionAnnotation::new);
+  }
+
+  @SuppressWarnings("unchecked")
   default Boolean isAnnotationPresent(final MetaClass metaClass) {
     return unsafeIsAnnotationPresent((Class<? extends Annotation>) metaClass.unsafeAsClass());
   }

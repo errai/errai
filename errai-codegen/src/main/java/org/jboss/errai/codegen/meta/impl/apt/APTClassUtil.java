@@ -20,6 +20,7 @@ import com.sun.tools.javac.code.Type;
 import com.sun.tools.javac.util.List;
 import org.jboss.errai.codegen.meta.MetaAnnotation;
 import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaParameter;
 import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.meta.MetaTypeVariable;
@@ -173,17 +174,25 @@ public final class APTClassUtil {
 
   public static Optional<MetaAnnotation> getAnnotation(final Element element,
           final Class<? extends Annotation> annotationClass) {
+    return getAnnotation(element, MetaClassFactory.getUncached(annotationClass));
+  }
+
+  public static Optional<MetaAnnotation> getAnnotation(final TypeMirror typeMirror,
+          final Class<? extends Annotation> annotationClass) {
+    return getAnnotation(typeMirror, MetaClassFactory.getUncached(annotationClass));
+  }
+
+  public static Optional<MetaAnnotation> getAnnotation(final TypeMirror typeMirror, final MetaClass annotationClass) {
+    return Optional.ofNullable(types.asElement(typeMirror)).flatMap(element -> getAnnotation(element, annotationClass));
+  }
+
+  public static Optional<MetaAnnotation> getAnnotation(final Element element, final MetaClass annotationClass) {
 
     return element.getAnnotationMirrors()
             .stream()
             .filter(s -> s.getAnnotationType().toString().equals(annotationClass.getCanonicalName()))
             .map(annotationMirror -> (MetaAnnotation) new APTAnnotation(annotationMirror))
             .findFirst();
-  }
-
-  public static Optional<MetaAnnotation> getAnnotation(final TypeMirror typeMirror,
-          final Class<? extends Annotation> annotationClass) {
-    return Optional.ofNullable(types.asElement(typeMirror)).flatMap(element -> getAnnotation(element, annotationClass));
   }
 
   public static boolean isAnnotationPresent(final Element element, final MetaClass annotationMetaClass) {
