@@ -61,8 +61,6 @@ public abstract class MetaClass extends AbstractHasAnnotations implements MetaTy
 
   public abstract List<MetaMethod> getMethodsWithMetaAnnotations(Class<? extends Annotation> annotation);
 
-  public abstract List<MetaMethod> getMethodsAnnotatedWith(MetaClass annotation);
-
   public abstract MetaMethod[] getDeclaredMethods();
 
   public abstract MetaMethod getMethod(String name, Class... parameters);
@@ -96,13 +94,9 @@ public abstract class MetaClass extends AbstractHasAnnotations implements MetaTy
    */
   public abstract List<MetaField> getFieldsAnnotatedWith(Class<? extends Annotation> annotation);
 
-  public abstract List<MetaField> getFieldsAnnotatedWith(MetaClass annotation);
-
   public abstract List<MetaField> getFieldsWithMetaAnnotations(Class<? extends Annotation> annotations);
 
   public abstract List<MetaParameter> getParametersAnnotatedWith(Class<? extends Annotation> annotation);
-
-  public abstract List<MetaParameter> getParametersAnnotatedWith(MetaClass annotation);
 
   public abstract MetaField[] getDeclaredFields();
 

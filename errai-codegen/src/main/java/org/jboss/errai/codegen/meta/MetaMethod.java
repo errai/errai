@@ -77,12 +77,7 @@ public abstract class MetaMethod extends AbstractHasAnnotations implements MetaC
     return o instanceof MetaMethod && ((MetaMethod)o).hashString().equals(hashString());
   }
 
-
   public List<MetaParameter> getParametersAnnotatedWith(final Class<? extends Annotation> annotation) {
-    return getParametersAnnotatedWith(MetaClassFactory.getUncached(annotation));
-  }
-
-  public List<MetaParameter> getParametersAnnotatedWith(final MetaClass annotation) {
     return Arrays.stream(getParameters())
             .filter(p -> p.isAnnotationPresent(annotation))
             .collect(Collectors.collectingAndThen(Collectors.toList(), Collections::unmodifiableList));

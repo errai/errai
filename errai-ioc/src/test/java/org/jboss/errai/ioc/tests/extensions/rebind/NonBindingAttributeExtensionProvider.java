@@ -27,7 +27,6 @@ import javax.enterprise.context.Dependent;
 
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
-import org.jboss.errai.codegen.meta.MetaAnnotation;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.ioc.client.api.IOCExtension;
@@ -75,7 +74,7 @@ public class NonBindingAttributeExtensionProvider implements IOCExtensionConfigu
   }
 
   private FactoryBodyGenerator getGenerator(final InjectionSite injectionSite) {
-    final MetaAnnotation anno = injectionSite.getAnnotation(AnnoWithNonBindingAttribute.class).get();
+    final AnnoWithNonBindingAttribute anno = injectionSite.unsafeGetAnnotation(AnnoWithNonBindingAttribute.class);
     final String value = anno.value();
 
     return new AbstractBodyGenerator() {

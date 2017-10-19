@@ -76,11 +76,6 @@ public class APTParameter extends MetaParameter {
   }
 
   @Override
-  public Optional<MetaAnnotation> getAnnotation(final MetaClass annotationClass) {
-    return APTClassUtil.getAnnotation(parameter, annotationClass);
-  }
-
-  @Override
   public Boolean isAnnotationPresent(final MetaClass metaClass) {
     return APTClassUtil.isAnnotationPresent(parameter, metaClass);
   }
