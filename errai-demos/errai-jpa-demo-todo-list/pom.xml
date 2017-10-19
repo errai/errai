@@ -452,6 +452,7 @@
         <dependency><groupId>org.jboss.errai</groupId><artifactId>errai-jaxrs-client</artifactId><scope>provided</scope></dependency>
         <dependency><groupId>org.jboss.errai</groupId><artifactId>errai-ui</artifactId><scope>provided</scope></dependency>
         <dependency><groupId>io.netty</groupId><artifactId>netty-codec-http</artifactId><scope>provided</scope></dependency>
+        <dependency><groupId>io.netty</groupId><artifactId>netty-handler</artifactId><scope>provided</scope></dependency>
         <dependency><groupId>javax.validation</groupId><artifactId>validation-api</artifactId><scope>provided</scope></dependency>
         <dependency><groupId>org.jboss.errai</groupId><artifactId>errai-tools</artifactId><scope>provided</scope></dependency>
         <dependency><groupId>org.hibernate</groupId><artifactId>hibernate-core</artifactId><scope>provided</scope></dependency>

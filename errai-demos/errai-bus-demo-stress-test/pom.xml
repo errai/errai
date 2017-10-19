@@ -128,6 +128,10 @@
           <groupId>io.netty</groupId>
           <artifactId>netty-codec-http</artifactId>
         </exclusion>
+        <exclusion>
+          <groupId>io.netty</groupId>
+          <artifactId>netty-handler</artifactId>
+        </exclusion>
       </exclusions>
     </dependency>
 
@@ -327,7 +331,8 @@
         <dependency><groupId>org.jboss.weld.servlet</groupId><artifactId>weld-servlet-core</artifactId><scope>provided</scope></dependency>
         <dependency><groupId>xml-apis</groupId><artifactId>xml-apis</artifactId><scope>provided</scope></dependency>
         <dependency><groupId>io.netty</groupId><artifactId>netty-codec-http</artifactId><scope>provided</scope></dependency>
-    
+        <dependency><groupId>io.netty</groupId><artifactId>netty-handler</artifactId><scope>provided</scope></dependency>
+
         <!-- And finally, add this -->
         <dependency>
           <groupId>org.jboss.errai</groupId>
