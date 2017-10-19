@@ -50,7 +50,7 @@ public class APTParameter extends MetaParameter {
 
   @Override
   public MetaClass getType() {
-    return new APTClass(actualParameterType);
+    return new APTClass(actualParameterType).getErased();
   }
 
   @Override
