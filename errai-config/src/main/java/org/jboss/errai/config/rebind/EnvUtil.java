@@ -16,20 +16,7 @@
 
 package org.jboss.errai.config.rebind;
 
-import org.jboss.errai.codegen.meta.MetaClass;
-import org.jboss.errai.codegen.meta.MetaClassFactory;
-import org.jboss.errai.common.client.api.annotations.LocalEvent;
-import org.jboss.errai.common.client.api.annotations.NonPortable;
-import org.jboss.errai.common.client.api.annotations.Portable;
-import org.jboss.errai.common.client.types.TypeHandlerFactory;
-import org.jboss.errai.common.metadata.ErraiAppPropertiesFiles;
-import org.jboss.errai.common.metadata.ScannerSingleton;
-import org.jboss.errai.common.rebind.CacheStore;
-import org.jboss.errai.common.rebind.CacheUtil;
-import org.jboss.errai.config.util.ClassScanner;
-import org.jboss.errai.reflections.util.SimplePackageFilter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static java.util.stream.Collectors.toCollection;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -44,7 +31,20 @@ import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static java.util.stream.Collectors.toCollection;
+import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaClassFactory;
+import org.jboss.errai.common.client.api.annotations.LocalEvent;
+import org.jboss.errai.common.client.api.annotations.NonPortable;
+import org.jboss.errai.common.client.api.annotations.Portable;
+import org.jboss.errai.common.client.types.TypeHandlerFactory;
+import org.jboss.errai.common.metadata.ErraiAppPropertiesFiles;
+import org.jboss.errai.common.metadata.ScannerSingleton;
+import org.jboss.errai.common.rebind.CacheStore;
+import org.jboss.errai.common.rebind.CacheUtil;
+import org.jboss.errai.config.util.ClassScanner;
+import org.jboss.errai.reflections.util.SimplePackageFilter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Mike Brock
@@ -79,6 +79,7 @@ public abstract class EnvUtil {
   public static final String CONFIG_ERRAI_MAPPING_ALIASES = "errai.marshalling.mappingAliases";
   public static final String CONFIG_ERRAI_IOC_ENABLED_ALTERNATIVES = "errai.ioc.enabled.alternatives";
   public static final String CONFIG_ERRAI_BINDABLE_TYPES = "errai.ui.bindableTypes";
+  public static final String CONFIG_ERRAI_NONBINDABLE_TYPES = "errai.ui.nonbindableTypes";
 
   private static volatile Boolean _isJUnitTest;
 
@@ -210,7 +211,7 @@ public abstract class EnvUtil {
         addSerializableTypes(exposedClasses, explicitTypes, value);
       }
       else if (key.equals(CONFIG_ERRAI_NONSERIALIZABLE_TYPE)) {
-        addNonSerializableTypes(exposedClasses, nonportableClasses, value);
+          addNonSerializableTypes(nonportableClasses, value);
       }
       else if (key.equals(CONFIG_ERRAI_MAPPING_ALIASES)) {
         addMappingAliases(mappingAliases, explicitTypes, value);
@@ -241,8 +242,7 @@ public abstract class EnvUtil {
     }
   }
 
-  private static void addNonSerializableTypes(final Set<MetaClass> exposedClasses, final Set<MetaClass> nonportableClasses,
-          final String value) {
+  private static void addNonSerializableTypes(final Set<MetaClass> nonportableClasses, final String value) {
     final Set<String> patterns = new LinkedHashSet<>();
     for (final String s : value.split(" ")) {
       final String singleValue = s.trim();
@@ -265,7 +265,7 @@ public abstract class EnvUtil {
         .getAllCachedClasses()
         .stream()
         .filter(mc -> filter.apply(mc.getFullyQualifiedName()))
-        .collect(toCollection(() -> exposedClasses));
+        .collect(toCollection(() -> nonportableClasses));
     }
   }
 
@@ -329,6 +329,7 @@ public abstract class EnvUtil {
   private static boolean isListValuedProperty(final String key) {
     return key.equals(CONFIG_ERRAI_IOC_ENABLED_ALTERNATIVES)
             || key.equals(CONFIG_ERRAI_BINDABLE_TYPES)
+            || key.equals(CONFIG_ERRAI_NONBINDABLE_TYPES)
             || key.equals(CONFIG_ERRAI_SERIALIZABLE_TYPE)
             || key.equals(CONFIG_ERRAI_NONSERIALIZABLE_TYPE)
             || key.equals(CONFIG_ERRAI_MAPPING_ALIASES);
