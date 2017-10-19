@@ -53,17 +53,27 @@ public class MarshallingConfiguration {
                   .stream()
                   .collect(toMap(x -> MetaClassFactory.get(x.getKey()), Map.Entry::getValue))));
 
-  private static final ErraiAppPropertiesConfiguration ERRAI_APP_PROPERTIES_CONFIGURATION = new ErraiAppPropertiesConfiguration();
+  private static ErraiAppPropertiesConfiguration erraiAppPropertiesConfiguration;
 
   @Deprecated
   //FIXME: tiago: make it work with annotation configuration too
   public static boolean isPortableType(final Class<?> cls) {
     final MetaClass mc = MetaClassFactory.get(cls);
     final MetaClassFinder metaClassFinder = a -> new HashSet<>(ClassScanner.getTypesAnnotatedWith(a));
-    final Set<MetaClass> allPortableTypes = allPortableTypes(ERRAI_APP_PROPERTIES_CONFIGURATION, metaClassFinder);
+    final ErraiConfiguration erraiConfiguration = getErraiAppPropertiesConfiguration();
+    final Set<MetaClass> allPortableTypes = allPortableTypes(erraiConfiguration, metaClassFinder);
 
     return mc.isAnnotationPresent(Portable.class) || allPortableTypes.contains(mc) || String.class.getName()
-            .equals(mc.getFullyQualifiedName()) || TypeHandlerFactory.getHandler(mc.unsafeAsClass()) != null;
+            .equals(mc.getFullyQualifiedName()) || isBuiltinPortable(mc);
+  }
+
+  private static ErraiAppPropertiesConfiguration getErraiAppPropertiesConfiguration() {
+
+    if (erraiAppPropertiesConfiguration == null) {
+      erraiAppPropertiesConfiguration = new ErraiAppPropertiesConfiguration();
+    }
+
+    return erraiAppPropertiesConfiguration;
   }
 
   public static Set<MetaClass> allPortableConcreteSubtypes(final ErraiConfiguration erraiConfiguration,
@@ -149,7 +159,8 @@ public class MarshallingConfiguration {
         final Class<? extends ExposedTypesProvider> providerClass = Class.forName(cls.getFullyQualifiedName())
                 .asSubclass(ExposedTypesProvider.class);
 
-        final Constructor<? extends ExposedTypesProvider> constructor = providerClass.getConstructor(MetaClassFinder.class);
+        final Constructor<? extends ExposedTypesProvider> constructor = providerClass.getConstructor(
+                MetaClassFinder.class);
         constructor.setAccessible(true);
 
         for (final MetaClass exposedType : constructor.newInstance(metaClassFinder).provideTypesToExpose()) {
