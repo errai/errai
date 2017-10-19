@@ -16,11 +16,12 @@
 
 package org.jboss.errai.marshalling;
 
+import org.jboss.errai.common.client.PageRequest;
 import org.jboss.errai.common.configuration.ErraiModule;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
-@ErraiModule
+@ErraiModule(serializableTypes = { PageRequest.class })
 public class ErraiMarshallingModule {
 }
