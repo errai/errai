@@ -17,14 +17,12 @@
 package org.jboss.errai.bus.client.tests.support;
 
 import org.jboss.errai.common.client.api.annotations.MapsTo;
-import org.jboss.errai.common.client.api.annotations.Portable;
 
 /**
  * Part of the regression tests for ERRAI-595 and ERRAI-596.
  *
  * @author Jonathan Fuerth <jfuerth@redhat.com>
  */
-@Portable
 public class EntityWithConstructorAndMethodMappedLong {
 
   private final long nativeLongValue;
