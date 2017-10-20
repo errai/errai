@@ -29,18 +29,23 @@ import org.jboss.errai.codegen.builder.Builder;
 import org.jboss.errai.codegen.builder.callstack.LoadClassReference;
 import org.jboss.errai.codegen.builder.impl.Scope;
 import org.jboss.errai.codegen.literal.AnnotationLiteral;
+import org.jboss.errai.codegen.meta.MetaAnnotation;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassMember;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
 import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.meta.MetaTypeVariable;
+import org.jboss.errai.codegen.meta.impl.java.JavaReflectionAnnotation;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -134,13 +139,13 @@ public class BuildMetaMethod extends MetaMethod implements Builder {
           }
 
           @Override
-          public Annotation[] unsafeGetAnnotations() {
-            return new Annotation[0];
+          public Collection<MetaAnnotation> getAnnotations() {
+            return Collections.emptyList();
           }
 
           @Override
-          public <A extends Annotation> A unsafeGetAnnotation(final Class<A> annotation) {
-            return null;
+          public Optional<MetaAnnotation> getAnnotation(final Class<? extends Annotation> annotationClass) {
+            return Optional.empty();
           }
         });
       }
@@ -221,8 +226,8 @@ public class BuildMetaMethod extends MetaMethod implements Builder {
   }
 
   @Override
-  public Annotation[] unsafeGetAnnotations() {
-    return annotations.toArray(new Annotation[annotations.size()]);
+  public Collection<MetaAnnotation> getAnnotations() {
+    return annotations.stream().map(JavaReflectionAnnotation::new).collect(Collectors.toList());
   }
 
   @Override
@@ -306,7 +311,7 @@ public class BuildMetaMethod extends MetaMethod implements Builder {
     final StringBuilder buf = new StringBuilder(256);
 
     if (!annotations.isEmpty()) {
-      for (final Annotation a : unsafeGetAnnotations()) {
+      for (final Annotation a : annotations) {
         buf.append(new AnnotationLiteral(a).getCanonicalString(context)).append(" ");
       }
       buf.append("\n");

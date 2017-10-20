@@ -16,14 +16,18 @@
 
 package org.jboss.errai.codegen.meta.impl.gwt;
 
-import java.lang.annotation.Annotation;
-
+import com.google.gwt.core.ext.typeinfo.JField;
+import com.google.gwt.core.ext.typeinfo.TypeOracle;
+import org.jboss.errai.codegen.meta.MetaAnnotation;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaType;
+import org.jboss.errai.codegen.meta.impl.java.JavaReflectionAnnotation;
 
-import com.google.gwt.core.ext.typeinfo.JField;
-import com.google.gwt.core.ext.typeinfo.TypeOracle;
+import java.lang.annotation.Annotation;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.stream.Collectors;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -50,8 +54,10 @@ public class GWTField extends MetaField {
   }
 
   @Override
-  public Annotation[] unsafeGetAnnotations() {
-    return annotations == null ? new Annotation[0] : annotations;
+  public Collection<MetaAnnotation> getAnnotations() {
+    return Arrays.stream(annotations == null ? new Annotation[0] : annotations)
+            .map(JavaReflectionAnnotation::new)
+            .collect(Collectors.toList());
   }
 
   @Override

@@ -17,7 +17,11 @@
 package org.jboss.errai.codegen.meta.impl.gwt;
 
 import java.lang.annotation.Annotation;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.stream.Collectors;
 
+import org.jboss.errai.codegen.meta.MetaAnnotation;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassMember;
 import org.jboss.errai.codegen.meta.MetaConstructor;
@@ -26,6 +30,7 @@ import org.jboss.errai.codegen.meta.MetaParameter;
 
 import com.google.gwt.core.ext.typeinfo.JParameter;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
+import org.jboss.errai.codegen.meta.impl.java.JavaReflectionAnnotation;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -62,8 +67,8 @@ public class GWTParameter extends MetaParameter {
   }
 
   @Override
-  public Annotation[] unsafeGetAnnotations() {
-    return annotations;
+  public Collection<MetaAnnotation> getAnnotations() {
+    return Arrays.stream(annotations).map(JavaReflectionAnnotation::new).collect(Collectors.toList());
   }
 
   @Override

@@ -18,12 +18,16 @@ package org.jboss.errai.codegen.meta.impl.gwt;
 
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.stream.Collectors;
 
+import org.jboss.errai.codegen.meta.MetaAnnotation;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaConstructor;
 import org.jboss.errai.codegen.meta.MetaParameter;
 import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.meta.MetaTypeVariable;
+import org.jboss.errai.codegen.meta.impl.java.JavaReflectionAnnotation;
 import org.jboss.errai.codegen.util.GenUtil;
 
 import com.google.gwt.core.ext.typeinfo.JConstructor;
@@ -79,8 +83,8 @@ public class GWTConstructor extends MetaConstructor {
   }
 
   @Override
-  public Annotation[] unsafeGetAnnotations() {
-    return annotations;
+  public Collection<MetaAnnotation> getAnnotations() {
+    return Arrays.stream(annotations).map(JavaReflectionAnnotation::new).collect(Collectors.toList());
   }
 
   @Override

@@ -71,17 +71,6 @@ public class InjectionSite implements HasAnnotations {
   }
 
   @Override
-  @Deprecated
-  public Annotation[] unsafeGetAnnotations() {
-    return annotated.unsafeGetAnnotations();
-  }
-
-  @Override
-  public <A extends Annotation> A unsafeGetAnnotation(final Class<A> annotation) {
-    return annotated.unsafeGetAnnotation(annotation);
-  }
-
-  @Override
   public Optional<MetaAnnotation> getAnnotation(final Class<? extends Annotation> annotationClass) {
     return annotated.getAnnotation(annotationClass);
   }

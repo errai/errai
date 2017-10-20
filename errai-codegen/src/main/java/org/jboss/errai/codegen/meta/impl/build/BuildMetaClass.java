@@ -19,9 +19,11 @@ package org.jboss.errai.codegen.meta.impl.build;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.jboss.errai.codegen.BlockStatement;
 import org.jboss.errai.codegen.Comment;
@@ -33,6 +35,7 @@ import org.jboss.errai.codegen.builder.Builder;
 import org.jboss.errai.codegen.builder.callstack.LoadClassReference;
 import org.jboss.errai.codegen.builder.impl.Scope;
 import org.jboss.errai.codegen.literal.AnnotationLiteral;
+import org.jboss.errai.codegen.meta.MetaAnnotation;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaConstructor;
@@ -41,6 +44,7 @@ import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameterizedType;
 import org.jboss.errai.codegen.meta.MetaTypeVariable;
 import org.jboss.errai.codegen.meta.impl.AbstractMetaClass;
+import org.jboss.errai.codegen.meta.impl.java.JavaReflectionAnnotation;
 import org.jboss.errai.codegen.util.GenUtil;
 import org.jboss.errai.codegen.util.PrettyPrinter;
 
@@ -384,8 +388,8 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
   }
 
   @Override
-  public Annotation[] unsafeGetAnnotations() {
-    return annotations.toArray(new Annotation[annotations.size()]);
+  public Collection<MetaAnnotation> getAnnotations() {
+    return annotations.stream().map(JavaReflectionAnnotation::new).collect(Collectors.toList());
   }
 
   @Override
@@ -585,7 +589,7 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
       context.addVariable(Variable.create(buildMetaField.getName(), buildMetaField.getType()));
     }
 
-    for (final Annotation a : unsafeGetAnnotations()) {
+    for (final Annotation a : annotations) {
       buf.append(new AnnotationLiteral(a).getCanonicalString(context));
       buf.append(" ");
     }

@@ -149,7 +149,7 @@ public class TemplatedCodeDecoratorTest {
             Optional.of(new JavaReflectionAnnotation(defaultHandlerAnno)));
     when(handlerMethod.getParameters()).thenReturn(new MetaParameter[] { eventParam });
     when(eventParam.getType()).thenReturn(elemental2EventClass);
-    when(eventParam.getAnnotation(any())).thenReturn(Optional.empty());
+    when(eventParam.getAnnotation(any(Class.class))).thenReturn(Optional.empty());
 
     try {
       decorator.generateDecorator(decorable, controller);

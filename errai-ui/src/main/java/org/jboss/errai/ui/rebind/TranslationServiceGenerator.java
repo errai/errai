@@ -34,6 +34,7 @@ import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.ConstructorBlockBuilder;
 import org.jboss.errai.codegen.builder.impl.ClassBuilder;
 import org.jboss.errai.codegen.exception.GenerationException;
+import org.jboss.errai.codegen.meta.MetaAnnotation;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.impl.build.BuildMetaClass;
@@ -50,6 +51,7 @@ import org.jboss.errai.reflections.Reflections;
 import org.jboss.errai.reflections.scanners.ResourcesScanner;
 import org.jboss.errai.reflections.util.ConfigurationBuilder;
 import org.jboss.errai.reflections.util.FilterBuilder;
+import org.jboss.errai.ui.client.local.spi.TemplateProvider;
 import org.jboss.errai.ui.client.local.spi.TranslationService;
 import org.jboss.errai.ui.rebind.chain.TemplateCatalog;
 import org.jboss.errai.ui.shared.DomVisit;
@@ -156,8 +158,8 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
 
       // Figure out the translation key value (for the null locale).
       String value = null;
-      final TranslationKey annotation = metaField.unsafeGetAnnotation(TranslationKey.class);
-      final String defaultValue = annotation.defaultValue();
+      final MetaAnnotation annotation = metaField.getAnnotation(TranslationKey.class).get();
+      final String defaultValue = annotation.value("defaultValue");
       if (defaultValue != null) {
         value = defaultValue;
       }
@@ -295,7 +297,7 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
 
   private String getPathRoot(final MetaClass bundleClass, final URL resource) {
     final String fullPath = resource.getPath();
-    final String resourcePath = bundleClass.unsafeGetAnnotation(Bundle.class).value();
+    final String resourcePath = bundleClass.getAnnotation(Bundle.class).get().value();
     final String protocol = resource.getProtocol();
 
     final String relativePath;
@@ -372,11 +374,8 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
    * @param bundleAnnotatedClass
    */
   private String getMessageBundlePath(final MetaClass bundleAnnotatedClass) {
-    final Bundle annotation = bundleAnnotatedClass.unsafeGetAnnotation(Bundle.class);
-    final String name = annotation.value();
-    if (name == null) {
-      throw new GenerationException("@Bundle: bundle name must not be null].");
-    }
+    final String name = bundleAnnotatedClass.getAnnotation(Bundle.class).get().value();
+
     // Absolute path vs. relative path.
     if (name.startsWith("/")) {
       return name.substring(1);
@@ -474,8 +473,8 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
     // Find all *usages* of translation keys by scanning and processing all templates.
     final Collection<MetaClass> templatedAnnotatedClasses = ClassScanner.getTypesAnnotatedWith(Templated.class);
     for (final MetaClass templatedAnnotatedClass : templatedAnnotatedClasses) {
-      if (!templatedAnnotatedClass.unsafeGetAnnotation(Templated.class)
-              .provider().equals(Templated.DEFAULT_PROVIDER.class))
+      final MetaClass provider = templatedAnnotatedClass.getAnnotation(Templated.class).get().value("provider");
+      if (!provider.instanceOf(Templated.DEFAULT_PROVIDER.class))
         continue;
 
       final String templateFileName = TemplatedCodeDecorator.getTemplateFileName(templatedAnnotatedClass);

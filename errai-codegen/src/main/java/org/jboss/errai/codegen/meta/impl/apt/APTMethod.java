@@ -110,14 +110,4 @@ public class APTMethod extends MetaMethod implements APTMember {
   public Boolean isAnnotationPresent(final MetaClass metaClass) {
     return APTClassUtil.isAnnotationPresent(method, metaClass);
   }
-
-  @Override
-  public Annotation[] unsafeGetAnnotations() {
-    return APTClassUtil.unsafeGetAnnotations();
-  }
-
-  @Override
-  public <A extends Annotation> A unsafeGetAnnotation(final Class<A> annotation) {
-    return APTClassUtil.unsafeGetAnnotation();
-  }
 }

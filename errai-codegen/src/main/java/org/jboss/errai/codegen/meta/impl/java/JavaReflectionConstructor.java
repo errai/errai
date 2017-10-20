@@ -21,8 +21,12 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import org.jboss.errai.codegen.meta.MetaAnnotation;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaConstructor;
@@ -109,11 +113,16 @@ public class JavaReflectionConstructor extends MetaConstructor {
   }
 
   @Override
-  public synchronized Annotation[] unsafeGetAnnotations() {
-    if (annotationsCache == null) {
-      annotationsCache = constructor.getAnnotations();
+  public synchronized Collection<MetaAnnotation> getAnnotations() {
+    final Annotation[] array;
+
+    if (annotationsCache != null) {
+      array = annotationsCache;
+    } else {
+      array = annotationsCache = constructor.getAnnotations();
     }
-    return annotationsCache;
+
+    return Arrays.stream(array).map(JavaReflectionAnnotation::new).collect(Collectors.toList());
   }
 
   @Override

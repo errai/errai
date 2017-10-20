@@ -210,22 +210,7 @@ public final class APTClassUtil {
   }
 
   @Deprecated
-  public static Annotation[] unsafeGetAnnotations() {
-    throw new RuntimeException("Unsafe methods should not be called in APT environment");
-  }
-
-  @Deprecated
   public static Class<?> unsafeAsClass() {
-    throw new RuntimeException("Unsafe methods should not be called in APT environment");
-  }
-
-  @Deprecated
-  public static <A extends Annotation> A unsafeGetAnnotation() {
-    throw new RuntimeException("Unsafe methods should not be called in APT environment");
-  }
-
-  @Deprecated
-  public static boolean unsafeIsAnnotationPresent() {
     throw new RuntimeException("Unsafe methods should not be called in APT environment");
   }
 }

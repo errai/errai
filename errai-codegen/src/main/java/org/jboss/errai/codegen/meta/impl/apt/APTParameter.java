@@ -87,16 +87,6 @@ public class APTParameter extends MetaParameter {
     return APTClassUtil.isAnnotationPresent(parameter, metaClass);
   }
 
-  @Override
-  public Annotation[] unsafeGetAnnotations() {
-    return APTClassUtil.unsafeGetAnnotations();
-  }
-
-  @Override
-  public <A extends Annotation> A unsafeGetAnnotation(final Class<A> annotation) {
-    return APTClassUtil.unsafeGetAnnotation();
-  }
-
   public Element getParameter() {
     return parameter;
   }

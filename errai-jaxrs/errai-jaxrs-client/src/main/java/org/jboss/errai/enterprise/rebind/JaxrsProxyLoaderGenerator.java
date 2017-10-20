@@ -28,7 +28,6 @@ import org.jboss.errai.codegen.builder.MethodBlockBuilder;
 import org.jboss.errai.codegen.builder.impl.ClassBuilder;
 import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
-import org.jboss.errai.config.MetaClassFinder;
 import org.jboss.errai.codegen.util.AnnotationFilter;
 import org.jboss.errai.codegen.util.InterceptorProvider;
 import org.jboss.errai.codegen.util.RuntimeAnnotationFilter;
@@ -38,6 +37,7 @@ import org.jboss.errai.common.client.api.interceptor.InterceptsRemoteCall;
 import org.jboss.errai.common.client.framework.ProxyProvider;
 import org.jboss.errai.common.client.framework.RemoteServiceProxyFactory;
 import org.jboss.errai.common.metadata.RebindUtils;
+import org.jboss.errai.config.MetaClassFinder;
 import org.jboss.errai.config.rebind.AbstractAsyncGenerator;
 import org.jboss.errai.config.rebind.GenerateAsync;
 import org.jboss.errai.config.util.ClassScanner;
@@ -136,17 +136,10 @@ public class JaxrsProxyLoaderGenerator extends AbstractAsyncGenerator {
 
   @Override
   protected boolean isRelevantClass(final MetaClass clazz) {
-    // It's ok to use unsafe methods here because the APT environment doesn't call this method
-    for (final Annotation anno : clazz.unsafeGetAnnotations()) {
-      if (anno.annotationType().equals(Path.class)
-              || anno.annotationType().equals(FeatureInterceptor.class)
-              || anno.annotationType().equals(InterceptsRemoteCall.class)
-              || anno.annotationType().equals(Provider.class)) {
-        return true;
-      }
-    }
-
-    return false;
+    return clazz.isAnnotationPresent(Path.class)
+            || clazz.isAnnotationPresent(FeatureInterceptor.class)
+            || clazz.isAnnotationPresent(InterceptsRemoteCall.class)
+            || clazz.isAnnotationPresent(Provider.class);
   }
 
   private Set<MetaClass> getMetaClasses(final GeneratorContext context,

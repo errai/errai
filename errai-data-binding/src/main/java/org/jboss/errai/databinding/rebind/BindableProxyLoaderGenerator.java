@@ -33,9 +33,9 @@ import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaParameterizedType;
 import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.util.Stmt;
-import org.jboss.errai.config.MetaClassFinder;
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.config.ErraiAppPropertiesConfiguration;
+import org.jboss.errai.config.MetaClassFinder;
 import org.jboss.errai.config.rebind.AbstractAsyncGenerator;
 import org.jboss.errai.config.rebind.GenerateAsync;
 import org.jboss.errai.config.util.ClassScanner;
@@ -160,13 +160,7 @@ public class BindableProxyLoaderGenerator extends AbstractAsyncGenerator {
 
   @Override
   protected boolean isRelevantClass(final MetaClass clazz) {
-    for (final Annotation anno : clazz.unsafeGetAnnotations()) {
-      if (anno.annotationType().equals(Bindable.class) || anno.annotationType().equals(DefaultConverter.class)) {
-        return true;
-      }
-    }
-
-    return false;
+    return clazz.isAnnotationPresent(Bindable.class) || clazz.isAnnotationPresent(DefaultConverter.class);
   }
 
   private Set<MetaClass> findAnnotatedElements(final Class<? extends Annotation> annotation,

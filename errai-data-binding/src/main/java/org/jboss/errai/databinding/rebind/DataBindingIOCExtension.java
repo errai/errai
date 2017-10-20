@@ -19,7 +19,9 @@ package org.jboss.errai.databinding.rebind;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.meta.HasAnnotations;
+import org.jboss.errai.codegen.meta.MetaAnnotation;
 import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.impl.java.JavaReflectionAnnotation;
 import org.jboss.errai.databinding.client.api.Bindable;
 import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.ioc.client.api.IOCExtension;
@@ -43,9 +45,12 @@ import org.jboss.errai.ui.shared.api.annotations.Model;
 import javax.enterprise.context.Dependent;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
 import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
@@ -86,20 +91,18 @@ public class DataBindingIOCExtension implements IOCExtensionConfigurator {
               injectionContext.getQualifierFactory().forSource(new HasAnnotations() {
 
                 @Override
-                public Annotation[] unsafeGetAnnotations() {
-                  return new Annotation[] {
-                      anno
-                  };
+                public Collection<MetaAnnotation> getAnnotations() {
+                  return Collections.singleton(new JavaReflectionAnnotation(anno));
                 }
 
                 @SuppressWarnings("unchecked")
                 @Override
-                public <A extends Annotation> A unsafeGetAnnotation(Class<A> annotation) {
+                public Optional<MetaAnnotation> getAnnotation(Class<? extends Annotation> annotation) {
                   if (isAnnotationPresent(annotation)) {
-                    return (A) anno;
+                    return Optional.of(new JavaReflectionAnnotation(anno));
                   }
                   else {
-                    return null;
+                    return Optional.empty();
                   }
                 }
               }));

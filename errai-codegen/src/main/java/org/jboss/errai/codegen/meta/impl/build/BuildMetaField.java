@@ -18,7 +18,9 @@ package org.jboss.errai.codegen.meta.impl.build;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.jboss.errai.codegen.Comment;
 import org.jboss.errai.codegen.Context;
@@ -27,9 +29,11 @@ import org.jboss.errai.codegen.Variable;
 import org.jboss.errai.codegen.builder.Builder;
 import org.jboss.errai.codegen.builder.impl.Scope;
 import org.jboss.errai.codegen.literal.AnnotationLiteral;
+import org.jboss.errai.codegen.meta.MetaAnnotation;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaType;
+import org.jboss.errai.codegen.meta.impl.java.JavaReflectionAnnotation;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -78,8 +82,8 @@ public class BuildMetaField extends MetaField implements Builder {
   }
 
   @Override
-  public Annotation[] unsafeGetAnnotations() {
-    return annotations.toArray(new Annotation[annotations.size()]);
+  public Collection<MetaAnnotation> getAnnotations() {
+    return annotations.stream().map(JavaReflectionAnnotation::new).collect(Collectors.toList());
   }
 
   @Override
@@ -198,7 +202,7 @@ public class BuildMetaField extends MetaField implements Builder {
     }
 
     if (!annotations.isEmpty()) {
-      for (final Annotation a : unsafeGetAnnotations()) {
+      for (final Annotation a : annotations) {
         builder.append(new AnnotationLiteral(a).getCanonicalString(Context.create())).append(" ");
       }
     }

@@ -114,14 +114,4 @@ interface APTMember extends MetaClassMember, HasAnnotations {
   default Boolean isAnnotationPresent(final MetaClass metaClass) {
     return APTClassUtil.isAnnotationPresent(getMember(), metaClass);
   }
-
-  @Override
-  default Annotation[] unsafeGetAnnotations() {
-    return APTClassUtil.unsafeGetAnnotations();
-  }
-
-  @Override
-  default <A extends Annotation> A unsafeGetAnnotation(final Class<A> annotation) {
-    return APTClassUtil.unsafeGetAnnotation();
-  }
 }

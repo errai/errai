@@ -16,12 +16,16 @@
 
 package org.jboss.errai.codegen.meta.impl.java;
 
-import java.lang.annotation.Annotation;
-import java.util.concurrent.atomic.AtomicInteger;
-
+import org.jboss.errai.codegen.meta.MetaAnnotation;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassMember;
 import org.jboss.errai.codegen.meta.MetaParameter;
+
+import java.lang.annotation.Annotation;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -57,8 +61,10 @@ public class JavaReflectionParameter extends MetaParameter {
   }
 
   @Override
-  public Annotation[] unsafeGetAnnotations() {
-    return annotations == null ? new Annotation[0] : annotations;
+  public Collection<MetaAnnotation> getAnnotations() {
+    return Arrays.stream(annotations == null ? new Annotation[0] : annotations)
+            .map(JavaReflectionAnnotation::new)
+            .collect(Collectors.toList());
   }
 
   @Override

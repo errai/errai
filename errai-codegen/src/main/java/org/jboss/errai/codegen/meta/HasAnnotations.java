@@ -32,39 +32,23 @@ import static java.util.stream.Collectors.toList;
 @FunctionalInterface
 public interface HasAnnotations {
 
-  /**
-   * @deprecated This method is not safe to use in APT environment.
-   */
-  @Deprecated
-  Annotation[] unsafeGetAnnotations();
-
-  /**
-   * @deprecated This method is not safe to use in APT environment.
-   */
-  @Deprecated
-  @SuppressWarnings("unchecked")
-  default <A extends Annotation> A unsafeGetAnnotation(final Class<A> annotation) {
-    // Please no hate or else null.
-    return (A) Arrays.stream(unsafeGetAnnotations())
-            .filter(a -> a.annotationType().equals(annotation))
-            .findFirst()
-            .orElse(null);
-  }
+  Collection<MetaAnnotation> getAnnotations();
 
   default Optional<MetaAnnotation> getAnnotation(final Class<? extends Annotation> annotationClass) {
-    return Optional.ofNullable(unsafeGetAnnotation(annotationClass)).map(JavaReflectionAnnotation::new);
+    return getAnnotations().stream().filter(a -> a.annotationType().instanceOf(annotationClass)).findFirst();
+  }
+
+  @SuppressWarnings("unchecked")
+  default Optional<MetaAnnotation> getAnnotation(final MetaClass annotationClass) {
+    return getAnnotation((Class<? extends Annotation>) annotationClass.unsafeAsClass());
+  }
+
+  default Boolean isAnnotationPresent(final Class<? extends Annotation> annotationClass) {
+    return getAnnotation(annotationClass).isPresent();
   }
 
   @SuppressWarnings("unchecked")
   default Boolean isAnnotationPresent(final MetaClass metaClass) {
     return isAnnotationPresent((Class<? extends Annotation>) metaClass.unsafeAsClass());
-  }
-
-  default Collection<MetaAnnotation> getAnnotations() {
-    return Arrays.stream(unsafeGetAnnotations()).map(JavaReflectionAnnotation::new).collect(toList());
-  }
-
-  default Boolean isAnnotationPresent(final Class<? extends Annotation> annotationClass) {
-    return getAnnotation(annotationClass).isPresent();
   }
 }

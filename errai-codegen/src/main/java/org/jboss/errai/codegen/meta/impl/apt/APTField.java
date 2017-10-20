@@ -83,14 +83,4 @@ public class APTField extends MetaField implements APTMember {
   public Optional<MetaAnnotation> getAnnotation(final Class<? extends Annotation> annotationClass) {
     return APTMember.super.getAnnotation(annotationClass);
   }
-
-  @Override
-  public Annotation[] unsafeGetAnnotations() {
-    return APTClassUtil.unsafeGetAnnotations();
-  }
-
-  @Override
-  public <A extends Annotation> A unsafeGetAnnotation(final Class<A> annotation) {
-    return APTClassUtil.unsafeGetAnnotation();
-  }
 }

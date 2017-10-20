@@ -833,14 +833,4 @@ public class APTClass extends AbstractMetaClass<TypeMirror> {
     return APTClassUtil.unsafeAsClass();
   }
 
-  @Override
-  public Annotation[] unsafeGetAnnotations() {
-    return APTClassUtil.unsafeGetAnnotations();
-  }
-
-  @Override
-  public <A extends Annotation> A unsafeGetAnnotation(final Class<A> annotation) {
-    return APTClassUtil.unsafeGetAnnotation();
-  }
-
 }

@@ -27,15 +27,18 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.enterprise.util.TypeLiteral;
 
+import org.jboss.errai.codegen.meta.MetaAnnotation;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaConstructor;
@@ -372,11 +375,16 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
   }
 
   @Override
-  public synchronized Annotation[] unsafeGetAnnotations() {
-    if (_annotationsCache == null) {
-      _annotationsCache = getEnclosedMetaObject().getAnnotations();
+  public synchronized Collection<MetaAnnotation> getAnnotations() {
+    final Annotation[] array;
+
+    if (_annotationsCache != null) {
+      array = _annotationsCache;
+    } else {
+      array = _annotationsCache = getEnclosedMetaObject().getAnnotations();
     }
-    return _annotationsCache;
+
+    return Arrays.stream(array).map(JavaReflectionAnnotation::new).collect(Collectors.toList());
   }
 
   @Override

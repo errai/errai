@@ -36,6 +36,7 @@ import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.MethodBlockBuilder;
 import org.jboss.errai.codegen.builder.MethodCommentBuilder;
 import org.jboss.errai.codegen.exception.GenerationException;
+import org.jboss.errai.codegen.meta.MetaAnnotation;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaField;
@@ -51,9 +52,9 @@ import org.jboss.errai.common.client.api.WrappedPortable;
 import org.jboss.errai.common.metadata.MetaDataScanner;
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.common.metadata.ScannerSingleton;
+import org.jboss.errai.config.PropertiesUtil;
 import org.jboss.errai.config.rebind.AbstractAsyncGenerator;
 import org.jboss.errai.config.rebind.GenerateAsync;
-import org.jboss.errai.config.PropertiesUtil;
 import org.jboss.errai.jpa.client.local.BigIntegerIdGenerator;
 import org.jboss.errai.jpa.client.local.ErraiEntityManager;
 import org.jboss.errai.jpa.client.local.ErraiEntityManagerFactory;
@@ -112,6 +113,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 @GenerateAsync(ErraiEntityManager.class)
@@ -408,12 +410,10 @@ public class ErraiEntityManagerGenerator extends AbstractAsyncGenerator {
       List<MetaClass> listenerClasses = new ArrayList<MetaClass>();
       listenerClasses.addAll(globalEntityListeners);
 
-      EntityListeners entityListeners = entityType.unsafeGetAnnotation(EntityListeners.class);
-      if (entityListeners != null) {
-        for (Class<?> listenerClass : entityListeners.value()) {
-          listenerClasses.add(MetaClassFactory.get(listenerClass));
-        }
-      }
+      entityType.getAnnotation(EntityListeners.class)
+              .map(a -> a.valueAsArray(MetaClass[].class))
+              .map(Arrays::asList)
+              .ifPresent(listenerClasses::addAll);
 
       for (MetaClass listenerMetaClass : listenerClasses) {
         for (MetaMethod callback : listenerMetaClass.getMethodsAnnotatedWith(eventType)) {
