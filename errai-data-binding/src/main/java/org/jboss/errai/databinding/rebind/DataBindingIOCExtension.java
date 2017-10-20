@@ -86,11 +86,6 @@ public class DataBindingIOCExtension implements IOCExtensionConfigurator {
               injectionContext.getQualifierFactory().forSource(new HasAnnotations() {
 
                 @Override
-                public boolean unsafeIsAnnotationPresent(Class<? extends Annotation> annotation) {
-                  return Model.class.equals(annotation);
-                }
-
-                @Override
                 public Annotation[] unsafeGetAnnotations() {
                   return new Annotation[] {
                       anno
@@ -100,7 +95,7 @@ public class DataBindingIOCExtension implements IOCExtensionConfigurator {
                 @SuppressWarnings("unchecked")
                 @Override
                 public <A extends Annotation> A unsafeGetAnnotation(Class<A> annotation) {
-                  if (unsafeIsAnnotationPresent(annotation)) {
+                  if (isAnnotationPresent(annotation)) {
                     return (A) anno;
                   }
                   else {

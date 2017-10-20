@@ -85,11 +85,6 @@ public class APTField extends MetaField implements APTMember {
   }
 
   @Override
-  public boolean unsafeIsAnnotationPresent(Class<? extends Annotation> annotation) {
-    return APTClassUtil.unsafeIsAnnotationPresent();
-  }
-
-  @Override
   public Annotation[] unsafeGetAnnotations() {
     return APTClassUtil.unsafeGetAnnotations();
   }

@@ -829,11 +829,6 @@ public class APTClass extends AbstractMetaClass<TypeMirror> {
   }
 
   @Override
-  public boolean unsafeIsAnnotationPresent(Class<? extends Annotation> annotation) {
-    return APTClassUtil.unsafeIsAnnotationPresent();
-  }
-
-  @Override
   public synchronized Class<?> unsafeAsClass() {
     return APTClassUtil.unsafeAsClass();
   }

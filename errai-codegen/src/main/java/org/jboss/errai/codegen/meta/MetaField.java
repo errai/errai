@@ -236,11 +236,6 @@ public abstract class MetaField extends AbstractHasAnnotations implements MetaCl
     }
 
     @Override
-    public boolean unsafeIsAnnotationPresent(Class<? extends Annotation> annotation) {
-      return false;
-    }
-
-    @Override
     public <A extends Annotation> A unsafeGetAnnotation(Class<A> annotation) {
       return null;
     }

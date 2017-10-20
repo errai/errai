@@ -60,11 +60,6 @@ class HasNamedAnnotation implements HasAnnotations {
   }
 
   @Override
-  public boolean unsafeIsAnnotationPresent(final Class<? extends Annotation> annotation) {
-    return Named.class.equals(annotation);
-  }
-
-  @Override
   public Annotation[] unsafeGetAnnotations() {
     return new Annotation[] { named };
   }
@@ -72,7 +67,7 @@ class HasNamedAnnotation implements HasAnnotations {
   @Override
   @SuppressWarnings("unchecked")
   public <A extends Annotation> A unsafeGetAnnotation(final Class<A> annotation) {
-    if (unsafeIsAnnotationPresent(annotation)) {
+    if (isAnnotationPresent(annotation)) {
       return (A) named;
     } else {
       return null;

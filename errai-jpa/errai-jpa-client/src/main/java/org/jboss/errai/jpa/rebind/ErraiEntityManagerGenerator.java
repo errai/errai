@@ -466,11 +466,11 @@ public class ErraiEntityManagerGenerator extends AbstractAsyncGenerator {
   protected boolean isGeneratedValue(Member javaMember) {
     if (javaMember instanceof Field) {
       MetaField field = MetaClassFactory.get((Field) javaMember);
-      return field.unsafeIsAnnotationPresent(GeneratedValue.class);
+      return field.isAnnotationPresent(GeneratedValue.class);
     }
     else if (javaMember instanceof Method) {
       MetaMethod method = MetaClassFactory.get((Method) javaMember);
-      return method.unsafeIsAnnotationPresent(GeneratedValue.class);
+      return method.isAnnotationPresent(GeneratedValue.class);
     }
     throw new IllegalArgumentException("Given member is a "
         + javaMember.getClass().getName()

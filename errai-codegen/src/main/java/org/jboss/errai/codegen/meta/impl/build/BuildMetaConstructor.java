@@ -111,11 +111,6 @@ public class BuildMetaConstructor extends MetaConstructor implements Builder {
           }
 
           @Override
-          public boolean unsafeIsAnnotationPresent(final Class<? extends Annotation> annotation) {
-            return false;
-          }
-
-          @Override
           public <A extends Annotation> A unsafeGetAnnotation(final Class<A> annotation) {
             return null;
           }

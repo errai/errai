@@ -42,14 +42,6 @@ public interface HasAnnotations {
    * @deprecated This method is not safe to use in APT environment.
    */
   @Deprecated
-  default boolean unsafeIsAnnotationPresent(final Class<? extends Annotation> annotation) {
-    return isAnnotationPresent(annotation);
-  }
-
-  /**
-   * @deprecated This method is not safe to use in APT environment.
-   */
-  @Deprecated
   @SuppressWarnings("unchecked")
   default <A extends Annotation> A unsafeGetAnnotation(final Class<A> annotation) {
     // Please no hate or else null.
@@ -65,7 +57,7 @@ public interface HasAnnotations {
 
   @SuppressWarnings("unchecked")
   default Boolean isAnnotationPresent(final MetaClass metaClass) {
-    return unsafeIsAnnotationPresent((Class<? extends Annotation>) metaClass.unsafeAsClass());
+    return isAnnotationPresent((Class<? extends Annotation>) metaClass.unsafeAsClass());
   }
 
   default Collection<MetaAnnotation> getAnnotations() {
