@@ -29,6 +29,7 @@ import static java.util.stream.Collectors.toList;
 import static org.jboss.errai.common.configuration.ErraiApp.Property.APPLICATION_CONTEXT;
 import static org.jboss.errai.common.configuration.ErraiApp.Property.ASYNC_BEAN_MANAGER;
 import static org.jboss.errai.common.configuration.ErraiApp.Property.AUTO_DISCOVER_SERVICES;
+import static org.jboss.errai.common.configuration.ErraiApp.Property.CUSTOM_PROPERTIES;
 import static org.jboss.errai.common.configuration.ErraiApp.Property.ENABLE_WEB_SOCKET_SERVER;
 import static org.jboss.errai.common.configuration.ErraiApp.Property.FORCE_STATIC_MARSHALLERS;
 import static org.jboss.errai.common.configuration.ErraiApp.Property.LAZY_LOAD_BUILTIN_MARSHALLERS;
@@ -109,7 +110,7 @@ public class AptErraiAppConfiguration implements ErraiAppConfiguration {
 
   @Override
   public Optional<String> custom(final String propertyName) {
-    return Arrays.stream(erraiAppAnnotation.valueAsArray(MetaAnnotation[].class))
+    return Arrays.stream(erraiAppAnnotation.valueAsArray(CUSTOM_PROPERTIES, MetaAnnotation[].class))
             .filter(a -> a.value("name").equals(propertyName))
             .findFirst()
             .map(a -> a.value("value"));

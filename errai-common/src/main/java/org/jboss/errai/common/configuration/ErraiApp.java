@@ -55,5 +55,6 @@ public @interface ErraiApp {
     String FORCE_STATIC_MARSHALLERS = "forceStaticMarshallers";
     String LAZY_LOAD_BUILTIN_MARSHALLERS = "lazyLoadBuiltinMarshallers";
     String MAKE_DEFAULT_ARRAY_MARSHALLERS = "makeDefaultArrayMarshallers";
+    String CUSTOM_PROPERTIES = "customProperties";
   }
 }

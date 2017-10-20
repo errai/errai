@@ -16,6 +16,7 @@
 
 package org.jboss.errai.common.apt.configuration;
 
+import org.jboss.errai.common.configuration.CustomProperty;
 import org.jboss.errai.common.configuration.ErraiApp;
 
 /**
@@ -25,6 +26,11 @@ import org.jboss.errai.common.configuration.ErraiApp;
           asyncBeanManager = true,
           enableWebSocketServer = true,
           autoDiscoverServices = true,
-          applicationContext = "/test")
+          applicationContext = "/test",
+          forceStaticMarshallers = true,
+          useStaticMarshallers = true,
+          makeDefaultArrayMarshallers = true,
+          lazyLoadBuiltinMarshallers = true,
+          customProperties = @CustomProperty(name = "existent", value = "test"))
 class ErraiTestApp {
 }

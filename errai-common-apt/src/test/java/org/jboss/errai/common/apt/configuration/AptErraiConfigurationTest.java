@@ -36,6 +36,11 @@ public class AptErraiConfigurationTest extends ErraiAptTest {
     Assert.assertEquals(false, config.asyncBeanManager());
     Assert.assertEquals(false, config.isWebSocketServerEnabled());
     Assert.assertEquals(false, config.isAutoDiscoverServicesEnabled());
+    Assert.assertEquals(false, config.forceStaticMarshallers());
+    Assert.assertEquals(false, config.useStaticMarshallers());
+    Assert.assertEquals(false, config.makeDefaultArrayMarshallers());
+    Assert.assertEquals(false, config.lazyLoadBuiltinMarshallers());
+    Assert.assertFalse(config.custom("nonexistent").isPresent());
   }
 
   @Test
@@ -61,6 +66,11 @@ public class AptErraiConfigurationTest extends ErraiAptTest {
     Assert.assertEquals(true, config.asyncBeanManager());
     Assert.assertEquals(true, config.isWebSocketServerEnabled());
     Assert.assertEquals(true, config.isAutoDiscoverServicesEnabled());
+    Assert.assertEquals(true, config.forceStaticMarshallers());
+    Assert.assertEquals(true, config.useStaticMarshallers());
+    Assert.assertEquals(true, config.makeDefaultArrayMarshallers());
+    Assert.assertEquals(true, config.lazyLoadBuiltinMarshallers());
+    Assert.assertEquals("test", config.custom("existent").get());
   }
 
 }
