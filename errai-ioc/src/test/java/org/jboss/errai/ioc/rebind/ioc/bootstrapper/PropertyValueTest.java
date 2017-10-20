@@ -16,9 +16,8 @@
 
 package org.jboss.errai.ioc.rebind.ioc.bootstrapper;
 
-import org.jboss.errai.config.ErraiAppPropertiesConfiguration;
+import org.jboss.errai.config.propertiesfile.ErraiAppPropertiesConfiguration;
 import org.jboss.errai.config.ErraiConfiguration;
-import org.jboss.errai.config.ErraiModulesConfiguration;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.junit.Test;
 import org.junit.runner.RunWith;

@@ -28,7 +28,7 @@ import org.jboss.errai.config.MetaClassFinder;
 import org.jboss.errai.common.apt.ResourceFilesFinder;
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.common.metadata.ScannerSingleton;
-import org.jboss.errai.config.ErraiAppPropertiesConfiguration;
+import org.jboss.errai.config.propertiesfile.ErraiAppPropertiesConfiguration;
 import org.jboss.errai.config.ErraiConfiguration;
 import org.jboss.errai.config.rebind.AbstractAsyncGenerator;
 import org.jboss.errai.config.rebind.EnvUtil;

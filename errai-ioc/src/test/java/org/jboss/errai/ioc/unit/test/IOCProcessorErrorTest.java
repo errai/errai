@@ -42,7 +42,7 @@ import org.jboss.errai.ioc.rebind.ioc.bootstrapper.FactoryGenerator;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessor;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IocRelevantClassesUtil;
-import org.jboss.errai.config.ErraiAppPropertiesConfiguration;
+import org.jboss.errai.config.propertiesfile.ErraiAppPropertiesConfiguration;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraph;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.QualifierFactory;
 import org.jboss.errai.ioc.rebind.ioc.graph.impl.DefaultQualifierFactory;

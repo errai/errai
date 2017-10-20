@@ -28,7 +28,7 @@ import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.impl.AbstractMetaClass;
 import org.jboss.errai.common.metadata.RebindUtils;
-import org.jboss.errai.config.ErraiAppPropertiesConfiguration;
+import org.jboss.errai.config.propertiesfile.ErraiAppPropertiesConfiguration;
 import org.jboss.errai.config.ErraiConfiguration;
 import org.jboss.errai.marshalling.client.api.MarshallerFramework;
 import org.jboss.errai.marshalling.rebind.api.GeneratorMappingContext;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.config.rebind;
+package org.jboss.errai.config.propertiesfile;
 
 import java.util.HashMap;
 import java.util.Map;

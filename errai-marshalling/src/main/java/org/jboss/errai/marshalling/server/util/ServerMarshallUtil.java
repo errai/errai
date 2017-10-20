@@ -17,7 +17,6 @@
 package org.jboss.errai.marshalling.server.util;
 
 import org.jboss.errai.codegen.util.ClassChangeUtil;
-import org.jboss.errai.config.ErraiAppPropertiesConfiguration;
 import org.jboss.errai.config.ErraiConfiguration;
 import org.jboss.errai.marshalling.client.api.MarshallerFactory;
 import org.jboss.errai.marshalling.rebind.MarshallerGeneratorFactory;
@@ -49,7 +48,7 @@ public abstract class ServerMarshallUtil {
     if (generatedMarshaller.isPresent()) {
       return (Class<? extends MarshallerFactory>) generatedMarshaller.get();
     }
-    else if (!MarshallingGenUtil.isForceStaticMarshallers()) {
+    else if (!MarshallingGenUtil.isForceStaticMarshallers(erraiConfiguration)) {
       return null;
     }
     else {

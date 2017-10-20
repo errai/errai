@@ -37,6 +37,8 @@ import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.util.GenUtil;
 import org.jboss.errai.codegen.util.If;
 import org.jboss.errai.codegen.util.Stmt;
+import org.jboss.errai.config.propertiesfile.ErraiAppPropertiesErraiAppConfiguration;
+import org.jboss.errai.config.ErraiConfiguration;
 import org.jboss.errai.config.rebind.EnvUtil;
 import org.jboss.errai.marshalling.client.Marshalling;
 import org.jboss.errai.marshalling.client.api.Marshaller;
@@ -46,8 +48,6 @@ import org.jboss.errai.marshalling.client.api.Marshaller;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class MarshallingGenUtil {
-  private static final String USE_STATIC_MARSHALLERS = "errai.marshalling.use_static_marshallers";
-  private static final String FORCE_STATIC_MARSHALLERS = "errai.marshalling.force_static_marshallers";
   public static final String USE_SHORT_IMPL_NAMES = "errai.marshalling.short_names";
   public static final String USE_VERY_SHORT_IMPL_NAMES = "errai.marshalling.very_short_names";
 
@@ -226,38 +226,26 @@ public class MarshallingGenUtil {
     return Collections.unmodifiableCollection(l);
   }
 
-  public static boolean isUseStaticMarshallers() {
-    if (isForceStaticMarshallers())
+  public static boolean isUseStaticMarshallers(final ErraiConfiguration erraiConfiguration) {
+    if (isForceStaticMarshallers(erraiConfiguration))
       return true;
 
     if (EnvUtil.isDevMode() && !EnvUtil.isJUnitTest())
       return false;
 
-    if (System.getProperty(USE_STATIC_MARSHALLERS) != null) {
-      return Boolean.getBoolean(USE_STATIC_MARSHALLERS);
+    if (System.getProperty(ErraiAppPropertiesErraiAppConfiguration.USE_STATIC_MARSHALLERS) != null) {
+      return Boolean.getBoolean(ErraiAppPropertiesErraiAppConfiguration.USE_STATIC_MARSHALLERS);
     }
 
-    final Map<String, String> frameworkProperties = EnvUtil.getEnvironmentConfig().getFrameworkProperties();
-    if (frameworkProperties.containsKey(USE_STATIC_MARSHALLERS)) {
-      return "true".equals(frameworkProperties.get(USE_STATIC_MARSHALLERS));
-    }
-    else {
-      return !EnvUtil.isDevMode();
-    }
+    return erraiConfiguration.app().useStaticMarshallers();
   }
 
-  public static boolean isForceStaticMarshallers() {
-    if (System.getProperty(FORCE_STATIC_MARSHALLERS) != null) {
-      return Boolean.getBoolean(FORCE_STATIC_MARSHALLERS);
+  public static boolean isForceStaticMarshallers(final ErraiConfiguration erraiConfiguration) {
+    if (System.getProperty(ErraiAppPropertiesErraiAppConfiguration.FORCE_STATIC_MARSHALLERS) != null) {
+      return Boolean.getBoolean(ErraiAppPropertiesErraiAppConfiguration.FORCE_STATIC_MARSHALLERS);
     }
 
-    final Map<String, String> frameworkProperties = EnvUtil.getEnvironmentConfig().getFrameworkProperties();
-    if (frameworkProperties.containsKey(FORCE_STATIC_MARSHALLERS)) {
-      return "true".equals(frameworkProperties.get(FORCE_STATIC_MARSHALLERS));
-    }
-    else {
-      return false;
-    }
+    return erraiConfiguration.app().forceStaticMarshallers();
   }
 
   public static void ensureMarshallerFieldCreated(final ClassStructureBuilder<?> classStructureBuilder,

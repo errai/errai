@@ -78,7 +78,7 @@ import org.jboss.errai.common.client.api.Assert;
 import org.jboss.errai.common.client.api.annotations.LocalEvent;
 import org.jboss.errai.common.client.framework.ProxyFactory;
 import org.jboss.errai.common.server.api.ErraiBootstrapFailure;
-import org.jboss.errai.config.MarshallingConfiguration;
+import org.jboss.errai.config.marshalling.MarshallingConfiguration;
 import org.jboss.errai.config.util.ClassScanner;
 import org.jboss.errai.enterprise.client.cdi.CDIProtocol;
 import org.jboss.errai.enterprise.client.cdi.EventQualifierSerializer;

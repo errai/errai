@@ -22,10 +22,10 @@ import org.jboss.errai.codegen.meta.MetaAnnotation;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.common.client.api.annotations.Portable;
+import org.jboss.errai.config.propertiesfile.ErraiAppPropertiesConfigurationUtil;
 import org.jboss.errai.config.ErraiConfiguration;
-import org.jboss.errai.config.MarshallingConfiguration;
+import org.jboss.errai.config.marshalling.MarshallingConfiguration;
 import org.jboss.errai.config.MetaClassFinder;
-import org.jboss.errai.config.rebind.EnvUtil;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
 import org.jboss.errai.marshalling.client.api.annotations.ImplementationAliases;
@@ -167,7 +167,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
   private void loadCustomMappings() {
     exposedClasses.add(MetaClassFactory.get(Object.class));
 
-    EnvUtil.clearCache();
+    ErraiAppPropertiesConfigurationUtil.clearCache();
     final Set<MetaClass> envExposedClasses = MarshallingConfiguration.allExposedPortableTypes(erraiConfiguration, metaClassFinder);
 
     for (final Class<?> cls : findCustomMappings()) {

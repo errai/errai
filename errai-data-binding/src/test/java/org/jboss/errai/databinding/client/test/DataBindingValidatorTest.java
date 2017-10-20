@@ -21,7 +21,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
-import org.jboss.errai.config.ErraiAppPropertiesConfiguration;
+import org.jboss.errai.config.propertiesfile.ErraiAppPropertiesConfiguration;
 import org.jboss.errai.databinding.client.TestModel;
 import org.jboss.errai.databinding.rebind.DataBindingValidator;
 import org.junit.Test;

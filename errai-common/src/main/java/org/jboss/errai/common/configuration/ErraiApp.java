@@ -35,11 +35,25 @@ public @interface ErraiApp {
 
   boolean asyncBeanManager() default false;
 
+  boolean useStaticMarshallers() default false;
+
+  boolean forceStaticMarshallers() default false;
+
+  boolean lazyLoadBuiltinMarshallers() default false;
+
+  boolean makeDefaultArrayMarshallers() default false;
+
+  CustomProperty[] customProperties() default {};
+
   interface Property {
     String USER_ON_HOST_PAGE_ENABLED = "userOnHostPageEnabled";
     String APPLICATION_CONTEXT = "applicationContext";
     String AUTO_DISCOVER_SERVICES = "autoDiscoverServices";
     String ENABLE_WEB_SOCKET_SERVER = "enableWebSocketServer";
     String ASYNC_BEAN_MANAGER = "asyncBeanManager";
+    String USE_STATIC_MARSHALLERS = "useStaticMarshallers";
+    String FORCE_STATIC_MARSHALLERS = "forceStaticMarshallers";
+    String LAZY_LOAD_BUILTIN_MARSHALLERS = "lazyLoadBuiltinMarshallers";
+    String MAKE_DEFAULT_ARRAY_MARSHALLERS = "makeDefaultArrayMarshallers";
   }
 }

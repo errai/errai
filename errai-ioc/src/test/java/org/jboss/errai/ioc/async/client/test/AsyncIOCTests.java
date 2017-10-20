@@ -17,7 +17,7 @@
 package org.jboss.errai.ioc.async.client.test;
 
 import org.jboss.errai.common.rebind.CacheUtil;
-import org.jboss.errai.config.rebind.EnvUtil.EnvironmentConfigCache;
+import org.jboss.errai.config.propertiesfile.ErraiAppPropertiesConfigurationUtil.EnvironmentConfigCache;
 import org.jboss.errai.ioc.async.test.beanmanager.client.AsyncBeanManagerTests;
 import org.jboss.errai.ioc.async.test.constructor.client.AsyncConstructorInjectionTests;
 import org.jboss.errai.ioc.async.test.scopes.dependent.client.AsyncDependentScopeIntegrationTest;

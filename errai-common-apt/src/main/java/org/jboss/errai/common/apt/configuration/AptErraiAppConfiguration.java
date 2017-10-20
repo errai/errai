@@ -17,10 +17,11 @@
 package org.jboss.errai.common.apt.configuration;
 
 import org.jboss.errai.codegen.meta.MetaAnnotation;
-import org.jboss.errai.config.MetaClassFinder;
 import org.jboss.errai.common.configuration.ErraiApp;
 import org.jboss.errai.config.ErraiAppConfiguration;
+import org.jboss.errai.config.MetaClassFinder;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,7 +30,11 @@ import static org.jboss.errai.common.configuration.ErraiApp.Property.APPLICATION
 import static org.jboss.errai.common.configuration.ErraiApp.Property.ASYNC_BEAN_MANAGER;
 import static org.jboss.errai.common.configuration.ErraiApp.Property.AUTO_DISCOVER_SERVICES;
 import static org.jboss.errai.common.configuration.ErraiApp.Property.ENABLE_WEB_SOCKET_SERVER;
+import static org.jboss.errai.common.configuration.ErraiApp.Property.FORCE_STATIC_MARSHALLERS;
+import static org.jboss.errai.common.configuration.ErraiApp.Property.LAZY_LOAD_BUILTIN_MARSHALLERS;
+import static org.jboss.errai.common.configuration.ErraiApp.Property.MAKE_DEFAULT_ARRAY_MARSHALLERS;
 import static org.jboss.errai.common.configuration.ErraiApp.Property.USER_ON_HOST_PAGE_ENABLED;
+import static org.jboss.errai.common.configuration.ErraiApp.Property.USE_STATIC_MARSHALLERS;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
@@ -78,7 +83,36 @@ public class AptErraiAppConfiguration implements ErraiAppConfiguration {
   }
 
   @Override
+  public boolean forceStaticMarshallers() {
+    return erraiAppAnnotation.value(FORCE_STATIC_MARSHALLERS);
+  }
+
+  @Override
+  public boolean useStaticMarshallers() {
+    return erraiAppAnnotation.value(USE_STATIC_MARSHALLERS);
+  }
+
+  @Override
+  public boolean lazyLoadBuiltinMarshallers() {
+    return erraiAppAnnotation.value(LAZY_LOAD_BUILTIN_MARSHALLERS);
+  }
+
+  @Override
+  public boolean makeDefaultArrayMarshallers() {
+    return erraiAppAnnotation.value(MAKE_DEFAULT_ARRAY_MARSHALLERS);
+  }
+
+  @Override
   public boolean isAptEnvironment() {
     return true;
   }
+
+  @Override
+  public Optional<String> custom(final String propertyName) {
+    return Arrays.stream(erraiAppAnnotation.valueAsArray(MetaAnnotation[].class))
+            .filter(a -> a.value("name").equals(propertyName))
+            .findFirst()
+            .map(a -> a.value("value"));
+  }
+
 }

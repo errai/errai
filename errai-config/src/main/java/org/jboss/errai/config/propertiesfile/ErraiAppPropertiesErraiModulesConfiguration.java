@@ -14,20 +14,12 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.config;
+package org.jboss.errai.config.propertiesfile;
 
-import com.google.common.collect.Multimap;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.impl.java.JavaReflectionClass;
-import org.jboss.errai.common.client.api.annotations.NonPortable;
-import org.jboss.errai.common.client.api.annotations.Portable;
-import org.jboss.errai.common.metadata.MetaDataScanner;
-import org.jboss.errai.common.metadata.ScannerSingleton;
-import org.jboss.errai.config.rebind.EnvUtil;
-import org.jboss.errai.config.rebind.EnvironmentConfigExtension;
-import org.jboss.errai.config.rebind.ExposedTypesProvider;
-import org.jboss.errai.config.util.ClassScanner;
+import org.jboss.errai.config.ErraiModulesConfiguration;
 import org.jboss.errai.reflections.util.SimplePackageFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +27,6 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -117,7 +108,7 @@ public class ErraiAppPropertiesErraiModulesConfiguration implements ErraiModules
 
       Set<MetaClass> bindableTypes = new HashSet<>();
 
-      for (final URL url : EnvUtil.getErraiAppPropertiesFilesUrls()) {
+      for (final URL url : ErraiAppPropertiesConfigurationUtil.getErraiAppPropertiesFilesUrls()) {
         InputStream inputStream = null;
         try {
           log.debug("Checking " + url.getFile() + " for bindable types...");
@@ -211,7 +202,7 @@ public class ErraiAppPropertiesErraiModulesConfiguration implements ErraiModules
   private static void processErraiAppPropertiesFiles(final Set<MetaClass> exposedClasses,
           final Set<MetaClass> nonportableClasses) {
 
-    for (final URL url : EnvUtil.getErraiAppPropertiesFilesUrls()) {
+    for (final URL url : ErraiAppPropertiesConfigurationUtil.getErraiAppPropertiesFilesUrls()) {
       InputStream inputStream = null;
       try {
         log.debug("checking " + url.getFile() + " for configured types ...");
@@ -307,7 +298,7 @@ public class ErraiAppPropertiesErraiModulesConfiguration implements ErraiModules
   public Map<String, String> getMappingAliases() {
     final Map<String, String> mappingAliases = new HashMap<>();
 
-    for (final URL url : EnvUtil.getErraiAppPropertiesFilesUrls()) {
+    for (final URL url : ErraiAppPropertiesConfigurationUtil.getErraiAppPropertiesFilesUrls()) {
       InputStream inputStream = null;
       try {
         log.debug("checking " + url.getFile() + " for configured types ...");

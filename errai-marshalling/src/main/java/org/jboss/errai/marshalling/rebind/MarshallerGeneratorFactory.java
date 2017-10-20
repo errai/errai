@@ -283,7 +283,7 @@ public class MarshallerGeneratorFactory {
     getMarshallerMethod.append(getMarshallerConditional);
     getMarshallerMethod.append(Stmt.loadLiteral(null).returnValue()).finish();
 
-    if (CommonConfigAttribs.MAKE_DEFAULT_ARRAY_MARSHALLERS.getBoolean()) {
+    if (erraiConfiguration.app().makeDefaultArrayMarshallers()) {
       for (final MetaClass arrayType : MarshallingGenUtil.getDefaultArrayMarshallers()) {
         addArrayMarshaller(arrayType, target == MarshallerOutputTarget.GWT);
       }
@@ -437,7 +437,7 @@ public class MarshallerGeneratorFactory {
       mappingContext.registerGeneratedMarshaller(clazz.getFullyQualifiedName());
     }
 
-    final boolean lazyEnabled = CommonConfigAttribs.LAZY_LOAD_BUILTIN_MARSHALLERS.getBoolean();
+    final boolean lazyEnabled = erraiConfiguration.app().lazyLoadBuiltinMarshallers();
 
     for (final MetaClass cls : exposed) {
       final MetaClass compType = cls.getOuterComponentType();

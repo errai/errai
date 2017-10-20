@@ -18,7 +18,7 @@ package org.jboss.errai.marshalling.server;
 
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
-import org.jboss.errai.config.ErraiAppPropertiesConfiguration;
+import org.jboss.errai.config.propertiesfile.ErraiAppPropertiesConfiguration;
 import org.jboss.errai.config.MetaClassFinder;
 import org.jboss.errai.config.util.ClassScanner;
 import org.jboss.errai.marshalling.client.MarshallingSessionProviderFactory;
@@ -64,7 +64,7 @@ public class MappingContextSingleton {
     ServerMappingContext sContext;
 
     try {
-      if (!MarshallingGenUtil.isUseStaticMarshallers()) {
+      if (!MarshallingGenUtil.isUseStaticMarshallers(ERRAI_CONFIGURATION)) {
         sContext = loadDynamicMarshallers();
       }
       else {
@@ -75,7 +75,7 @@ public class MappingContextSingleton {
           log.debug("failed to load static marshallers", t);
           log.warn("static marshallers were not found.");
 
-          if (MarshallingGenUtil.isForceStaticMarshallers()) {
+          if (MarshallingGenUtil.isForceStaticMarshallers(ERRAI_CONFIGURATION)) {
             throw new IOException("Enforcing static marshallers but failed to load generated server marshallers", t);
           }
 

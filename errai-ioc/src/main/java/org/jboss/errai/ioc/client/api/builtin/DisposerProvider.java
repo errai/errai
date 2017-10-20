@@ -26,7 +26,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.lang.annotation.Annotation;
 
-import static org.jboss.errai.config.ErraiAppPropertiesErraiAppConfiguration.ERRAI_IOC_ASYNC_BEAN_MANAGER;
+import static org.jboss.errai.config.propertiesfile.ErraiAppPropertiesErraiAppConfiguration.ERRAI_IOC_ASYNC_BEAN_MANAGER;
 
 /**
  * @author Mike Brock

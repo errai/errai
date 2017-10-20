@@ -34,6 +34,7 @@ import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.typeinfo.JClassType;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
+import org.jboss.errai.config.propertiesfile.ErraiAppPropertiesConfigurationUtil;
 
 /**
  * @author Mike Brock
@@ -114,7 +115,7 @@ public abstract class MetaClassBridgeUtil {
     }
     tOCache.populatedFrom = context;
 
-    CacheUtil.getCache(EnvUtil.EnvironmentConfigCache.class).clear();
+    ErraiAppPropertiesConfigurationUtil.clearCache();
   }
 
   private static boolean isReloadable(final MetaClass clazz, final Set<String> reloadablePacakges) {

@@ -37,7 +37,7 @@ public final class ErraiMarshallingExportedAnnotations {
   private ServerMarshaller serverMarshaller;
   private CustomMapping customMapping;
 
-  //FIXME: tiago: not ideal to be here, but errai-marshalling is really the only place where it's used
+  // not ideal to be here, but errai-marshalling is really the only place where it's used
   private EnvironmentConfigExtension environmentConfigExtension;
 }
 

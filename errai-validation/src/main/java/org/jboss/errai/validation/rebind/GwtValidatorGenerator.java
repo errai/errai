@@ -27,7 +27,7 @@ import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
-import org.jboss.errai.config.PropertiesUtil;
+import org.jboss.errai.config.propertiesfile.PropertiesUtil;
 import org.jboss.errai.config.util.ClassScanner;
 import org.jboss.errai.reflections.Reflections;
 import org.jboss.errai.reflections.scanners.FieldAnnotationsScanner;

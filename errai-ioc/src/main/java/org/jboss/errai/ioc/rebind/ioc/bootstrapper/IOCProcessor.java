@@ -46,7 +46,6 @@ import org.jboss.errai.codegen.util.If;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.client.api.Assert;
 import org.jboss.errai.config.ErraiConfiguration;
-import org.jboss.errai.config.rebind.EnvUtil;
 import org.jboss.errai.ioc.client.Bootstrapper;
 import org.jboss.errai.ioc.client.JsArray;
 import org.jboss.errai.ioc.client.WindowInjectionContext;
@@ -70,7 +69,6 @@ import org.jboss.errai.ioc.client.container.async.AsyncBeanManagerSetup;
 import org.jboss.errai.ioc.client.container.async.AsyncBeanManagerSetup.FactoryLoader;
 import org.jboss.errai.ioc.client.container.async.AsyncBeanManagerSetup.FactoryLoaderCallback;
 import org.jboss.errai.ioc.client.container.async.DefaultRunAsyncCallback;
-import org.jboss.errai.ioc.util.MetaAnnotationSerializer;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraph;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraphBuilder;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraphBuilder.Dependency;
@@ -85,6 +83,7 @@ import org.jboss.errai.ioc.rebind.ioc.injector.api.ExtensionTypeCallback;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableProvider;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
+import org.jboss.errai.ioc.util.MetaAnnotationSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -127,7 +126,7 @@ import static org.jboss.errai.codegen.util.Stmt.declareVariable;
 import static org.jboss.errai.codegen.util.Stmt.invokeStatic;
 import static org.jboss.errai.codegen.util.Stmt.loadLiteral;
 import static org.jboss.errai.codegen.util.Stmt.loadVariable;
-import static org.jboss.errai.config.ErraiAppPropertiesErraiAppConfiguration.ERRAI_IOC_ASYNC_BEAN_MANAGER;
+import static org.jboss.errai.config.propertiesfile.ErraiAppPropertiesErraiAppConfiguration.ERRAI_IOC_ASYNC_BEAN_MANAGER;
 import static org.jboss.errai.ioc.rebind.ioc.bootstrapper.AbstractBodyGenerator.getAnnotationArrayStmt;
 import static org.jboss.errai.ioc.rebind.ioc.bootstrapper.AbstractBodyGenerator.getAssignableTypesArrayStmt;
 
@@ -1296,12 +1295,10 @@ public class IOCProcessor {
       return erraiConfiguration.app().asyncBeanManager();
     }
 
-    final String propertyValue = EnvUtil.getEnvironmentConfig().getFrameworkOrSystemProperty(propName);
-    if (propertyValue == null) {
-      return matchByDefault;
-    } else {
-      return caseSensitive ? propertyValue.equals(matchValue) : propertyValue.equalsIgnoreCase(matchValue);
-    }
+    return erraiConfiguration.app()
+            .custom(propName)
+            .map(value -> caseSensitive ? value.equals(matchValue) : value.equalsIgnoreCase(matchValue))
+            .orElse(matchByDefault);
   }
 
   private boolean hasEnablingProperty(final MetaClass type) {

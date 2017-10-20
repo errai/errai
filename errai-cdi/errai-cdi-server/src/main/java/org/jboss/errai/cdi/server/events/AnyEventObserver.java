@@ -20,7 +20,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.spi.EventMetadata;
 
-import org.jboss.errai.config.MarshallingConfiguration;
+import org.jboss.errai.config.marshalling.MarshallingConfiguration;
 
 /**
  * Managed bean that observes all server-side events and dispatches them to the

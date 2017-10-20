@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.config;
+package org.jboss.errai.config.propertiesfile;
 
 import org.jboss.errai.common.metadata.ScannerSingleton;
 

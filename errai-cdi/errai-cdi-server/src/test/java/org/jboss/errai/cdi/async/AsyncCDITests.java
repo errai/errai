@@ -23,7 +23,7 @@ import org.jboss.errai.cdi.async.test.postconstruct.client.AsyncPostConstructOrd
 import org.jboss.errai.cdi.async.test.producers.client.AsyncProducerTest;
 import org.jboss.errai.cdi.stereotypes.client.test.StereotypesIntegrationTest;
 import org.jboss.errai.common.rebind.CacheUtil;
-import org.jboss.errai.config.rebind.EnvUtil.EnvironmentConfigCache;
+import org.jboss.errai.config.propertiesfile.ErraiAppPropertiesConfigurationUtil.EnvironmentConfigCache;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.runner.RunWith;

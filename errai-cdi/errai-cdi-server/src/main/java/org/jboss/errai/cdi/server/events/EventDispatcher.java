@@ -41,7 +41,7 @@ import org.jboss.errai.bus.client.api.messaging.MessageCallback;
 import org.jboss.errai.bus.server.api.RpcContext;
 import org.jboss.errai.bus.server.util.LocalContext;
 import org.jboss.errai.common.client.protocols.MessageParts;
-import org.jboss.errai.config.MarshallingConfiguration;
+import org.jboss.errai.config.marshalling.MarshallingConfiguration;
 import org.jboss.errai.enterprise.client.cdi.CDICommands;
 import org.jboss.errai.enterprise.client.cdi.CDIProtocol;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;

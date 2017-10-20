@@ -32,7 +32,7 @@ import org.jboss.errai.codegen.meta.MetaParameter;
 import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.config.MetaClassFinder;
-import org.jboss.errai.config.MarshallingConfiguration;
+import org.jboss.errai.config.marshalling.MarshallingConfiguration;
 import org.jboss.errai.common.client.api.annotations.LocalEvent;
 import org.jboss.errai.config.ErraiConfiguration;
 import org.jboss.errai.enterprise.client.cdi.AbstractCDIEventCallback;

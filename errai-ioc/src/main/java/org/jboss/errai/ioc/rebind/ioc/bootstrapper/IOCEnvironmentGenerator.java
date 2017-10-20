@@ -24,18 +24,14 @@ import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.impl.ClassBuilder;
 import org.jboss.errai.codegen.util.Stmt;
-import org.jboss.errai.common.server.api.ErraiConfig;
-import org.jboss.errai.config.ErraiAppPropertiesConfiguration;
+import org.jboss.errai.config.propertiesfile.ErraiAppPropertiesConfiguration;
 import org.jboss.errai.config.ErraiConfiguration;
-import org.jboss.errai.config.rebind.EnvUtil;
 import org.jboss.errai.ioc.client.container.ClientBeanManager;
 import org.jboss.errai.ioc.client.container.IOCEnvironment;
 import org.jboss.errai.ioc.client.container.SyncBeanManagerImpl;
 import org.jboss.errai.ioc.client.container.async.AsyncBeanManagerImpl;
 
 import java.io.PrintWriter;
-
-import static org.jboss.errai.config.ErraiAppPropertiesErraiAppConfiguration.ERRAI_IOC_ASYNC_BEAN_MANAGER;
 
 /**
  * @author Mike Brock

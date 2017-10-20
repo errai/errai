@@ -23,7 +23,7 @@ import org.jboss.errai.ioc.client.container.async.AsyncBeanManager;
 
 import javax.inject.Singleton;
 
-import static org.jboss.errai.config.ErraiAppPropertiesErraiAppConfiguration.ERRAI_IOC_ASYNC_BEAN_MANAGER;
+import static org.jboss.errai.config.propertiesfile.ErraiAppPropertiesErraiAppConfiguration.ERRAI_IOC_ASYNC_BEAN_MANAGER;
 
 /**
  * @author Mike Brock

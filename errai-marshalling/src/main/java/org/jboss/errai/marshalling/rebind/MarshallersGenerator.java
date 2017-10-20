@@ -24,9 +24,9 @@ import com.google.gwt.core.ext.typeinfo.NotFoundException;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.util.ClassChangeUtil;
 import org.jboss.errai.common.metadata.RebindUtils;
-import org.jboss.errai.config.ErraiAppPropertiesConfiguration;
+import org.jboss.errai.config.propertiesfile.ErraiAppPropertiesConfiguration;
 import org.jboss.errai.config.ErraiConfiguration;
-import org.jboss.errai.config.MarshallingConfiguration;
+import org.jboss.errai.config.marshalling.MarshallingConfiguration;
 import org.jboss.errai.config.rebind.AbstractAsyncGenerator;
 import org.jboss.errai.config.rebind.EnvUtil;
 import org.jboss.errai.config.rebind.GenerateAsync;
@@ -79,7 +79,7 @@ public class MarshallersGenerator extends AbstractAsyncGenerator {
       final boolean junitOrDevMode = !EnvUtil.isProdMode();
       final ErraiConfiguration erraiConfiguration = new ErraiAppPropertiesConfiguration();
 
-      if (SERVER_MARSHALLER_OUTPUT_ENABLED && MarshallingGenUtil.isUseStaticMarshallers()) {
+      if (SERVER_MARSHALLER_OUTPUT_ENABLED && MarshallingGenUtil.isUseStaticMarshallers(erraiConfiguration)) {
 
         final String serverSource;
         if (!junitOrDevMode && _serverMarshallerCache != null) {
@@ -92,7 +92,7 @@ public class MarshallersGenerator extends AbstractAsyncGenerator {
         }
 
         if (junitOrDevMode) {
-          if (MarshallingGenUtil.isUseStaticMarshallers()) {
+          if (MarshallingGenUtil.isUseStaticMarshallers(erraiConfiguration)) {
             final String tmpLocation = new File(sourceOutputTemp).getAbsolutePath();
             log.info("*** using temporary path: " + tmpLocation + " ***");
 

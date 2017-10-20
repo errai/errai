@@ -36,7 +36,6 @@ import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.MethodBlockBuilder;
 import org.jboss.errai.codegen.builder.MethodCommentBuilder;
 import org.jboss.errai.codegen.exception.GenerationException;
-import org.jboss.errai.codegen.meta.MetaAnnotation;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaField;
@@ -52,7 +51,7 @@ import org.jboss.errai.common.client.api.WrappedPortable;
 import org.jboss.errai.common.metadata.MetaDataScanner;
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.common.metadata.ScannerSingleton;
-import org.jboss.errai.config.PropertiesUtil;
+import org.jboss.errai.config.propertiesfile.PropertiesUtil;
 import org.jboss.errai.config.rebind.AbstractAsyncGenerator;
 import org.jboss.errai.config.rebind.GenerateAsync;
 import org.jboss.errai.jpa.client.local.BigIntegerIdGenerator;
@@ -113,7 +112,6 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 @GenerateAsync(ErraiEntityManager.class)
