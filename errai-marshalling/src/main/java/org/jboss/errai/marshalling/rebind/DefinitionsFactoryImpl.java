@@ -22,10 +22,10 @@ import org.jboss.errai.codegen.meta.MetaAnnotation;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.common.client.api.annotations.Portable;
-import org.jboss.errai.config.propertiesfile.ErraiAppPropertiesConfigurationUtil;
 import org.jboss.errai.config.ErraiConfiguration;
-import org.jboss.errai.config.marshalling.MarshallingConfiguration;
 import org.jboss.errai.config.MetaClassFinder;
+import org.jboss.errai.config.marshalling.MarshallingConfiguration;
+import org.jboss.errai.config.propertiesfile.ErraiAppPropertiesConfigurationUtil;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
 import org.jboss.errai.marshalling.client.api.annotations.ImplementationAliases;
@@ -425,12 +425,12 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
   }
 
   private Set<Class<?>> findCustomMappings() {
-    //FIXME: tiago: what to do?
+    // Classes annotated with @CustomMapping annotation have to be pre-compiled
     return metaClassFinder.findAnnotatedWith(CustomMapping.class).stream().map(s -> {
       try {
         return Class.forName(s.getFullyQualifiedName());
       } catch (final ClassNotFoundException e) {
-        throw new RuntimeException(e);
+        throw new RuntimeException("Failed to load @CustomMapping class " + s.getFullyQualifiedName(), e);
       }
     }).collect(toSet());
   }

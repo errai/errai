@@ -52,7 +52,7 @@ public class MarshallerAptGenerator extends ErraiAptGenerators.MultipleFiles {
     final ErraiConfiguration erraiConfiguration = new AptErraiConfiguration(metaClassFinder());
     final Set<AptGeneratedSourceFile> files = new HashSet<>();
 
-    //We need to iterate using an index here because we add elements to exposedClasses during iteration
+    // We need to iterate using an index here because we add elements to exposedClasses during iteration
     for (int i = 0; i < exposedClasses.size(); i++) {
       final MetaClass metaClass = exposedClasses.get(i);
       files.add(getGeneratedFile(erraiConfiguration, metaClass));
@@ -79,7 +79,7 @@ public class MarshallerAptGenerator extends ErraiAptGenerators.MultipleFiles {
 
   @Override
   public int priority() {
-    //Has to run after MarshallersGenerator because it sets the exposedClasses
+    //Has to run after MarshallersGenerator because it sets part of the exposedClasses
     return 1;
   }
 
