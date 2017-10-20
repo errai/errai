@@ -26,7 +26,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.stream.Collectors;
 
-public abstract class MetaField extends AbstractHasAnnotations implements MetaClassMember {
+public abstract class MetaField implements MetaClassMember, HasAnnotations {
 
   /**
    * Returns an actual MetaClass (a class, interface, primitive type, array, or

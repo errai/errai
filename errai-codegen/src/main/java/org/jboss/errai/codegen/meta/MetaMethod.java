@@ -26,7 +26,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public abstract class MetaMethod extends AbstractHasAnnotations implements MetaClassMember, MetaGenericDeclaration {
+public abstract class MetaMethod implements MetaClassMember, MetaGenericDeclaration, HasAnnotations {
 
   /**
    * Returns the MetaClass representing this method's return type. The returned
