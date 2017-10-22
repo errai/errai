@@ -351,8 +351,7 @@ public class DataBindingUtil {
    *          the type to check
    */
   private static void assertTypeIsBindable(final MetaClass type) {
-    if ((!type.isAnnotationPresent(Bindable.class) && !getConfiguredBindableTypes().contains(type))
-        || getConfiguredNonBindableTypes().contains(type)) {
+    if (!isBindableType(type)) {
       throw new GenerationException(type.getName() + " must be a @Bindable type when used as @Model");
     }
   }
@@ -399,21 +398,11 @@ public class DataBindingUtil {
    */
   public static Set<MetaClass> getConfiguredBindableTypes() {
     if (configuredBindableTypes != null) {
-      configuredBindableTypes = refreshConfiguredBindableTypes();
+      configuredBindableTypes = refreshConfiguredTypes(configuredBindableTypes);
     } else {
       initEnvironmentConfig();
     }
-     return configuredBindableTypes;
-  }
-
-  private static Set<MetaClass> refreshConfiguredBindableTypes() {
-    final Set<MetaClass> refreshedTypes = new HashSet<>(configuredBindableTypes.size());
-
-    for (final MetaClass clazz : configuredBindableTypes) {
-      refreshedTypes.add(MetaClassFactory.get(clazz.getFullyQualifiedName()));
-    }
-
-    return refreshedTypes;
+    return configuredBindableTypes;
   }
 
   /**
@@ -422,10 +411,21 @@ public class DataBindingUtil {
    * @return a set of meta classes representing the configured nonbindable types.
    */
   public static Set<MetaClass> getConfiguredNonBindableTypes() {
-    if (configuredNonBindableTypes == null) {
+    if (configuredNonBindableTypes != null) {
+      configuredNonBindableTypes = refreshConfiguredTypes(configuredNonBindableTypes);
+    } else {
       initEnvironmentConfig();
     }
     return configuredNonBindableTypes;
+  }
+
+  private static Set<MetaClass> refreshConfiguredTypes(Set<MetaClass> configuredTypes) {
+    final Set<MetaClass> refreshedTypes = new HashSet<>(configuredTypes.size());
+
+    for (final MetaClass clazz : configuredTypes) {
+      refreshedTypes.add(MetaClassFactory.get(clazz.getFullyQualifiedName()));
+    }
+    return refreshedTypes;
   }
 
   private static void initEnvironmentConfig() {

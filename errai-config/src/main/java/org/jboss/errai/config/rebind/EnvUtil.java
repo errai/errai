@@ -211,7 +211,7 @@ public abstract class EnvUtil {
         addSerializableTypes(exposedClasses, explicitTypes, value);
       }
       else if (key.equals(CONFIG_ERRAI_NONSERIALIZABLE_TYPE)) {
-          addNonSerializableTypes(nonportableClasses, value);
+        addNonSerializableTypes(nonportableClasses, value);
       }
       else if (key.equals(CONFIG_ERRAI_MAPPING_ALIASES)) {
         addMappingAliases(mappingAliases, explicitTypes, value);

@@ -2395,7 +2395,8 @@ public class SerializationTests extends AbstractErraiTest {
    try {
      Marshalling.toJSON(new NonSerializable());
    } catch (final RuntimeException ex) {
-     assertTrue("Unexpected exception.", ex.getMessage().contains("No marshaller for type"));
+     final String message = ex.getMessage();
+     assertTrue(message.contains("No marshaller for type") || message.contains("no marshalling definition"));
    }
  }
 

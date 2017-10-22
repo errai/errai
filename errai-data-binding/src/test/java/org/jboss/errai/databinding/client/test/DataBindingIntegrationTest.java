@@ -60,6 +60,7 @@ import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.databinding.client.api.StateSync;
 import org.jboss.errai.databinding.client.api.handler.property.PropertyChangeEvent;
 import org.jboss.errai.databinding.client.api.handler.property.PropertyChangeHandler;
+import org.jboss.errai.databinding.client.nonbindablepkg.TestModelInNonBindablePkg;
 import org.jboss.errai.databinding.client.scan.TestModelBindable;
 import org.jboss.errai.databinding.client.scan.TestModelWithoutBindableA;
 import org.jboss.errai.databinding.client.scan.TestModelWithoutBindableB;
@@ -1587,5 +1588,15 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     view.value.setValue("bar");
     invokeEventListeners(view.value, "keyup");
     assertEquals(view.value.getValue(), model.getValue());
+  }
+
+  @Test
+  public void testTypeInNonBiandablePakageIsNotBound() {
+    try {
+      final DataBinder<TestModelInNonBindablePkg> binder = DataBinder.forType(TestModelInNonBindablePkg.class);
+      binder.getModel();
+    } catch (Exception ex) {
+      assertTrue(ex.getMessage().contains("No proxy"));
+    }
   }
 }
