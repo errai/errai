@@ -16,6 +16,8 @@
 
 package org.jboss.errai.codegen.meta.impl.apt;
 
+import java.util.List;
+
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
@@ -23,5 +25,26 @@ class TestConcreteClass implements TestConcreteInterface {
   @Override
   public String foo() {
     return "foo";
+  }
+
+  public <X> X bar() {
+    return null;
+  }
+
+  public <X extends Long> X boundedBar() {
+    return null;
+  }
+
+  public List<?> wildcardBar() {
+    return null;
+  }
+
+  public void par(final String string) {
+  }
+
+  public <X> void unboundedPar(final String string, final X foo) {
+  }
+
+  public <X extends Long> void boundedPar(final String string, final X foo) {
   }
 }

@@ -93,7 +93,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
   private final ErraiConfiguration erraiConfiguration;
   private final MetaClassFinder metaClassFinder;
 
-  DefinitionsFactoryImpl(final ErraiConfiguration erraiConfiguration, MetaClassFinder metaClassFinder) {
+  DefinitionsFactoryImpl(final ErraiConfiguration erraiConfiguration, final MetaClassFinder metaClassFinder) {
     this.erraiConfiguration = erraiConfiguration;
     this.metaClassFinder = metaClassFinder;
     loadCustomMappings();

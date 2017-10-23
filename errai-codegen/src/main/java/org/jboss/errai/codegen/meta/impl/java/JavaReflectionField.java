@@ -49,7 +49,7 @@ public class JavaReflectionField extends MetaField {
   private volatile Annotation[] _annotationsCache;
 
   @Override
-  public Collection<MetaAnnotation> getAnnotations() {
+  public synchronized Collection<MetaAnnotation> getAnnotations() {
     final Annotation[] array;
 
     if (_annotationsCache != null) {

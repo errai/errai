@@ -20,7 +20,7 @@ import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.common.apt.ErraiAptExportedTypes;
 import org.jboss.errai.common.apt.ErraiAptGenerators;
 import org.jboss.errai.common.apt.configuration.AptErraiConfiguration;
-import org.jboss.errai.common.apt.generator.AptGeneratedSourceFile;
+import org.jboss.errai.common.apt.generator.ErraiAptGeneratedSourceFile;
 import org.jboss.errai.config.ErraiConfiguration;
 import org.jboss.errai.marshalling.rebind.MarshallerGenerator;
 import org.jboss.errai.marshalling.rebind.MarshallerGeneratorFactory;
@@ -48,9 +48,9 @@ public class MarshallerAptGenerator extends ErraiAptGenerators.MultipleFiles {
   }
 
   @Override
-  public Collection<AptGeneratedSourceFile> files() {
+  public Collection<ErraiAptGeneratedSourceFile> files() {
     final ErraiConfiguration erraiConfiguration = new AptErraiConfiguration(metaClassFinder());
-    final Set<AptGeneratedSourceFile> files = new HashSet<>();
+    final Set<ErraiAptGeneratedSourceFile> files = new HashSet<>();
 
     // We need to iterate using an index here because we add elements to exposedClasses during iteration
     for (int i = 0; i < exposedClasses.size(); i++) {
@@ -61,10 +61,10 @@ public class MarshallerAptGenerator extends ErraiAptGenerators.MultipleFiles {
     return files;
   }
 
-  private AptGeneratedSourceFile getGeneratedFile(final ErraiConfiguration erraiConfiguration, final MetaClass type) {
+  private ErraiAptGeneratedSourceFile getGeneratedFile(final ErraiConfiguration erraiConfiguration, final MetaClass type) {
     final String classSimpleName = MarshallerGeneratorFactory.getMarshallerImplClassName(type, true);
     final String generatedSource = generateSource(erraiConfiguration, type);
-    return new AptGeneratedSourceFile(PACKAGE_NAME, classSimpleName, generatedSource);
+    return new ErraiAptGeneratedSourceFile(PACKAGE_NAME, classSimpleName, generatedSource);
   }
 
   private String generateSource(final ErraiConfiguration erraiConfiguration, final MetaClass type) {

@@ -23,4 +23,6 @@ interface TestGenericInterface<T> {
 
   T foo();
 
+  void par(final T foo);
+
 }

@@ -63,11 +63,11 @@ public class GWTMethod extends MetaMethod {
   public MetaParameter[] getParameters() {
     return Arrays.stream(method.getParameters())
             .map(p -> new GWTParameter(oracle, p, this))
-            .toArray(s -> new GWTParameter[s]);
+            .toArray(GWTParameter[]::new);
   }
 
   @Override
-  public Collection<MetaAnnotation> getAnnotations() {
+  public synchronized Collection<MetaAnnotation> getAnnotations() {
     return Arrays.stream(annotations).map(JavaReflectionAnnotation::new).collect(Collectors.toList());
   }
 
@@ -101,7 +101,7 @@ public class GWTMethod extends MetaMethod {
   public MetaType[] getGenericParameterTypes() {
     return Arrays.stream(method.getParameters())
             .map(p -> GWTUtil.fromType(oracle, p.getType()))
-            .toArray(s -> new MetaType[s]);
+            .toArray(MetaType[]::new);
   }
 
   @Override

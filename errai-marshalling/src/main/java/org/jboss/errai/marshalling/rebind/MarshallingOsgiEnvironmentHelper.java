@@ -1,4 +1,4 @@
-package org.jboss.errai.marshalling.rebind;/*
+/*
  * Copyright (C) 2017 Red Hat, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +13,8 @@ package org.jboss.errai.marshalling.rebind;/*
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package org.jboss.errai.marshalling.rebind;
 
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
@@ -45,7 +47,6 @@ import org.jboss.errai.marshalling.client.marshallers.StringBuilderMarshaller;
 import org.jboss.errai.marshalling.client.marshallers.StringMarshaller;
 import org.jboss.errai.marshalling.client.marshallers.TimeMarshaller;
 import org.jboss.errai.marshalling.client.marshallers.TimestampMarshaller;
-import org.jboss.errai.marshalling.rebind.MarshallerGeneratorFactory;
 import org.jboss.errai.marshalling.rebind.mappings.builtin.StackTraceElementDefinition;
 import org.jboss.errai.marshalling.rebind.mappings.builtin.ThrowableDefinition;
 import org.jboss.errai.marshalling.server.marshallers.ServerClassMarshaller;
