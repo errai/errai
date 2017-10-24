@@ -1591,10 +1591,13 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
   }
 
   @Test
-  public void testTypeInNonBiandablePakageIsNotBound() {
+  public void testTypeInNonBindablePackageIsNotBound() {
     try {
       final DataBinder<TestModelInNonBindablePkg> binder = DataBinder.forType(TestModelInNonBindablePkg.class);
       binder.getModel();
+      fail("Expected 'No proxy' exception. TestModelInNonBindablePkg should be non-bindable.");
+    } catch (AssertionError ae) {
+        throw ae;
     } catch (Exception ex) {
       assertTrue(ex.getMessage().contains("No proxy"));
     }
