@@ -18,9 +18,11 @@ package org.jboss.errai.common.apt;
 
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.impl.apt.APTClass;
+import org.jboss.errai.common.apt.configuration.AptErraiAppConfiguration;
 import org.jboss.errai.common.apt.exportfile.ExportFile;
 import org.jboss.errai.common.apt.exportfile.ExportFileName;
 import org.jboss.errai.common.apt.generator.ExportFileGenerator;
+import org.jboss.errai.config.ErraiAppConfiguration;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.PackageElement;
@@ -56,16 +58,21 @@ public final class ErraiAptExportedTypes {
   private final Elements elements;
   private final AnnotatedSourceElementsFinder annotatedSourceElementsFinder;
   private final ResourceFilesFinder resourcesFilesFinder;
+  private final AptErraiAppConfiguration aptErraiAppConfiguration;
+  private final MetaClass erraiAppAnnotatedMetaClass;
 
-  public ErraiAptExportedTypes(final Types types,
+  public ErraiAptExportedTypes(final MetaClass erraiAppAnnotatedMetaClass,
+          final Types types,
           final Elements elements,
           final AnnotatedSourceElementsFinder annotatedSourceElementsFinder,
           final ResourceFilesFinder resourceFilesFinder) {
 
+    this.erraiAppAnnotatedMetaClass = erraiAppAnnotatedMetaClass;
     this.types = types;
     this.elements = elements;
-    this.annotatedSourceElementsFinder = annotatedSourceElementsFinder;
     this.resourcesFilesFinder = resourceFilesFinder;
+    this.annotatedSourceElementsFinder = annotatedSourceElementsFinder;
+    this.aptErraiAppConfiguration = new AptErraiAppConfiguration(erraiAppAnnotatedMetaClass);
 
     // Loads all exported types from ExportFiles
     exportedClassesByAnnotationClassName = getExportedTypesFromExportFilesInExportFilesPackage();
@@ -149,11 +156,24 @@ public final class ErraiAptExportedTypes {
             .stream()
             .filter(s -> s.getKind().equals(TypeKind.DECLARED))
             .map(APTClass::new)
+            .filter(this::isUnderLocalErraiAppPackage)
             .collect(toSet());
+  }
+
+  private boolean isUnderLocalErraiAppPackage(final MetaClass type) {
+    if (aptErraiAppConfiguration.local()) {
+      return type.getPackageName().startsWith(erraiAppAnnotatedMetaClass.getPackageName());
+    } else {
+      return true;
+    }
   }
 
   public ResourceFilesFinder resourceFilesFinder() {
     return resourcesFilesFinder;
+  }
+
+  ErraiAppConfiguration erraiAppConfiguration() {
+    return aptErraiAppConfiguration;
   }
 
   // Java 9 will implement this method, so when it's released and we upgrade, this can be removed.

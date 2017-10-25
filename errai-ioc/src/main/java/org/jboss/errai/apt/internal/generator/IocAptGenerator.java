@@ -20,8 +20,6 @@ import org.jboss.errai.apt.internal.generator.util.AptIocRelevantClassesFinder;
 import org.jboss.errai.common.apt.ErraiAptExportedTypes;
 import org.jboss.errai.common.apt.ErraiAptGenerators;
 import org.jboss.errai.common.apt.ResourceFilesFinder;
-import org.jboss.errai.common.apt.configuration.AptErraiConfiguration;
-import org.jboss.errai.config.ErraiConfiguration;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCGenerator;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IocRelevantClassesFinder;
 
@@ -44,10 +42,8 @@ public class IocAptGenerator extends ErraiAptGenerators.SingleFile {
 
   @Override
   public String generate() {
-    final ErraiConfiguration erraiConfiguration = new AptErraiConfiguration(metaClassFinder());
     final IocRelevantClassesFinder relevantClasses = new AptIocRelevantClassesFinder(metaClassFinder());
-
-    return iocGenerator.generate(null, metaClassFinder(), erraiConfiguration, relevantClasses, resourceFilesFinder);
+    return iocGenerator.generate(null, metaClassFinder(), erraiConfiguration(), relevantClasses, resourceFilesFinder);
   }
 
   @Override

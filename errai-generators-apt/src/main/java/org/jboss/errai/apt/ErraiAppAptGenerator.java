@@ -16,13 +16,16 @@
 
 package org.jboss.errai.apt;
 
+import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.impl.apt.APTClass;
 import org.jboss.errai.codegen.meta.impl.apt.APTClassUtil;
 import org.jboss.errai.common.apt.AnnotatedSourceElementsFinder;
 import org.jboss.errai.common.apt.AptAnnotatedSourceElementsFinder;
 import org.jboss.errai.common.apt.AptResourceFilesFinder;
 import org.jboss.errai.common.apt.ErraiAptExportedTypes;
-import org.jboss.errai.common.apt.generator.ErraiAptGeneratedSourceFile;
 import org.jboss.errai.common.apt.ErraiAptGenerators;
+import org.jboss.errai.common.apt.generator.ErraiAptGeneratedSourceFile;
+import org.jboss.errai.common.configuration.ErraiApp;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.RoundEnvironment;
@@ -54,8 +57,6 @@ import static org.jboss.errai.common.apt.ErraiAptPackages.generatorsPackageEleme
 @SupportedAnnotationTypes({ "org.jboss.errai.common.configuration.ErraiApp" })
 public class ErraiAppAptGenerator extends AbstractProcessor {
 
-  private ErraiAptExportedTypes erraiAptExportedTypes;
-
   @Override
   public boolean process(final Set<? extends TypeElement> annotations, final RoundEnvironment roundEnv) {
 
@@ -80,22 +81,42 @@ public class ErraiAppAptGenerator extends AbstractProcessor {
       final Elements elements = processingEnv.getElementUtils();
       APTClassUtil.init(types, elements);
 
-      this.erraiAptExportedTypes = new ErraiAptExportedTypes(types, elements, annotatedElementsFinder, new AptResourceFilesFinder(processingEnv.getFiler()));
+      annotatedElementsFinder.findSourceElementsAnnotatedWith(ErraiApp.class)
+              .stream()
+              .map(s -> new APTClass(s.asType()))
+              .map(m -> newAptExportedTypes(annotatedElementsFinder, types, elements, m))
+              .flatMap(aptExportedTypes -> findGenerators(elements, aptExportedTypes).stream())
+              .flatMap(generator -> generator.files().stream())
+              .forEach(this::saveFile);
 
-      findGenerators(elements).stream().flatMap(generator -> generator.files().stream()).forEach(this::saveFile);
-      System.out.println("Successfully generated files using Errai APT Generators in " + (System.currentTimeMillis() - start) + "ms");
+      System.out.println("Successfully generated files using Errai APT Generators in "
+              + (System.currentTimeMillis() - start)
+              + "ms");
     }
   }
 
-  List<ErraiAptGenerators.Any> findGenerators(final Elements elements) {
-    return generatorsPackageElement(elements).map(this::newGenerators).orElseGet(ArrayList::new);
+  private ErraiAptExportedTypes newAptExportedTypes(final AnnotatedSourceElementsFinder annotatedElementsFinder,
+          final Types types,
+          final Elements elements,
+          final MetaClass erraiAppAnnotatedMetaClass) {
+
+    return new ErraiAptExportedTypes(erraiAppAnnotatedMetaClass, types, elements, annotatedElementsFinder,
+            new AptResourceFilesFinder(processingEnv.getFiler()));
   }
 
-  private List<ErraiAptGenerators.Any> newGenerators(final PackageElement packageElement) {
+  List<ErraiAptGenerators.Any> findGenerators(final Elements elements,
+          final ErraiAptExportedTypes erraiAptExportedTypes) {
+
+    return generatorsPackageElement(elements).map(
+            packageElement -> newGenerators(packageElement, erraiAptExportedTypes)).orElseGet(ArrayList::new);
+  }
+
+  private List<ErraiAptGenerators.Any> newGenerators(final PackageElement packageElement,
+          final ErraiAptExportedTypes erraiAptExportedTypes) {
     return packageElement.getEnclosedElements()
             .stream()
             .map(this::loadClass)
-            .map(this::newGenerator)
+            .map(generatorClass -> newGenerator(generatorClass, erraiAptExportedTypes))
             .sorted(comparing(ErraiAptGenerators.Any::priority))
             .collect(toList());
   }
@@ -110,9 +131,11 @@ public class ErraiAppAptGenerator extends AbstractProcessor {
     }
   }
 
-  private ErraiAptGenerators.Any newGenerator(final Class<? extends ErraiAptGenerators.Any> generatorClass) {
+  private ErraiAptGenerators.Any newGenerator(final Class<? extends ErraiAptGenerators.Any> generatorClass,
+          final ErraiAptExportedTypes erraiAptExportedTypes) {
     try {
-      final Constructor<? extends ErraiAptGenerators.Any> constructor = generatorClass.getConstructor(ErraiAptExportedTypes.class);
+      final Constructor<? extends ErraiAptGenerators.Any> constructor = generatorClass.getConstructor(
+              ErraiAptExportedTypes.class);
       constructor.setAccessible(true);
       return constructor.newInstance(erraiAptExportedTypes);
     } catch (final Exception e) {

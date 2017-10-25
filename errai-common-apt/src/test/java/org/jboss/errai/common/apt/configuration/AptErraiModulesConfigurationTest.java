@@ -18,7 +18,7 @@ package org.jboss.errai.common.apt.configuration;
 
 import com.google.common.collect.ImmutableMap;
 import org.jboss.errai.codegen.apt.test.ErraiAptTest;
-import org.jboss.errai.common.apt.TestMetaClassFinder;
+import org.jboss.errai.codegen.meta.MetaAnnotation;
 import org.jboss.errai.common.apt.configuration.ErraiTestCustomModule1.IocWhitelisted1;
 import org.jboss.errai.common.apt.configuration.ErraiTestCustomModule1.NonBindable1;
 import org.jboss.errai.common.apt.configuration.ErraiTestCustomModule2.IocAlternative2;
@@ -51,8 +51,8 @@ public class AptErraiModulesConfigurationTest extends ErraiAptTest {
 
   @Test
   public void testGetAllPropertiesWithDefaultValues() {
-    final TestMetaClassFinder metaClassFinder = new TestMetaClassFinder(aptClass(ErraiDefaultTestModule.class));
-    final AptErraiModulesConfiguration config = new AptErraiModulesConfiguration(metaClassFinder);
+    final Set<MetaAnnotation> modules = new HashSet<>(aptClass(ErraiDefaultTestModule.class).getAnnotations());
+    final AptErraiModulesConfiguration config = new AptErraiModulesConfiguration(modules);
 
     assertTrue(config.getBindableTypes().isEmpty());
     assertTrue(config.getNonBindableTypes().isEmpty());
@@ -66,8 +66,8 @@ public class AptErraiModulesConfigurationTest extends ErraiAptTest {
 
   @Test
   public void testGetAllPropertiesWithCustomValues() {
-    final TestMetaClassFinder metaClassFinder = new TestMetaClassFinder(aptClass(ErraiTestCustomModule1.class));
-    final AptErraiModulesConfiguration config = new AptErraiModulesConfiguration(metaClassFinder);
+    final Set<MetaAnnotation> modules = new HashSet<>(aptClass(ErraiTestCustomModule1.class).getAnnotations());
+    final AptErraiModulesConfiguration config = new AptErraiModulesConfiguration(modules);
 
     assertContainsOnly(config.getBindableTypes(), aptClass(Bindable1.class));
     assertContainsOnly(config.getNonBindableTypes(), aptClass(NonBindable1.class));
@@ -83,15 +83,16 @@ public class AptErraiModulesConfigurationTest extends ErraiAptTest {
 
   @Test
   public void testGetAllPropertiesComposedCustomValues() {
+    final Set<MetaAnnotation> modules = new HashSet<>();
+    modules.addAll(aptClass(ErraiTestCustomModule1.class).getAnnotations());
+    modules.addAll(aptClass(ErraiTestCustomModule2.class).getAnnotations());
 
-    final TestMetaClassFinder metaClassFinder = new TestMetaClassFinder(aptClass(ErraiTestCustomModule1.class),
-            aptClass(ErraiTestCustomModule2.class));
-
-    final AptErraiModulesConfiguration config = new AptErraiModulesConfiguration(metaClassFinder);
+    final AptErraiModulesConfiguration config = new AptErraiModulesConfiguration(modules);
 
     assertContainsOnly(config.getBindableTypes(), aptClass(Bindable1.class), aptClass(Bindable2.class));
     assertContainsOnly(config.getNonBindableTypes(), aptClass(NonBindable1.class), aptClass(NonBindable2.class));
-    assertContainsOnly(config.getIocEnabledAlternatives(), aptClass(IocAlternative1.class), aptClass(IocAlternative2.class));
+    assertContainsOnly(config.getIocEnabledAlternatives(), aptClass(IocAlternative1.class),
+            aptClass(IocAlternative2.class));
     assertContainsOnly(config.getIocBlacklist(), aptClass(IocBlacklisted1.class), aptClass(IocBlacklisted2.class));
     assertContainsOnly(config.getIocWhitelist(), aptClass(IocWhitelisted1.class), aptClass(IocWhitelisted2.class));
     assertContainsOnly(config.portableTypes(), aptClass(Serializable1.class), aptClass(Serializable2.class));

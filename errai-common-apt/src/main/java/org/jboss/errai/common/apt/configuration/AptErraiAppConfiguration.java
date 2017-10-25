@@ -17,15 +17,13 @@
 package org.jboss.errai.common.apt.configuration;
 
 import org.jboss.errai.codegen.meta.MetaAnnotation;
+import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.common.configuration.ErraiApp;
 import org.jboss.errai.config.ErraiAppConfiguration;
-import org.jboss.errai.config.MetaClassFinder;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
 
-import static java.util.stream.Collectors.toList;
 import static org.jboss.errai.common.configuration.ErraiApp.Property.APPLICATION_CONTEXT;
 import static org.jboss.errai.common.configuration.ErraiApp.Property.ASYNC_BEAN_MANAGER;
 import static org.jboss.errai.common.configuration.ErraiApp.Property.AUTO_DISCOVER_SERVICES;
@@ -33,6 +31,7 @@ import static org.jboss.errai.common.configuration.ErraiApp.Property.CUSTOM_PROP
 import static org.jboss.errai.common.configuration.ErraiApp.Property.ENABLE_WEB_SOCKET_SERVER;
 import static org.jboss.errai.common.configuration.ErraiApp.Property.FORCE_STATIC_MARSHALLERS;
 import static org.jboss.errai.common.configuration.ErraiApp.Property.LAZY_LOAD_BUILTIN_MARSHALLERS;
+import static org.jboss.errai.common.configuration.ErraiApp.Property.LOCAL;
 import static org.jboss.errai.common.configuration.ErraiApp.Property.MAKE_DEFAULT_ARRAY_MARSHALLERS;
 import static org.jboss.errai.common.configuration.ErraiApp.Property.USER_ON_HOST_PAGE_ENABLED;
 import static org.jboss.errai.common.configuration.ErraiApp.Property.USE_STATIC_MARSHALLERS;
@@ -42,65 +41,56 @@ import static org.jboss.errai.common.configuration.ErraiApp.Property.USE_STATIC_
  */
 public class AptErraiAppConfiguration implements ErraiAppConfiguration {
 
-  private final MetaAnnotation erraiAppAnnotation;
+  private final MetaAnnotation erraiAppMetaAnnotation;
 
-  public AptErraiAppConfiguration(final MetaClassFinder metaClassFinder) {
-    final List<MetaAnnotation> erraiAppMetaAnnotation = metaClassFinder.findAnnotatedWith(ErraiApp.class)
-            .stream()
-            .map(app -> app.getAnnotation(ErraiApp.class))
-            .map(Optional::get)
-            .collect(toList());
-
-    if (erraiAppMetaAnnotation.size() > 1) {
-      throw new RuntimeException("There should exist only one @ErraiApp annotated class.");
-    }
-
-    this.erraiAppAnnotation = erraiAppMetaAnnotation.get(0);
+  public AptErraiAppConfiguration(final MetaClass erraiAppAnnotatedMetaClass) {
+    this.erraiAppMetaAnnotation = erraiAppAnnotatedMetaClass.getAnnotation(ErraiApp.class)
+            .orElseThrow(() -> new RuntimeException("Provided MetaClass must contain an @ErraiApp annotation"));
   }
 
   @Override
   public boolean isUserEnabledOnHostPage() {
-    return erraiAppAnnotation.value(USER_ON_HOST_PAGE_ENABLED);
+    return erraiAppMetaAnnotation.value(USER_ON_HOST_PAGE_ENABLED);
   }
 
   @Override
   public boolean isWebSocketServerEnabled() {
-    return erraiAppAnnotation.value(ENABLE_WEB_SOCKET_SERVER);
+    return erraiAppMetaAnnotation.value(ENABLE_WEB_SOCKET_SERVER);
   }
 
   @Override
   public boolean isAutoDiscoverServicesEnabled() {
-    return erraiAppAnnotation.value(AUTO_DISCOVER_SERVICES);
+    return erraiAppMetaAnnotation.value(AUTO_DISCOVER_SERVICES);
   }
 
   @Override
   public String getApplicationContext() {
-    return erraiAppAnnotation.value(APPLICATION_CONTEXT);
+    return erraiAppMetaAnnotation.value(APPLICATION_CONTEXT);
   }
 
   @Override
   public boolean asyncBeanManager() {
-    return erraiAppAnnotation.value(ASYNC_BEAN_MANAGER);
+    return erraiAppMetaAnnotation.value(ASYNC_BEAN_MANAGER);
   }
 
   @Override
   public boolean forceStaticMarshallers() {
-    return erraiAppAnnotation.value(FORCE_STATIC_MARSHALLERS);
+    return erraiAppMetaAnnotation.value(FORCE_STATIC_MARSHALLERS);
   }
 
   @Override
   public boolean useStaticMarshallers() {
-    return erraiAppAnnotation.value(USE_STATIC_MARSHALLERS);
+    return erraiAppMetaAnnotation.value(USE_STATIC_MARSHALLERS);
   }
 
   @Override
   public boolean lazyLoadBuiltinMarshallers() {
-    return erraiAppAnnotation.value(LAZY_LOAD_BUILTIN_MARSHALLERS);
+    return erraiAppMetaAnnotation.value(LAZY_LOAD_BUILTIN_MARSHALLERS);
   }
 
   @Override
   public boolean makeDefaultArrayMarshallers() {
-    return erraiAppAnnotation.value(MAKE_DEFAULT_ARRAY_MARSHALLERS);
+    return erraiAppMetaAnnotation.value(MAKE_DEFAULT_ARRAY_MARSHALLERS);
   }
 
   @Override
@@ -108,9 +98,13 @@ public class AptErraiAppConfiguration implements ErraiAppConfiguration {
     return true;
   }
 
+  public boolean local() {
+    return erraiAppMetaAnnotation.value(LOCAL);
+  }
+
   @Override
   public Optional<String> custom(final String propertyName) {
-    return Arrays.stream(erraiAppAnnotation.valueAsArray(CUSTOM_PROPERTIES, MetaAnnotation[].class))
+    return Arrays.stream(erraiAppMetaAnnotation.valueAsArray(CUSTOM_PROPERTIES, MetaAnnotation[].class))
             .filter(a -> a.value("name").equals(propertyName))
             .findFirst()
             .map(a -> a.value("value"));

@@ -33,7 +33,7 @@ public class ErraiAppAptGeneratorTest extends ErraiAptTest {
 
   @Test
   public void testFindGenerators() {
-    final List<ErraiAptGenerators.Any> generators = new ErraiAppAptGenerator().findGenerators(elements);
+    final List<ErraiAptGenerators.Any> generators = new ErraiAppAptGenerator().findGenerators(elements, null);
 
     Assert.assertEquals(1, generators.size());
     Assert.assertEquals(TestExportedGenerator.class, generators.get(0).getClass());

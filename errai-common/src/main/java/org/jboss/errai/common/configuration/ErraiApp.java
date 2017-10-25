@@ -25,6 +25,8 @@ import java.lang.annotation.RetentionPolicy;
 @Retention(RetentionPolicy.CLASS)
 public @interface ErraiApp {
 
+  boolean local() default false;
+
   boolean userOnHostPageEnabled() default false;
 
   String applicationContext() default "";
@@ -56,5 +58,6 @@ public @interface ErraiApp {
     String LAZY_LOAD_BUILTIN_MARSHALLERS = "lazyLoadBuiltinMarshallers";
     String MAKE_DEFAULT_ARRAY_MARSHALLERS = "makeDefaultArrayMarshallers";
     String CUSTOM_PROPERTIES = "customProperties";
+    String LOCAL  = "local";
   }
 }

@@ -16,10 +16,15 @@
 
 package org.jboss.errai.common.apt.configuration;
 
-import org.jboss.errai.config.MetaClassFinder;
+import org.jboss.errai.common.configuration.ErraiModule;
 import org.jboss.errai.config.ErraiAppConfiguration;
 import org.jboss.errai.config.ErraiConfiguration;
 import org.jboss.errai.config.ErraiModulesConfiguration;
+import org.jboss.errai.config.MetaClassFinder;
+
+import java.util.Optional;
+
+import static java.util.stream.Collectors.toSet;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
@@ -29,9 +34,15 @@ public class AptErraiConfiguration implements ErraiConfiguration {
   private final ErraiModulesConfiguration modules;
   private final ErraiAppConfiguration app;
 
-  public AptErraiConfiguration(final MetaClassFinder metaClassFinder) {
-    this.modules = new AptErraiModulesConfiguration(metaClassFinder);
-    this.app = new AptErraiAppConfiguration(metaClassFinder);
+  public AptErraiConfiguration(final ErraiAppConfiguration erraiAppConfiguration,
+          final MetaClassFinder metaClassFinder) {
+    
+    this.app = erraiAppConfiguration;
+    this.modules = new AptErraiModulesConfiguration(metaClassFinder.findAnnotatedWith(ErraiModule.class)
+            .stream()
+            .map(m -> m.getAnnotation(ErraiModule.class))
+            .map(Optional::get)
+            .collect(toSet()));
   }
 
   @Override
