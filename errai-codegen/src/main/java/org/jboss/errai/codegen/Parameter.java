@@ -144,11 +144,6 @@ public class Parameter extends AbstractStatement {
       public Collection<MetaAnnotation> getAnnotations() {
         return Collections.emptyList();
       }
-
-      @Override
-      public Optional<MetaAnnotation> getAnnotation(final Class<? extends Annotation> annotationClass) {
-        return Optional.empty();
-      }
     };
   }
 }

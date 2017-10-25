@@ -29,6 +29,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.*;
+
 public class JavaReflectionField extends MetaField {
   private final Field field;
 
@@ -46,19 +48,9 @@ public class JavaReflectionField extends MetaField {
     return MetaClassFactory.get(field.getType(), field.getGenericType());
   }
 
-  private volatile Annotation[] _annotationsCache;
-
   @Override
-  public synchronized Collection<MetaAnnotation> getAnnotations() {
-    final Annotation[] array;
-
-    if (_annotationsCache != null) {
-      array = _annotationsCache;
-    } else {
-      array = _annotationsCache = field.getAnnotations();
-    }
-
-    return Arrays.stream(array).map(JavaReflectionAnnotation::new).collect(Collectors.toList());
+  public Collection<MetaAnnotation> getAnnotations() {
+    return Arrays.stream(field.getAnnotations()).map(JavaReflectionAnnotation::new).collect(toList());
   }
 
   @Override

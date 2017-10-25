@@ -16,9 +16,17 @@
 
 package org.jboss.errai.codegen.meta.impl.java;
 
-import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
-import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
+import org.jboss.errai.codegen.meta.MetaAnnotation;
+import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaClassFactory;
+import org.jboss.errai.codegen.meta.MetaConstructor;
+import org.jboss.errai.codegen.meta.MetaField;
+import org.jboss.errai.codegen.meta.MetaMethod;
+import org.jboss.errai.codegen.meta.MetaTypeVariable;
+import org.jboss.errai.codegen.meta.impl.AbstractMetaClass;
+import org.jboss.errai.codegen.util.GenUtil;
 
+import javax.enterprise.util.TypeLiteral;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -34,22 +42,12 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
-import javax.enterprise.util.TypeLiteral;
-
-import org.jboss.errai.codegen.meta.MetaAnnotation;
-import org.jboss.errai.codegen.meta.MetaClass;
-import org.jboss.errai.codegen.meta.MetaClassFactory;
-import org.jboss.errai.codegen.meta.MetaConstructor;
-import org.jboss.errai.codegen.meta.MetaField;
-import org.jboss.errai.codegen.meta.MetaMethod;
-import org.jboss.errai.codegen.meta.MetaTypeVariable;
-import org.jboss.errai.codegen.meta.impl.AbstractMetaClass;
-import org.jboss.errai.codegen.util.GenUtil;
+import static java.util.stream.Collectors.toList;
+import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
+import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
 
 public class JavaReflectionClass extends AbstractMetaClass<Class> {
-  private Annotation[] _annotationsCache;
 
   protected JavaReflectionClass(final Class clazz, final boolean erased) {
     this(clazz, null, erased);
@@ -376,22 +374,13 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
 
   @Override
   public synchronized Collection<MetaAnnotation> getAnnotations() {
-    final Annotation[] array;
-
-    if (_annotationsCache != null) {
-      array = _annotationsCache;
-    } else {
-      array = _annotationsCache = getEnclosedMetaObject().getAnnotations();
-    }
-
-    return Arrays.stream(array).map(JavaReflectionAnnotation::new).collect(Collectors.toList());
+    return Arrays.stream(getEnclosedMetaObject().getAnnotations()).map(JavaReflectionAnnotation::new).collect(toList());
   }
 
   @Override
   public MetaTypeVariable[] getTypeParameters() {
     return JavaReflectionUtil.fromTypeVariable(getEnclosedMetaObject().getTypeParameters());
   }
-
 
   @Override
   public boolean isPrimitive() {

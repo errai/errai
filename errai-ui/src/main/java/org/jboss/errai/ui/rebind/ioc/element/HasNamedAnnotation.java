@@ -69,14 +69,4 @@ class HasNamedAnnotation implements HasAnnotations {
   public Collection<MetaAnnotation> getAnnotations() {
     return singleton(new JavaReflectionAnnotation(named));
   }
-
-  @Override
-  @SuppressWarnings("unchecked")
-  public Optional<MetaAnnotation> getAnnotation(final Class<? extends Annotation> annotation) {
-    if (isAnnotationPresent(annotation)) {
-      return Optional.of(new JavaReflectionAnnotation(named));
-    } else {
-      return Optional.empty();
-    }
-  }
 }

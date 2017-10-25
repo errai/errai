@@ -18,8 +18,6 @@ package org.jboss.errai.databinding.rebind;
 
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
-import org.jboss.errai.codegen.meta.HasAnnotations;
-import org.jboss.errai.codegen.meta.MetaAnnotation;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.impl.java.JavaReflectionAnnotation;
 import org.jboss.errai.databinding.client.api.Bindable;
@@ -45,12 +43,9 @@ import org.jboss.errai.ui.shared.api.annotations.Model;
 import javax.enterprise.context.Dependent;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
 import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
@@ -87,25 +82,8 @@ public class DataBindingIOCExtension implements IOCExtensionConfigurator {
             .findAnnotatedWith(Bindable.class);
 
     for (final MetaClass modelBean : allBindableTypes) {
-      final InjectableHandle handle = new InjectableHandle(modelBean,
-              injectionContext.getQualifierFactory().forSource(new HasAnnotations() {
-
-                @Override
-                public Collection<MetaAnnotation> getAnnotations() {
-                  return Collections.singleton(new JavaReflectionAnnotation(anno));
-                }
-
-                @SuppressWarnings("unchecked")
-                @Override
-                public Optional<MetaAnnotation> getAnnotation(Class<? extends Annotation> annotation) {
-                  if (isAnnotationPresent(annotation)) {
-                    return Optional.of(new JavaReflectionAnnotation(anno));
-                  }
-                  else {
-                    return Optional.empty();
-                  }
-                }
-              }));
+      final InjectableHandle handle = new InjectableHandle(modelBean, injectionContext.getQualifierFactory()
+              .forSource(() -> Collections.singleton(new JavaReflectionAnnotation(anno))));
 
       injectionContext.registerInjectableProvider(handle, new InjectableProvider() {
 

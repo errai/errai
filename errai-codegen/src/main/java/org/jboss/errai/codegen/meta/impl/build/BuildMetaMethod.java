@@ -142,11 +142,6 @@ public class BuildMetaMethod extends MetaMethod implements Builder {
           public Collection<MetaAnnotation> getAnnotations() {
             return Collections.emptyList();
           }
-
-          @Override
-          public Optional<MetaAnnotation> getAnnotation(final Class<? extends Annotation> annotationClass) {
-            return Optional.empty();
-          }
         });
       }
 
