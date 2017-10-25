@@ -16,14 +16,9 @@
 
 package org.jboss.errai.codegen.meta;
 
-import org.jboss.errai.codegen.meta.impl.java.JavaReflectionAnnotation;
-
 import java.lang.annotation.Annotation;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Optional;
-
-import static java.util.stream.Collectors.toList;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -38,17 +33,15 @@ public interface HasAnnotations {
     return getAnnotations().stream().filter(a -> a.annotationType().instanceOf(annotationClass)).findFirst();
   }
 
-  @SuppressWarnings("unchecked")
   default Optional<MetaAnnotation> getAnnotation(final MetaClass annotationClass) {
-    return getAnnotation((Class<? extends Annotation>) annotationClass.unsafeAsClass());
+    return getAnnotations().stream().filter(a -> a.annotationType().equals(annotationClass)).findFirst();
   }
 
   default Boolean isAnnotationPresent(final Class<? extends Annotation> annotationClass) {
     return getAnnotation(annotationClass).isPresent();
   }
 
-  @SuppressWarnings("unchecked")
   default Boolean isAnnotationPresent(final MetaClass metaClass) {
-    return isAnnotationPresent((Class<? extends Annotation>) metaClass.unsafeAsClass());
+    return getAnnotation(metaClass).isPresent();
   }
 }
