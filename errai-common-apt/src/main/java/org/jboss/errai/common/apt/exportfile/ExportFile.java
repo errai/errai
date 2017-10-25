@@ -49,8 +49,9 @@ public class ExportFile {
 
     exportedTypes.stream()
             .map(Element::asType)
-            .distinct()
             .map(APTClass::new)
+            .map(APTClass::getErased)
+            .distinct()
             .forEach(exportedType -> classBuilder.publicField(fieldName(exportedType), exportedType).finish());
 
     return classBuilder.toJavaString();

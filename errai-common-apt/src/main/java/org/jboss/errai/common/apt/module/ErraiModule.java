@@ -23,10 +23,9 @@ import org.jboss.errai.common.apt.AnnotatedSourceElementsFinder;
 import org.jboss.errai.common.apt.exportfile.ExportFile;
 
 import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.TypeMirror;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -99,6 +98,8 @@ public class ErraiModule {
       return isUnderModulePackage((Symbol) element);
     } else if (element.getKind().isField()) {
       return isUnderModulePackage(((Symbol.VarSymbol) element).owner);
+    } else if (element.getKind().equals(METHOD) || element.getKind().equals(CONSTRUCTOR)) {
+      return isUnderModulePackage(((Symbol) element).getEnclosingElement());
     } else if (element.getKind().equals(PARAMETER)) {
       return isUnderModulePackage(((Symbol) element).getEnclosingElement().getEnclosingElement());
     } else {

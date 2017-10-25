@@ -244,6 +244,7 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
               templateStyleSheetPath.flatMap(resourceFilesFinder::getResource) :
               getResolvedStyleSheetFile(declaringClass, resourceFilesFinder);
 
+
       final boolean lessStylesheet = resolvedStylesheetFile.filter(s -> s.getName().endsWith(".less")).isPresent();
 
       /*
@@ -251,6 +252,7 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
        */
       final boolean generateCssBundle = resolvedStylesheetFile.isPresent() && !lessStylesheet;
       if (!customProvider || generateCssBundle) {
+        //FIXME: tiago: path is absolute but should be relative beggining in "org"
         final Optional<String> cssFilePath = resolvedStylesheetFile.map(s -> s.toURI().getPath())
                 .filter(path -> path.endsWith(".css"));
         generateTemplateResourceInterface(decorable, declaringClass, customProvider, cssFilePath);
