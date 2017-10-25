@@ -48,11 +48,11 @@ public class MarshallersAptGenerator extends ErraiAptGenerators.MultipleFiles {
   @Override
   public Collection<ErraiAptGeneratedSourceFile> files() {
 
-    final ErraiAptGeneratedSourceFile server = new ErraiAptGeneratedSourceFile(SERVER_PACKAGE_NAME, SERVER_CLASS_NAME,
+    final ErraiAptGeneratedSourceFile server = new ErraiAptGeneratedSourceFile(erraiConfiguration(), SERVER_PACKAGE_NAME, SERVER_CLASS_NAME,
             MarshallerGeneratorFactory.getFor(null, Java, erraiConfiguration(), metaClassFinder())
                     .generate(SERVER_PACKAGE_NAME, SERVER_CLASS_NAME));
 
-    final ErraiAptGeneratedSourceFile client = new ErraiAptGeneratedSourceFile(CLIENT_PACKAGE_NAME, CLIENT_CLASS_NAME,
+    final ErraiAptGeneratedSourceFile client = new ErraiAptGeneratedSourceFile(erraiConfiguration(), CLIENT_PACKAGE_NAME, CLIENT_CLASS_NAME,
             MarshallerGeneratorFactory.getFor(null, GWT, erraiConfiguration(), metaClassFinder())
                     .generate(CLIENT_PACKAGE_NAME, CLIENT_CLASS_NAME));
 

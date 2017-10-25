@@ -44,6 +44,7 @@ import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toList;
@@ -83,10 +84,19 @@ public class ErraiAppAptGenerator extends AbstractProcessor {
 
       annotatedElementsFinder.findSourceElementsAnnotatedWith(ErraiApp.class)
               .stream()
-              .map(s -> new APTClass(s.asType()))
-              .map(m -> newAptExportedTypes(annotatedElementsFinder, types, elements, m))
-              .flatMap(aptExportedTypes -> findGenerators(elements, aptExportedTypes).stream())
-              .flatMap(generator -> generator.files().stream())
+              .map(Element::asType)
+              .map(APTClass::new)
+              .sorted(comparing(APTClass::getPackageName))
+              .map(appMetaClass -> newErraiAptExportedTypes(annotatedElementsFinder, types, elements, appMetaClass))
+              .flatMap(erraiAptExportedTypes -> findGenerators(elements, erraiAptExportedTypes).stream())
+              .flatMap(generator -> {
+                try {
+                  return generator.files().stream();
+                } catch (final Exception e) {
+                  e.printStackTrace();
+                  return Stream.of();
+                }
+              })
               .forEach(this::saveFile);
 
       System.out.println("Successfully generated files using Errai APT Generators in "
@@ -95,7 +105,7 @@ public class ErraiAppAptGenerator extends AbstractProcessor {
     }
   }
 
-  private ErraiAptExportedTypes newAptExportedTypes(final AnnotatedSourceElementsFinder annotatedElementsFinder,
+  private ErraiAptExportedTypes newErraiAptExportedTypes(final AnnotatedSourceElementsFinder annotatedElementsFinder,
           final Types types,
           final Elements elements,
           final MetaClass erraiAppAnnotatedMetaClass) {

@@ -27,6 +27,8 @@ public @interface ErraiApp {
 
   boolean local() default false;
 
+  Class<?>[] modules() default {};
+
   boolean userOnHostPageEnabled() default false;
 
   String applicationContext() default "";
@@ -59,5 +61,6 @@ public @interface ErraiApp {
     String MAKE_DEFAULT_ARRAY_MARSHALLERS = "makeDefaultArrayMarshallers";
     String CUSTOM_PROPERTIES = "customProperties";
     String LOCAL  = "local";
+    String MODULES  = "modules";
   }
 }

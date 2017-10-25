@@ -17,6 +17,7 @@
 package org.jboss.errai.common.apt.module;
 
 import com.sun.tools.javac.code.Symbol;
+import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.impl.apt.APTClassUtil;
 import org.jboss.errai.common.apt.AnnotatedSourceElementsFinder;
 import org.jboss.errai.common.apt.exportfile.ExportFile;
@@ -41,18 +42,18 @@ import static javax.lang.model.element.ElementKind.PARAMETER;
 public class ErraiModule {
 
   private final String camelCaseErraiModuleName;
-  private final Element erraiModuleClassElement;
+  private final MetaClass erraiModuleMetaClass;
   private final AnnotatedSourceElementsFinder annotatedSourceElementsFinder;
   private final String packageName;
 
   public ErraiModule(final String camelCaseErraiModuleName,
-          final Element erraiModuleClassElement,
+          final MetaClass erraiModuleMetaClass,
           final AnnotatedSourceElementsFinder annotatedSourceElementsFinder) {
 
     this.camelCaseErraiModuleName = camelCaseErraiModuleName;
-    this.erraiModuleClassElement = erraiModuleClassElement;
+    this.erraiModuleMetaClass = erraiModuleMetaClass;
     this.annotatedSourceElementsFinder = annotatedSourceElementsFinder;
-    this.packageName = getPackageName();
+    this.packageName = erraiModuleMetaClass.getPackageName();
   }
 
   public Stream<ExportFile> exportFiles(final Set<? extends TypeElement> exportableAnnotations) {
@@ -111,25 +112,6 @@ public class ErraiModule {
   }
 
   String erraiModuleUniqueNamespace() {
-
-    final String moduleFullName = ((TypeElement) erraiModuleClassElement).getQualifiedName()
-            .toString()
-            .replace(".", "_");
-
-    return moduleFullName + "__" + camelCaseErraiModuleName;
-  }
-
-  private String getPackageName() {
-    return getPackage(erraiModuleClassElement).getQualifiedName().toString();
-  }
-
-  private PackageElement getPackage(final Element element) {
-    final Element enclosingElement = element.getEnclosingElement();
-
-    if (enclosingElement.getKind().equals(ElementKind.PACKAGE)) {
-      return ((PackageElement) enclosingElement);
-    } else {
-      return getPackage(enclosingElement);
-    }
+    return erraiModuleMetaClass.getCanonicalName().replace(".", "_") + "__" + camelCaseErraiModuleName;
   }
 }

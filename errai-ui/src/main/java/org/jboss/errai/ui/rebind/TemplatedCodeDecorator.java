@@ -81,6 +81,7 @@ import org.jboss.errai.ui.shared.api.annotations.ForEvent;
 import org.jboss.errai.ui.shared.api.annotations.SinkNative;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 import org.jboss.errai.ui.shared.api.style.StyleBindingsRegistry;
+import org.lesscss.FileResource;
 import org.lesscss.LessCompiler;
 import org.lesscss.LessException;
 import org.lesscss.LessSource;
@@ -89,6 +90,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.enterprise.util.TypeLiteral;
+import java.io.File;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
@@ -153,7 +155,7 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
     final MetaClass templateProvider = anno.value("provider");
     final boolean customProvider = !templateProvider.equals(MetaClassFactory.get(Templated.DEFAULT_PROVIDER.class));
     final Optional<String> styleSheetPath = getTemplateStyleSheetPath(declaringClass);
-    final boolean explicitStyleSheetPresent = styleSheetPath.filter(path -> resourceFilesFinder.getResource(path) != null).isPresent();
+    final boolean explicitStyleSheetPresent = styleSheetPath.map(resourceFilesFinder::getResource).isPresent();
 
     if (declaringClass.isAssignableTo(Composite.class)) {
       logger.warn("The @Templated class, {}, extends Composite. This will not be supported in future versions.", declaringClass.getFullyQualifiedName());
@@ -236,16 +238,22 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
 
     if (!constructed.containsKey(declaringClass)) {
       final String templateVarName = "templateFor" + decorable.getDecorableDeclaringType().getName();
-      final Optional<String> resolvedStylesheetPath = getResolvedStyleSheetPath(getTemplateStyleSheetPath(declaringClass), declaringClass,
-              resourceFilesFinder);
-      final boolean lessStylesheet = resolvedStylesheetPath.filter(path -> path.endsWith(".less")).isPresent();
+
+      final Optional<String> templateStyleSheetPath = getTemplateStyleSheetPath(declaringClass);
+      final Optional<File> resolvedStylesheetFile = templateStyleSheetPath.isPresent() ?
+              templateStyleSheetPath.flatMap(resourceFilesFinder::getResource) :
+              getResolvedStyleSheetFile(declaringClass, resourceFilesFinder);
+
+      final boolean lessStylesheet = resolvedStylesheetFile.filter(s -> s.getName().endsWith(".less")).isPresent();
 
       /*
        * Generate this component's ClientBundle resource if necessary
        */
-      final boolean generateCssBundle = resolvedStylesheetPath.isPresent() && !lessStylesheet;
+      final boolean generateCssBundle = resolvedStylesheetFile.isPresent() && !lessStylesheet;
       if (!customProvider || generateCssBundle) {
-        generateTemplateResourceInterface(decorable, declaringClass, customProvider, resolvedStylesheetPath.filter(path -> path.endsWith(".css")));
+        final Optional<String> cssFilePath = resolvedStylesheetFile.map(s -> s.toURI().getPath())
+                .filter(path -> path.endsWith(".css"));
+        generateTemplateResourceInterface(decorable, declaringClass, customProvider, cssFilePath);
 
       /*
        * Instantiate the ClientBundle Template resource
@@ -263,16 +271,16 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
       /*
        * Compile LESS stylesheet to CSS and generate StyleInjector code
        */
-      if (resolvedStylesheetPath.isPresent() && lessStylesheet) {
+      if (resolvedStylesheetFile.isPresent() && lessStylesheet) {
         try {
-          final Resource lessResource = new ClassPathResource(resolvedStylesheetPath.get(), Thread.currentThread().getContextClassLoader());
+          final Resource lessResource = new FileResource(resolvedStylesheetFile.get());
           final LessSource source = new LessSource(lessResource);
           final LessCompiler compiler = new LessCompiler();
           final String compiledCss = compiler.compile(source);
 
           controller.addFactoryInitializationStatements(singletonList(invokeStatic(StyleInjector.class, "inject", loadLiteral(compiledCss))));
         } catch (IOException | LessException e) {
-          throw new RuntimeException("Error while attempting to compile the LESS stylesheet [" + resolvedStylesheetPath.get() + "].", e);
+          throw new RuntimeException("Error while attempting to compile the LESS stylesheet [" + resolvedStylesheetFile.get().toURI().getPath() + "].", e);
         }
       }
 
@@ -338,24 +346,18 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
     }
   }
 
-  private Optional<String> getResolvedStyleSheetPath(final Optional<String> declaredStylesheetPath,
-          final MetaClass declaringClass, final ResourceFilesFinder resourceFilesFinder) {
-    if (declaredStylesheetPath.isPresent()) {
-      return declaredStylesheetPath;
-    }
-    else {
-      final String simpleName = declaringClass.getName();
-      final String unsuffixedPath = declaringClass.getPackageName().replace('.', '/') + "/" + simpleName;
+  private Optional<File> getResolvedStyleSheetFile(final MetaClass declaringClass,
+          final ResourceFilesFinder resourceFilesFinder) {
 
-      if (resourceFilesFinder.getResource(unsuffixedPath + ".css") != null) {
-        return Optional.of(unsuffixedPath + ".css");
-      }
-      if (resourceFilesFinder.getResource(unsuffixedPath + ".less") != null) {
-        return Optional.of(unsuffixedPath + ".less");
-      }
+    final String simpleName = declaringClass.getName();
+    final String unsuffixedPath = declaringClass.getPackageName().replace('.', '/') + "/" + simpleName;
 
-      return Optional.empty();
+    final Optional<File> cssFile = resourceFilesFinder.getResource(unsuffixedPath + ".css");
+    if (cssFile.isPresent()) {
+      return cssFile;
     }
+
+    return resourceFilesFinder.getResource(unsuffixedPath + ".less");
   }
 
   @SuppressWarnings("serial")

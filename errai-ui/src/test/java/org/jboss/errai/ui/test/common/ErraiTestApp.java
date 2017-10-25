@@ -14,11 +14,15 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ui.test.runtime;
+package org.jboss.errai.ui.test.common;
+
+import org.jboss.errai.common.configuration.ErraiApp;
+import org.jboss.errai.common.configuration.ErraiModule;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
-@org.jboss.errai.common.configuration.ErraiModule
-public class ErraiTestModule {
+@ErraiApp(local = true)
+@ErraiModule
+public class ErraiTestApp {
 }

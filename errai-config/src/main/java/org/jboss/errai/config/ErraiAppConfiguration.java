@@ -31,4 +31,8 @@ public interface ErraiAppConfiguration extends Ioc, Marshalling, Others {
   boolean isAptEnvironment();
 
   Optional<String> custom(final String propertyName);
+
+  default String namespace() {
+    return "";
+  };
 }

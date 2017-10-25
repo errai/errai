@@ -68,7 +68,9 @@ public class ErraiAptGenerators {
 
     @Override
     public Collection<ErraiAptGeneratedSourceFile> files() {
-      return Collections.singleton(new ErraiAptGeneratedSourceFile(getPackageName(), getClassSimpleName(), generate()));
+      return Collections.singleton(
+              new ErraiAptGeneratedSourceFile(erraiConfiguration(), getPackageName(), getClassSimpleName(),
+                      generate()));
     }
 
   }

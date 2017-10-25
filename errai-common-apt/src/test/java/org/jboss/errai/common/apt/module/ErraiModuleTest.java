@@ -101,7 +101,7 @@ public class ErraiModuleTest extends ErraiAptTest {
   }
 
   private ErraiModule getErraiModule(final AnnotatedSourceElementsFinder annotatedElementsFinder) {
-    return new ErraiModule("test", getTypeElement(ErraiDefaultTestModule.class), annotatedElementsFinder);
+    return new ErraiModule("test", aptClass(ErraiDefaultTestModule.class), annotatedElementsFinder);
   }
 
   private static void assertContainsOnly(final Set<?> actual, final Object... expected) {

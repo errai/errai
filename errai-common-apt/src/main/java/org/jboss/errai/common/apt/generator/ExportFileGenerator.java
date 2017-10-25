@@ -16,9 +16,11 @@
 
 package org.jboss.errai.common.apt.generator;
 
+import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.impl.apt.APTClass;
 import org.jboss.errai.common.apt.AnnotatedSourceElementsFinder;
-import org.jboss.errai.common.apt.module.ErraiModule;
 import org.jboss.errai.common.apt.exportfile.ExportFile;
+import org.jboss.errai.common.apt.module.ErraiModule;
 
 import javax.annotation.processing.Filer;
 import javax.lang.model.element.Element;
@@ -57,13 +59,14 @@ public class ExportFileGenerator {
     return annotatedSourceElementsFinder.findSourceElementsAnnotatedWith(
             org.jboss.errai.common.configuration.ErraiModule.class)
             .stream()
+            .map(s -> new APTClass(s.asType()))
             .map(this::newModule)
             .flatMap(this::createExportFiles)
             .collect(toSet());
   }
 
-  private ErraiModule newModule(final Element element) {
-    return new ErraiModule(camelCaseErraiModuleName, element, annotatedSourceElementsFinder);
+  private ErraiModule newModule(final MetaClass metaClass) {
+    return new ErraiModule(camelCaseErraiModuleName, metaClass, annotatedSourceElementsFinder);
   }
 
   private Stream<ExportFile> createExportFiles(final ErraiModule erraiModule) {

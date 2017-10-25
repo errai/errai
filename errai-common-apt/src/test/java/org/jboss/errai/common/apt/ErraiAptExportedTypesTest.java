@@ -30,6 +30,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Optional;
+
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
@@ -122,6 +124,6 @@ public class ErraiAptExportedTypesTest extends ErraiAptTest {
   }
 
   private ResourceFilesFinder resourceFilesFinder() {
-    return a -> null;
+    return a -> Optional.empty();
   }
 }

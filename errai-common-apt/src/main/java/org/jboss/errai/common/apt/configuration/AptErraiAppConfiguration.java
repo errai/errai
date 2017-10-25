@@ -22,6 +22,7 @@ import org.jboss.errai.common.configuration.ErraiApp;
 import org.jboss.errai.config.ErraiAppConfiguration;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Optional;
 
 import static org.jboss.errai.common.configuration.ErraiApp.Property.APPLICATION_CONTEXT;
@@ -33,6 +34,7 @@ import static org.jboss.errai.common.configuration.ErraiApp.Property.FORCE_STATI
 import static org.jboss.errai.common.configuration.ErraiApp.Property.LAZY_LOAD_BUILTIN_MARSHALLERS;
 import static org.jboss.errai.common.configuration.ErraiApp.Property.LOCAL;
 import static org.jboss.errai.common.configuration.ErraiApp.Property.MAKE_DEFAULT_ARRAY_MARSHALLERS;
+import static org.jboss.errai.common.configuration.ErraiApp.Property.MODULES;
 import static org.jboss.errai.common.configuration.ErraiApp.Property.USER_ON_HOST_PAGE_ENABLED;
 import static org.jboss.errai.common.configuration.ErraiApp.Property.USE_STATIC_MARSHALLERS;
 
@@ -42,8 +44,10 @@ import static org.jboss.errai.common.configuration.ErraiApp.Property.USE_STATIC_
 public class AptErraiAppConfiguration implements ErraiAppConfiguration {
 
   private final MetaAnnotation erraiAppMetaAnnotation;
+  private final MetaClass erraiAppAnnotatedMetaClass;
 
   public AptErraiAppConfiguration(final MetaClass erraiAppAnnotatedMetaClass) {
+    this.erraiAppAnnotatedMetaClass = erraiAppAnnotatedMetaClass;
     this.erraiAppMetaAnnotation = erraiAppAnnotatedMetaClass.getAnnotation(ErraiApp.class)
             .orElseThrow(() -> new RuntimeException("Provided MetaClass must contain an @ErraiApp annotation"));
   }
@@ -100,6 +104,19 @@ public class AptErraiAppConfiguration implements ErraiAppConfiguration {
 
   public boolean local() {
     return erraiAppMetaAnnotation.value(LOCAL);
+  }
+
+  public Collection<MetaClass> modules() {
+    return Arrays.asList(erraiAppMetaAnnotation.valueAsArray(MODULES, MetaClass[].class));
+  }
+
+  @Override
+  public String namespace() {
+    if (local()) {
+      return erraiAppAnnotatedMetaClass.getCanonicalName().replace(".", "_") + "__";
+    } else {
+      return ErraiAppConfiguration.super.namespace();
+    }
   }
 
   @Override

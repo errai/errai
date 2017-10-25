@@ -16,6 +16,8 @@
 
 package org.jboss.errai.common.apt.generator;
 
+import org.jboss.errai.config.ErraiConfiguration;
+
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
@@ -24,9 +26,13 @@ public class ErraiAptGeneratedSourceFile {
   private final String classSimpleName;
   private final String sourceCode;
 
-  public ErraiAptGeneratedSourceFile(final String packageName, final String classSimpleName, final String sourceCode) {
+  public ErraiAptGeneratedSourceFile(final ErraiConfiguration erraiConfiguration,
+          final String packageName,
+          final String classSimpleName,
+          final String sourceCode) {
+
     this.packageName = packageName;
-    this.classSimpleName = classSimpleName;
+    this.classSimpleName = erraiConfiguration.app().namespace() + classSimpleName;
     this.sourceCode = sourceCode;
   }
 

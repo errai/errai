@@ -152,6 +152,16 @@ public class APTClass extends AbstractMetaClass<TypeMirror> {
     }
   }
 
+  private PackageElement getPackage(final Element element) {
+    final Element enclosingElement = element.getEnclosingElement();
+
+    if (enclosingElement.getKind().equals(ElementKind.PACKAGE)) {
+      return ((PackageElement) enclosingElement);
+    } else {
+      return getPackage(enclosingElement);
+    }
+  }
+
   @Override
   public String getPackageName() {
     final TypeMirror mirror = getEnclosedMetaObject();
@@ -159,8 +169,7 @@ public class APTClass extends AbstractMetaClass<TypeMirror> {
     case DECLARED:
     case TYPEVAR: {
       final Element element = types.asElement(mirror);
-      final PackageElement pkg = (PackageElement) element.getEnclosingElement();
-      return pkg.getQualifiedName().toString();
+      return getPackage(element).getQualifiedName().toString();
     }
     case ARRAY: {
       final Type.ArrayType arrayType = (Type.ArrayType) mirror;

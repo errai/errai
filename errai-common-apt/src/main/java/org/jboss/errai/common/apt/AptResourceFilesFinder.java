@@ -18,24 +18,23 @@ package org.jboss.errai.common.apt;
 
 import javax.annotation.processing.Filer;
 import javax.tools.JavaFileManager;
+import javax.tools.StandardLocation;
 import java.io.File;
-import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
-import static javax.tools.StandardLocation.CLASS_PATH;
-import static javax.tools.StandardLocation.SOURCE_PATH;
+import static java.util.stream.Collectors.toSet;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
 public class AptResourceFilesFinder implements ResourceFilesFinder {
 
-  private static final List<JavaFileManager.Location> LOCATIONS_TO_SEARCH = Arrays.asList(SOURCE_PATH, CLASS_PATH);
+  private static final List<JavaFileManager.Location> LOCATIONS_TO_SEARCH = Arrays.asList(StandardLocation.values());
 
   private final Filer filer;
 
@@ -44,26 +43,28 @@ public class AptResourceFilesFinder implements ResourceFilesFinder {
   }
 
   @Override
-  public URL getResource(final String path) {
+  public Optional<File> getResource(final String path) {
 
     final int lastSlashIndex = path.lastIndexOf("/");
     final String packageName = path.substring(0, lastSlashIndex).replace("/", ".");
     final String fileName = path.substring(lastSlashIndex + 1);
 
-    return LOCATIONS_TO_SEARCH.stream()
+    final Set<URI> possibleUris = LOCATIONS_TO_SEARCH.stream()
             .map(location -> getUri(location, packageName, fileName))
             .filter(Optional::isPresent)
             .map(Optional::get)
-            .findFirst()
-            .filter(s -> new File(s).exists())
-            .flatMap(this::getUrl)
-            .orElse(null);
+            .collect(toSet());
+
+    return possibleUris.stream()
+            .map(File::new)
+            .filter(File::exists)
+            .findFirst();
   }
 
   private Optional<URL> getUrl(final URI uri) {
     try {
       return Optional.of(uri.toURL());
-    } catch (final MalformedURLException e) {
+    } catch (final Exception e) {
       return Optional.empty();
     }
   }
@@ -74,7 +75,7 @@ public class AptResourceFilesFinder implements ResourceFilesFinder {
 
     try {
       return Optional.ofNullable(filer.getResource(location, packageName, fileName).toUri());
-    } catch (final IOException e) {
+    } catch (final Exception e) {
       return Optional.empty();
     }
   }

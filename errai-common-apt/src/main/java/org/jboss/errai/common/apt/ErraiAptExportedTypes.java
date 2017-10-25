@@ -59,7 +59,7 @@ public final class ErraiAptExportedTypes {
   private final AnnotatedSourceElementsFinder annotatedSourceElementsFinder;
   private final ResourceFilesFinder resourcesFilesFinder;
   private final AptErraiAppConfiguration aptErraiAppConfiguration;
-  private final MetaClass erraiAppAnnotatedMetaClass;
+  private final Set<String> moduleNames;
 
   public ErraiAptExportedTypes(final MetaClass erraiAppAnnotatedMetaClass,
           final Types types,
@@ -67,12 +67,12 @@ public final class ErraiAptExportedTypes {
           final AnnotatedSourceElementsFinder annotatedSourceElementsFinder,
           final ResourceFilesFinder resourceFilesFinder) {
 
-    this.erraiAppAnnotatedMetaClass = erraiAppAnnotatedMetaClass;
     this.types = types;
     this.elements = elements;
     this.resourcesFilesFinder = resourceFilesFinder;
     this.annotatedSourceElementsFinder = annotatedSourceElementsFinder;
     this.aptErraiAppConfiguration = new AptErraiAppConfiguration(erraiAppAnnotatedMetaClass);
+    this.moduleNames = aptErraiAppConfiguration.modules().stream().map(MetaClass::getCanonicalName).collect(toSet());
 
     // Loads all exported types from ExportFiles
     exportedClassesByAnnotationClassName = getExportedTypesFromExportFilesInExportFilesPackage();
@@ -88,8 +88,17 @@ public final class ErraiAptExportedTypes {
   private Map<String, Set<TypeMirror>> getExportedTypesFromExportFiles(final PackageElement packageElement) {
     return packageElement.getEnclosedElements()
             .stream()
+            .filter(e -> localErraiAppContainsModuleOfExportFileElement(e.getSimpleName().toString()))
             .collect(groupingBy(this::getAnnotationNameFromExportFileElement,
                     flatMapping(this::getExportedTypesFromExportFileElement, toSet())));
+  }
+
+  private boolean localErraiAppContainsModuleOfExportFileElement(final String exportFileClassSimpleName) {
+    if (aptErraiAppConfiguration.local()) {
+      return moduleNames.contains(
+              ExportFileName.decodeModuleClassCanonicalNameFromExportFileSimpleName(exportFileClassSimpleName));
+    }
+    return true;
   }
 
   private String getAnnotationNameFromExportFileElement(final Element e) {
@@ -128,6 +137,7 @@ public final class ErraiAptExportedTypes {
   private Map<String, Set<TypeMirror>> getLocalExportableTypesByItsAnnotationName(final Set<TypeElement> allExportableAnnotations) {
     return getLocalExportFileGenerator(allExportableAnnotations).createExportFiles()
             .stream()
+            .filter(s -> localErraiAppContainsModuleOfExportFileElement(s.simpleClassName()))
             .collect(groupingBy(this::getAnnotationNameFromExportFile,
                     flatMapping(this::getExportedTypesFromExportFile, toSet())));
   }
@@ -151,21 +161,12 @@ public final class ErraiAptExportedTypes {
     return exportFile.exportedTypes().stream().map(Element::asType);
   }
 
-  public Set<MetaClass> findAnnotatedMetaClasses(final Class<? extends Annotation> annotation) {
+  Set<MetaClass> findAnnotatedMetaClasses(final Class<? extends Annotation> annotation) {
     return exportedClassesByAnnotationClassName.getOrDefault(annotation.getName(), emptySet())
             .stream()
             .filter(s -> s.getKind().equals(TypeKind.DECLARED))
             .map(APTClass::new)
-            .filter(this::isUnderLocalErraiAppPackage)
             .collect(toSet());
-  }
-
-  private boolean isUnderLocalErraiAppPackage(final MetaClass type) {
-    if (aptErraiAppConfiguration.local()) {
-      return type.getPackageName().startsWith(erraiAppAnnotatedMetaClass.getPackageName());
-    } else {
-      return true;
-    }
   }
 
   public ResourceFilesFinder resourceFilesFinder() {

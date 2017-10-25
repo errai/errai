@@ -20,8 +20,8 @@ import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.util.GWTPrivateMemberAccessor;
 import org.jboss.errai.codegen.util.PrivateAccessUtil;
 import org.jboss.errai.common.apt.ErraiAptExportedTypes;
-import org.jboss.errai.common.apt.generator.ErraiAptGeneratedSourceFile;
 import org.jboss.errai.common.apt.ErraiAptGenerators;
+import org.jboss.errai.common.apt.generator.ErraiAptGeneratedSourceFile;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.FactoryGenerator;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraph;
@@ -65,9 +65,8 @@ public class FactoriesAptGenerator extends ErraiAptGenerators.MultipleFiles {
     log.info("Generating Factories...");
 
     final DependencyGraph dependencyGraph = FactoryGenerator.assertGraphSetAndGet();
-    final List<ErraiAptGeneratedSourceFile> generatedSources = StreamSupport.stream(dependencyGraph.spliterator(), false)
-            .map(this::generatedFactoryClass)
-            .collect(toList());
+    final List<ErraiAptGeneratedSourceFile> generatedSources = StreamSupport.stream(dependencyGraph.spliterator(),
+            false).map(this::generatedFactoryClass).collect(toList());
 
     log.info("Generated {} factories", generatedSources.size());
     return generatedSources;
@@ -77,7 +76,9 @@ public class FactoriesAptGenerator extends ErraiAptGenerators.MultipleFiles {
     final MetaClass factoryMetaClass = processingContext.buildFactoryMetaClass(injectable);
     final String generatedSource = generateSources(factoryMetaClass, injectable);
     final String classSimpleName = factoryMetaClass.getName();
-    return new ErraiAptGeneratedSourceFile(FactoryGenerator.GENERATED_PACKAGE, classSimpleName, generatedSource);
+
+    return new ErraiAptGeneratedSourceFile(erraiConfiguration(), FactoryGenerator.GENERATED_PACKAGE, classSimpleName,
+            generatedSource);
   }
 
   private String generateSources(final MetaClass factoryMetaClass, final Injectable injectable) {
