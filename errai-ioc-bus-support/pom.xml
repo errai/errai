@@ -120,6 +120,19 @@ runtime dependencies on it and it breaks deployment on JBoss AS and Tomcat -->
            <artifactId>validation-api</artifactId>
            <classifier>sources</classifier>
          </dependency>
+
+         <dependency>
+           <groupId>org.jboss.errai</groupId>
+           <artifactId>errai-generators-apt</artifactId>
+           <scope>test</scope>
+         </dependency>
+
+         <dependency>
+           <groupId>org.slf4j</groupId>
+           <artifactId>slf4j-simple</artifactId>
+           <scope>test</scope>
+         </dependency>
+
        </dependencies>
 
        <build>

@@ -87,7 +87,7 @@ public class ErraiModule {
   private Stream<? extends Element> getTypeElement(final Element element) {
     if (element.getKind().isClass() || element.getKind().isInterface()) {
       return Stream.of(Optional.of(element)
-              .filter(s -> s.getEnclosingElement().getKind().equals(PACKAGE))
+              .filter(e -> e.getEnclosingElement().getKind().equals(PACKAGE))
               .orElse(element.getEnclosingElement())); //Inner classes/interfaces
     } else if (element.getKind().isField()) {
       return Stream.of(APTClassUtil.types.asElement(element.asType()));
