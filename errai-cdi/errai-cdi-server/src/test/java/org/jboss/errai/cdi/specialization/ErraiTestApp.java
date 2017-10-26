@@ -14,13 +14,25 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.cdi;
+package org.jboss.errai.cdi.specialization;
 
+import org.jboss.errai.bus.ErraiBusModule;
+import org.jboss.errai.common.configuration.ErraiApp;
 import org.jboss.errai.common.configuration.ErraiModule;
+import org.jboss.errai.enterprise.ErraiCdiClientModule;
+import org.jboss.errai.enterprise.ErraiCdiSharedModule;
+import org.jboss.errai.ioc.ErraiIocModule;
+import org.jboss.errai.marshalling.ErraiMarshallingModule;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
+@ErraiApp(local = true,
+          modules = { ErraiMarshallingModule.class,
+                      ErraiBusModule.class,
+                      ErraiIocModule.class,
+                      ErraiCdiClientModule.class,
+                      ErraiCdiSharedModule.class })
 @ErraiModule
-public class ErraiCdiServerTestModule {
+public class ErraiTestApp {
 }

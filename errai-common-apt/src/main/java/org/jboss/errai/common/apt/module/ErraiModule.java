@@ -81,7 +81,7 @@ public class ErraiModule {
   }
 
   private boolean isTypeElementPublic(final Element element) {
-    return element.getModifiers().contains(Modifier.PUBLIC);
+    return element.getEnclosingElement().getKind().isInterface() || element.getModifiers().contains(Modifier.PUBLIC);
   }
 
   private Stream<? extends Element> getTypeElement(final Element element) {
