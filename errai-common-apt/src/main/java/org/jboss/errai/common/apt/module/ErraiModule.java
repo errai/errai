@@ -18,6 +18,7 @@ package org.jboss.errai.common.apt.module;
 
 import com.sun.tools.javac.code.Symbol;
 import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.impl.apt.APTClass;
 import org.jboss.errai.codegen.meta.impl.apt.APTClassUtil;
 import org.jboss.errai.common.apt.AnnotatedSourceElementsFinder;
 import org.jboss.errai.common.apt.exportfile.ExportFile;
@@ -75,9 +76,16 @@ public class ErraiModule {
     return annotatedSourceElementsFinder.findSourceElementsAnnotatedWith(annotationTypeElement)
             .stream()
             .filter(this::isPartOfModule)
-            .flatMap(this::getTypeElement)
+            .flatMap(this::getExportableElements)
+            .map(this::toTypeElement)
             .filter(this::isTypeElementPublic)
             .collect(toSet());
+  }
+
+  private Element toTypeElement(final Element element) {
+    final Element typeElement = APTClassUtil.types.asElement(element.asType());
+    assert typeElement != null;
+    return typeElement;
   }
 
   private boolean isTypeElementPublic(final Element element) {
@@ -99,7 +107,7 @@ public class ErraiModule {
     return false;
   }
 
-  private Stream<? extends Element> getTypeElement(final Element element) {
+  private Stream<? extends Element> getExportableElements(final Element element) {
     if (element.getKind().isClass() || element.getKind().isInterface()) {
       return Stream.of(element);
     } else if (element.getKind().isField()) {
