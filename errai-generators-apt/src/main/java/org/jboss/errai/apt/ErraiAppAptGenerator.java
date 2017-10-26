@@ -82,24 +82,15 @@ public class ErraiAppAptGenerator extends AbstractProcessor {
       final Elements elements = processingEnv.getElementUtils();
       APTClassUtil.init(types, elements);
 
+
+      //FIXME: tiago: filter out generators of non present errai modules in local @ErraiApps
       annotatedElementsFinder.findSourceElementsAnnotatedWith(ErraiApp.class)
               .stream()
-              .map(Element::asType)
-              .map(APTClass::new)
-              .sorted(comparing(APTClass::getPackageName))
-              .map(appMetaClass -> {
-                System.out.println("Generating classes for " + appMetaClass.getFullyQualifiedName());
-                return newErraiAptExportedTypes(annotatedElementsFinder, types, elements, appMetaClass);
-              })
+              .map(erraiAppElement -> new APTClass(erraiAppElement.asType()))
+              .sorted(comparing(APTClass::getFullyQualifiedName))
+              .map(appMetaClass -> newErraiAptExportedTypes(annotatedElementsFinder, types, elements, appMetaClass))
               .flatMap(erraiAptExportedTypes -> findGenerators(elements, erraiAptExportedTypes).stream())
-              .flatMap(generator -> {
-                try {
-                  return generator.files().stream();
-                } catch (final Exception e) {
-                  e.printStackTrace();
-                  return Stream.of();
-                }
-              })
+              .flatMap(this::generatedFiles)
               .forEach(this::saveFile);
 
       System.out.println("Successfully generated files using Errai APT Generators in "
@@ -108,11 +99,21 @@ public class ErraiAppAptGenerator extends AbstractProcessor {
     }
   }
 
+  private Stream<ErraiAptGeneratedSourceFile> generatedFiles(final ErraiAptGenerators.Any generator) {
+    try {
+      return generator.files().stream();
+    } catch (final Exception e) {
+      // Continues to next generator even when errors occur
+      e.printStackTrace();
+      return Stream.of();
+    }
+  }
+
   private ErraiAptExportedTypes newErraiAptExportedTypes(final AnnotatedSourceElementsFinder annotatedElementsFinder,
           final Types types,
           final Elements elements,
           final MetaClass erraiAppAnnotatedMetaClass) {
-
+    System.out.println("Generating classes for " + erraiAppAnnotatedMetaClass.getFullyQualifiedName());
     return new ErraiAptExportedTypes(erraiAppAnnotatedMetaClass, types, elements, annotatedElementsFinder,
             new AptResourceFilesFinder(processingEnv.getFiler()));
   }

@@ -16,16 +16,24 @@
 
 package org.jboss.errai.databinding;
 
+import org.jboss.errai.common.configuration.ErraiApp;
 import org.jboss.errai.common.configuration.ErraiModule;
 import org.jboss.errai.databinding.client.TestModelWithoutBindableAnnotation;
 import org.jboss.errai.databinding.client.scan.TestModelBindable;
 import org.jboss.errai.databinding.client.scan.TestModelWithoutBindableA;
 import org.jboss.errai.databinding.client.scan.TestModelWithoutBindableB;
 import org.jboss.errai.databinding.client.scan.TestModelWithoutBindableC;
+import org.jboss.errai.ioc.ErraiIocModule;
+import org.jboss.errai.marshalling.ErraiMarshallingModule;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
+@ErraiApp(local = true,
+          modules = { ErraiDataBindingTestModule.class,
+                      ErraiMarshallingModule.class,
+                      ErraiDataBindingModule.class,
+                      ErraiIocModule.class })
 @ErraiModule(bindableTypes = { TestModelBindable.class,
                                TestModelWithoutBindableA.class,
                                TestModelWithoutBindableB.class,
