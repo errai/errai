@@ -24,8 +24,8 @@ import org.jboss.errai.common.apt.exportfile.ExportFile;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.TypeMirror;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -33,6 +33,7 @@ import java.util.stream.Stream;
 import static java.util.stream.Collectors.toSet;
 import static javax.lang.model.element.ElementKind.CONSTRUCTOR;
 import static javax.lang.model.element.ElementKind.METHOD;
+import static javax.lang.model.element.ElementKind.PACKAGE;
 import static javax.lang.model.element.ElementKind.PARAMETER;
 
 /**
@@ -75,12 +76,19 @@ public class ErraiModule {
             .stream()
             .filter(this::isPartOfModule)
             .flatMap(this::getTypeElement)
+            .filter(this::isTypeElementPublic)
             .collect(toSet());
+  }
+
+  private boolean isTypeElementPublic(final Element element) {
+    return element.getModifiers().contains(Modifier.PUBLIC);
   }
 
   private Stream<? extends Element> getTypeElement(final Element element) {
     if (element.getKind().isClass() || element.getKind().isInterface()) {
-      return Stream.of(element);
+      return Stream.of(Optional.of(element)
+              .filter(s -> s.getEnclosingElement().getKind().equals(PACKAGE))
+              .orElse(element.getEnclosingElement())); //Inner classes/interfaces
     } else if (element.getKind().isField()) {
       return Stream.of(APTClassUtil.types.asElement(element.asType()));
     } else if (element.getKind().equals(METHOD) || element.getKind().equals(CONSTRUCTOR)) {

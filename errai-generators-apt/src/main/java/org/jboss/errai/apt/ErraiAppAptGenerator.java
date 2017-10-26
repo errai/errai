@@ -87,7 +87,10 @@ public class ErraiAppAptGenerator extends AbstractProcessor {
               .map(Element::asType)
               .map(APTClass::new)
               .sorted(comparing(APTClass::getPackageName))
-              .map(appMetaClass -> newErraiAptExportedTypes(annotatedElementsFinder, types, elements, appMetaClass))
+              .map(appMetaClass -> {
+                System.out.println("Generating classes for " + appMetaClass.getFullyQualifiedName());
+                return newErraiAptExportedTypes(annotatedElementsFinder, types, elements, appMetaClass);
+              })
               .flatMap(erraiAptExportedTypes -> findGenerators(elements, erraiAptExportedTypes).stream())
               .flatMap(generator -> {
                 try {
@@ -127,7 +130,7 @@ public class ErraiAppAptGenerator extends AbstractProcessor {
             .stream()
             .map(this::loadClass)
             .map(generatorClass -> newGenerator(generatorClass, erraiAptExportedTypes))
-            .sorted(comparing(ErraiAptGenerators.Any::priority))
+            .sorted(comparing(ErraiAptGenerators.Any::priority).thenComparing(g -> g.getClass().getSimpleName()))
             .collect(toList());
   }
 
