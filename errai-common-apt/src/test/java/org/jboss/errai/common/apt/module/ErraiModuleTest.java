@@ -11,9 +11,11 @@ import org.junit.Test;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.TypeMirror;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import static java.util.Collections.singleton;
 
@@ -27,8 +29,8 @@ public class ErraiModuleTest extends ErraiAptTest {
     final TypeElement testEnclosedElementAnnotation = getTypeElement(TestEnclosedElementAnnotation.class);
     final ErraiModule erraiModule = getErraiModule(getTestAnnotatedElementsFinder(testExportedTypes));
 
-    final Set<Element> elements = erraiModule.findAnnotatedElements(testEnclosedElementAnnotation);
-    Assert.assertEquals(singleton(getTypeElement(String.class)), elements);
+    final Set<TypeMirror> elements = erraiModule.findAnnotatedElements(testEnclosedElementAnnotation);
+    Assert.assertEquals(singleton(getTypeElement(String.class).asType()), elements);
   }
 
   @Test
@@ -38,8 +40,8 @@ public class ErraiModuleTest extends ErraiAptTest {
 
     final ErraiModule testGenerator = getErraiModule(getTestAnnotatedElementsFinder(testExportedType));
 
-    final Set<Element> elements = testGenerator.findAnnotatedElements(testAnnotation);
-    Assert.assertEquals(singleton(testExportedType), elements);
+    final Set<TypeMirror> elements = testGenerator.findAnnotatedElements(testAnnotation);
+    Assert.assertEquals(singleton(testExportedType.asType()), elements);
   }
 
   @Test
@@ -47,11 +49,14 @@ public class ErraiModuleTest extends ErraiAptTest {
     final TypeElement testAnnotation = getTypeElement(TestAnnotation.class);
 
     final TypeElement type = getTypeElement(AnnotatedTypeWithAnnotatedInnerClasses.class);
+    final TypeElement innerStaticType = getTypeElement(
+            AnnotatedTypeWithAnnotatedInnerClasses.InnerAnnotatedStaticType.class);
     final TypeElement innerType = getTypeElement(AnnotatedTypeWithAnnotatedInnerClasses.InnerAnnotatedType.class);
-    final ErraiModule erraiModule = getErraiModule(getTestAnnotatedElementsFinder(type, innerType));
+    final ErraiModule erraiModule = getErraiModule(getTestAnnotatedElementsFinder(
+            Stream.concat(Stream.of(type), type.getEnclosedElements().stream()).toArray(Element[]::new)));
 
-    final Set<Element> exportedTypes = erraiModule.findAnnotatedElements(testAnnotation);
-    assertContainsOnly(exportedTypes, type, innerType);
+    final Set<TypeMirror> exportedTypes = erraiModule.findAnnotatedElements(testAnnotation);
+    assertContainsOnly(exportedTypes, type.asType(), innerStaticType.asType(), innerType.asType());
   }
 
   @Test
@@ -62,8 +67,8 @@ public class ErraiModuleTest extends ErraiAptTest {
     final ErraiModule erraiModule = getErraiModule(
             getTestAnnotatedElementsFinder(annotatedTypeInsideModule, getTypeElement(AnnotatedTypeOutOfModule.class)));
 
-    final Set<Element> exportedTypes = erraiModule.findAnnotatedElements(testAnnotation);
-    assertContainsOnly(exportedTypes, annotatedTypeInsideModule);
+    final Set<TypeMirror> exportedTypes = erraiModule.findAnnotatedElements(testAnnotation);
+    assertContainsOnly(exportedTypes, annotatedTypeInsideModule.asType());
   }
 
   @Test
@@ -77,7 +82,7 @@ public class ErraiModuleTest extends ErraiAptTest {
 
     Assert.assertTrue(exportFile.isPresent());
     Assert.assertEquals(1, exportFile.get().exportedTypes().size());
-    Assert.assertTrue(exportFile.get().exportedTypes().contains(testExportedType));
+    Assert.assertTrue(exportFile.get().exportedTypes().contains(testExportedType.asType()));
   }
 
   @Test

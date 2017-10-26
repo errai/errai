@@ -18,6 +18,7 @@ package org.jboss.errai.common.apt.generator;
 
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.impl.apt.APTClass;
+import org.jboss.errai.codegen.meta.impl.apt.APTClassUtil;
 import org.jboss.errai.common.apt.AnnotatedSourceElementsFinder;
 import org.jboss.errai.common.apt.exportfile.ExportFile;
 import org.jboss.errai.common.apt.module.ErraiModule;
@@ -75,7 +76,13 @@ public class ExportFileGenerator {
 
   private void generateSourceAndSave(final ExportFile exportFile, final Filer filer) {
     try {
-      final Element[] originatingElements = exportFile.exportedTypes().toArray(new Element[0]);
+
+      final Element[] originatingElements = exportFile.exportedTypes()
+              .stream()
+              .map(APTClassUtil.types::asElement)
+              .collect(toSet())
+              .toArray(new Element[0]);
+
       final JavaFileObject sourceFile = filer.createSourceFile(exportFile.getFullClassName(), originatingElements);
 
       try (Writer writer = sourceFile.openWriter()) {

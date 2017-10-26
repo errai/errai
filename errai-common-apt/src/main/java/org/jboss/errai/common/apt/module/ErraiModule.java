@@ -26,6 +26,7 @@ import org.jboss.errai.common.apt.exportfile.ExportFile;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.TypeMirror;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -63,7 +64,7 @@ public class ErraiModule {
 
   Optional<ExportFile> newExportFile(final TypeElement annotation) {
 
-    final Set<Element> exportedTypes = findAnnotatedElements(annotation);
+    final Set<TypeMirror> exportedTypes = findAnnotatedElements(annotation);
 
     if (exportedTypes.isEmpty()) {
       return Optional.empty();
@@ -72,23 +73,23 @@ public class ErraiModule {
     return Optional.of(new ExportFile(erraiModuleUniqueNamespace(), annotation, exportedTypes));
   }
 
-  Set<Element> findAnnotatedElements(final TypeElement annotationTypeElement) {
+  Set<TypeMirror> findAnnotatedElements(final TypeElement annotationTypeElement) {
     return annotatedSourceElementsFinder.findSourceElementsAnnotatedWith(annotationTypeElement)
             .stream()
             .filter(this::isPartOfModule)
             .flatMap(this::getExportableElements)
-            .map(this::toTypeElement)
+            .map(Element::asType)
             .filter(this::isTypeElementPublic)
             .collect(toSet());
   }
 
-  private Element toTypeElement(final Element element) {
-    final Element typeElement = APTClassUtil.types.asElement(element.asType());
-    assert typeElement != null;
-    return typeElement;
-  }
+  private boolean isTypeElementPublic(final TypeMirror typeMirror) {
+    if (typeMirror.getKind().isPrimitive()) {
+      return true;
+    }
 
-  private boolean isTypeElementPublic(final Element element) {
+    final Element element = APTClassUtil.types.asElement(typeMirror);
+
     if (element.getEnclosingElement().getKind().isInterface()) {
       // Inner classes of interfaces are public if its outer class is public
       return element.getEnclosingElement().getModifiers().contains(PUBLIC);

@@ -158,7 +158,7 @@ public final class ErraiAptExportedTypes {
   }
 
   private Stream<TypeMirror> getExportedTypesFromExportFile(final ExportFile exportFile) {
-    return exportFile.exportedTypes().stream().map(Element::asType);
+    return exportFile.exportedTypes().stream();
   }
 
   Set<MetaClass> findAnnotatedMetaClasses(final Class<? extends Annotation> annotation) {

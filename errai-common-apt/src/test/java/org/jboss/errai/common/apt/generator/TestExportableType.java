@@ -20,5 +20,5 @@ package org.jboss.errai.common.apt.generator;
  * @author Tiago Bento <tfernand@redhat.com>
  */
 @TestAnnotation
-class TestExportableType {
+public class TestExportableType {
 }

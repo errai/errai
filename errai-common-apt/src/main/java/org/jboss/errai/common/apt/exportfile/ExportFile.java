@@ -23,6 +23,7 @@ import org.jboss.errai.codegen.meta.impl.apt.APTClass;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.TypeMirror;
 import java.util.Set;
 
 import static org.jboss.errai.common.apt.ErraiAptPackages.exportFilesPackagePath;
@@ -34,10 +35,10 @@ public class ExportFile {
 
   private final String erraiModuleNamespace;
   private final TypeElement annotation;
-  private final Set<? extends Element> exportedTypes;
+  private final Set<TypeMirror> exportedTypes;
   private final String simpleClassName;
 
-  public ExportFile(final String erraiModuleNamespace, final TypeElement annotation, final Set<? extends Element> exportedTypes) {
+  public ExportFile(final String erraiModuleNamespace, final TypeElement annotation, final Set<TypeMirror> exportedTypes) {
     this.erraiModuleNamespace = erraiModuleNamespace;
     this.annotation = annotation;
     this.exportedTypes = exportedTypes;
@@ -48,7 +49,6 @@ public class ExportFile {
     final ClassStructureBuilder<?> classBuilder = ClassBuilder.define(getFullClassName()).publicScope().body();
 
     exportedTypes.stream()
-            .map(Element::asType)
             .map(APTClass::new)
             .map(APTClass::getErased)
             .distinct()
@@ -74,7 +74,7 @@ public class ExportFile {
     return simpleClassName;
   }
 
-  public Set<? extends Element> exportedTypes() {
+  public Set<TypeMirror> exportedTypes() {
     return exportedTypes;
   }
 
