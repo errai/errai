@@ -456,6 +456,11 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
 
   @Override
   public MetaClass asArrayOf(final int dimensions) {
+
+    if (dimensions <= 0) {
+      return this;
+    }
+
     MetaClass arrayType = _arrayTypeCache.get(dimensions);
     if (arrayType == null) {
       _arrayTypeCache.put(dimensions, arrayType = MetaClassFactory.getArrayOf(getEnclosedMetaObject(), dimensions));

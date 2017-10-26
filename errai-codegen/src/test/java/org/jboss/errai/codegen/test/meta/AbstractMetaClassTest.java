@@ -53,6 +53,7 @@ import org.jboss.errai.codegen.test.model.tree.ParentInterface;
 import org.jboss.errai.codegen.test.model.tree.ParentSuperInterface1;
 import org.jboss.errai.codegen.test.model.tree.ParentSuperInterface2;
 import org.jboss.errai.codegen.util.GenUtil;
+import org.junit.Assert;
 import org.junit.Test;
 import org.mvel2.util.NullType;
 
@@ -950,9 +951,9 @@ public abstract class AbstractMetaClassTest {
   public void testGetConstructorOnlyFindsPublicConstructor() throws Exception {
     final MetaClass mc = getMetaClass(HasManyConstructors.class);
     assertNotNull(mc.getConstructor(new Class[0]));
-    assertNull(mc.getConstructor(new Class[] { int.class }));
-    assertNull(mc.getConstructor(new Class[] { String.class }));
-    assertNull(mc.getConstructor(new Class[] { double.class }));
+    assertNull(mc.getConstructor(int.class));
+    assertNull(mc.getConstructor(String.class));
+    assertNull(mc.getConstructor(double.class));
   }
 
   @Test
@@ -966,9 +967,9 @@ public abstract class AbstractMetaClassTest {
   public void testGetDeclaredConstructorFindsAllConstructors() throws Exception {
     final MetaClass mc = getMetaClass(HasManyConstructors.class);
     assertNotNull(mc.getDeclaredConstructor(new Class[0]));
-    assertNotNull(mc.getDeclaredConstructor(new Class[] { int.class }));
-    assertNotNull(mc.getDeclaredConstructor(new Class[] { String.class }));
-    assertNotNull(mc.getDeclaredConstructor(new Class[] { double.class }));
+    assertNotNull(mc.getDeclaredConstructor(int.class));
+    assertNotNull(mc.getDeclaredConstructor(String.class));
+    assertNotNull(mc.getDeclaredConstructor(double.class));
   }
 
   @Test
@@ -985,90 +986,17 @@ public abstract class AbstractMetaClassTest {
     }
   }
 
-  private static Plain mockPlain() {
-    return new Plain() {
-      @Override
-      public Class<? extends Annotation> annotationType() {
-        return Plain.class;
-      }
-
-      @Override
-      public String toString() {
-        return AnnotationUtils.toString(this);
-      }
-    };
+  @Test
+  public void testOuterComponentType() {
+    Assert.assertEquals(getMetaClassImpl(char.class), getMetaClassImpl(char[].class).getOuterComponentType());
+    Assert.assertEquals(getMetaClassImpl(char.class), getMetaClassImpl(char[][].class).getOuterComponentType());
+    Assert.assertEquals(getMetaClassImpl(char.class), getMetaClassImpl(char[][][].class).getOuterComponentType());
   }
 
-  private static SingleValue mockSingleValue(final String value) {
-    return new SingleValue() {
-      @Override
-      public Class<? extends Annotation> annotationType() {
-        return SingleValue.class;
-      }
-
-      @Override
-      public String value() {
-        return value;
-      }
-
-      @Override
-      public String toString() {
-        return AnnotationUtils.toString(this);
-      }
-    };
-  }
-
-  private static MultipleValues mockMultipleValues(final int num, final Class<?> clazz, final String... strs) {
-    return new MultipleValues() {
-      @Override
-      public Class<? extends Annotation> annotationType() {
-        return MultipleValues.class;
-      }
-
-      @Override
-      public String[] str() {
-        return strs;
-      }
-
-      @Override
-      public int num() {
-        return num;
-      }
-
-      @Override
-      public Class<?> clazz() {
-        return clazz;
-      }
-
-      @Override
-      public String toString() {
-        return AnnotationUtils.toString(this);
-      }
-    };
-  }
-
-  private static Nested mockNested(final String singleValue) {
-    return new Nested() {
-      @Override
-      public Class<? extends Annotation> annotationType() {
-        return Nested.class;
-      }
-
-      @Override
-      public SingleValue value() {
-        return mockSingleValue(singleValue);
-      }
-
-      @Override
-      public String toString() {
-        return AnnotationUtils.toString(this);
-      }
-    };
-  }
-
-  private static void assertAnnotationsEqual(final Annotation expected, final Annotation actual) {
-    if (!AnnotationUtils.equals(expected, actual)) {
-      throw new AssertionError(String.format("Expected [%s] but found [%s].", expected, actual));
-    }
+  @Test
+  public void testGetArrayType() {
+    Assert.assertEquals(getMetaClassImpl(char.class), getMetaClassImpl(char.class).asArrayOf(0));
+    Assert.assertEquals(getMetaClassImpl(char[].class), getMetaClassImpl(char.class).asArrayOf(1));
+    Assert.assertEquals(getMetaClassImpl(char[][].class), getMetaClassImpl(char.class).asArrayOf(2));
   }
 }

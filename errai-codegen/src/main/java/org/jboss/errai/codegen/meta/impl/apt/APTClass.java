@@ -46,6 +46,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.IntStream;
 
 import static java.util.Collections.emptySet;
 import static org.jboss.errai.codegen.meta.impl.apt.APTClassUtil.elements;
@@ -348,6 +349,9 @@ public class APTClass extends AbstractMetaClass<TypeMirror> {
     case SHORT:
       return null;
     case ARRAY:
+      if ("length".equals(name)) {
+        return new MetaField.ArrayLengthMetaField(this);
+      }
     default:
       return throwUnsupportedTypeError(mirror);
     }
@@ -762,9 +766,13 @@ public class APTClass extends AbstractMetaClass<TypeMirror> {
   }
 
   @Override
-  public MetaClass asArrayOf(final int dimensions) {
-    final ArrayType arrayType = types.getArrayType(getEnclosedMetaObject());
-    return new APTClass(arrayType);
+  public MetaClass asArrayOf(final int dimension) {
+    return IntStream.range(0, dimension)
+            .boxed()
+            .map(i -> types.getArrayType(getEnclosedMetaObject()))
+            .reduce((a, b) -> types.getArrayType(a))
+            .map(APTClass::new)
+            .orElse(this);
   }
 
   @Override

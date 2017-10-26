@@ -594,9 +594,7 @@ public class MarshallerGeneratorFactory {
       initMethod = classStructureBuilder.privateMethod(void.class, "lazyInit");
     }
 
-    final MetaClass arrayOfArrayType = arrayType.asArrayOf(1);
-
-    classStructureBuilder.publicMethod(arrayOfArrayType, "getEmptyArray")
+    classStructureBuilder.publicMethod(arrayType.asArrayOf(1), "getEmptyArray")
         .append(Stmt.load(null).returnValue())
         .finish();
 
