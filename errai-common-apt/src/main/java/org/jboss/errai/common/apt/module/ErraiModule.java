@@ -24,7 +24,6 @@ import org.jboss.errai.common.apt.exportfile.ExportFile;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import java.util.Optional;
 import java.util.Set;
@@ -35,6 +34,7 @@ import static javax.lang.model.element.ElementKind.CONSTRUCTOR;
 import static javax.lang.model.element.ElementKind.METHOD;
 import static javax.lang.model.element.ElementKind.PACKAGE;
 import static javax.lang.model.element.ElementKind.PARAMETER;
+import static javax.lang.model.element.Modifier.PUBLIC;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
@@ -81,14 +81,27 @@ public class ErraiModule {
   }
 
   private boolean isTypeElementPublic(final Element element) {
-    return element.getEnclosingElement().getKind().isInterface() || element.getModifiers().contains(Modifier.PUBLIC);
+    if (element.getEnclosingElement().getKind().isInterface()) {
+      // Inner classes of interfaces are public if its outer class is public
+      return element.getEnclosingElement().getModifiers().contains(PUBLIC);
+    }
+
+    if (element.getEnclosingElement().getKind().isClass()) {
+      // Inner classes of non-inner classes have to contain the public modifier to be public
+      return element.getModifiers().contains(PUBLIC) && element.getEnclosingElement().getModifiers().contains(PUBLIC);
+    }
+
+    if (element.getEnclosingElement().getKind().equals(PACKAGE)) {
+      // Non-inner classes and interfaces have to contain the public modifier to be public
+      return element.getModifiers().contains(PUBLIC);
+    }
+
+    return false;
   }
 
   private Stream<? extends Element> getTypeElement(final Element element) {
     if (element.getKind().isClass() || element.getKind().isInterface()) {
-      return Stream.of(Optional.of(element)
-              .filter(e -> e.getEnclosingElement().getKind().equals(PACKAGE))
-              .orElse(element.getEnclosingElement())); //Inner classes/interfaces
+      return Stream.of(element);
     } else if (element.getKind().isField()) {
       return Stream.of(APTClassUtil.types.asElement(element.asType()));
     } else if (element.getKind().equals(METHOD) || element.getKind().equals(CONSTRUCTOR)) {
