@@ -16,11 +16,14 @@
 
 package org.jboss.errai.enterprise;
 
+import org.jboss.errai.common.configuration.ErraiApp;
 import org.jboss.errai.common.configuration.ErraiModule;
+import org.jboss.errai.marshalling.ErraiMarshallingModule;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
+@ErraiApp(local = true, modules = { ErraiTestApp.class, ErraiMarshallingModule.class })
 @ErraiModule
-public class ErraiJaxrsModule {
+public class ErraiTestApp {
 }
