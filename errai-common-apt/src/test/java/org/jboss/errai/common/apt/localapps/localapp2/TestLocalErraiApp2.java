@@ -16,11 +16,15 @@
 
 package org.jboss.errai.common.apt.localapps.localapp2;
 
+import org.jboss.errai.common.apt.localapps.localapp1.module1.TestModule1;
+import org.jboss.errai.common.apt.localapps.localapp2.module2.TestModule2;
 import org.jboss.errai.common.configuration.ErraiApp;
+import org.jboss.errai.common.configuration.ErraiModule;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
-@ErraiApp(local = true)
+@ErraiModule
+@ErraiApp(local = true, modules = TestModule2.class)
 public class TestLocalErraiApp2 {
 }

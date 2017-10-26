@@ -22,15 +22,23 @@ import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.common.apt.localapps.TestLocalAppWithTwoSubErraiApps;
 import org.jboss.errai.common.apt.localapps.localapp1.TestLocalErraiApp1;
 import org.jboss.errai.common.apt.localapps.localapp1.module1.TestExportedType1;
+import org.jboss.errai.common.apt.localapps.localapp1.module1.TestModule1;
 import org.jboss.errai.common.apt.localapps.localapp2.TestLocalErraiApp2;
 import org.jboss.errai.common.apt.localapps.localapp2.module2.TestExportedType21;
 import org.jboss.errai.common.apt.localapps.localapp2.module2.TestExportedType22;
+import org.jboss.errai.common.apt.localapps.localapp2.module2.TestModule2;
 import org.jboss.errai.common.configuration.ErraiApp;
+import org.jboss.errai.common.configuration.ErraiModule;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import javax.lang.model.element.Element;
+import javax.lang.model.element.TypeElement;
+import java.lang.annotation.Annotation;
+import java.util.Collections;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
@@ -119,8 +127,27 @@ public class ErraiAptExportedTypesTest extends ErraiAptTest {
   }
 
   private AnnotatedSourceElementsFinder localErraiAppAnnotatedSourceElementsFinder() {
-    return new TestAnnotatedSourceElementsFinder(getTypeElement(TestExportedType1.class),
-            getTypeElement(TestExportedType21.class), getTypeElement(TestExportedType22.class));
+    return new TestAnnotatedSourceElementsFinder() {
+
+      @Override
+      public Set<? extends Element> findSourceElementsAnnotatedWith(TypeElement typeElement) {
+        if (typeElement.equals(getTypeElement(ErraiAptExportedTypesTestAnnotation.class))) {
+          return ImmutableSet.of(getTypeElement(TestExportedType1.class), getTypeElement(TestExportedType21.class),
+                  getTypeElement(TestExportedType22.class));
+        } else {
+          return Collections.emptySet();
+        }
+      }
+
+      @Override
+      public Set<? extends Element> findSourceElementsAnnotatedWith(final Class<? extends Annotation> annotationClass) {
+        if (annotationClass.equals(ErraiModule.class)) {
+          return ImmutableSet.of(getTypeElement(TestModule1.class), getTypeElement(TestModule2.class));
+        } else {
+          return Collections.emptySet();
+        }
+      }
+    };
   }
 
   private ResourceFilesFinder resourceFilesFinder() {
