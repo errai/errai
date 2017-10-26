@@ -17,6 +17,8 @@
 package org.jboss.errai.apt.internal.generator;
 
 import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.util.GWTPrivateMemberAccessor;
+import org.jboss.errai.codegen.util.PrivateAccessUtil;
 import org.jboss.errai.common.apt.ErraiAptExportedTypes;
 import org.jboss.errai.common.apt.ErraiAptGenerators;
 import org.jboss.errai.common.apt.configuration.AptErraiConfiguration;
@@ -45,6 +47,7 @@ public class MarshallerAptGenerator extends ErraiAptGenerators.MultipleFiles {
   // IMPORTANT: Do not remove. ErraiAppAptGenerator depends on this constructor
   public MarshallerAptGenerator(final ErraiAptExportedTypes exportedTypes) {
     super(exportedTypes);
+    PrivateAccessUtil.registerPrivateMemberAccessor("jsni", new GWTPrivateMemberAccessor());
   }
 
   @Override
