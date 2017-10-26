@@ -126,6 +126,11 @@
           <scope>provided</scope>
           <classifier>sources</classifier>
         </dependency>
+        <dependency>
+          <groupId>org.jboss.errai</groupId>
+          <artifactId>errai-generators-apt</artifactId>
+          <scope>test</scope>
+        </dependency>
       </dependencies>
     </profile>
   </profiles>

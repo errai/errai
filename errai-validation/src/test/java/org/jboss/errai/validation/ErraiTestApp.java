@@ -14,13 +14,23 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.security;
+package org.jboss.errai.validation;
 
+import org.jboss.errai.common.configuration.ErraiApp;
 import org.jboss.errai.common.configuration.ErraiModule;
+import org.jboss.errai.databinding.ErraiDataBindingModule;
+import org.jboss.errai.ioc.ErraiIocModule;
+import org.jboss.errai.marshalling.ErraiMarshallingModule;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
+@ErraiApp(local = true,
+          modules = { ErraiTestApp.class,
+                      ErraiMarshallingModule.class,
+                      ErraiIocModule.class,
+                      ErraiDataBindingModule.class,
+                      ErraiValidationModule.class })
 @ErraiModule
-public class ErraiSecurityClientTestModule {
+public class ErraiTestApp {
 }
