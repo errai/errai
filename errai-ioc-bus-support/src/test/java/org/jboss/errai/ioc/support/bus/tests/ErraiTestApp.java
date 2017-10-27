@@ -20,13 +20,18 @@ import org.jboss.errai.bus.ErraiBusModule;
 import org.jboss.errai.common.configuration.ErraiApp;
 import org.jboss.errai.common.configuration.ErraiModule;
 import org.jboss.errai.ioc.ErraiIocModule;
+import org.jboss.errai.ioc.support.bus.ErraiBusSupportModule;
 import org.jboss.errai.marshalling.ErraiMarshallingModule;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
 @ErraiApp(local = true,
-          modules = { ErraiTestApp.class, ErraiBusModule.class, ErraiIocModule.class, ErraiMarshallingModule.class })
+          modules = { ErraiTestApp.class,
+                      ErraiBusSupportModule.class,
+                      ErraiBusModule.class,
+                      ErraiIocModule.class,
+                      ErraiMarshallingModule.class })
 @ErraiModule
 public class ErraiTestApp {
 }

@@ -128,7 +128,7 @@ public class MarshallingConfiguration {
     // must do this before filling in interfaces and supertypes!
     exposedTypes.removeAll(nonPortableTypes);
 
-    return exposedTypes;
+    return exposedTypes.stream().map(MetaClass::getErased).collect(toSet());
   }
 
   private static Set<MetaClass> allNonExposedPortableTypes(final ErraiConfiguration erraiConfiguration,
