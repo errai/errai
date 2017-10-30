@@ -269,7 +269,7 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
        */
       if (resolvedStylesheetRelativePath.isPresent() && lessStylesheet) {
         try {
-          final Resource lessResource = new FileResource(new File(resolvedStylesheetRelativePath.get()));
+          final Resource lessResource = new ResourceFilesFinderResource(resolvedStylesheetRelativePath.get(), resourceFilesFinder);
           final LessSource source = new LessSource(lessResource);
           final LessCompiler compiler = new LessCompiler();
           final String compiledCss = compiler.compile(source);

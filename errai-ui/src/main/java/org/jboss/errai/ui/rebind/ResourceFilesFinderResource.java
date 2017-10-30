@@ -16,44 +16,54 @@
 
 package org.jboss.errai.ui.rebind;
 
-import java.io.IOException;
-import java.io.InputStream;
-
+import org.apache.http.impl.io.EmptyInputStream;
+import org.jboss.errai.common.apt.ResourceFilesFinder;
 import org.jboss.errai.common.client.api.Assert;
 import org.lesscss.Resource;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.function.Function;
 
 /**
  * Allows less resources that are loaded from the classpath.
  *
  * @author Max Barkley <mbarkley@redhat.com>
  */
-public class ClassPathResource implements Resource {
+public class ResourceFilesFinderResource implements Resource {
 
   private final String path;
-  private final ClassLoader classLoader;
+  private final ResourceFilesFinder resourcesFilesFinder;
 
-  public ClassPathResource(final String path, final ClassLoader classLoader) {
+  public ResourceFilesFinderResource(final String path, final ResourceFilesFinder resourcesFilesFinder) {
     this.path = Assert.notNull(path);
-    this.classLoader = Assert.notNull(classLoader);
+    this.resourcesFilesFinder = Assert.notNull(resourcesFilesFinder);
   }
 
   @Override
   public boolean exists() {
-    return classLoader.getResource(path) != null;
+    return resourcesFilesFinder.getResource(path).isPresent();
   }
 
   @Override
   public long lastModified() {
-    try {
-      return classLoader.getResource(path).openConnection().getLastModified();
-    } catch (final IOException e) {
-      return 0;
-    }
+    return resourcesFilesFinder.getResource(path).map(File::lastModified).orElse(0L);
   }
 
   @Override
   public InputStream getInputStream() throws IOException {
-    return classLoader.getResourceAsStream(path);
+    return resourcesFilesFinder.getResource(path).map(this::newFileInputStream).orElse(EmptyInputStream.INSTANCE);
+  }
+
+  private InputStream newFileInputStream(final File file) {
+    try {
+      return new FileInputStream(file);
+    } catch (final FileNotFoundException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   @Override
@@ -67,7 +77,7 @@ public class ClassPathResource implements Resource {
       final String parentPath = path.substring(0, endOfParentPath+1);
       newPath = parentPath + relativeResourcePath;
     }
-    return new ClassPathResource(newPath, classLoader);
+    return new ResourceFilesFinderResource(newPath, resourcesFilesFinder);
   }
 
   @Override
