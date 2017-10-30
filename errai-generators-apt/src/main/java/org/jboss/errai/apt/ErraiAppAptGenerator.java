@@ -88,7 +88,7 @@ public class ErraiAppAptGenerator extends AbstractProcessor {
               .map(APTClass::new)
               .sorted(comparing(APTClass::getFullyQualifiedName))
               .map(app -> newErraiAptExportedTypes(annotatedElementsFinder, types, elements, filer, app))
-              .flatMap(erraiAptExportedTypes -> findGenerators(elements, erraiAptExportedTypes).stream())
+              .flatMap(erraiAptExportedTypes -> findGenerators(erraiAptExportedTypes).stream())
               .flatMap(this::generatedFiles)
               .forEach(this::saveFile);
 
@@ -119,8 +119,7 @@ public class ErraiAppAptGenerator extends AbstractProcessor {
             new AptResourceFilesFinder(filer));
   }
 
-  List<ErraiAptGenerators.Any> findGenerators(final Elements elements,
-          final ErraiAptExportedTypes erraiAptExportedTypes) {
+  List<ErraiAptGenerators.Any> findGenerators(final ErraiAptExportedTypes erraiAptExportedTypes) {
 
     return erraiAptExportedTypes.findAnnotatedMetaClasses(ErraiGenerator.class)
             .stream()
