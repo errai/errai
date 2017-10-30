@@ -239,22 +239,16 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
     if (!constructed.containsKey(declaringClass)) {
       final String templateVarName = "templateFor" + decorable.getDecorableDeclaringType().getName();
 
-      final Optional<String> templateStyleSheetPath = getTemplateStyleSheetPath(declaringClass);
-      final Optional<File> resolvedStylesheetFile = templateStyleSheetPath.isPresent() ?
-              templateStyleSheetPath.flatMap(resourceFilesFinder::getResource) :
-              getResolvedStyleSheetFile(declaringClass, resourceFilesFinder);
+      final Optional<String> resolvedStylesheetRelativePath = getRelativeStylesheetPath(resourceFilesFinder, declaringClass);
 
-
-      final boolean lessStylesheet = resolvedStylesheetFile.filter(s -> s.getName().endsWith(".less")).isPresent();
+      final boolean lessStylesheet = resolvedStylesheetRelativePath.filter(s -> s.endsWith(".less")).isPresent();
 
       /*
        * Generate this component's ClientBundle resource if necessary
        */
-      final boolean generateCssBundle = resolvedStylesheetFile.isPresent() && !lessStylesheet;
+      final boolean generateCssBundle = resolvedStylesheetRelativePath.isPresent() && !lessStylesheet;
       if (!customProvider || generateCssBundle) {
-        //FIXME: tiago: path is absolute but should be relative beggining in "org"
-        final Optional<String> cssFilePath = resolvedStylesheetFile.map(s -> s.toURI().getPath())
-                .filter(path -> path.endsWith(".css"));
+        final Optional<String> cssFilePath = resolvedStylesheetRelativePath.filter(path -> path.endsWith(".css"));
         generateTemplateResourceInterface(decorable, declaringClass, customProvider, cssFilePath);
 
       /*
@@ -273,16 +267,16 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
       /*
        * Compile LESS stylesheet to CSS and generate StyleInjector code
        */
-      if (resolvedStylesheetFile.isPresent() && lessStylesheet) {
+      if (resolvedStylesheetRelativePath.isPresent() && lessStylesheet) {
         try {
-          final Resource lessResource = new FileResource(resolvedStylesheetFile.get());
+          final Resource lessResource = new FileResource(new File(resolvedStylesheetRelativePath.get()));
           final LessSource source = new LessSource(lessResource);
           final LessCompiler compiler = new LessCompiler();
           final String compiledCss = compiler.compile(source);
 
           controller.addFactoryInitializationStatements(singletonList(invokeStatic(StyleInjector.class, "inject", loadLiteral(compiledCss))));
         } catch (IOException | LessException e) {
-          throw new RuntimeException("Error while attempting to compile the LESS stylesheet [" + resolvedStylesheetFile.get().toURI().getPath() + "].", e);
+          throw new RuntimeException("Error while attempting to compile the LESS stylesheet [" + resolvedStylesheetRelativePath.get() + "].", e);
         }
       }
 
@@ -348,18 +342,27 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
     }
   }
 
-  private Optional<File> getResolvedStyleSheetFile(final MetaClass declaringClass,
-          final ResourceFilesFinder resourceFilesFinder) {
+  private Optional<String> getRelativeStylesheetPath(final ResourceFilesFinder resourceFilesFinder, final MetaClass declaringClass) {
+
+    final Optional<String> templateStyleSheetPath = getTemplateStyleSheetPath(declaringClass);
+    if (templateStyleSheetPath.isPresent()) {
+      return templateStyleSheetPath;
+    }
 
     final String simpleName = declaringClass.getName();
     final String unsuffixedPath = declaringClass.getPackageName().replace('.', '/') + "/" + simpleName;
 
-    final Optional<File> cssFile = resourceFilesFinder.getResource(unsuffixedPath + ".css");
-    if (cssFile.isPresent()) {
-      return cssFile;
+    final String possibleCssFilePath = unsuffixedPath + ".css";
+    if (resourceFilesFinder.getResource(possibleCssFilePath).isPresent()) {
+      return Optional.of(possibleCssFilePath);
     }
 
-    return resourceFilesFinder.getResource(unsuffixedPath + ".less");
+    final String possibleLessFilePath = unsuffixedPath + ".less";
+    if (resourceFilesFinder.getResource(possibleLessFilePath).isPresent()) {
+    return Optional.of(possibleLessFilePath);
+  }
+
+    return Optional.empty();
   }
 
   @SuppressWarnings("serial")

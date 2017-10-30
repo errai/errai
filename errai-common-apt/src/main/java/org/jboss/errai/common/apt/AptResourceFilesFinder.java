@@ -17,6 +17,7 @@
 package org.jboss.errai.common.apt;
 
 import javax.annotation.processing.Filer;
+import javax.annotation.processing.RoundEnvironment;
 import javax.tools.JavaFileManager;
 import javax.tools.StandardLocation;
 import java.io.File;
@@ -59,14 +60,6 @@ public class AptResourceFilesFinder implements ResourceFilesFinder {
             .map(File::new)
             .filter(File::exists)
             .findFirst();
-  }
-
-  private Optional<URL> getUrl(final URI uri) {
-    try {
-      return Optional.of(uri.toURL());
-    } catch (final Exception e) {
-      return Optional.empty();
-    }
   }
 
   private Optional<URI> getUri(final JavaFileManager.Location location,
