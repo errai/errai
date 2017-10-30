@@ -17,6 +17,7 @@
 package org.jboss.errai.apt.internal.export.annotation;
 
 import org.jboss.errai.common.configuration.ErraiApp;
+import org.jboss.errai.common.configuration.ErraiGenerator;
 import org.jboss.errai.common.configuration.ErraiModule;
 
 /**
@@ -29,6 +30,7 @@ public final class ErraiCommonAptExportedAnnotations {
   private ErraiCommonAptExportedAnnotations() {
   }
 
+  private ErraiGenerator erraiGenerator;
   private ErraiModule erraiModule;
   private ErraiApp erraiApp;
 }

@@ -14,32 +14,10 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.apt.internal.generator;
-
-import org.jboss.errai.common.apt.ErraiAptExportedTypes;
-import org.jboss.errai.common.apt.ErraiAptGenerators;
+package org.jboss.errai.common.configuration;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
-public class TestGenerator extends ErraiAptGenerators.SingleFile {
-
-  public TestGenerator(final ErraiAptExportedTypes exportedTypes) {
-    super(exportedTypes);
-  }
-
-  @Override
-  public String generate() {
-    return "";
-  }
-
-  @Override
-  public String getPackageName() {
-    return "org.jboss.errai.apt.test";
-  }
-
-  @Override
-  public String getClassSimpleName() {
-    return "TestGeneratedSourceImpl";
-  }
+public @interface ErraiGenerator {
 }

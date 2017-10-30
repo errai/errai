@@ -18,7 +18,7 @@ package org.jboss.errai.marshalling.rebind;
 
 import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.shared.GWT;
-import org.jboss.errai.apt.internal.generator.MarshallerAptGenerator;
+import org.jboss.errai.marshalling.apt.MarshallerAptGenerator;
 import org.jboss.errai.codegen.Context;
 import org.jboss.errai.codegen.InnerClass;
 import org.jboss.errai.codegen.Parameter;

@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.apt.internal.generator;
+package org.jboss.errai.databinding.apt;
 
 import org.jboss.errai.common.apt.ErraiAptExportedTypes;
 import org.jboss.errai.common.apt.ErraiAptGenerators;
-import org.jboss.errai.ui.nav.rebind.NavigationGraphGenerator;
+import org.jboss.errai.common.configuration.ErraiGenerator;
+import org.jboss.errai.databinding.client.api.Bindable;
+import org.jboss.errai.databinding.rebind.BindableProxyLoaderGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,33 +29,39 @@ import org.slf4j.LoggerFactory;
  *
  * @author Tiago Bento <tfernand@redhat.com>
  */
-public class NavigationGraphAptGenerator extends ErraiAptGenerators.SingleFile {
+@ErraiGenerator
+public class BindableProxyLoaderAptGenerator extends ErraiAptGenerators.SingleFile {
 
-  public static final Logger logger = LoggerFactory.getLogger(NavigationGraphAptGenerator.class);
+  private static final Logger log = LoggerFactory.getLogger(BindableProxyLoaderAptGenerator.class);
 
-  private final NavigationGraphGenerator navigationGraphGenerator;
+  private final BindableProxyLoaderGenerator bindableProxyLoaderGenerator;
 
   // IMPORTANT: Do not remove. ErraiAppAptGenerator depends on this constructor
-  public NavigationGraphAptGenerator(final ErraiAptExportedTypes exportedTypes) {
+  public BindableProxyLoaderAptGenerator(final ErraiAptExportedTypes exportedTypes) {
     super(exportedTypes);
-    this.navigationGraphGenerator = new NavigationGraphGenerator();
+    this.bindableProxyLoaderGenerator = new BindableProxyLoaderGenerator();
   }
 
   @Override
   public String generate() {
-    logger.info("Generating " + getClassSimpleName() + "...");
-    final String generated = navigationGraphGenerator.generate(metaClassFinder());
-    logger.info("Generated " + getClassSimpleName());
-    return generated;
+    log.info("Generating {}...", getClassSimpleName());
+
+    final String generatedSource = bindableProxyLoaderGenerator.generate(
+            metaClassFinder().extend(Bindable.class, erraiConfiguration().modules()::getBindableTypes)
+                    .remove(Bindable.class, erraiConfiguration().modules()::getNonBindableTypes));
+
+    log.info("Generated {}", getClassSimpleName());
+    return generatedSource;
   }
 
   @Override
   public String getPackageName() {
-    return NavigationGraphGenerator.PACKAGE_NAME;
+    return bindableProxyLoaderGenerator.getPackageName();
   }
 
   @Override
   public String getClassSimpleName() {
-    return NavigationGraphGenerator.CLASS_NAME;
+    return bindableProxyLoaderGenerator.getClassSimpleName();
   }
+
 }

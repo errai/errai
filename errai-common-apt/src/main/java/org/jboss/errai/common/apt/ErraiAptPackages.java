@@ -27,7 +27,6 @@ public final class ErraiAptPackages {
 
   private static final String EXPORT_FILES_PACKAGE_PATH = "org.jboss.errai.apt.internal.export";
   private static final String EXPORTED_ANNOTATIONS_PACKAGE_PATH = "org.jboss.errai.apt.internal.export.annotation";
-  private static final String GENERATORS_PACKAGE_PACKAGE_PATH = "org.jboss.errai.apt.internal.generator";
 
   private ErraiAptPackages() {
   }
@@ -38,10 +37,6 @@ public final class ErraiAptPackages {
 
   public static String exportedAnnotationsPackagePath() {
     return EXPORTED_ANNOTATIONS_PACKAGE_PATH;
-  }
-
-  public static String generatorsPackagePath() {
-    return GENERATORS_PACKAGE_PACKAGE_PATH;
   }
 
   public static Optional<PackageElement> exportFilesPackageElement(final Elements elementUtils) {
@@ -59,16 +54,6 @@ public final class ErraiAptPackages {
 
     if (packageElement == null) {
       System.out.println("Exported annotations package not found");
-    }
-
-    return Optional.ofNullable(packageElement);
-  }
-
-  public static Optional<PackageElement> generatorsPackageElement(final Elements elementUtils) {
-    final PackageElement packageElement = elementUtils.getPackageElement(generatorsPackagePath());
-
-    if (packageElement == null) {
-      System.out.println("Generators package not found");
     }
 
     return Optional.ofNullable(packageElement);

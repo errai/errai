@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.apt.internal.generator.util;
+package org.jboss.errai.ioc.apt.util;
 
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.config.MetaClassFinder;

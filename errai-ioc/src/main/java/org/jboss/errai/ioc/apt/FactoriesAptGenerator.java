@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.apt.internal.generator;
+package org.jboss.errai.ioc.apt;
 
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.util.GWTPrivateMemberAccessor;
@@ -22,6 +22,7 @@ import org.jboss.errai.codegen.util.PrivateAccessUtil;
 import org.jboss.errai.common.apt.ErraiAptExportedTypes;
 import org.jboss.errai.common.apt.ErraiAptGenerators;
 import org.jboss.errai.common.apt.generator.ErraiAptGeneratedSourceFile;
+import org.jboss.errai.common.configuration.ErraiGenerator;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.FactoryGenerator;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraph;
@@ -41,6 +42,7 @@ import static java.util.stream.Collectors.toList;
  *
  * @author Tiago Bento <tfernand@redhat.com>
  */
+@ErraiGenerator
 public class FactoriesAptGenerator extends ErraiAptGenerators.MultipleFiles {
 
   private static final Logger log = LoggerFactory.getLogger(FactoriesAptGenerator.class);

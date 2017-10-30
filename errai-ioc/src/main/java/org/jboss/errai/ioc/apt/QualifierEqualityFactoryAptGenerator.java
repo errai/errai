@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.apt.internal.generator;
+package org.jboss.errai.ioc.apt;
 
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.common.apt.ErraiAptExportedTypes;
 import org.jboss.errai.common.apt.ErraiAptGenerators;
+import org.jboss.errai.common.configuration.ErraiGenerator;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.QualifierEqualityFactoryGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +36,7 @@ import static java.util.Collections.singleton;
  *
  * @author Tiago Bento <tfernand@redhat.com>
  */
+@ErraiGenerator
 public class QualifierEqualityFactoryAptGenerator extends ErraiAptGenerators.SingleFile {
 
   private static final Logger log = LoggerFactory.getLogger(QualifierEqualityFactoryAptGenerator.class);

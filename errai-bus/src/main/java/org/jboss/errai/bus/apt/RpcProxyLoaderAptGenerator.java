@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.apt.internal.generator;
+package org.jboss.errai.bus.apt;
 
 import org.jboss.errai.bus.rebind.RpcProxyLoaderGenerator;
 import org.jboss.errai.codegen.meta.MetaAnnotation;
 import org.jboss.errai.common.apt.ErraiAptExportedTypes;
 import org.jboss.errai.common.apt.ErraiAptGenerators;
+import org.jboss.errai.common.configuration.ErraiGenerator;
 
 import java.util.Collection;
 
@@ -30,6 +31,7 @@ import static java.util.stream.Collectors.toList;
  *
  * @author Tiago Bento <tfernand@redhat.com>
  */
+@ErraiGenerator
 public final class RpcProxyLoaderAptGenerator extends ErraiAptGenerators.SingleFile {
 
   private final RpcProxyLoaderGenerator rpcProxyLoaderGenerator;

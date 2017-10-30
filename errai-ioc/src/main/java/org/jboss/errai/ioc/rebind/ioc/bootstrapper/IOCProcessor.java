@@ -19,7 +19,7 @@ package org.jboss.errai.ioc.rebind.ioc.bootstrapper;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import jsinterop.annotations.JsType;
-import org.jboss.errai.apt.internal.generator.FactoriesAptGenerator;
+import org.jboss.errai.ioc.apt.FactoriesAptGenerator;
 import org.jboss.errai.codegen.ArithmeticExpression;
 import org.jboss.errai.codegen.ArithmeticOperator;
 import org.jboss.errai.codegen.Modifier;

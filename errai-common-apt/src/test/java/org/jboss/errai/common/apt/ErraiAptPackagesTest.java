@@ -18,8 +18,6 @@ package org.jboss.errai.common.apt;
 
 import org.jboss.errai.apt.internal.export.annotation.TestExportedAnnotations;
 import org.jboss.errai.apt.internal.export.test_hYbKGF_ExportFile_org_jboss_errai_common_apt_exportfile_TestAnnotation;
-import org.jboss.errai.apt.internal.generator.TestGenerator;
-import org.jboss.errai.common.apt.ErraiAptPackages;
 import org.jboss.errai.codegen.apt.test.ErraiAptTest;
 import org.junit.Test;
 
@@ -34,7 +32,6 @@ public class ErraiAptPackagesTest extends ErraiAptTest {
   public void testPackagesExist() {
     assertTrue(ErraiAptPackages.exportFilesPackageElement(elements).isPresent());
     assertTrue(ErraiAptPackages.exportedAnnotationsPackageElement(elements).isPresent());
-    assertTrue(ErraiAptPackages.generatorsPackageElement(elements).isPresent());
   }
 
   @Test
@@ -47,10 +44,6 @@ public class ErraiAptPackagesTest extends ErraiAptTest {
 
     assertTrue(ErraiAptPackages.exportedAnnotationsPackageElement(elements)
             .map(p -> p.getEnclosedElements().contains(getTypeElement(TestExportedAnnotations.class)))
-            .orElse(false));
-
-    assertTrue(ErraiAptPackages.generatorsPackageElement(elements)
-            .map(p -> p.getEnclosedElements().contains(getTypeElement(TestGenerator.class)))
             .orElse(false));
   }
 }

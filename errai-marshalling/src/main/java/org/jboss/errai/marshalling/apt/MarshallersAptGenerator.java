@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.apt.internal.generator;
+package org.jboss.errai.marshalling.apt;
 
 import org.jboss.errai.common.apt.ErraiAptExportedTypes;
 import org.jboss.errai.common.apt.ErraiAptGenerators;
 import org.jboss.errai.common.apt.configuration.AptErraiConfiguration;
 import org.jboss.errai.common.apt.generator.ErraiAptGeneratedSourceFile;
+import org.jboss.errai.common.configuration.ErraiGenerator;
 import org.jboss.errai.config.ErraiConfiguration;
 import org.jboss.errai.marshalling.rebind.MarshallerGeneratorFactory;
 
@@ -38,6 +39,7 @@ import static org.jboss.errai.marshalling.rebind.MarshallersGenerator.SERVER_PAC
  *
  * @author Tiago Bento <tfernand@redhat.com>
  */
+@ErraiGenerator
 public class MarshallersAptGenerator extends ErraiAptGenerators.MultipleFiles {
 
   // IMPORTANT: Do not remove. ErraiAppAptGenerator depends on this constructor

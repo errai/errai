@@ -14,45 +14,48 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.apt.internal.generator;
+package org.jboss.errai.ui.nav.apt;
 
-import org.jboss.errai.apt.internal.generator.util.AptIocRelevantClassesFinder;
 import org.jboss.errai.common.apt.ErraiAptExportedTypes;
 import org.jboss.errai.common.apt.ErraiAptGenerators;
-import org.jboss.errai.common.apt.ResourceFilesFinder;
-import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCGenerator;
-import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IocRelevantClassesFinder;
+import org.jboss.errai.common.configuration.ErraiGenerator;
+import org.jboss.errai.ui.nav.rebind.NavigationGraphGenerator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * IMPORTANT: Do not move this class. ErraiAppAptGenerator depends on it being in this exact package.
  *
  * @author Tiago Bento <tfernand@redhat.com>
  */
-public class IocAptGenerator extends ErraiAptGenerators.SingleFile {
+@ErraiGenerator
+public class NavigationGraphAptGenerator extends ErraiAptGenerators.SingleFile {
 
-  private final IOCGenerator iocGenerator;
-  private final ResourceFilesFinder resourceFilesFinder;
+  public static final Logger logger = LoggerFactory.getLogger(NavigationGraphAptGenerator.class);
+
+  private final NavigationGraphGenerator navigationGraphGenerator;
 
   // IMPORTANT: Do not remove. ErraiAppAptGenerator depends on this constructor
-  public IocAptGenerator(final ErraiAptExportedTypes exportedTypes) {
+  public NavigationGraphAptGenerator(final ErraiAptExportedTypes exportedTypes) {
     super(exportedTypes);
-    this.resourceFilesFinder = exportedTypes.resourceFilesFinder();
-    this.iocGenerator = new IOCGenerator();
+    this.navigationGraphGenerator = new NavigationGraphGenerator();
   }
 
   @Override
   public String generate() {
-    final IocRelevantClassesFinder relevantClasses = new AptIocRelevantClassesFinder(metaClassFinder());
-    return iocGenerator.generate(null, metaClassFinder(), erraiConfiguration(), relevantClasses, resourceFilesFinder);
+    logger.info("Generating " + getClassSimpleName() + "...");
+    final String generated = navigationGraphGenerator.generate(metaClassFinder());
+    logger.info("Generated " + getClassSimpleName());
+    return generated;
   }
 
   @Override
   public String getPackageName() {
-    return iocGenerator.getPackageName();
+    return NavigationGraphGenerator.PACKAGE_NAME;
   }
 
   @Override
   public String getClassSimpleName() {
-    return iocGenerator.getClassSimpleName();
+    return NavigationGraphGenerator.CLASS_NAME;
   }
 }

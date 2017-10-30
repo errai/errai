@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Red Hat, Inc. and/or its affiliates.
+ * Copyright (C) 2017 Red Hat, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,47 +14,47 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.apt.internal.generator;
+package org.jboss.errai.ioc.apt;
 
+import org.jboss.errai.ioc.apt.util.AptIocRelevantClassesFinder;
 import org.jboss.errai.common.apt.ErraiAptExportedTypes;
 import org.jboss.errai.common.apt.ErraiAptGenerators;
-import org.jboss.errai.common.apt.configuration.AptErraiConfiguration;
-import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCEnvironmentGenerator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.jboss.errai.common.apt.ResourceFilesFinder;
+import org.jboss.errai.common.configuration.ErraiGenerator;
+import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCGenerator;
+import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IocRelevantClassesFinder;
 
 /**
  * IMPORTANT: Do not move this class. ErraiAppAptGenerator depends on it being in this exact package.
  *
  * @author Tiago Bento <tfernand@redhat.com>
  */
-public class IocEnvironmentAptGenerator extends ErraiAptGenerators.SingleFile {
+@ErraiGenerator
+public class IocAptGenerator extends ErraiAptGenerators.SingleFile {
 
-  private static final Logger log = LoggerFactory.getLogger(IocEnvironmentAptGenerator.class);
-
-  private final IOCEnvironmentGenerator iocEnvironmentGenerator;
+  private final IOCGenerator iocGenerator;
+  private final ResourceFilesFinder resourceFilesFinder;
 
   // IMPORTANT: Do not remove. ErraiAppAptGenerator depends on this constructor
-  public IocEnvironmentAptGenerator(final ErraiAptExportedTypes exportedTypes) {
+  public IocAptGenerator(final ErraiAptExportedTypes exportedTypes) {
     super(exportedTypes);
-    this.iocEnvironmentGenerator = new IOCEnvironmentGenerator();
+    this.resourceFilesFinder = exportedTypes.resourceFilesFinder();
+    this.iocGenerator = new IOCGenerator();
   }
 
   @Override
   public String generate() {
-    log.info("Generating {}...", getClassSimpleName());
-    final String generatedSource = iocEnvironmentGenerator.generate(erraiConfiguration());
-    log.info("Generated {}", getClassSimpleName());
-    return generatedSource;
+    final IocRelevantClassesFinder relevantClasses = new AptIocRelevantClassesFinder(metaClassFinder());
+    return iocGenerator.generate(null, metaClassFinder(), erraiConfiguration(), relevantClasses, resourceFilesFinder);
   }
 
   @Override
   public String getPackageName() {
-    return IOCEnvironmentGenerator.PACKAGE_NAME;
+    return iocGenerator.getPackageName();
   }
 
   @Override
   public String getClassSimpleName() {
-    return IOCEnvironmentGenerator.CLASS_NAME;
+    return iocGenerator.getClassSimpleName();
   }
 }

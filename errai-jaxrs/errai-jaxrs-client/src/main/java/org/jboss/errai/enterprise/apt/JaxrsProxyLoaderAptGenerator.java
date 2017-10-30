@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.apt.internal.generator;
+package org.jboss.errai.enterprise.apt;
 
 import org.jboss.errai.codegen.meta.MetaAnnotation;
 import org.jboss.errai.common.apt.ErraiAptExportedTypes;
 import org.jboss.errai.common.apt.ErraiAptGenerators;
+import org.jboss.errai.common.configuration.ErraiGenerator;
 import org.jboss.errai.enterprise.rebind.JaxrsProxyLoaderGenerator;
 
 import java.util.Collection;
@@ -30,6 +31,7 @@ import static java.util.stream.Collectors.toList;
  *
  * @author Tiago Bento <tfernand@redhat.com>
  */
+@ErraiGenerator
 public final class JaxrsProxyLoaderAptGenerator extends ErraiAptGenerators.SingleFile {
 
   private final JaxrsProxyLoaderGenerator jaxrsProxyLoaderGenerator;

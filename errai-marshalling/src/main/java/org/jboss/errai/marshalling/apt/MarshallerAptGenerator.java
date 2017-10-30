@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.apt.internal.generator;
+package org.jboss.errai.marshalling.apt;
 
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.util.GWTPrivateMemberAccessor;
@@ -23,6 +23,7 @@ import org.jboss.errai.common.apt.ErraiAptExportedTypes;
 import org.jboss.errai.common.apt.ErraiAptGenerators;
 import org.jboss.errai.common.apt.configuration.AptErraiConfiguration;
 import org.jboss.errai.common.apt.generator.ErraiAptGeneratedSourceFile;
+import org.jboss.errai.common.configuration.ErraiGenerator;
 import org.jboss.errai.config.ErraiConfiguration;
 import org.jboss.errai.marshalling.rebind.MarshallerGenerator;
 import org.jboss.errai.marshalling.rebind.MarshallerGeneratorFactory;
@@ -40,6 +41,7 @@ import static org.jboss.errai.marshalling.rebind.MarshallerGenerator.PACKAGE_NAM
  *
  * @author Tiago Bento <tfernand@redhat.com>
  */
+@ErraiGenerator
 public class MarshallerAptGenerator extends ErraiAptGenerators.MultipleFiles {
 
   private static final List<MetaClass> exposedClasses = new ArrayList<>();
