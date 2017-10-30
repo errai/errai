@@ -42,12 +42,10 @@ import javax.tools.FileObject;
 import java.io.IOException;
 import java.io.Writer;
 import java.lang.reflect.Constructor;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
 import static java.util.Comparator.comparing;
-import static java.util.stream.Collectors.toList;
 import static javax.tools.StandardLocation.SOURCE_OUTPUT;
 
 /**
@@ -88,7 +86,7 @@ public class ErraiAppAptGenerator extends AbstractProcessor {
               .map(APTClass::new)
               .sorted(comparing(APTClass::getFullyQualifiedName))
               .map(app -> newErraiAptExportedTypes(annotatedElementsFinder, types, elements, filer, app))
-              .flatMap(erraiAptExportedTypes -> findGenerators(erraiAptExportedTypes).stream())
+              .flatMap(this::findGenerators)
               .flatMap(this::generatedFiles)
               .forEach(this::saveFile);
 
@@ -119,14 +117,12 @@ public class ErraiAppAptGenerator extends AbstractProcessor {
             new AptResourceFilesFinder(filer));
   }
 
-  List<ErraiAptGenerators.Any> findGenerators(final ErraiAptExportedTypes erraiAptExportedTypes) {
-
+  private Stream<ErraiAptGenerators.Any> findGenerators(final ErraiAptExportedTypes erraiAptExportedTypes) {
     return erraiAptExportedTypes.findAnnotatedMetaClasses(ErraiGenerator.class)
             .stream()
             .map(this::loadClass)
             .map(generatorClass -> newGenerator(generatorClass, erraiAptExportedTypes))
-            .sorted(comparing(ErraiAptGenerators.Any::priority).thenComparing(g -> g.getClass().getSimpleName()))
-            .collect(toList());
+            .sorted(comparing(ErraiAptGenerators.Any::priority).thenComparing(g -> g.getClass().getSimpleName()));
   }
 
   @SuppressWarnings("unchecked")
