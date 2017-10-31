@@ -44,7 +44,7 @@ public class MessageReplyCallbackTest extends AbstractErraiTest {
 
   @Override
   public String getModuleName() {
-    return "org.jboss.errai.bus.ServiceAnnotationTestModule_apt";
+    return "org.jboss.errai.bus.ServiceAnnotationTestModule";
   }
 
   @Override

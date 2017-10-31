@@ -44,7 +44,7 @@ public class IocEnvironmentAptGenerator extends ErraiAptGenerators.SingleFile {
   @Override
   public String generate() {
     log.info("Generating {}...", getClassSimpleName());
-    final String generatedSource = iocEnvironmentGenerator.generate(erraiConfiguration(), getResolvedClassSimpleName());
+    final String generatedSource = iocEnvironmentGenerator.generate(erraiConfiguration(), getResolvedFullyQualifiedClassName());
     log.info("Generated {}", getClassSimpleName());
     return generatedSource;
   }
