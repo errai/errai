@@ -218,11 +218,23 @@
       <scope>compile</scope>
     </dependency>
 
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
   </dependencies>
 
   <profiles>
     <profile>
-      <id>integration-test</id>
+      <id>apt-generators</id>
+      <activation>
+        <property>
+          <name>apt-generators</name>
+          <value>true</value>
+        </property>
+      </activation>
 
       <dependencies>
         <dependency>
@@ -231,7 +243,10 @@
           <scope>test</scope>
         </dependency>
       </dependencies>
+    </profile>
 
+    <profile>
+      <id>integration-test</id>
       <build>
         <plugins>
           <plugin>

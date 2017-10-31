@@ -16,14 +16,14 @@
 
 package org.jboss.errai.bus.client.tests;
 
+import com.google.gwt.user.client.Timer;
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.bus.client.api.messaging.MessageBus;
 import org.jboss.errai.bus.client.api.messaging.MessageCallback;
 import org.jboss.errai.bus.common.AbstractErraiTest;
-
-import com.google.gwt.user.client.Timer;
+import org.jboss.errai.common.client.util.ErraiTestUtil;
 
 /**
  * @author Max Barkley <mbarkley@redhat.com>
@@ -44,7 +44,7 @@ public class MessageReplyCallbackTest extends AbstractErraiTest {
 
   @Override
   public String getModuleName() {
-    return "org.jboss.errai.bus.ServiceAnnotationTestModule";
+    return ErraiTestUtil.resolve("org.jboss.errai.bus.ServiceAnnotationTestModule");
   }
 
   @Override
