@@ -23,7 +23,6 @@ import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.bus.client.api.messaging.MessageBus;
 import org.jboss.errai.bus.client.api.messaging.MessageCallback;
 import org.jboss.errai.bus.common.AbstractErraiTest;
-import org.jboss.errai.common.client.util.ErraiTestUtil;
 
 /**
  * @author Max Barkley <mbarkley@redhat.com>
@@ -44,7 +43,7 @@ public class MessageReplyCallbackTest extends AbstractErraiTest {
 
   @Override
   public String getModuleName() {
-    return ErraiTestUtil.resolve("org.jboss.errai.bus.ServiceAnnotationTestModule");
+    return "org.jboss.errai.bus.ServiceAnnotationTestModule";
   }
 
   @Override

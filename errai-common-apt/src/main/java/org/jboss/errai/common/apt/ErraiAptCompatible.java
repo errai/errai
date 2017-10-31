@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.common.client.util;
+package org.jboss.errai.common.apt;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
-public class ErraiTestUtil {
+public @interface ErraiAptCompatible {
 
-  public static String resolve(final String moduleName) {
-    return moduleName + (Boolean.getBoolean("apt-generators") ? "_apt" : "");
-  }
+  Class<?> erraiTestApp();
+
+  String gwtModuleName();
 }
