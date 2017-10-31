@@ -55,6 +55,7 @@ public class FactoriesAptGenerator extends ErraiAptGenerators.MultipleFiles {
   public FactoriesAptGenerator(final ErraiAptExportedTypes exportedTypes) {
     super(exportedTypes);
     this.factoryGenerator = new FactoryGenerator();
+    FactoryGenerator.reset(); // Needs to reset previously saved static values for next @ErraiApp that will generate code
     PrivateAccessUtil.registerPrivateMemberAccessor("jsni", new GWTPrivateMemberAccessor());
   }
 
@@ -79,8 +80,7 @@ public class FactoriesAptGenerator extends ErraiAptGenerators.MultipleFiles {
     final String generatedSource = generateSources(factoryMetaClass, injectable);
     final String classSimpleName = factoryMetaClass.getName();
 
-    return new ErraiAptGeneratedSourceFile(erraiConfiguration(), FactoryGenerator.GENERATED_PACKAGE, classSimpleName,
-            generatedSource);
+    return new ErraiAptGeneratedSourceFile(FactoryGenerator.GENERATED_PACKAGE, classSimpleName, generatedSource);
   }
 
   private String generateSources(final MetaClass factoryMetaClass, final Injectable injectable) {

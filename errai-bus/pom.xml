@@ -237,6 +237,9 @@
           <plugin>
             <artifactId>maven-failsafe-plugin</artifactId>
             <configuration>
+              <additionalClasspathElements>
+                <additionalClasspathElement>target/generated-test-sources/test-annotations</additionalClasspathElement>
+              </additionalClasspathElements>
               <forkMode>always</forkMode>
               <argLine>${argLine} -Xmx2500m -Dgwt.args='-testBeginTimeout 5 ${gwtArgs}'</argLine>
               <useManifestOnlyJar>true</useManifestOnlyJar>

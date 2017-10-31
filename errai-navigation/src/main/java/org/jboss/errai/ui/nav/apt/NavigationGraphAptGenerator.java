@@ -44,7 +44,7 @@ public class NavigationGraphAptGenerator extends ErraiAptGenerators.SingleFile {
   @Override
   public String generate() {
     logger.info("Generating " + getClassSimpleName() + "...");
-    final String generated = navigationGraphGenerator.generate(metaClassFinder());
+    final String generated = navigationGraphGenerator.generateSource(metaClassFinder(), getResolvedFullyQualifiedClassName());
     logger.info("Generated " + getClassSimpleName());
     return generated;
   }

@@ -68,8 +68,9 @@ public class Implementations {
    * @return an instance of the {@link ClassStructureBuilder} for building the
    *         extended class
    */
-  public static ClassStructureBuilder<?> extend(final Class<?> superclass, final String implClassName) {
-    return ClassBuilder.define(superclass.getPackage().getName() + "." + implClassName, superclass)
+
+  public static ClassStructureBuilder<?> extend(final Class<?> superclass, final String fqcn) {
+    return ClassBuilder.define(fqcn, superclass)
             .publicScope()
             .body();
   }

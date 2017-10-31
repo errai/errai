@@ -153,9 +153,14 @@ public class ErraiAppAptGenerator extends AbstractProcessor {
       // generated code is client code and will be compiled by the GWT/J2CL compiler.
       // FIXME: errai-marshalling will generate server code too
 
-      final String fileName = file.getClassSimpleName() + ".java";
-      final String packageName = file.getPackageName();
-      final FileObject sourceFile = processingEnv.getFiler().createResource(SOURCE_OUTPUT, packageName, fileName);
+      final FileObject sourceFile;
+
+      if (file.saveAsResource()) {
+        sourceFile = processingEnv.getFiler()
+                .createResource(SOURCE_OUTPUT, file.getPackageName(), file.getClassSimpleName() + ".java");
+      } else {
+        sourceFile = processingEnv.getFiler().createSourceFile(file.getPackageName() + "." + file.getClassSimpleName());
+      }
 
       try (final Writer writer = sourceFile.openWriter()) {
         writer.write(file.getSourceCode());

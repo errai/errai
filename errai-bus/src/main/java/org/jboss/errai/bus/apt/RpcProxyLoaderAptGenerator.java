@@ -44,8 +44,8 @@ public final class RpcProxyLoaderAptGenerator extends ErraiAptGenerators.SingleF
 
   @Override
   public String generate() {
-    return rpcProxyLoaderGenerator.generate(metaClassFinder(), isIOCModuleInherited(),
-            this::filterAnnotations);
+    return rpcProxyLoaderGenerator.generate(metaClassFinder(), isIOCModuleInherited(), this::filterAnnotations,
+            getResolvedFullyQualifiedClassName());
   }
 
   private Boolean isIOCModuleInherited() {

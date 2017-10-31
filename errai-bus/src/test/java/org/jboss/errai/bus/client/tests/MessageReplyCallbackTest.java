@@ -44,7 +44,7 @@ public class MessageReplyCallbackTest extends AbstractErraiTest {
 
   @Override
   public String getModuleName() {
-    return "org.jboss.errai.bus.MessageReplyCallbackTests";
+    return "org.jboss.errai.bus.ServiceAnnotationTestModule_apt";
   }
 
   @Override
@@ -94,8 +94,8 @@ public class MessageReplyCallbackTest extends AbstractErraiTest {
   }
 
   /*
-   * This test in a nut shell: 
-   *    - send message to ReplyCallbackTestService and wait for first reply 
+   * This test in a nut shell:
+   *    - send message to ReplyCallbackTestService and wait for first reply
    *    - send second message to ReplyCallbackTestService by building conversation
    *    - test that this conversation was repliable by waiting for second reply from ReplyCallbackTestService
    */
@@ -115,10 +115,10 @@ public class MessageReplyCallbackTest extends AbstractErraiTest {
       }
     }).sendNowWith(bus);
   }
-  
+
   /*
-   * This test in a nut shell: 
-   *    - send message to ReplyCallbackTestService and wait for first reply 
+   * This test in a nut shell:
+   *    - send message to ReplyCallbackTestService and wait for first reply
    *    - send second message to ReplyCallbackTestService by building conversation
    *    - test that this conversation was repliable by waiting for second reply from ReplyCallbackTestService
    */
@@ -137,7 +137,7 @@ public class MessageReplyCallbackTest extends AbstractErraiTest {
       }
     }).sendNowWith(bus);
   }
-  
+
   public void testSendGlobalViaDefaultBuilder() {
     runAndWait(new Runnable() {
       @Override
@@ -146,7 +146,7 @@ public class MessageReplyCallbackTest extends AbstractErraiTest {
       }
     });
   }
-  
+
   public void testSendNoListenersViaDefaultBuilder() {
     runAndWait(new Runnable() {
       @Override

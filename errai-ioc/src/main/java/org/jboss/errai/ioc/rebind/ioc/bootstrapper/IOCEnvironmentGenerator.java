@@ -70,18 +70,18 @@ public class IOCEnvironmentGenerator extends Generator {
       return;
     }
 
-    final String csq = generate(new ErraiAppPropertiesConfiguration());
+    final String csq = generate(new ErraiAppPropertiesConfiguration(), PACKAGE_NAME + "." + CLASS_NAME);
 
     printWriter.append(csq);
     generatorContext.commit(logger, printWriter);
   }
 
-  public String generate(final ErraiConfiguration erraiConfiguration) {
+  public String generate(final ErraiConfiguration erraiConfiguration, final String fqcn) {
     final boolean asyncBootstrap = erraiConfiguration.app().asyncBeanManager();
     final Statement newBeanManager = asyncBootstrap ? Stmt.newObject(AsyncBeanManagerImpl.class) : Stmt.newObject(SyncBeanManagerImpl.class);
 
     final ClassStructureBuilder<? extends ClassStructureBuilder<?>> builder
-        = ClassBuilder.define(PACKAGE_NAME + "." + CLASS_NAME).publicScope()
+        = ClassBuilder.define(fqcn).publicScope()
         .implementsInterface(IOCEnvironment.class)
         .body()
         .publicMethod(boolean.class, "isAsync")

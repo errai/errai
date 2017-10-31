@@ -31,6 +31,7 @@ import org.jboss.errai.codegen.builder.MethodBlockBuilder;
 import org.jboss.errai.codegen.builder.impl.ClassBuilder;
 import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.util.AnnotationFilter;
 import org.jboss.errai.codegen.util.InterceptorProvider;
 import org.jboss.errai.codegen.util.RuntimeAnnotationFilter;
@@ -78,17 +79,19 @@ public class RpcProxyLoaderGenerator extends AbstractAsyncGenerator {
     final Set<String> translatablePackages = RebindUtils.findTranslatablePackages(context);
     final AnnotationFilter gwtAnnotationFilter = new RuntimeAnnotationFilter(translatablePackages);
     final MetaClassFinder metaClassFinder = annotation -> getMetaClasses(context, annotation, translatablePackages);
+    final String fqcn = packageName + "." + classSimpleName;
 
-    return generate(metaClassFinder, iocEnabled, gwtAnnotationFilter);
+    return generate(metaClassFinder, iocEnabled, gwtAnnotationFilter, fqcn);
   }
 
   public String generate(final MetaClassFinder metaClassFinder,
           final boolean iocEnabled,
-          final AnnotationFilter annotationFilter) {
+          final AnnotationFilter annotationFilter,
+          final String fqcn) {
 
     log.info("generating RPC proxy loader class...");
 
-    ClassStructureBuilder<?> classBuilder = ClassBuilder.implement(RpcProxyLoader.class);
+    ClassStructureBuilder<?> classBuilder = ClassBuilder.implement(RpcProxyLoader.class, fqcn);
 
     final long time = System.currentTimeMillis();
     final MethodBlockBuilder<?> loadProxies = classBuilder.publicMethod(void.class, "loadProxies",

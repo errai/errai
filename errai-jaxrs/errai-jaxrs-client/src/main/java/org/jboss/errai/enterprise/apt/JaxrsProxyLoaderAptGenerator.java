@@ -44,8 +44,8 @@ public final class JaxrsProxyLoaderAptGenerator extends ErraiAptGenerators.Singl
 
   @Override
   public String generate() {
-    return jaxrsProxyLoaderGenerator.generate(metaClassFinder(), isIOCModuleInherited(),
-            this::filterAnnotations);
+    return jaxrsProxyLoaderGenerator.generate(metaClassFinder(), isIOCModuleInherited(), this::filterAnnotations,
+            getResolvedFullyQualifiedClassName());
   }
 
   private Boolean isIOCModuleInherited() {

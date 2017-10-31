@@ -78,17 +78,18 @@ public class JaxrsProxyLoaderGenerator extends AbstractAsyncGenerator {
     final AnnotationFilter annotationFilter = new RuntimeAnnotationFilter(translatablePackages);
     final MetaClassFinder metaClassFinder = annotation -> getMetaClasses(context, annotation, translatablePackages);
 
-    return generate(metaClassFinder, iocEnabled, annotationFilter);
+    return generate(metaClassFinder, iocEnabled, annotationFilter, packageName + "." + classSimpleName);
   }
 
   public String generate(final MetaClassFinder metaClassFinder,
           final Boolean iocEnabled,
-          final AnnotationFilter annotationFilter) {
+          final AnnotationFilter annotationFilter,
+          final String fqcn) {
 
     log.info("Generating JAX-RS RPC proxy loader class...");
     final long time = System.currentTimeMillis();
 
-    ClassStructureBuilder<?> classBuilder = ClassBuilder.implement(JaxrsProxyLoader.class);
+    ClassStructureBuilder<?> classBuilder = ClassBuilder.implement(JaxrsProxyLoader.class, fqcn);
 
     final MethodBlockBuilder<?> loadProxies = classBuilder.publicMethod(void.class, "loadProxies");
 

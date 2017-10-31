@@ -18,21 +18,12 @@ package org.jboss.errai.marshalling.apt;
 
 import org.jboss.errai.common.apt.ErraiAptExportedTypes;
 import org.jboss.errai.common.apt.ErraiAptGenerators;
-import org.jboss.errai.common.apt.configuration.AptErraiConfiguration;
-import org.jboss.errai.common.apt.generator.ErraiAptGeneratedSourceFile;
 import org.jboss.errai.common.configuration.ErraiGenerator;
-import org.jboss.errai.config.ErraiConfiguration;
 import org.jboss.errai.marshalling.rebind.MarshallerGeneratorFactory;
 
-import java.util.Arrays;
-import java.util.Collection;
-
 import static org.jboss.errai.marshalling.rebind.MarshallerOutputTarget.GWT;
-import static org.jboss.errai.marshalling.rebind.MarshallerOutputTarget.Java;
 import static org.jboss.errai.marshalling.rebind.MarshallersGenerator.CLIENT_CLASS_NAME;
 import static org.jboss.errai.marshalling.rebind.MarshallersGenerator.CLIENT_PACKAGE_NAME;
-import static org.jboss.errai.marshalling.rebind.MarshallersGenerator.SERVER_CLASS_NAME;
-import static org.jboss.errai.marshalling.rebind.MarshallersGenerator.SERVER_PACKAGE_NAME;
 
 /**
  * IMPORTANT: Do not move this class. ErraiAppAptGenerator depends on it being in this exact package.
@@ -40,25 +31,26 @@ import static org.jboss.errai.marshalling.rebind.MarshallersGenerator.SERVER_PAC
  * @author Tiago Bento <tfernand@redhat.com>
  */
 @ErraiGenerator
-public class MarshallersAptGenerator extends ErraiAptGenerators.MultipleFiles {
+public class ClientMarshallersAptGenerator extends ErraiAptGenerators.SingleFile {
 
   // IMPORTANT: Do not remove. ErraiAppAptGenerator depends on this constructor
-  public MarshallersAptGenerator(final ErraiAptExportedTypes exportedTypes) {
+  public ClientMarshallersAptGenerator(final ErraiAptExportedTypes exportedTypes) {
     super(exportedTypes);
   }
 
   @Override
-  public Collection<ErraiAptGeneratedSourceFile> files() {
-
-    final ErraiAptGeneratedSourceFile server = new ErraiAptGeneratedSourceFile(erraiConfiguration(), SERVER_PACKAGE_NAME, SERVER_CLASS_NAME,
-            MarshallerGeneratorFactory.getFor(null, Java, erraiConfiguration(), metaClassFinder())
-                    .generate(SERVER_PACKAGE_NAME, SERVER_CLASS_NAME));
-
-    final ErraiAptGeneratedSourceFile client = new ErraiAptGeneratedSourceFile(erraiConfiguration(), CLIENT_PACKAGE_NAME, CLIENT_CLASS_NAME,
-            MarshallerGeneratorFactory.getFor(null, GWT, erraiConfiguration(), metaClassFinder())
-                    .generate(CLIENT_PACKAGE_NAME, CLIENT_CLASS_NAME));
-
-    return Arrays.asList(client, server);
+  public String generate() {
+    return MarshallerGeneratorFactory.getFor(null, GWT, erraiConfiguration(), metaClassFinder())
+            .generate(getPackageName(), getResolvedClassSimpleName());
   }
 
+  @Override
+  public String getPackageName() {
+    return CLIENT_PACKAGE_NAME;
+  }
+
+  @Override
+  public String getClassSimpleName() {
+    return CLIENT_CLASS_NAME;
+  }
 }

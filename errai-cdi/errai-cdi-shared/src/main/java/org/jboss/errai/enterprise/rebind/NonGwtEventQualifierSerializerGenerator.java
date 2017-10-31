@@ -16,17 +16,6 @@
 
 package org.jboss.errai.enterprise.rebind;
 
-import static org.jboss.errai.codegen.builder.impl.ObjectBuilder.newInstanceOf;
-import static org.jboss.errai.codegen.util.Stmt.castTo;
-import static org.jboss.errai.codegen.util.Stmt.invokeStatic;
-import static org.jboss.errai.codegen.util.Stmt.loadVariable;
-import static org.jboss.errai.enterprise.client.cdi.EventQualifierSerializer.SERIALIZER_CLASS_NAME;
-import static org.jboss.errai.enterprise.client.cdi.EventQualifierSerializer.SERIALIZER_PACKAGE_NAME;
-
-import java.util.Collection;
-import java.util.Optional;
-import java.util.function.Function;
-
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.ConstructorBlockBuilder;
@@ -38,11 +27,22 @@ import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.util.CDIAnnotationUtils;
 import org.jboss.errai.codegen.util.ClassChangeUtil;
 import org.jboss.errai.common.client.api.Assert;
+import org.jboss.errai.enterprise.client.cdi.EventQualifierSerializer;
 import org.jboss.errai.ioc.client.util.AnnotationPropertyAccessorBuilder;
 import org.jboss.errai.ioc.client.util.ClientAnnotationSerializer;
-import org.jboss.errai.enterprise.client.cdi.EventQualifierSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Collection;
+import java.util.Optional;
+import java.util.function.Function;
+
+import static org.jboss.errai.codegen.builder.impl.ObjectBuilder.newInstanceOf;
+import static org.jboss.errai.codegen.util.Stmt.castTo;
+import static org.jboss.errai.codegen.util.Stmt.invokeStatic;
+import static org.jboss.errai.codegen.util.Stmt.loadVariable;
+import static org.jboss.errai.enterprise.client.cdi.EventQualifierSerializer.SERIALIZER_CLASS_NAME;
+import static org.jboss.errai.enterprise.client.cdi.EventQualifierSerializer.SERIALIZER_PACKAGE_NAME;
 
 /**
  *
@@ -57,7 +57,8 @@ public class NonGwtEventQualifierSerializerGenerator {
   @SuppressWarnings("unchecked")
   public static Class<? extends EventQualifierSerializer> generateAndLoad() {
     logger.info("Generating source for {}.{}...", SERIALIZER_PACKAGE_NAME, SERIALIZER_CLASS_NAME);
-    final String source = generateSource(CDIAnnotationUtils.getQualifiers());
+    final String source = generateSource(CDIAnnotationUtils.getQualifiers(),
+            SERIALIZER_PACKAGE_NAME + "." + SERIALIZER_CLASS_NAME);
     logger.info("Successfully generated source for {}.{}", SERIALIZER_PACKAGE_NAME, SERIALIZER_CLASS_NAME);
 
     logger.info("Attempting to compile and load {}.{}", SERIALIZER_PACKAGE_NAME, SERIALIZER_CLASS_NAME);
@@ -65,9 +66,9 @@ public class NonGwtEventQualifierSerializerGenerator {
             .compileAndLoadFromSource(SERIALIZER_PACKAGE_NAME, SERIALIZER_CLASS_NAME, source);
   }
 
-  static String generateSource(final Iterable<MetaClass> qualifiers) {
+  static String generateSource(final Iterable<MetaClass> qualifiers, final String fqcn) {
     final ClassStructureBuilder<?> body = ClassBuilder
-            .define(SERIALIZER_PACKAGE_NAME + "." + SERIALIZER_CLASS_NAME, EventQualifierSerializer.class)
+            .define(fqcn, EventQualifierSerializer.class)
             .publicScope().body();
     final ConstructorBlockBuilder<?> ctor = body.publicConstructor();
 

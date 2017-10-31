@@ -86,7 +86,7 @@ public class IOCGenerator extends AbstractAsyncGenerator {
     final IocRelevantClassesFinder iocRelevantClasses = ann -> IocRelevantClassesUtil.findRelevantClasses();
     final ResourceFilesFinder resourceFilesFinder = this::findResourceFile;
 
-    return generate(context, metaClassFinder, erraiConfiguration, iocRelevantClasses, resourceFilesFinder);
+    return generate(context, metaClassFinder, erraiConfiguration, iocRelevantClasses, resourceFilesFinder, className);
   }
 
   private Optional<File> findResourceFile(final String name) {
@@ -103,10 +103,11 @@ public class IOCGenerator extends AbstractAsyncGenerator {
           final MetaClassFinder metaClassFinder,
           final ErraiConfiguration erraiConfiguration,
           final IocRelevantClassesFinder relevantClasses,
-          final ResourceFilesFinder resourceFilesFinder) {
+          final ResourceFilesFinder resourceFilesFinder,
+          final String classSimpleName) {
 
     return new IOCBootstrapGenerator(metaClassFinder, resourceFilesFinder, context, erraiConfiguration, relevantClasses)
-            .generate(packageName, className);
+            .generate(packageName, classSimpleName);
   }
 
   private Set<MetaClass> findMetaClasses(final GeneratorContext context,

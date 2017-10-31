@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Red Hat, Inc. and/or its affiliates.
+ * Copyright (C) 2017 Red Hat, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,12 +26,9 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.function.Function;
 
 /**
- * Allows less resources that are loaded from the classpath.
- *
- * @author Max Barkley <mbarkley@redhat.com>
+ * @author Tiago Bento <tfernand@redhat.com>
  */
 public class ResourceFilesFinderResource implements Resource {
 
@@ -71,10 +68,9 @@ public class ResourceFilesFinderResource implements Resource {
     final String newPath;
     if (relativeResourcePath.startsWith("/")) {
       newPath = relativeResourcePath.substring(1);
-    }
-    else {
+    } else {
       final int endOfParentPath = path.lastIndexOf('/');
-      final String parentPath = path.substring(0, endOfParentPath+1);
+      final String parentPath = path.substring(0, endOfParentPath + 1);
       newPath = parentPath + relativeResourcePath;
     }
     return new ResourceFilesFinderResource(newPath, resourcesFilesFinder);

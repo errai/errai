@@ -122,7 +122,7 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
   public String generate(final TreeLogger logger, final GeneratorContext context) {
     // The class we will be building is GeneratedTranslationService
     final ClassStructureBuilder<?> classBuilder = Implementations.extend(
-            TranslationService.class, GENERATED_CLASS_NAME);
+            TranslationService.class, TranslationService.class.getPackage().getName() + "." + GENERATED_CLASS_NAME);
     final ConstructorBlockBuilder<?> ctor = classBuilder.publicConstructor();
 
     // The i18n keys found (per locale) while processing the bundles.

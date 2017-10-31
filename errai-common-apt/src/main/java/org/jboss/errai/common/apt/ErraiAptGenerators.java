@@ -66,11 +66,18 @@ public class ErraiAptGenerators {
 
     public abstract String getClassSimpleName();
 
+    protected String getResolvedClassSimpleName() {
+      return erraiConfiguration().app().namespace() + getClassSimpleName();
+    }
+
+    protected String getResolvedFullyQualifiedClassName() {
+      return getPackageName() + "." + getResolvedClassSimpleName();
+    }
+
     @Override
-    public Collection<ErraiAptGeneratedSourceFile> files() {
+    public final Collection<ErraiAptGeneratedSourceFile> files() {
       return Collections.singleton(
-              new ErraiAptGeneratedSourceFile(erraiConfiguration(), getPackageName(), getClassSimpleName(),
-                      generate()));
+              new ErraiAptGeneratedSourceFile(getPackageName(), getResolvedClassSimpleName(), generate()));
     }
 
   }

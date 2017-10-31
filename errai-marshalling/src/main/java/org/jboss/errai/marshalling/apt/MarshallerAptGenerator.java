@@ -21,7 +21,6 @@ import org.jboss.errai.codegen.util.GWTPrivateMemberAccessor;
 import org.jboss.errai.codegen.util.PrivateAccessUtil;
 import org.jboss.errai.common.apt.ErraiAptExportedTypes;
 import org.jboss.errai.common.apt.ErraiAptGenerators;
-import org.jboss.errai.common.apt.configuration.AptErraiConfiguration;
 import org.jboss.errai.common.apt.generator.ErraiAptGeneratedSourceFile;
 import org.jboss.errai.common.configuration.ErraiGenerator;
 import org.jboss.errai.config.ErraiConfiguration;
@@ -44,7 +43,7 @@ import static org.jboss.errai.marshalling.rebind.MarshallerGenerator.PACKAGE_NAM
 @ErraiGenerator
 public class MarshallerAptGenerator extends ErraiAptGenerators.MultipleFiles {
 
-  private static final List<MetaClass> exposedClasses = new ArrayList<>();
+  private static List<MetaClass> exposedClasses = new ArrayList<>();
 
   // IMPORTANT: Do not remove. ErraiAppAptGenerator depends on this constructor
   public MarshallerAptGenerator(final ErraiAptExportedTypes exportedTypes) {
@@ -62,13 +61,16 @@ public class MarshallerAptGenerator extends ErraiAptGenerators.MultipleFiles {
       files.add(getGeneratedFile(metaClass));
     }
 
+    // Needs to be empty for next @ErraiApp that will generate code
+    exposedClasses = new ArrayList<>();
     return files;
   }
 
   private ErraiAptGeneratedSourceFile getGeneratedFile(final MetaClass type) {
-    final String classSimpleName = MarshallerGeneratorFactory.getMarshallerImplClassName(type, true);
+    final String classSimpleName = MarshallerGeneratorFactory.getMarshallerImplClassName(type, true,
+            erraiConfiguration());
     final String generatedSource = generateSource(erraiConfiguration(), type);
-    return new ErraiAptGeneratedSourceFile(erraiConfiguration(), PACKAGE_NAME, classSimpleName, generatedSource);
+    return new ErraiAptGeneratedSourceFile(PACKAGE_NAME, classSimpleName, generatedSource);
   }
 
   private String generateSource(final ErraiConfiguration erraiConfiguration, final MetaClass type) {

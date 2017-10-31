@@ -135,7 +135,7 @@ public class MarshallerGeneratorFactory {
       MarshallerAptGenerator.addExposedClass(type);
     }
 
-    return ClassBuilder.define(getMarshallerImplClassName(type, true))
+    return ClassBuilder.define(getMarshallerImplClassName(type, true, erraiConfiguration))
             .publicScope()
             .implementsInterface(GeneratedMarshaller.class)
             .body()
@@ -488,7 +488,7 @@ public class MarshallerGeneratorFactory {
         final MappingStrategy strategy = MappingStrategyFactory
             .createStrategy(false, GeneratorMappingContextFactory.getFor(context, target), type, erraiConfiguration);
 
-        final String marshallerClassName = getMarshallerImplClassName(type, false);
+        final String marshallerClassName = getMarshallerImplClassName(type, false, erraiConfiguration);
 
         final ClassStructureBuilder<?> marshaller = strategy.getMapper().getMarshaller(marshallerClassName);
         customMarshaller = marshaller.getClassDefinition();
@@ -542,7 +542,7 @@ public class MarshallerGeneratorFactory {
     final String varName = getVarName(type);
 
     if (!arrayMarshallers.contains(varName)) {
-      final String marshallerClassName = getMarshallerImplClassName(type, gwtTarget);
+      final String marshallerClassName = getMarshallerImplClassName(type, gwtTarget, erraiConfiguration);
       final InnerClass arrayMarshaller = new InnerClass(generateArrayMarshaller(type, marshallerClassName, gwtTarget));
 
       if (!erraiConfiguration.app().isAptEnvironment()) {
@@ -557,14 +557,17 @@ public class MarshallerGeneratorFactory {
     return varName;
   }
 
-  public static String getMarshallerImplClassName(final MetaClass type, final boolean gwtTarget) {
+  public static String getMarshallerImplClassName(final MetaClass type,
+          final boolean gwtTarget,
+          final ErraiConfiguration erraiConfiguration) {
+
     String implName = leasedNamesByTypeName.get(type.getFullyQualifiedName());
     if (implName == null) {
       implName = generateMarshallerImplClassName(type, gwtTarget);
       leasedNamesByTypeName.put(type.getFullyQualifiedName(), implName);
     }
 
-    return implName;
+    return erraiConfiguration.app().namespace() + implName;
   }
 
   private static String generateMarshallerImplClassName(final MetaClass type, final boolean gwtTarget) {

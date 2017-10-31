@@ -22,17 +22,14 @@ import org.jboss.errai.config.ErraiConfiguration;
  * @author Tiago Bento <tfernand@redhat.com>
  */
 public class ErraiAptGeneratedSourceFile {
+
   private final String packageName;
   private final String classSimpleName;
   private final String sourceCode;
 
-  public ErraiAptGeneratedSourceFile(final ErraiConfiguration erraiConfiguration,
-          final String packageName,
-          final String classSimpleName,
-          final String sourceCode) {
-
+  public ErraiAptGeneratedSourceFile(final String packageName, final String classSimpleName, final String sourceCode) {
     this.packageName = packageName;
-    this.classSimpleName = erraiConfiguration.app().namespace() + classSimpleName;
+    this.classSimpleName = classSimpleName;
     this.sourceCode = sourceCode;
   }
 
@@ -46,5 +43,9 @@ public class ErraiAptGeneratedSourceFile {
 
   public String getSourceCode() {
     return sourceCode;
+  }
+
+  public boolean saveAsResource() {
+    return true;
   }
 }

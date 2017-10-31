@@ -53,7 +53,8 @@ public class EventQualifierSerializerAptGenerator extends ErraiAptGenerators.Sin
   @Override
   public String generate() {
     logger.info("Generating " + getClassSimpleName() + "...");
-    final String generated = eventQualifierSerializerGenerator.generate(qualifiers());
+    final String generated = eventQualifierSerializerGenerator.generate(qualifiers(),
+            getResolvedFullyQualifiedClassName());
     logger.info("Generated " + getClassSimpleName());
     return generated;
   }

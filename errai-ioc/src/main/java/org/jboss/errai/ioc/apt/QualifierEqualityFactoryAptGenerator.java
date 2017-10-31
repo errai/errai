@@ -52,7 +52,8 @@ public class QualifierEqualityFactoryAptGenerator extends ErraiAptGenerators.Sin
   @Override
   public String generate() {
     log.info("Generating {}...", getClassSimpleName());
-    final String generatedSource = qualifierEqualityFactoryGenerator.generate(qualifiers());
+    final String generatedSource = qualifierEqualityFactoryGenerator.generate(qualifiers(),
+            getResolvedFullyQualifiedClassName());
     log.info("Generated {}", getClassSimpleName());
     return generatedSource;
   }

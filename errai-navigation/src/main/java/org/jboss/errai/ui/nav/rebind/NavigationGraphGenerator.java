@@ -126,12 +126,13 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
   @Override
   protected String generate(TreeLogger logger, GeneratorContext context) {
     final MetaClassFinder metaClassFinder = ann -> new HashSet<>(ClassScanner.getTypesAnnotatedWith(ann, context));
-    return generate(metaClassFinder);
+    final String fqcn = PACKAGE_NAME + "." + CLASS_NAME;
+
+    return generateSource(metaClassFinder, fqcn);
   }
 
-  public String generate(final MetaClassFinder metaClassFinder) {
-    final ClassStructureBuilder<?> classBuilder =
-        Implementations.extend(NavigationGraph.class, CLASS_NAME);
+  public String generateSource(final MetaClassFinder metaClassFinder, final String fqcn) {
+    final ClassStructureBuilder<?> classBuilder = Implementations.extend(NavigationGraph.class, fqcn);
 
     // accumulation of (name, pageclass) mappings for dupe detection and dot file generation
     final BiMap<String, MetaClass> pageNames = HashBiMap.create();

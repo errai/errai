@@ -19,6 +19,7 @@ package org.jboss.errai.databinding.apt;
 import org.jboss.errai.common.apt.ErraiAptExportedTypes;
 import org.jboss.errai.common.apt.ErraiAptGenerators;
 import org.jboss.errai.common.configuration.ErraiGenerator;
+import org.jboss.errai.config.MetaClassFinder;
 import org.jboss.errai.databinding.client.api.Bindable;
 import org.jboss.errai.databinding.rebind.BindableProxyLoaderGenerator;
 import org.slf4j.Logger;
@@ -46,9 +47,12 @@ public class BindableProxyLoaderAptGenerator extends ErraiAptGenerators.SingleFi
   public String generate() {
     log.info("Generating {}...", getClassSimpleName());
 
-    final String generatedSource = bindableProxyLoaderGenerator.generate(
-            metaClassFinder().extend(Bindable.class, erraiConfiguration().modules()::getBindableTypes)
-                    .remove(Bindable.class, erraiConfiguration().modules()::getNonBindableTypes));
+    final MetaClassFinder metaClassFinder = metaClassFinder().extend(Bindable.class,
+            erraiConfiguration().modules()::getBindableTypes)
+            .remove(Bindable.class, erraiConfiguration().modules()::getNonBindableTypes);
+
+    final String generatedSource = bindableProxyLoaderGenerator.generate(metaClassFinder,
+            getResolvedFullyQualifiedClassName());
 
     log.info("Generated {}", getClassSimpleName());
     return generatedSource;

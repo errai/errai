@@ -17,9 +17,19 @@
 <!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 2.0//EN"
         "http://google-web-toolkit.googlecode.com/svn/releases/2.0/distro-source/core/src/gwt-module.dtd">
 <module>
-    <inherits name='com.google.gwt.user.User'/>
-    <inherits name="com.google.gwt.junit.JUnit"/>
-    <inherits name="org.jboss.errai.common.ErraiCommon"/>
-    <inherits name="org.jboss.errai.bus.ErraiBus"/>
-    <inherits name="org.jboss.errai.bus.TestCommon"/>
+
+    <inherits name="org.jboss.errai.bus.ServiceAnnotationTestModule"/>
+
+    <replace-with class="org.jboss.errai.bus.client.local.org_jboss_errai_bus_ErraiTestApp__RpcProxyLoaderImpl">
+        <when-type-assignable class="org.jboss.errai.bus.client.local.RpcProxyLoader"/>
+        <when-property-is name="errai.useAptGenerators" value="true"/>
+    </replace-with>
+
+    <replace-with class="org.jboss.errai.marshalling.client.api.org_jboss_errai_bus_ErraiTestApp__MarshallerFactoryImpl">
+        <when-type-assignable class="org.jboss.errai.marshalling.client.api.MarshallerFactory"/>
+        <when-property-is name="errai.useAptGenerators" value="true"/>
+    </replace-with>
+
+    <set-property name="errai.useAptGenerators" value="true"/>
+
 </module>
