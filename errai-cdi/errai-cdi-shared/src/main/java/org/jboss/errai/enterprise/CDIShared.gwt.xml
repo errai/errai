@@ -25,11 +25,6 @@
 
     <inherits name="javax.enterprise.Support"/>
 
-    <replace-with class="org.jboss.errai.enterprise.client.cdi.EventQualifierSerializerImpl">
-        <when-type-is class="org.jboss.errai.enterprise.client.cdi.EventQualifierSerializer"/>
-        <when-property-is name="errai.useAptGenerators" value="true"/>
-    </replace-with>
-
     <generate-with class="org.jboss.errai.enterprise.rebind.EventQualifierSerializerGenerator">
         <when-type-is class="org.jboss.errai.enterprise.client.cdi.EventQualifierSerializer"/>
         <when-property-is name="errai.useAptGenerators" value="false"/>

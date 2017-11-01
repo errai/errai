@@ -21,7 +21,7 @@ package org.jboss.errai.common.apt;
  */
 public @interface ErraiAptCompatible {
 
-  Class<?> erraiTestApp();
+  Class<?> erraiApp();
 
   String gwtModuleName();
 }

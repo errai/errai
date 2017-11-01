@@ -61,7 +61,6 @@
     <maven.clean.plugin.version>2.4.1</maven.clean.plugin.version>
     <maven.deploy.plugin.version>2.7</maven.deploy.plugin.version>
     <maven.gwt.plugin.version>2.8.1</maven.gwt.plugin.version>
-    <gwt.module.prefix> </gwt.module.prefix>
   </properties>
 
   <repositories>
@@ -187,7 +186,7 @@
           <soycDetailed>false</soycDetailed>
           <hostedWebapp>src/main/webapp/</hostedWebapp>
           <strict>true</strict>
-          <module>org.jboss.errai.demo.busstress.${gwt.module.prefix}App</module>
+          <module>org.jboss.errai.demo.busstress.App</module>
         </configuration>
         <executions>
           <execution>
@@ -290,27 +289,24 @@
   <profiles>
 
     <profile>
-
       <id>apt-generators</id>
-
       <activation>
         <property>
           <name>apt-generators</name>
         </property>
       </activation>
-
-      <properties>
-        <gwt.module.prefix>AptGenerators_</gwt.module.prefix>
-      </properties>
-
       <dependencies>
         <dependency>
           <groupId>org.jboss.errai</groupId>
           <artifactId>errai-generators-apt</artifactId>
           <scope>provided</scope>
         </dependency>
+        <dependency>
+          <groupId>org.jboss.errai</groupId>
+          <artifactId>errai-gwt-module-apt</artifactId>
+          <scope>provided</scope>
+        </dependency>
       </dependencies>
-
     </profile>
 
     <profile>

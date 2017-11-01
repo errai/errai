@@ -29,7 +29,7 @@ import org.jboss.errai.marshalling.ErraiMarshallingModule;
  */
 
 @ErraiApp(local = true, modules = { ErraiMarshallingModule.class, ErraiBusModule.class, ErraiBusTestsApp.class })
-@ErraiAptCompatible(gwtModuleName = "org.jboss.errai.bus.ErraiBusTests", erraiTestApp = ErraiBusTestsApp.class)
+@ErraiAptCompatible(gwtModuleName = "org.jboss.errai.bus.ErraiBusTests", erraiApp = ErraiBusTestsApp.class)
 @ErraiModule(serializableTypes = { PortableType1.class },
              nonSerializableTypes = { NonSerializable.class, BuilderEntity.NonPortableNestedClass.class })
 public class ErraiBusTestsApp {

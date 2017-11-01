@@ -66,7 +66,6 @@
     <errai.jboss.home>${project.build.directory}/wildfly-${wildfly.version}</errai.jboss.home>    
     <errai.dev.context>${project.artifactId}</errai.dev.context>
     <wildfly.version>10.0.0.Final</wildfly.version>
-    <gwt.module.prefix> </gwt.module.prefix>
   </properties>
 
   <repositories>
@@ -294,27 +293,24 @@
   <profiles>
 
     <profile>
-
       <id>apt-generators</id>
-
       <activation>
         <property>
           <name>apt-generators</name>
         </property>
       </activation>
-
-      <properties>
-        <gwt.module.prefix>AptGenerators_</gwt.module.prefix>
-      </properties>
-
       <dependencies>
         <dependency>
           <groupId>org.jboss.errai</groupId>
           <artifactId>errai-generators-apt</artifactId>
           <scope>provided</scope>
         </dependency>
+        <dependency>
+          <groupId>org.jboss.errai</groupId>
+          <artifactId>errai-gwt-module-apt</artifactId>
+          <scope>provided</scope>
+        </dependency>
       </dependencies>
-
     </profile>
 
     <profile>
@@ -427,7 +423,7 @@
           <soyc>false</soyc>
           <hostedWebapp>src/main/webapp/</hostedWebapp>                
           <compileReport>true</compileReport>
-          <module>org.jboss.errai.demo.grocery.${gwt.module.prefix}GroceryList</module>
+          <module>org.jboss.errai.demo.grocery.GroceryList</module>
         </configuration>
         <executions>
           <execution>

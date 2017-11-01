@@ -43,7 +43,6 @@ import com.google.gwt.user.client.ui.RootPanel;
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-@ErraiApp
 @EntryPoint
 public class TagCloudDemoClient {
 

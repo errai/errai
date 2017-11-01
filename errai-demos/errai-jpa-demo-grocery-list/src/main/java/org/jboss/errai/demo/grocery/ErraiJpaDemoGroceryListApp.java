@@ -14,14 +14,19 @@
  * limitations under the License.
  */
 
-package org.errai.samples.stockdemo;
+package org.jboss.errai.demo.grocery;
 
+import org.jboss.errai.common.apt.ErraiAptCompatible;
+import org.jboss.errai.common.configuration.ErraiApp;
 import org.jboss.errai.common.configuration.ErraiModule;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
 
+@ErraiAptCompatible(gwtModuleName = "org.jboss.errai.demo.grocery.GroceryList",
+                    erraiApp = ErraiJpaDemoGroceryListApp.class)
+@ErraiApp(asyncBeanManager = true)
 @ErraiModule
-public final class ErraiBusDemoStockModule {
+public final class ErraiJpaDemoGroceryListApp {
 }

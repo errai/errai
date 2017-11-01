@@ -68,7 +68,6 @@
     <as.version>10.0.0.Final</as.version>
     <!-- Add the absolute path for $JBOSS_HOME below to manage another instance -->
     <errai.jboss.home>${project.build.directory}/wildfly-${as.version}</errai.jboss.home>
-    <gwt.module.prefix> </gwt.module.prefix>
   </properties>
 
   <repositories>
@@ -210,27 +209,24 @@
   <profiles>
 
     <profile>
-
       <id>apt-generators</id>
-
       <activation>
         <property>
           <name>apt-generators</name>
         </property>
       </activation>
-
-      <properties>
-        <gwt.module.prefix>AptGenerators_</gwt.module.prefix>
-      </properties>
-
       <dependencies>
         <dependency>
           <groupId>org.jboss.errai</groupId>
           <artifactId>errai-generators-apt</artifactId>
           <scope>provided</scope>
         </dependency>
+        <dependency>
+          <groupId>org.jboss.errai</groupId>
+          <artifactId>errai-gwt-module-apt</artifactId>
+          <scope>provided</scope>
+        </dependency>
       </dependencies>
-
     </profile>
 
     <profile>
@@ -475,7 +471,7 @@
           <extraJvmArgs>${argLine} -Xmx2g -Xms1g -XX:+AggressiveOpts -XX:+UseNUMA -XX:CompileThreshold=100 -Derrai.jboss.home=${errai.jboss.home} -Derrai.dev.context=${errai.dev.context}</extraJvmArgs>
           <server>org.jboss.errai.cdi.server.gwt.EmbeddedWildFlyLauncher</server>
           <hostedWebapp>src/main/webapp/</hostedWebapp>
-          <module>org.jboss.errai.demo.jpa.${gwt.module.prefix}ErraiJpaDemo</module>
+          <module>org.jboss.errai.demo.jpa.ErraiJpaDemo</module>
         </configuration>
         <executions>
           <execution>

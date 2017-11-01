@@ -47,7 +47,6 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <javaee.version>3.0.1.Final</javaee.version>
     <errai.dev.context>${project.artifactId}</errai.dev.context>
-    <gwt.module.prefix> </gwt.module.prefix>
   </properties>
 
   <dependencies>
@@ -169,7 +168,7 @@
           </execution>
         </executions>
         <configuration>
-          <module>org.jboss.errai.jsinterop.demo.${gwt.module.prefix}Plugin</module>
+          <module>org.jboss.errai.jsinterop.demo.Plugin</module>
           <strict>true</strict>
           <webappDirectory>../errai-jsinterop-demo-app/src/main/webapp</webappDirectory>
           <logLevel>INFO</logLevel>
@@ -187,27 +186,24 @@
 
   <profiles>
     <profile>
-
       <id>apt-generators</id>
-
       <activation>
         <property>
           <name>apt-generators</name>
         </property>
       </activation>
-
-      <properties>
-        <gwt.module.prefix>AptGenerators_</gwt.module.prefix>
-      </properties>
-
       <dependencies>
         <dependency>
           <groupId>org.jboss.errai</groupId>
           <artifactId>errai-generators-apt</artifactId>
           <scope>provided</scope>
         </dependency>
+        <dependency>
+          <groupId>org.jboss.errai</groupId>
+          <artifactId>errai-gwt-module-apt</artifactId>
+          <scope>provided</scope>
+        </dependency>
       </dependencies>
-
     </profile>
   </profiles>
 

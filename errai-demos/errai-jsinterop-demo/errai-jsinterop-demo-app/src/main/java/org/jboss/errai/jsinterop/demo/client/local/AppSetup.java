@@ -24,7 +24,6 @@ import org.jboss.errai.common.configuration.ErraiApp;
 import org.jboss.errai.common.client.dom.Document;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 
-@ErraiApp
 @EntryPoint
 public class AppSetup {
 

@@ -33,7 +33,6 @@ import java.util.Map;
 
 import static org.errai.samples.stockdemo.client.local.EquityRenderer.newEquity;
 
-@ErraiApp
 public class StockClient implements EntryPoint {
 
     private Map<String, EquityRenderer> equities = new HashMap<String, EquityRenderer>();

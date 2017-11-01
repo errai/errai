@@ -121,7 +121,7 @@ public class AptCompatibleGwtModuleGenerator extends AbstractProcessor {
   }
 
   private List<String> modulesOverridingRebindRules(final MetaAnnotation erraiAptCompatibleTestAnnotation) {
-    final MetaClass erraiAppAnnotatedMetaClass = erraiAptCompatibleTestAnnotation.value("erraiTestApp");
+    final MetaClass erraiAppAnnotatedMetaClass = erraiAptCompatibleTestAnnotation.value("erraiApp");
 
     final ErraiAptExportedTypes erraiAptExportedTypes = new ErraiAptExportedTypes(erraiAppAnnotatedMetaClass,
             processingEnv.getTypeUtils(), processingEnv.getElementUtils(), annotatedSourceElementsFinder,
@@ -158,8 +158,64 @@ public class AptCompatibleGwtModuleGenerator extends AbstractProcessor {
               + "</replace-with>";
     }
 
-    //FIXME: tiago: add the other modules
+    if (name.equals("ErraiIocModule")) {
+      return "<replace-with class=\"org.jboss.errai.ioc.client."
+              + erraiAppConfiguration.namespace()
+              + "BootstrapperImpl\">\n"
+              + "<when-type-assignable class=\"org.jboss.errai.ioc.client.Bootstrapper\"/>\n"
+              + "<when-property-is name=\"errai.useAptGenerators\" value=\"true\"/>\n"
+              + "</replace-with>"
+              + ""
+              + "<replace-with class=\"org.jboss.errai.ioc.client."
+              + erraiAppConfiguration.namespace()
+              + "QualifierEqualityFactoryImpl\">\n"
+              + "<when-type-assignable class=\"org.jboss.errai.ioc.client.QualifierEqualityFactory\"/>\n"
+              + "<when-property-is name=\"errai.useAptGenerators\" value=\"true\" />\n"
+              + "</replace-with>"
+              + ""
+              + "<replace-with class=\"org.jboss.errai.ioc.client.container."
+              + erraiAppConfiguration.namespace()
+              + "IOCEnvironmentImpl\">\n"
+              + "<when-type-assignable class=\"org.jboss.errai.ioc.client.container.IOCEnvironment\"/>\n"
+              + "<when-property-is name=\"errai.useAptGenerators\" value=\"true\" />\n"
+              + "</replace-with>";
+    }
 
+    if (name.equals("ErraiCdiSharedModule")) {
+      return "<replace-with class=\"org.jboss.errai.enterprise.client.cdi."
+              + erraiAppConfiguration.namespace()
+              + "EventQualifierSerializerImpl\">\n"
+              + "<when-type-is class=\"org.jboss.errai.enterprise.client.cdi.EventQualifierSerializer\"/>\n"
+              + "<when-property-is name=\"errai.useAptGenerators\" value=\"true\"/>\n"
+              + "</replace-with>";
+    }
+
+    if (name.equals("ErraiDataBindingModule")) {
+      return "<replace-with class=\"org.jboss.errai.databinding.client.local."
+              + erraiAppConfiguration.namespace()
+              + "BindableProxyLoaderImpl\">\n"
+              + "<when-type-assignable class=\"org.jboss.errai.databinding.client.local.BindableProxyLoader\"/>\n"
+              + "<when-property-is name=\"errai.useAptGenerators\" value=\"true\"/>\n"
+              + "</replace-with>";
+    }
+
+    if (name.equals("ErraiNavigationModule")) {
+      return "<replace-with class=\"org.jboss.errai.ui.nav.client.local.spi."
+              + erraiAppConfiguration.namespace()
+              + "GeneratedNavigationGraph\">\n"
+              + "<when-type-is class=\"org.jboss.errai.ui.nav.client.local.spi.NavigationGraph\"/>\n"
+              + "<when-property-is name=\"errai.useAptGenerators\" value=\"true\"/>\n"
+              + "</replace-with>";
+    }
+
+    if (name.equals("ErraiJaxrsModule")) {
+      return "<replace-with class=\"org.jboss.errai.enterprise.client.local."
+              + erraiAppConfiguration.namespace()
+              + "JaxrsProxyLoaderImpl\">\n"
+              + "<when-type-assignable class=\"org.jboss.errai.enterprise.client.local.JaxrsProxyLoader\" />\n"
+              + "<when-property-is name=\"errai.useAptGenerators\" value=\"true\" />\n"
+              + "</replace-with>";
+    }
 
     return "";
   }

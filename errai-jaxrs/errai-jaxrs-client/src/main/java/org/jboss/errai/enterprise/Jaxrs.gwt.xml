@@ -16,11 +16,6 @@
     <when-property-is name="errai.useAptGenerators" value="false" />
   </generate-with>
 
-  <replace-with class="org.jboss.errai.enterprise.client.local.JaxrsProxyLoaderImpl">
-    <when-type-assignable class="org.jboss.errai.enterprise.client.local.JaxrsProxyLoader" />
-    <when-property-is name="errai.useAptGenerators" value="true" />
-  </replace-with>
-
   <super-source path="compat" />
   <source path="client" />
 </module>

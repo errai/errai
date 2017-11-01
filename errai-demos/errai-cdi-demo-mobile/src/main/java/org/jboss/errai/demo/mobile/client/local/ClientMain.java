@@ -43,7 +43,6 @@ import com.google.gwt.user.client.ui.RootPanel;
  * Main application entry point.
  */
 @EntryPoint
-@ErraiApp(applicationContext = "/errai-cdi-demo-mobile/", autoDiscoverServices = true, enableWebSocketServer = false)
 public class ClientMain {
 
   /**

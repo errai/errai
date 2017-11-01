@@ -69,7 +69,6 @@
     <as.version>10.0.0.Final</as.version>
     <!-- Add the absolute path for $JBOSS_HOME below to manage another instance -->
     <errai.jboss.home>${project.build.directory}/wildfly-${as.version}</errai.jboss.home>
-    <gwt.module.prefix> </gwt.module.prefix>
   </properties>
 
   <repositories>
@@ -170,27 +169,24 @@
   <profiles>
 
     <profile>
-
       <id>apt-generators</id>
-
       <activation>
         <property>
           <name>apt-generators</name>
         </property>
       </activation>
-
-      <properties>
-        <gwt.module.prefix>AptGenerators_</gwt.module.prefix>
-      </properties>
-
       <dependencies>
         <dependency>
           <groupId>org.jboss.errai</groupId>
           <artifactId>errai-generators-apt</artifactId>
           <scope>provided</scope>
         </dependency>
+        <dependency>
+          <groupId>org.jboss.errai</groupId>
+          <artifactId>errai-gwt-module-apt</artifactId>
+          <scope>provided</scope>
+        </dependency>
       </dependencies>
-
     </profile>
 
     <profile>
@@ -350,7 +346,7 @@
           <strict>true</strict>
           <compileReport>true</compileReport>
           <copyWebapp>true</copyWebapp>
-          <module>org.jboss.errai.samples.restdemo.${gwt.module.prefix}RestDemo</module>
+          <module>org.jboss.errai.samples.restdemo.RestDemo</module>
         </configuration>
         <executions>
           <execution>

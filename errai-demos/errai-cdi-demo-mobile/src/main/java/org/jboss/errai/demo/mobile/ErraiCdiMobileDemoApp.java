@@ -14,14 +14,19 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.demo.grocery;
+package org.jboss.errai.demo.mobile;
 
+import org.jboss.errai.common.apt.ErraiAptCompatible;
+import org.jboss.errai.common.configuration.ErraiApp;
 import org.jboss.errai.common.configuration.ErraiModule;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
 
+@ErraiAptCompatible(gwtModuleName = "org.jboss.errai.demo.mobile.ErraiCdiMobileDemo",
+                    erraiApp = ErraiCdiMobileDemoApp.class)
+@ErraiApp(applicationContext = "/errai-cdi-demo-mobile/", autoDiscoverServices = true, enableWebSocketServer = false)
 @ErraiModule
-public final class ErraiJpaDemoGroceryListModule {
+public final class ErraiCdiMobileDemoApp {
 }

@@ -30,7 +30,6 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
 
-@ErraiApp
 @EntryPoint
 @Bundle("i18n-client.json")
 public class I18NClient {

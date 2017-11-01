@@ -62,7 +62,6 @@
     <wildfly.version>10.0.0.Final</wildfly.version>
     <errai.dev.context>${project.artifactId}</errai.dev.context>
     <errai.jboss.home>${project.build.directory}/wildfly-${wildfly.version}</errai.jboss.home>
-    <gwt.module.prefix> </gwt.module.prefix>
   </properties>
 
   <repositories>
@@ -417,7 +416,7 @@
           <soyc>false</soyc>
           <hostedWebapp>src/main/webapp</hostedWebapp>
           <extraJvmArgs>-Xmx712m -XX:CompileThreshold=7000 -Derrai.jboss.home=${errai.jboss.home} -Derrai.dev.context=${errai.dev.context}</extraJvmArgs>
-          <module>org.jboss.errai.demo.todo.${gwt.module.prefix}TodoList</module>
+          <module>org.jboss.errai.demo.todo.TodoList</module>
         </configuration>
       </plugin>
     </plugins>
@@ -427,27 +426,24 @@
   <profiles>
 
     <profile>
-
       <id>apt-generators</id>
-
       <activation>
         <property>
           <name>apt-generators</name>
         </property>
       </activation>
-
-      <properties>
-        <gwt.module.prefix>AptGenerators_</gwt.module.prefix>
-      </properties>
-
       <dependencies>
         <dependency>
           <groupId>org.jboss.errai</groupId>
           <artifactId>errai-generators-apt</artifactId>
           <scope>provided</scope>
         </dependency>
+        <dependency>
+          <groupId>org.jboss.errai</groupId>
+          <artifactId>errai-gwt-module-apt</artifactId>
+          <scope>provided</scope>
+        </dependency>
       </dependencies>
-
     </profile>
 
     <profile>

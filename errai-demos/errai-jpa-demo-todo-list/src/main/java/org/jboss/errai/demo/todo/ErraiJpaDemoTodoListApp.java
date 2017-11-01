@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.jsinterop.demo;
+package org.jboss.errai.demo.todo;
 
+import org.jboss.errai.common.apt.ErraiAptCompatible;
 import org.jboss.errai.common.configuration.ErraiApp;
 import org.jboss.errai.common.configuration.ErraiModule;
 
@@ -23,7 +24,8 @@ import org.jboss.errai.common.configuration.ErraiModule;
  * @author Tiago Bento <tfernand@redhat.com>
  */
 
-@ErraiApp
+@ErraiAptCompatible(gwtModuleName = "org.jboss.errai.demo.todo.TodoList", erraiApp = ErraiJpaDemoTodoListApp.class)
+@ErraiApp(userOnHostPageEnabled = true)
 @ErraiModule
-public final class ErraiJsInteropDemoPluginModule {
+public final class ErraiJpaDemoTodoListApp {
 }

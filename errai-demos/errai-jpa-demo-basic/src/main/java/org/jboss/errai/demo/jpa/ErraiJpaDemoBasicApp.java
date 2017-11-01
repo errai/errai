@@ -14,14 +14,18 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.jsinterop.demo;
+package org.jboss.errai.demo.jpa;
 
+import org.jboss.errai.common.apt.ErraiAptCompatible;
+import org.jboss.errai.common.configuration.ErraiApp;
 import org.jboss.errai.common.configuration.ErraiModule;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
 
+@ErraiAptCompatible(gwtModuleName = "org.jboss.errai.demo.jpa.ErraiJpaDemo", erraiApp = ErraiJpaDemoBasicApp.class)
+@ErraiApp
 @ErraiModule
-public final class ErraiJsInteropDemoAppModule {
+public final class ErraiJpaDemoBasicApp {
 }

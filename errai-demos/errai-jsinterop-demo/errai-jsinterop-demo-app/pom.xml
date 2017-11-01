@@ -49,7 +49,6 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <javaee.version>3.0.1.Final</javaee.version>
     <errai.dev.context>${project.artifactId}</errai.dev.context>
-    <gwt.module.prefix> </gwt.module.prefix>
   </properties>
 
   <dependencies>
@@ -232,7 +231,7 @@
           <hostedWebapp>src/main/webapp</hostedWebapp>
           <extraJvmArgs>-Xmx1G -XX:CompileThreshold=7000 -Derrai.jboss.home=${errai.jboss.home} -Derrai.dev.context=${errai.dev.context} -Derrai.ioc.jsinterop.support=true</extraJvmArgs>
           <generateJsInteropExports>true</generateJsInteropExports>
-          <module>org.jboss.errai.jsinterop.demo.${gwt.module.prefix}App</module>
+          <module>org.jboss.errai.jsinterop.demo.App</module>
         </configuration>
       </plugin>
     </plugins>
@@ -241,27 +240,24 @@
   <profiles>
 
     <profile>
-
       <id>apt-generators</id>
-
       <activation>
         <property>
           <name>apt-generators</name>
         </property>
       </activation>
-
-      <properties>
-        <gwt.module.prefix>AptGenerators_</gwt.module.prefix>
-      </properties>
-
       <dependencies>
         <dependency>
           <groupId>org.jboss.errai</groupId>
           <artifactId>errai-generators-apt</artifactId>
           <scope>provided</scope>
         </dependency>
+        <dependency>
+          <groupId>org.jboss.errai</groupId>
+          <artifactId>errai-gwt-module-apt</artifactId>
+          <scope>provided</scope>
+        </dependency>
       </dependencies>
-
     </profile>
 
     <profile>

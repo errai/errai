@@ -14,14 +14,18 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.demo.busstress;
+package org.errai.samples.i18ndemo;
 
+import org.jboss.errai.common.apt.ErraiAptCompatible;
+import org.jboss.errai.common.configuration.ErraiApp;
 import org.jboss.errai.common.configuration.ErraiModule;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
 
+@ErraiAptCompatible(gwtModuleName = "org.errai.samples.i18ndemo.App", erraiApp = ErraiUiDemosi18nApp.class)
+@ErraiApp
 @ErraiModule
-public final class ErraiBusDemoStressTestModule {
+public final class ErraiUiDemosi18nApp {
 }

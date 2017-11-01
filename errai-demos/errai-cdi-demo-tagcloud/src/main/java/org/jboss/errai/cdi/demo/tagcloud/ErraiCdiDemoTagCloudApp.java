@@ -14,14 +14,19 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.samples.restdemo;
+package org.jboss.errai.cdi.demo.tagcloud;
 
+import org.jboss.errai.common.apt.ErraiAptCompatible;
+import org.jboss.errai.common.configuration.ErraiApp;
 import org.jboss.errai.common.configuration.ErraiModule;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
 
+@ErraiAptCompatible(gwtModuleName = "org.jboss.errai.cdi.demo.tagcloud.TagCloudDemo",
+                    erraiApp = ErraiCdiDemoTagCloudApp.class)
+@ErraiApp
 @ErraiModule
-public final class ErraiJaxrsDemoCrudModule {
+public final class ErraiCdiDemoTagCloudApp {
 }

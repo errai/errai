@@ -37,7 +37,6 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 
-@ErraiApp
 @EntryPoint
 public class Main {
 
