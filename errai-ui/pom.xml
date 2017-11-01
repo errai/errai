@@ -225,6 +225,7 @@
                 <additionalClasspathElement>${basedir}/test-classes/</additionalClasspathElement>
                 <additionalClasspathElement>${basedir}/src/main/java/</additionalClasspathElement>
                 <additionalClasspathElement>${basedir}/src/test/java/</additionalClasspathElement>
+                <additionalClasspathElement>${basedir}/target/generated-test-sources/test-annotations</additionalClasspathElement>
               </additionalClasspathElements>
 
               <useManifestOnlyJar>true</useManifestOnlyJar>
