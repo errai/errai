@@ -19,7 +19,6 @@ package org.jboss.errai.ioc.rebind.ioc.bootstrapper;
 import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.UnableToCompleteException;
-import com.google.gwt.core.ext.typeinfo.NotFoundException;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaParameter;
@@ -160,10 +159,7 @@ public class IOCGenerator extends AbstractAsyncGenerator {
 
   @Override
   public boolean alreadyGeneratedSourcesViaAptGenerators(final GeneratorContext context) {
-    try {
-      return context.getTypeOracle().getType(getPackageName() + "." + getClassSimpleName()) != null;
-    } catch (final NotFoundException e) {
-      return false;
-    }
+    return RebindUtils.isErraiUseAptGeneratorsPropertyEnabled(context);
   }
+
 }

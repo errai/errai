@@ -23,7 +23,6 @@ import com.google.common.collect.Multimap;
 import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.UnableToCompleteException;
-import com.google.gwt.core.ext.typeinfo.NotFoundException;
 import com.google.gwt.user.client.ui.IsWidget;
 import org.apache.commons.lang3.StringUtils;
 import org.jboss.errai.codegen.Modifier;
@@ -772,11 +771,7 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
 
   @Override
   public boolean alreadyGeneratedSourcesViaAptGenerators(final GeneratorContext context) {
-    try {
-      final String classFullyQualifiedName = PACKAGE_NAME + "." + CLASS_NAME;
-      return context.getTypeOracle().getType(classFullyQualifiedName) != null;
-    } catch (final NotFoundException e) {
-      return false;
-    }
+    return RebindUtils.isErraiUseAptGeneratorsPropertyEnabled(context);
   }
+
 }

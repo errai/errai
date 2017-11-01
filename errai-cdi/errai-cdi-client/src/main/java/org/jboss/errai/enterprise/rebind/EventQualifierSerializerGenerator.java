@@ -19,7 +19,6 @@ package org.jboss.errai.enterprise.rebind;
 import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.UnableToCompleteException;
-import com.google.gwt.core.ext.typeinfo.NotFoundException;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.util.ClassChangeUtil;
 import org.jboss.errai.common.metadata.RebindUtils;
@@ -108,11 +107,7 @@ public class EventQualifierSerializerGenerator extends AbstractAsyncGenerator {
 
   @Override
   public boolean alreadyGeneratedSourcesViaAptGenerators(final GeneratorContext context) {
-    try {
-      final String classFullyQualifiedName = SERIALIZER_PACKAGE_NAME + "." + SERIALIZER_CLASS_NAME;
-      return context.getTypeOracle().getType(classFullyQualifiedName) != null || Class.forName(classFullyQualifiedName) != null;
-    } catch (final NotFoundException | ClassNotFoundException e) {
-      return false;
-    }
+    return RebindUtils.isErraiUseAptGeneratorsPropertyEnabled(context);
   }
+
 }

@@ -618,4 +618,16 @@ public class RebindUtils {
 
     return _translatablePackagesCache = Collections.unmodifiableSet(packages);
   }
+
+  public static boolean isErraiUseAptGeneratorsPropertyEnabled(final GeneratorContext context) {
+    return RebindUtils.getModuleDef(context)
+            .getProperties()
+            .getBindingProperties()
+            .stream()
+            .filter(s -> s.getName().equals("errai.useAptGenerators"))
+            .findFirst()
+            .map(p -> p.getFirstAllowedValue().equals("true"))
+            .orElse(false);
+
+  }
 }
