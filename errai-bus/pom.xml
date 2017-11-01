@@ -236,11 +236,6 @@
           <artifactId>errai-generators-apt</artifactId>
           <scope>test</scope>
         </dependency>
-        <dependency>
-          <groupId>org.jboss.errai</groupId>
-          <artifactId>errai-gwt-module-apt</artifactId>
-          <scope>test</scope>
-        </dependency>
       </dependencies>
     </profile>
 

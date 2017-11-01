@@ -181,11 +181,6 @@
           <artifactId>errai-generators-apt</artifactId>
           <scope>provided</scope>
         </dependency>
-        <dependency>
-          <groupId>org.jboss.errai</groupId>
-          <artifactId>errai-gwt-module-apt</artifactId>
-          <scope>provided</scope>
-        </dependency>
       </dependencies>
     </profile>
 

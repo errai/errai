@@ -16,6 +16,9 @@
 
 package org.jboss.errai.common.apt;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.lang.model.element.PackageElement;
 import javax.lang.model.util.Elements;
 import java.util.Optional;
@@ -24,6 +27,8 @@ import java.util.Optional;
  * @author Tiago Bento <tfernand@redhat.com>
  */
 public final class ErraiAptPackages {
+
+  private static final Logger log = LoggerFactory.getLogger(ErraiAptPackages.class);
 
   private static final String EXPORT_FILES_PACKAGE_PATH = "org.jboss.errai.apt.internal.export";
   private static final String EXPORTED_ANNOTATIONS_PACKAGE_PATH = "org.jboss.errai.apt.internal.export.annotation";
@@ -43,7 +48,7 @@ public final class ErraiAptPackages {
     final PackageElement packageElement = elementUtils.getPackageElement(exportFilesPackagePath());
 
     if (packageElement == null) {
-      System.out.println("Export files package not found");
+      log.error("Export files package not found");
     }
 
     return Optional.ofNullable(packageElement);
@@ -53,7 +58,7 @@ public final class ErraiAptPackages {
     final PackageElement packageElement = elementUtils.getPackageElement(exportedAnnotationsPackagePath());
 
     if (packageElement == null) {
-      System.out.println("Exported annotations package not found");
+      log.error("Exported annotations package not found");
     }
 
     return Optional.ofNullable(packageElement);

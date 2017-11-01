@@ -116,7 +116,6 @@
     <module>errai-marshalling-export-apt</module>
     <module>errai-ui-export-apt</module>
     <module>errai-cdi-export-apt</module>
-    <module>errai-gwt-module-apt</module>
   </modules>
 
   <repositories>

@@ -44,8 +44,4 @@ public class ErraiAptGeneratedSourceFile {
   public String getSourceCode() {
     return sourceCode;
   }
-
-  public boolean saveAsResource() {
-    return true;
-  }
 }

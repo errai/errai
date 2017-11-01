@@ -64,5 +64,6 @@ public @interface ErraiApp {
     String CUSTOM_PROPERTIES = "customProperties";
     String LOCAL  = "local";
     String MODULES  = "modules";
+    String GWT_MODULE_NAME  = "gwtModuleName";
   }
 }

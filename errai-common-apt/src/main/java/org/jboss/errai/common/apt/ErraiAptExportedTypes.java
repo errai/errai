@@ -22,7 +22,8 @@ import org.jboss.errai.common.apt.configuration.AptErraiAppConfiguration;
 import org.jboss.errai.common.apt.exportfile.ExportFile;
 import org.jboss.errai.common.apt.exportfile.ExportFileName;
 import org.jboss.errai.common.apt.generator.ExportFileGenerator;
-import org.jboss.errai.config.ErraiAppConfiguration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.PackageElement;
@@ -51,6 +52,8 @@ import static org.jboss.errai.common.apt.ErraiAptPackages.exportedAnnotationsPac
  * @author Tiago Bento <tfernand@redhat.com>
  */
 public final class ErraiAptExportedTypes {
+
+  private static final Logger log = LoggerFactory.getLogger(ErraiAptExportedTypes.class);
 
   private final Map<String, Set<TypeMirror>> exportedClassesByAnnotationClassName;
 
@@ -111,10 +114,9 @@ public final class ErraiAptExportedTypes {
   }
 
   private void addLocalExportableTypesWhichHaveNotBeenExported() {
-    final long start = System.currentTimeMillis();
-    System.out.println("Exporting local exportable types..");
-    exportedAnnotationsPackageElement(elements).map(this::getAllExportedAnnotations).ifPresent(this::addAllExportableTypes);
-    System.out.println("Exported local exportable types in " + (System.currentTimeMillis() - start) + "ms");
+    log.info("Exporting local exportable types..");
+    exportedAnnotationsPackageElement(elements).map(this::getAllExportedAnnotations)
+            .ifPresent(this::addAllExportableTypes);
   }
 
   private Set<TypeElement> getAllExportedAnnotations(final PackageElement exportedAnnotationsPackageElement) {
@@ -137,7 +139,7 @@ public final class ErraiAptExportedTypes {
     return getLocalExportFileGenerator(allExportableAnnotations).createExportFiles()
             .stream()
             .filter(s -> localErraiAppContainsModuleOfExportFileElement(s.simpleClassName()))
-            .collect(groupingBy(this::getAnnotationNameFromExportFile,
+            .collect(groupingBy(exportFile -> exportFile.annotation().getQualifiedName().toString(),
                     flatMapping(this::getExportedTypesFromExportFile, toSet())));
   }
 
@@ -150,10 +152,6 @@ public final class ErraiAptExportedTypes {
     final Set<TypeMirror> mappedTypes = entry.getValue();
     exportedClassesByAnnotationClassName.putIfAbsent(annotationName, new HashSet<>());
     exportedClassesByAnnotationClassName.get(annotationName).addAll(mappedTypes);
-  }
-
-  private String getAnnotationNameFromExportFile(final ExportFile exportFile) {
-    return exportFile.annotation().getQualifiedName().toString();
   }
 
   private Stream<TypeMirror> getExportedTypesFromExportFile(final ExportFile exportFile) {
@@ -172,7 +170,7 @@ public final class ErraiAptExportedTypes {
     return resourcesFilesFinder;
   }
 
-  ErraiAppConfiguration erraiAppConfiguration() {
+  public AptErraiAppConfiguration erraiAppConfiguration() {
     return aptErraiAppConfiguration;
   }
 

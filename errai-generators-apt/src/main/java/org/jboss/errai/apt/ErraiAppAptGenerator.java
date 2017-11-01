@@ -27,6 +27,8 @@ import org.jboss.errai.common.apt.ErraiAptGenerators;
 import org.jboss.errai.common.apt.generator.ErraiAptGeneratedSourceFile;
 import org.jboss.errai.common.configuration.ErraiApp;
 import org.jboss.errai.common.configuration.ErraiGenerator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.Filer;
@@ -46,6 +48,7 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import static java.util.Comparator.comparing;
+import static javax.tools.StandardLocation.CLASS_OUTPUT;
 import static javax.tools.StandardLocation.SOURCE_OUTPUT;
 
 /**
@@ -55,13 +58,17 @@ import static javax.tools.StandardLocation.SOURCE_OUTPUT;
 @SupportedAnnotationTypes({ "org.jboss.errai.common.configuration.ErraiApp" })
 public class ErraiAppAptGenerator extends AbstractProcessor {
 
+  private static final Logger log = LoggerFactory.getLogger(ErraiAppAptGenerator.class);
+
+  private static final String GWT_XML = ".gwt.xml";
+
   @Override
   public boolean process(final Set<? extends TypeElement> annotations, final RoundEnvironment roundEnv) {
 
     try {
       generateAndSaveSourceFiles(annotations, new AptAnnotatedSourceElementsFinder(roundEnv));
     } catch (final Exception e) {
-      System.out.println("Error generating files:");
+      log.error("Error generating files:");
       e.printStackTrace();
     }
 
@@ -73,7 +80,7 @@ public class ErraiAppAptGenerator extends AbstractProcessor {
 
     for (final TypeElement erraiAppAnnotation : annotations) {
       final long start = System.currentTimeMillis();
-      System.out.println("Generating files using Errai APT Generators..");
+      log.info("Generating files using Errai APT Generators..");
 
       final Types types = processingEnv.getTypeUtils();
       final Elements elements = processingEnv.getElementUtils();
@@ -86,14 +93,20 @@ public class ErraiAppAptGenerator extends AbstractProcessor {
               .map(APTClass::new)
               .sorted(comparing(APTClass::getFullyQualifiedName))
               .map(app -> newErraiAptExportedTypes(annotatedElementsFinder, types, elements, filer, app))
+              .peek(this::generateAptCompatibleGwtModuleFile)
               .flatMap(this::findGenerators)
               .flatMap(this::generatedFiles)
               .forEach(this::saveFile);
 
-      System.out.println("Successfully generated files using Errai APT Generators in "
-              + (System.currentTimeMillis() - start)
-              + "ms");
+      log.info("Successfully generated files using Errai APT Generators in {}ms", System.currentTimeMillis() - start);
     }
+  }
+
+  private void generateAptCompatibleGwtModuleFile(final ErraiAptExportedTypes erraiAptExportedTypes) {
+    erraiAptExportedTypes.resourceFilesFinder()
+            .getResource(erraiAptExportedTypes.erraiAppConfiguration().gwtModuleName().replace(".", "/") + GWT_XML)
+            .map(file -> new AptCompatibleGwtModuleFile(file, erraiAptExportedTypes))
+            .ifPresent(this::saveFile);
   }
 
   private Stream<ErraiAptGeneratedSourceFile> generatedFiles(final ErraiAptGenerators.Any generator) {
@@ -112,7 +125,7 @@ public class ErraiAppAptGenerator extends AbstractProcessor {
           final Filer filer,
           final MetaClass erraiAppAnnotatedMetaClass) {
 
-    System.out.println("Generating classes for " + erraiAppAnnotatedMetaClass.getFullyQualifiedName());
+    log.info("Processing {}", erraiAppAnnotatedMetaClass.getFullyQualifiedName());
     return new ErraiAptExportedTypes(erraiAppAnnotatedMetaClass, types, elements, annotatedElementsFinder,
             new AptResourceFilesFinder(filer));
   }
@@ -147,20 +160,33 @@ public class ErraiAppAptGenerator extends AbstractProcessor {
     }
   }
 
+  private void saveFile(final AptCompatibleGwtModuleFile file) {
+
+    final int lastDot = file.gwtModuleName().lastIndexOf(".");
+    final String fileName = file.gwtModuleName().substring(lastDot + 1) + GWT_XML;
+    final String packageName = file.gwtModuleName().substring(0, lastDot);
+
+    try {
+      // By writing to CLASS_OUTPUT we overwrite the original .gwt.xml file
+      final FileObject sourceFile = processingEnv.getFiler().createResource(CLASS_OUTPUT, packageName, fileName);
+      final String newGwtModuleFileContent = file.generate();
+
+      try (final Writer writer = sourceFile.openWriter()) {
+        writer.write(newGwtModuleFileContent);
+      }
+    } catch (final IOException e) {
+      throw new RuntimeException("Unable to write file " + file.gwtModuleName());
+    }
+  }
+
   private void saveFile(final ErraiAptGeneratedSourceFile file) {
     try {
       // By saving .java source files as resources we skip javac compilation. This behavior is desirable since all
       // generated code is client code and will be compiled by the GWT/J2CL compiler.
       // FIXME: errai-marshalling will generate server code too
 
-      final FileObject sourceFile;
-
-      if (file.saveAsResource()) {
-        sourceFile = processingEnv.getFiler()
-                .createResource(SOURCE_OUTPUT, file.getPackageName(), file.getClassSimpleName() + ".java");
-      } else {
-        sourceFile = processingEnv.getFiler().createSourceFile(file.getPackageName() + "." + file.getClassSimpleName());
-      }
+      final FileObject sourceFile = processingEnv.getFiler()
+              .createResource(SOURCE_OUTPUT, file.getPackageName(), file.getClassSimpleName() + ".java");
 
       try (final Writer writer = sourceFile.openWriter()) {
         writer.write(file.getSourceCode());
