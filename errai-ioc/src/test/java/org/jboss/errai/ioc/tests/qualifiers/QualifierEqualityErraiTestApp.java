@@ -26,7 +26,7 @@ import org.jboss.errai.ioc.tests.common.ErraiTestModule;
  */
 @ErraiApp(gwtModuleName = "org.jboss.errai.ioc.tests.qualifiers.QualifierEqualityTests",
           local = true,
-          modules = { ErraiTestApp.class, ErraiIocModule.class, ErraiTestModule.class })
+          modules = { QualifierEqualityErraiTestApp.class, ErraiIocModule.class, ErraiTestModule.class })
 @ErraiModule
-public class ErraiTestApp {
+public class QualifierEqualityErraiTestApp {
 }
