@@ -19,17 +19,18 @@ package org.jboss.errai.ui.test.nested;
 import org.jboss.errai.bus.ErraiBusModule;
 import org.jboss.errai.common.configuration.ErraiApp;
 import org.jboss.errai.common.configuration.ErraiModule;
-import org.jboss.errai.databinding.ErraiDataBindingModule;
 import org.jboss.errai.enterprise.ErraiCdiClientModule;
 import org.jboss.errai.enterprise.ErraiCdiSharedModule;
 import org.jboss.errai.ioc.ErraiIocModule;
 import org.jboss.errai.marshalling.ErraiMarshallingModule;
 import org.jboss.errai.ui.ErraiUiModule;
+import org.jboss.errai.ui.test.common.ErraiTestModule;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
-@ErraiApp(local = true,
+@ErraiApp(gwtModuleName = "org.jboss.errai.ui.test.nested.Test",
+          local = true,
           modules = { ErraiTestApp.class,
                       ErraiMarshallingModule.class,
                       ErraiBusModule.class,
@@ -37,7 +38,7 @@ import org.jboss.errai.ui.ErraiUiModule;
                       ErraiUiModule.class,
                       ErraiCdiClientModule.class,
                       ErraiCdiSharedModule.class,
-                      org.jboss.errai.ui.test.common.ErraiTestApp.class })
+                      ErraiTestModule.class })
 @ErraiModule
 public class ErraiTestApp {
 }

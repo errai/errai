@@ -16,7 +16,6 @@
 
 package org.jboss.errai.samples.restdemo;
 
-import org.jboss.errai.common.apt.ErraiAptCompatible;
 import org.jboss.errai.common.configuration.ErraiApp;
 import org.jboss.errai.common.configuration.ErraiModule;
 
@@ -24,9 +23,7 @@ import org.jboss.errai.common.configuration.ErraiModule;
  * @author Tiago Bento <tfernand@redhat.com>
  */
 
-@ErraiAptCompatible(gwtModuleName = "org.jboss.errai.samples.restdemo.RestDemo",
-                    erraiApp = ErraiJaxrsDemoCrudApp.class)
-@ErraiApp
+@ErraiApp(gwtModuleName = "org.jboss.errai.samples.restdemo.RestDemo")
 @ErraiModule
 public final class ErraiJaxrsDemoCrudApp {
 }

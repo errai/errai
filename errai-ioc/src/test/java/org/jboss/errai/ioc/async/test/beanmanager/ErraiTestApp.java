@@ -24,7 +24,9 @@ import org.jboss.errai.ioc.tests.common.ErraiTestModule;
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
-@ErraiApp(local = true, modules = { ErraiTestApp.class, ErraiIocModule.class, ErraiTestModule.class })
+@ErraiApp(gwtModuleName = "org.jboss.errai.ioc.async.test.beanmanager.AsyncBeanManagerTests",
+          local = true,
+          modules = { ErraiTestApp.class, ErraiIocModule.class, ErraiTestModule.class })
 @ErraiModule
 public class ErraiTestApp {
 }

@@ -22,7 +22,8 @@ import org.jboss.errai.common.configuration.ErraiApp;
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
-@ErraiApp(userOnHostPageEnabled = true,
+@ErraiApp(gwtModuleName = "moduleName",
+          userOnHostPageEnabled = true,
           asyncBeanManager = true,
           enableWebSocketServer = true,
           autoDiscoverServices = true,

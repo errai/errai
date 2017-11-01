@@ -19,7 +19,6 @@ package org.jboss.errai.bus;
 import org.jboss.errai.bus.client.tests.support.BuilderEntity;
 import org.jboss.errai.bus.client.tests.support.pkg.PortableType1;
 import org.jboss.errai.bus.client.tests.support.pkg.subpkg.NonSerializable;
-import org.jboss.errai.common.apt.ErraiAptCompatible;
 import org.jboss.errai.common.configuration.ErraiApp;
 import org.jboss.errai.common.configuration.ErraiModule;
 import org.jboss.errai.marshalling.ErraiMarshallingModule;
@@ -28,8 +27,9 @@ import org.jboss.errai.marshalling.ErraiMarshallingModule;
  * @author Tiago Bento <tfernand@redhat.com>
  */
 
-@ErraiApp(local = true, modules = { ErraiMarshallingModule.class, ErraiBusModule.class, ErraiBusTestsApp.class })
-@ErraiAptCompatible(gwtModuleName = "org.jboss.errai.bus.ErraiBusTests", erraiApp = ErraiBusTestsApp.class)
+@ErraiApp(gwtModuleName = "org.jboss.errai.bus.ErraiBusTests",
+          local = true,
+          modules = { ErraiMarshallingModule.class, ErraiBusModule.class, ErraiBusTestsApp.class })
 @ErraiModule(serializableTypes = { PortableType1.class },
              nonSerializableTypes = { NonSerializable.class, BuilderEntity.NonPortableNestedClass.class })
 public class ErraiBusTestsApp {

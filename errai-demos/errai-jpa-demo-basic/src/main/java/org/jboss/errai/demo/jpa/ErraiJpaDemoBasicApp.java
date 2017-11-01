@@ -16,7 +16,6 @@
 
 package org.jboss.errai.demo.jpa;
 
-import org.jboss.errai.common.apt.ErraiAptCompatible;
 import org.jboss.errai.common.configuration.ErraiApp;
 import org.jboss.errai.common.configuration.ErraiModule;
 
@@ -24,8 +23,7 @@ import org.jboss.errai.common.configuration.ErraiModule;
  * @author Tiago Bento <tfernand@redhat.com>
  */
 
-@ErraiAptCompatible(gwtModuleName = "org.jboss.errai.demo.jpa.ErraiJpaDemo", erraiApp = ErraiJpaDemoBasicApp.class)
-@ErraiApp
+@ErraiApp(gwtModuleName = "org.jboss.errai.demo.jpa.ErraiJpaDemo")
 @ErraiModule
 public final class ErraiJpaDemoBasicApp {
 }

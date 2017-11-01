@@ -14,15 +14,13 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.enterprise.jaxrs.client.test;
+package org.jboss.errai.ui.test.common;
 
-import org.jboss.errai.common.configuration.ErraiApp;
 import org.jboss.errai.common.configuration.ErraiModule;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
-@ErraiApp
 @ErraiModule
-public class ErraiJaxrsTestModule {
+public class ErraiTestModule {
 }

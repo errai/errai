@@ -25,6 +25,8 @@ import java.lang.annotation.RetentionPolicy;
 @Retention(RetentionPolicy.CLASS)
 public @interface ErraiApp {
 
+  String gwtModuleName();
+
   boolean local() default false;
 
   Class<?>[] modules() default {};

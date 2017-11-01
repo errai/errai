@@ -16,7 +16,6 @@
 
 package org.errai.samples.i18ndemo;
 
-import org.jboss.errai.common.apt.ErraiAptCompatible;
 import org.jboss.errai.common.configuration.ErraiApp;
 import org.jboss.errai.common.configuration.ErraiModule;
 
@@ -24,8 +23,7 @@ import org.jboss.errai.common.configuration.ErraiModule;
  * @author Tiago Bento <tfernand@redhat.com>
  */
 
-@ErraiAptCompatible(gwtModuleName = "org.errai.samples.i18ndemo.App", erraiApp = ErraiUiDemosi18nApp.class)
-@ErraiApp
+@ErraiApp(gwtModuleName = "org.errai.samples.i18ndemo.App")
 @ErraiModule
 public final class ErraiUiDemosi18nApp {
 }

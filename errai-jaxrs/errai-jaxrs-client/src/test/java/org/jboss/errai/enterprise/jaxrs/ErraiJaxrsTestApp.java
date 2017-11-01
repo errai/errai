@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.common.apt;
+package org.jboss.errai.enterprise.jaxrs;
+
+import org.jboss.errai.common.configuration.ErraiApp;
+import org.jboss.errai.common.configuration.ErraiModule;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
-public @interface ErraiAptCompatible {
-
-  Class<?> erraiApp();
-
-  String gwtModuleName();
+@ErraiApp(gwtModuleName = "org.jboss.errai.enterprise.jaxrs.TestModule")
+@ErraiModule
+public class ErraiJaxrsTestApp {
 }

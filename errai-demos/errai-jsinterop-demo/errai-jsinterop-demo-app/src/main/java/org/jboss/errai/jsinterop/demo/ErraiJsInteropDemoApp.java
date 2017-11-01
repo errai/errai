@@ -16,7 +16,6 @@
 
 package org.jboss.errai.jsinterop.demo;
 
-import org.jboss.errai.common.apt.ErraiAptCompatible;
 import org.jboss.errai.common.configuration.ErraiApp;
 import org.jboss.errai.common.configuration.ErraiModule;
 
@@ -24,8 +23,7 @@ import org.jboss.errai.common.configuration.ErraiModule;
  * @author Tiago Bento <tfernand@redhat.com>
  */
 
-@ErraiAptCompatible(gwtModuleName = "org.jboss.errai.jsinterop.demo.App", erraiApp = ErraiJsInteropDemoApp.class)
-@ErraiApp
+@ErraiApp(gwtModuleName = "org.jboss.errai.jsinterop.demo.App")
 @ErraiModule
 public final class ErraiJsInteropDemoApp {
 }

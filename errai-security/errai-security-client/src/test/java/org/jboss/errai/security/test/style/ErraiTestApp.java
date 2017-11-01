@@ -32,7 +32,8 @@ import org.jboss.errai.ui.nav.ErraiNavigationModule;
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
-@ErraiApp(local = true,
+@ErraiApp(gwtModuleName = "org.jboss.errai.security.test.style.StyleTest",
+          local = true,
           modules = { ErraiTestApp.class,
                       ErraiMarshallingModule.class,
                       ErraiBusModule.class,

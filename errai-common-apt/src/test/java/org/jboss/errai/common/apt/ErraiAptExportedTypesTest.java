@@ -45,7 +45,7 @@ import java.util.Set;
  */
 public class ErraiAptExportedTypesTest extends ErraiAptTest {
 
-  @ErraiApp
+  @ErraiApp(gwtModuleName = "")
   private static final class TestApp {
   }
 

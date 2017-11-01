@@ -21,6 +21,6 @@ import org.jboss.errai.common.configuration.ErraiApp;
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
-@ErraiApp
+@ErraiApp(gwtModuleName = "moduleName")
 class ErraiTestAppWithDefaultValues {
 }

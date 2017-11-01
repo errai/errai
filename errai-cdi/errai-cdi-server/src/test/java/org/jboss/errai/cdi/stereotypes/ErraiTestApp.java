@@ -27,7 +27,8 @@ import org.jboss.errai.marshalling.ErraiMarshallingModule;
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
-@ErraiApp(local = true,
+@ErraiApp(gwtModuleName = "org.jboss.errai.cdi.stereotypes.StereotypesTestModule",
+          local = true,
           modules = { ErraiMarshallingModule.class,
                       ErraiBusModule.class,
                       ErraiIocModule.class,

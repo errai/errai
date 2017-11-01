@@ -17,16 +17,15 @@
 package org.jboss.errai.common.apt.test;
 
 import org.apache.commons.lang3.StringUtils;
-import org.jboss.errai.codegen.meta.MetaAnnotation;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.impl.apt.APTClass;
 import org.jboss.errai.common.apt.AnnotatedSourceElementsFinder;
 import org.jboss.errai.common.apt.AptAnnotatedSourceElementsFinder;
 import org.jboss.errai.common.apt.AptResourceFilesFinder;
-import org.jboss.errai.common.apt.ErraiAptCompatible;
 import org.jboss.errai.common.apt.ErraiAptExportedTypes;
 import org.jboss.errai.common.apt.ResourceFilesFinder;
 import org.jboss.errai.common.apt.configuration.AptErraiAppConfiguration;
+import org.jboss.errai.common.configuration.ErraiApp;
 import org.jboss.errai.common.configuration.ErraiModule;
 import org.jboss.errai.config.ErraiAppConfiguration;
 import org.slf4j.Logger;
@@ -56,7 +55,7 @@ import static javax.tools.StandardLocation.CLASS_OUTPUT;
  * @author Tiago Bento <tfernand@redhat.com>
  */
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
-@SupportedAnnotationTypes("org.jboss.errai.common.apt.ErraiAptCompatible")
+@SupportedAnnotationTypes("org.jboss.errai.common.configuration.ErraiApp")
 public class AptCompatibleGwtModuleGenerator extends AbstractProcessor {
 
   private static final String GWT_XML = ".gwt.xml";
@@ -73,25 +72,24 @@ public class AptCompatibleGwtModuleGenerator extends AbstractProcessor {
   @Override
   public boolean process(final Set<? extends TypeElement> annotations, final RoundEnvironment roundEnv) {
 
-    for (final TypeElement erraiAptCompatibleTestAnnotation : annotations) {
+    for (final TypeElement erraiAppAnnotation : annotations) {
 
       resourceFilesFinder = new AptResourceFilesFinder(processingEnv.getFiler());
       annotatedSourceElementsFinder = new AptAnnotatedSourceElementsFinder(roundEnv);
 
-      roundEnv.getElementsAnnotatedWith(ErraiAptCompatible.class)
+      roundEnv.getElementsAnnotatedWith(ErraiApp.class)
               .stream()
               .map(s -> new APTClass(s.asType()))
-              .map(s -> s.getAnnotation(ErraiAptCompatible.class))
-              .filter(Optional::isPresent)
-              .map(Optional::get)
               .forEach(this::generateAptCompatibleGwtTestModuleFile);
     }
 
     return false;
   }
 
-  private void generateAptCompatibleGwtTestModuleFile(final MetaAnnotation erraiAptCompatibleTestAnnotation) {
-    final String gwtModuleName = erraiAptCompatibleTestAnnotation.value("gwtModuleName");
+  private void generateAptCompatibleGwtTestModuleFile(final MetaClass erraiAppAnnotatedMetaClass) {
+    final String gwtModuleName = erraiAppAnnotatedMetaClass.getAnnotation(ErraiApp.class).get().value("gwtModuleName");
+    log.info("Generating APT-compatible GWT module file based on {}", gwtModuleName);
+
     final Optional<File> gwtTestModuleFileOptional = resourceFilesFinder.getResource(
             gwtModuleName.replace(".", "/") + GWT_XML);
 
@@ -102,26 +100,27 @@ public class AptCompatibleGwtModuleGenerator extends AbstractProcessor {
 
     final File gwtTestModuleFile = gwtTestModuleFileOptional.get();
     final List<String> moduleContent = getFileContent(gwtTestModuleFile);
-    final String modifiedModuleContent = overrideRebindRules(moduleContent, erraiAptCompatibleTestAnnotation);
+    final String modifiedModuleContent = overrideRebindRules(moduleContent, erraiAppAnnotatedMetaClass);
     writeNewGwtModuleFile(gwtModuleName, modifiedModuleContent);
+
+    log.info("Generated APT-compatible GWT module file based on {}", gwtModuleName);
+    log.debug("Content: {}", modifiedModuleContent);
   }
 
-  private String overrideRebindRules(final List<String> fileContent,
-          final MetaAnnotation erraiAptCompatibleTestAnnotation) {
+  private String overrideRebindRules(final List<String> fileContent, final MetaClass erraiAppAnnotatedMetaClass) {
 
     final List<String> newFileContent = new ArrayList<>(fileContent);
     final String lastLine = fileContent.get(fileContent.size() - 1);
 
     newFileContent.remove(fileContent.size() - 1);
-    newFileContent.addAll(modulesOverridingRebindRules(erraiAptCompatibleTestAnnotation));
+    newFileContent.addAll(modulesOverridingRebindRules(erraiAppAnnotatedMetaClass));
     newFileContent.add("<set-property name=\"errai.useAptGenerators\" value=\"true\" />");
     newFileContent.add(lastLine);
 
     return newFileContent.stream().reduce((a, b) -> a + "\n" + b).orElse("");
   }
 
-  private List<String> modulesOverridingRebindRules(final MetaAnnotation erraiAptCompatibleTestAnnotation) {
-    final MetaClass erraiAppAnnotatedMetaClass = erraiAptCompatibleTestAnnotation.value("erraiApp");
+  private List<String> modulesOverridingRebindRules(final MetaClass erraiAppAnnotatedMetaClass) {
 
     final ErraiAptExportedTypes erraiAptExportedTypes = new ErraiAptExportedTypes(erraiAppAnnotatedMetaClass,
             processingEnv.getTypeUtils(), processingEnv.getElementUtils(), annotatedSourceElementsFinder,
