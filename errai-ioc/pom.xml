@@ -165,6 +165,23 @@
   </dependencies>
 
   <profiles>
+
+    <profile>
+      <id>apt-generators</id>
+      <activation>
+        <property>
+          <name>apt-generators</name>
+        </property>
+      </activation>
+      <dependencies>
+        <dependency>
+          <groupId>org.jboss.errai</groupId>
+          <artifactId>errai-generators-apt</artifactId>
+          <scope>test</scope>
+        </dependency>
+      </dependencies>
+    </profile>
+
     <profile>
       <id>integration-test</id>
 
@@ -179,13 +196,6 @@
           <artifactId>validation-api</artifactId>
           <classifier>sources</classifier>
         </dependency>
-
-        <dependency>
-          <groupId>org.jboss.errai</groupId>
-          <artifactId>errai-generators-apt</artifactId>
-          <scope>test</scope>
-        </dependency>
-
       </dependencies>
 
       <build>
@@ -193,6 +203,9 @@
           <plugin>
             <artifactId>maven-failsafe-plugin</artifactId>
             <configuration>
+              <additionalClasspathElements>
+                <additionalClasspathElement>${basedir}/target/generated-test-sources/test-annotations</additionalClasspathElement>
+              </additionalClasspathElements>
               <!-- This is required because the BasicIOCTest is run in "simulated 
                 client" mode, which prevents subsequent tests from succeeding -->
               <forkMode>pertest</forkMode>

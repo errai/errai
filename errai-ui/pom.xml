@@ -207,7 +207,6 @@
       <activation>
         <property>
           <name>apt-generators</name>
-          <value>true</value>
         </property>
       </activation>
       <dependencies>

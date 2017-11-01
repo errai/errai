@@ -226,10 +226,8 @@
       <activation>
         <property>
           <name>apt-generators</name>
-          <value>true</value>
         </property>
       </activation>
-
       <dependencies>
         <dependency>
           <groupId>org.jboss.errai</groupId>
@@ -247,7 +245,7 @@
             <artifactId>maven-failsafe-plugin</artifactId>
             <configuration>
               <additionalClasspathElements>
-                <additionalClasspathElement>target/generated-test-sources/test-annotations</additionalClasspathElement>
+                <additionalClasspathElement>${basedir}/target/generated-test-sources/test-annotations</additionalClasspathElement>
               </additionalClasspathElements>
               <forkMode>always</forkMode>
               <argLine>${argLine} -Xmx2500m -Dgwt.args='-testBeginTimeout 5 ${gwtArgs}'</argLine>

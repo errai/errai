@@ -32,33 +32,33 @@ public class AnnotatedTypeWithAnnotatedInnerClasses {
   public class InnerAnnotatedType {
   }
 
-  @TestAnnotation
   // Should not be exported
+  @TestAnnotation
   protected static class InnerNonVisibleType1 {
   }
 
-  @TestAnnotation
   // Should not be exported
+  @TestAnnotation
   static class InnerNonVisibleType2 {
   }
 
-  @TestAnnotation
   // Should not be exported
+  @TestAnnotation
   private static class InnerNonVisibleType3 {
   }
 
-  @TestAnnotation
   // Should not be exported
+  @TestAnnotation
   private class InnerNonVisibleType4 {
   }
 
-  @TestAnnotation
   // Should not be exported
+  @TestAnnotation
   protected class InnerNonVisibleType5 {
   }
 
+  // Should not be exported
   @TestAnnotation
-          // Should not be exported
   class InnerNonVisibleType6 {
   }
 

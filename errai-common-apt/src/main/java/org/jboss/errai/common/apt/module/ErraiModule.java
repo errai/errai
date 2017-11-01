@@ -18,7 +18,6 @@ package org.jboss.errai.common.apt.module;
 
 import com.sun.tools.javac.code.Symbol;
 import org.jboss.errai.codegen.meta.MetaClass;
-import org.jboss.errai.codegen.meta.impl.apt.APTClass;
 import org.jboss.errai.codegen.meta.impl.apt.APTClassUtil;
 import org.jboss.errai.common.apt.AnnotatedSourceElementsFinder;
 import org.jboss.errai.common.apt.exportfile.ExportFile;
@@ -79,11 +78,11 @@ public class ErraiModule {
             .filter(this::isPartOfModule)
             .flatMap(this::getExportableElements)
             .map(Element::asType)
-            .filter(this::isTypeElementPublic)
+            .filter(this::isPublic)
             .collect(toSet());
   }
 
-  private boolean isTypeElementPublic(final TypeMirror typeMirror) {
+  private boolean isPublic(final TypeMirror typeMirror) {
     if (typeMirror.getKind().isPrimitive()) {
       return true;
     }

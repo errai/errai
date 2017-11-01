@@ -80,6 +80,23 @@
   </dependencies>
 
   <profiles>
+
+    <profile>
+      <id>apt-generators</id>
+      <activation>
+        <property>
+          <name>apt-generators</name>
+        </property>
+      </activation>
+      <dependencies>
+        <dependency>
+          <groupId>org.jboss.errai</groupId>
+          <artifactId>errai-generators-apt</artifactId>
+          <scope>test</scope>
+        </dependency>
+      </dependencies>
+    </profile>
+
     <profile>
       <id>integration-test</id>
       <build>
@@ -89,6 +106,7 @@
             <configuration>
               <skipTests>false</skipTests>
               <additionalClasspathElements>
+                <additionalClasspathElement>${basedir}/target/generated-test-sources/test-annotations</additionalClasspathElement>
                 <additionalClasspathElement>${basedir}/${project.build.testOutputDirectory}/</additionalClasspathElement>
                 <additionalClasspathElement>${basedir}/src/main/java/</additionalClasspathElement>
                 <additionalClasspathElement>${basedir}/src/test/java/</additionalClasspathElement>
@@ -125,11 +143,6 @@
           <artifactId>hibernate-validator</artifactId>
           <scope>provided</scope>
           <classifier>sources</classifier>
-        </dependency>
-        <dependency>
-          <groupId>org.jboss.errai</groupId>
-          <artifactId>errai-generators-apt</artifactId>
-          <scope>test</scope>
         </dependency>
       </dependencies>
     </profile>
