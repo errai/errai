@@ -253,6 +253,7 @@
               <additionalClasspathElements>
                 <additionalClasspathElement>${basedir}/${profile.testOutputDirectory}/</additionalClasspathElement>
                 <additionalClasspathElement>${basedir}/src/test/java/</additionalClasspathElement>
+                <additionalClasspathElement>${basedir}/target/generated-test-sources/test-annotations/</additionalClasspathElement>
               </additionalClasspathElements>
               <forkMode>pertest</forkMode>
               <!-- DO NOT REMOVE THE errai.ioc.experimental.infer_dependent_by_reachability 

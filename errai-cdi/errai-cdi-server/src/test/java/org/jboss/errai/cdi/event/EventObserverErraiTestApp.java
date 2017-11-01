@@ -16,11 +16,25 @@
 
 package org.jboss.errai.cdi.event;
 
+import org.jboss.errai.bus.ErraiBusModule;
+import org.jboss.errai.common.configuration.ErraiApp;
 import org.jboss.errai.common.configuration.ErraiModule;
+import org.jboss.errai.enterprise.ErraiCdiClientModule;
+import org.jboss.errai.enterprise.ErraiCdiSharedModule;
+import org.jboss.errai.ioc.ErraiIocModule;
+import org.jboss.errai.marshalling.ErraiMarshallingModule;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
+@ErraiApp(gwtModuleName = "org.jboss.errai.cdi.event.EventObserverTestModule",
+          local = true,
+          modules = { ErraiMarshallingModule.class,
+                      ErraiBusModule.class,
+                      ErraiIocModule.class,
+                      ErraiCdiClientModule.class,
+                      ErraiCdiSharedModule.class,
+                      EventObserverErraiTestApp.class })
 @ErraiModule
-public class ErraiTestModule {
+public class EventObserverErraiTestApp {
 }

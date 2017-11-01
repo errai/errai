@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.cdi.producer;
+package org.jboss.errai.cdi.async.test.producers;
 
 import org.jboss.errai.bus.ErraiBusModule;
 import org.jboss.errai.common.configuration.ErraiApp;
@@ -27,13 +27,14 @@ import org.jboss.errai.marshalling.ErraiMarshallingModule;
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
-@ErraiApp(gwtModuleName = "org.jboss.errai.cdi.producer.LoggerProviderTestModule",
+@ErraiApp(gwtModuleName = "org.jboss.errai.cdi.async.test.producers.AsyncProducerTest",
           local = true,
           modules = { ErraiMarshallingModule.class,
                       ErraiBusModule.class,
                       ErraiIocModule.class,
                       ErraiCdiClientModule.class,
-                      ErraiCdiSharedModule.class })
+                      ErraiCdiSharedModule.class,
+                      AsyncProducerErraiTestApp.class })
 @ErraiModule
-public class ErraiTestApp {
+public class AsyncProducerErraiTestApp {
 }

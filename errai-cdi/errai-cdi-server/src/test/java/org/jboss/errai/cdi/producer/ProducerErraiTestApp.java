@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.cdi.injectioncycle;
+package org.jboss.errai.cdi.producer;
 
 import org.jboss.errai.bus.ErraiBusModule;
 import org.jboss.errai.common.configuration.ErraiApp;
@@ -27,14 +27,14 @@ import org.jboss.errai.marshalling.ErraiMarshallingModule;
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
-@ErraiApp(gwtModuleName = "org.jboss.errai.cdi.injectioncycle.InjectionCycleTestModule",
+@ErraiApp(gwtModuleName = "org.jboss.errai.cdi.producer.ProducerTestModule",
           local = true,
           modules = { ErraiMarshallingModule.class,
                       ErraiBusModule.class,
                       ErraiIocModule.class,
                       ErraiCdiClientModule.class,
                       ErraiCdiSharedModule.class,
-                      ErraiTestApp.class })
+                      ProducerErraiTestApp.class })
 @ErraiModule
-public class ErraiTestApp {
+public class ProducerErraiTestApp {
 }
