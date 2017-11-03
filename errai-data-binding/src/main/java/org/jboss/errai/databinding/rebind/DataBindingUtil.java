@@ -346,8 +346,12 @@ public class DataBindingUtil {
    *          the type to check
    */
   private static void assertTypeIsBindable(final MetaClass type, final Set<MetaClass> allConfiguredBindableTypes) {
-    if (!type.isAnnotationPresent(Bindable.class) && !allConfiguredBindableTypes.contains(type)) {
+    if (!isTypeBindable(type, allConfiguredBindableTypes)) {
       throw new GenerationException(type.getName() + " must be a @Bindable type when used as @Model");
     }
+  }
+
+  private static boolean isTypeBindable(MetaClass type, Set<MetaClass> allConfiguredBindableTypes) {
+    return type.isAnnotationPresent(Bindable.class) || allConfiguredBindableTypes.contains(type);
   }
 }

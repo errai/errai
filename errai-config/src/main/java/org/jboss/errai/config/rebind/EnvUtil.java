@@ -207,7 +207,7 @@ public abstract class EnvUtil {
         addSerializableTypes(exposedClasses, value);
       }
       else if (key.equals(ErraiAppPropertiesErraiModulesConfiguration.NON_SERIALIZABLE_TYPES)) {
-        addNonSerializableTypes(exposedClasses, nonportableClasses, value);
+        addNonSerializableTypes(nonportableClasses, value);
       }
       else if (key.equals(CONFIG_ERRAI_MAPPING_ALIASES)) {
         addMappingAliases(mappingAliases, value);
@@ -235,8 +235,7 @@ public abstract class EnvUtil {
     }
   }
 
-  private static void addNonSerializableTypes(final Set<MetaClass> exposedClasses, final Set<MetaClass> nonportableClasses,
-          final String value) {
+  private static void addNonSerializableTypes(final Set<MetaClass> nonportableClasses, final String value) {
     final Set<String> patterns = new LinkedHashSet<>();
     for (final String s : value.split(" ")) {
       final String singleValue = s.trim();
@@ -259,7 +258,7 @@ public abstract class EnvUtil {
         .getAllCachedClasses()
         .stream()
         .filter(mc -> filter.apply(mc.getFullyQualifiedName()))
-        .collect(toCollection(() -> exposedClasses));
+        .collect(toCollection(() -> nonportableClasses));
     }
   }
 
@@ -321,6 +320,7 @@ public abstract class EnvUtil {
   private static boolean isListValuedProperty(final String key) {
     return key.equals(ErraiAppPropertiesErraiModulesConfiguration.IOC_ENABLED_ALTERNATIVES)
             || key.equals(ErraiAppPropertiesErraiModulesConfiguration.BINDABLE_TYPES)
+            || key.equals(ErraiAppPropertiesErraiModulesConfiguration.NON_BINDABLE_TYPES)
             || key.equals(ErraiAppPropertiesErraiModulesConfiguration.SERIALIZABLE_TYPES)
             || key.equals(ErraiAppPropertiesErraiModulesConfiguration.NON_SERIALIZABLE_TYPES)
             || key.equals(CONFIG_ERRAI_MAPPING_ALIASES);
