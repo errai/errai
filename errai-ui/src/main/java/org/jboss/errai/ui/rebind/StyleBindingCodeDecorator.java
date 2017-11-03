@@ -28,7 +28,9 @@ import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
 import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
+import org.jboss.errai.config.ErraiConfiguration;
 import org.jboss.errai.databinding.client.PropertyChangeUnsubscribeHandle;
+import org.jboss.errai.databinding.client.api.Bindable;
 import org.jboss.errai.databinding.rebind.DataBindingUtil;
 import org.jboss.errai.ioc.client.api.CodeDecorator;
 import org.jboss.errai.ioc.client.container.Factory;
@@ -147,11 +149,9 @@ public class StyleBindingCodeDecorator extends IOCDecoratorExtension<StyleBindin
   @Override
   public void generateDecorator(final Decorable decorable, final FactoryController controller) {
 
-    final Set<MetaClass> allConfiguredBindableTypes = decorable.getInjectionContext()
-            .getProcessingContext()
-            .erraiConfiguration()
-            .modules()
-            .getBindableTypes();
+    final Set<MetaClass> allConfiguredBindableTypes = DataBindingUtil.getAllBindableTypes(
+            decorable.getInjectionContext().getProcessingContext().erraiConfiguration(),
+            decorable.getInjectionContext().getProcessingContext().metaClassFinder());
 
     final Statement valueAccessor;
     switch (decorable.decorableType()) {

@@ -26,6 +26,7 @@ import java.util.HashSet;
  * @author Tiago Bento <tfernand@redhat.com>
  */
 @ErraiModule(bindableTypes = ErraiTestCustomModule2.Bindable2.class,
+             nonBindableTypes = ErraiTestCustomModule2.NonBindable2.class,
              serializableTypes = ErraiTestCustomModule2.Serializable2.class,
              nonSerializableTypes = ErraiTestCustomModule2.NonSerializable2.class,
              iocAlternatives = ErraiTestCustomModule2.IocAlternative2.class,
@@ -41,6 +42,9 @@ class ErraiTestCustomModule2 {
   }
 
   static class Bindable2 {
+  }
+
+  static class NonBindable2 {
   }
 
   static class IocAlternative2 {

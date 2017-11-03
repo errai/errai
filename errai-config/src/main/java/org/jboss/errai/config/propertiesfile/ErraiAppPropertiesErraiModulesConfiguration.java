@@ -52,6 +52,7 @@ public class ErraiAppPropertiesErraiModulesConfiguration implements ErraiModules
   private static final String IOC_WHITELIST_PROPERTY = "errai.ioc.whitelist";
   private static final String IOC_BLACKLIST_PROPERTY = "errai.ioc.blacklist";
   public static final String BINDABLE_TYPES = "errai.ui.bindableTypes";
+  public static final String NON_BINDABLE_TYPES = "errai.ui.nonbindableTypes";
 
   private static final Logger log = LoggerFactory.getLogger(ErraiAppPropertiesErraiModulesConfiguration.class);
 
@@ -93,6 +94,7 @@ public class ErraiAppPropertiesErraiModulesConfiguration implements ErraiModules
   }
 
   private static Set<MetaClass> configuredBindableTypes = null;
+  private static Set<MetaClass> configuredNonBindableTypes = null;
 
   @Override
   public synchronized Set<MetaClass> getBindableTypes() {
@@ -106,7 +108,7 @@ public class ErraiAppPropertiesErraiModulesConfiguration implements ErraiModules
       configuredBindableTypes = refreshedTypes;
     } else {
 
-      Set<MetaClass> bindableTypes = new HashSet<>();
+      final Set<MetaClass> bindableTypes = new HashSet<>();
 
       for (final URL url : ErraiAppPropertiesConfigurationUtil.getErraiAppPropertiesFilesUrls()) {
         InputStream inputStream = null;
@@ -117,7 +119,8 @@ public class ErraiAppPropertiesErraiModulesConfiguration implements ErraiModules
           final ResourceBundle props = new PropertyResourceBundle(inputStream);
           for (final String key : props.keySet()) {
             if (key.equals(ErraiAppPropertiesErraiModulesConfiguration.BINDABLE_TYPES)) {
-              bindableTypes.addAll(allBindableTypes(props, key));
+              addListedClasses(bindableTypes, props.getString(key).split(" "));
+              break;
             }
           }
         } catch (final IOException e) {
@@ -139,27 +142,72 @@ public class ErraiAppPropertiesErraiModulesConfiguration implements ErraiModules
     return configuredBindableTypes;
   }
 
-  private Set<MetaClass> allBindableTypes(ResourceBundle props, String key) {
-    Set<MetaClass> objects = new HashSet<>();
-    final Set<String> patterns = new LinkedHashSet<>();
+  @Override
+  public Set<MetaClass> getNonBindableTypes() {
+    if (configuredNonBindableTypes != null) {
+      final Set<MetaClass> refreshedTypes = new HashSet<>(configuredNonBindableTypes.size());
 
-    for (final String s : props.getString(key).split(" ")) {
+      for (final MetaClass clazz : configuredNonBindableTypes) {
+        refreshedTypes.add(MetaClassFactory.get(clazz.getFullyQualifiedName()));
+      }
+
+      configuredNonBindableTypes = refreshedTypes;
+    } else {
+
+      final Set<MetaClass> nonBindableTypes = new HashSet<>();
+
+      for (final URL url : ErraiAppPropertiesConfigurationUtil.getErraiAppPropertiesFilesUrls()) {
+        InputStream inputStream = null;
+        try {
+          log.debug("Checking " + url.getFile() + " for bindable types...");
+          inputStream = url.openStream();
+
+          final ResourceBundle props = new PropertyResourceBundle(inputStream);
+          for (final String key : props.keySet()) {
+            if (key.equals(ErraiAppPropertiesErraiModulesConfiguration.NON_BINDABLE_TYPES)) {
+              final Set<String> patterns = new LinkedHashSet<>();
+              addListedClasses(nonBindableTypes, props.getString(key).split(" "));
+              break;
+            }
+          }
+        } catch (final IOException e) {
+          throw new RuntimeException("Error reading ErraiApp.properties", e);
+        } finally {
+          if (inputStream != null) {
+            try {
+              inputStream.close();
+            } catch (final IOException e) {
+              log.warn("Failed to close input stream", e);
+            }
+          }
+        }
+      }
+
+      configuredNonBindableTypes = nonBindableTypes;
+    }
+
+    return configuredNonBindableTypes;
+  }
+
+  private void addListedClasses(final Set<MetaClass> types, final String[] value) {
+    final Set<String > patterns = new HashSet<>();
+    for (final String s : value) {
       final String singleValue = s.trim();
       if (singleValue.endsWith("*")) {
         patterns.add(singleValue);
       } else {
         try {
-          objects.add(MetaClassFactory.get(s.trim()));
+          types.add(MetaClassFactory.get(s.trim()));
         } catch (final Exception e) {
-          throw new RuntimeException("Could not find class defined in ErraiApp.properties as bindable type: " + s);
+          throw new RuntimeException(
+                  "Could not find class defined in ErraiApp.properties type: " + s);
         }
       }
     }
 
     if (!patterns.isEmpty()) {
-      addPatternsToSet(objects, patterns);
+      addPatternsToSet(types, patterns);
     }
-    return objects;
   }
 
   private void addPatternsToSet(final Set<MetaClass> list, final Set<String> patterns) {
@@ -216,7 +264,7 @@ public class ErraiAppPropertiesErraiModulesConfiguration implements ErraiModules
           if (key.equals(ErraiAppPropertiesErraiModulesConfiguration.SERIALIZABLE_TYPES)) {
             addSerializableTypes(exposedClasses, value);
           } else if (key.equals(ErraiAppPropertiesErraiModulesConfiguration.NON_SERIALIZABLE_TYPES)) {
-            addNonSerializableTypes(exposedClasses, nonportableClasses, value);
+            addNonSerializableTypes(nonportableClasses, value);
           }
         }
       } catch (final IOException e) {
@@ -233,9 +281,7 @@ public class ErraiAppPropertiesErraiModulesConfiguration implements ErraiModules
     }
   }
 
-  private static void addNonSerializableTypes(final Set<MetaClass> exposedClasses,
-          final Set<MetaClass> nonportableClasses,
-          final String value) {
+  private static void addNonSerializableTypes(final Set<MetaClass> nonportableClasses, final String value) {
 
     final Set<String> patterns = new LinkedHashSet<>();
     for (final String s : value.split(" ")) {
@@ -255,7 +301,7 @@ public class ErraiAppPropertiesErraiModulesConfiguration implements ErraiModules
       MetaClassFactory.getAllCachedClasses()
               .stream()
               .filter(mc -> filter.apply(mc.getFullyQualifiedName()))
-              .collect(toCollection(() -> exposedClasses));
+              .collect(toCollection(() -> nonportableClasses));
     }
   }
 

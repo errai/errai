@@ -40,6 +40,7 @@ import org.jboss.errai.ioc.client.lifecycle.api.Access;
 import org.jboss.errai.ioc.client.lifecycle.api.LifecycleCallback;
 import org.jboss.errai.ioc.client.lifecycle.api.StateChange;
 import org.jboss.errai.ioc.client.lifecycle.impl.AccessImpl;
+import org.jboss.errai.ui.nav.client.local.api.DelegationControl;
 import org.jboss.errai.ui.nav.client.local.api.NavigationControl;
 import org.jboss.errai.ui.nav.client.local.api.PageNavigationErrorHandler;
 import org.jboss.errai.ui.nav.client.local.api.PageNotFoundException;
@@ -117,6 +118,8 @@ public class Navigation {
   protected IsWidget currentWidget;
 
   protected HistoryToken currentPageToken;
+
+  protected ContentDelegation contentDelegation = new DefaultContentDelegation();
 
   private PageNavigationErrorHandler navigationErrorHandler;
 
@@ -367,28 +370,39 @@ public class Navigation {
 
   /**
    * Hide the page currently displayed and call the associated lifecycle methods.
+   *
+   * @param requestPage the next requested page, this can be null if there is none.
    */
-  private void hideCurrentPage() {
+  private void hideCurrentPage(Object requestPage, NavigationControl control) {
     final IsWidget currentContent = navigatingContainer.getWidget();
 
     // Note: Optimized out in production mode
     if (currentPage != null && (currentContent == null || currentWidget.asWidget() != currentContent)) {
       // This could happen if someone was manipulating the DOM behind our backs
       GWT.log("Current content widget vanished or changed. " + "Not delivering pageHiding event to " + currentPage
-              + ".");
+            + ".");
     }
 
-    // Ensure clean contentPanel regardless of currentPage being null
-    navigatingContainer.clear();
+    DelegationControl hideControl = new DelegationControl(() -> {
+      if (currentPage != null && currentComponent != null) {
+        currentPage.pageHidden(currentComponent);
+        currentPage.destroy(currentComponent);
+      }
 
-    if (currentPage != null && currentComponent != null) {
-      currentPage.pageHidden(currentComponent);
-      currentPage.destroy(currentComponent);
+      control.proceed();
+    });
+
+    if (currentComponent != null) {
+      contentDelegation.hideContent(currentComponent, navigatingContainer, currentWidget, requestPage, hideControl);
+    } else {
+      navigatingContainer.clear();
+      hideControl.proceed();
     }
   }
 
   /**
-   * Call navigation and page related lifecycle methods. If the {@link Access} is fired successfully, load the new page.
+   * Call navigation and page related lifecycle methods.
+   * If the {@link Access} is fired successfully, load the new page.
    */
   private <C> void maybeShowPage(final Request<C> request, final boolean fireEvent) {
     request.pageNode.produceContent(component -> {
@@ -463,11 +477,13 @@ public class Navigation {
                     // fields actually changed.
                     stateChangeEvent.fireAsync(component);
 
+                    Object previousPage = currentComponent;
                     setCurrentPage(request.pageNode);
                     currentWidget = componentWidget;
                     currentComponent = component;
-                    navigatingContainer.setWidget(componentWidget);
-                    request.pageNode.pageShown(component, request.state);
+                    contentDelegation.showContent(component, navigatingContainer, currentWidget, previousPage, new DelegationControl(() -> {
+                      request.pageNode.pageShown(component, request.state);
+                    }));
                   } finally {
                     locked = false;
                   }
@@ -483,8 +499,9 @@ public class Navigation {
 
               try {
                 locked = true;
-                hideCurrentPage();
-                request.pageNode.pageShowing(component, request.state, showControl);
+                hideCurrentPage(component, new NavigationControl(Navigation.this, () -> {
+                  request.pageNode.pageShowing(component, request.state, showControl);
+                }));
               } catch (Exception ex) {
                 locked = false;
                 throw ex;
@@ -498,8 +515,9 @@ public class Navigation {
     }, new Runnable() {
       @Override
       public void run() {
-        hideCurrentPage();
-        setCurrentPage(null);
+        hideCurrentPage(null, new NavigationControl(Navigation.this, () -> {
+          setCurrentPage(null);
+        }));
       }
     });
 
@@ -628,4 +646,8 @@ public class Navigation {
   private native static IsWidget getCompositeWidget(Composite instance) /*-{
       return instance.@com.google.gwt.user.client.ui.Composite::widget;
   }-*/;
+
+  public void setContentDelegation(ContentDelegation contentDelegation) {
+    this.contentDelegation = contentDelegation;
+  }
 }

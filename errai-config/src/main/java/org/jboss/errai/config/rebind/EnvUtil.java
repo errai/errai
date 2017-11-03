@@ -67,5 +67,4 @@ public abstract class EnvUtil {
     isDevMode();
     isProdMode();
   }
-
 }

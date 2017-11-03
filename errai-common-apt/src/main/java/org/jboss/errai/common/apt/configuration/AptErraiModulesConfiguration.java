@@ -36,6 +36,7 @@ import static org.jboss.errai.common.configuration.ErraiModule.Property.IOC_ALTE
 import static org.jboss.errai.common.configuration.ErraiModule.Property.IOC_BLACKLIST;
 import static org.jboss.errai.common.configuration.ErraiModule.Property.IOC_WHITELIST;
 import static org.jboss.errai.common.configuration.ErraiModule.Property.MAPPING_ALIASES;
+import static org.jboss.errai.common.configuration.ErraiModule.Property.NON_BINDABLE_TYPES;
 import static org.jboss.errai.common.configuration.ErraiModule.Property.NON_SERIALIZABLE_TYPES;
 import static org.jboss.errai.common.configuration.ErraiModule.Property.SERIALIZABLE_TYPES;
 
@@ -57,6 +58,11 @@ public class AptErraiModulesConfiguration implements ErraiModulesConfiguration {
   @Override
   public Set<MetaClass> getBindableTypes() {
     return getConfiguredArrayProperty(a -> stream(a.valueAsArray(BINDABLE_TYPES, MetaClass[].class)));
+  }
+
+  @Override
+  public Set<MetaClass> getNonBindableTypes() {
+    return getConfiguredArrayProperty(a -> stream(a.valueAsArray(NON_BINDABLE_TYPES, MetaClass[].class)));
   }
 
   @Override

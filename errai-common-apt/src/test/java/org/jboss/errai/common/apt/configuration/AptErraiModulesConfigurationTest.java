@@ -20,7 +20,9 @@ import com.google.common.collect.ImmutableMap;
 import org.jboss.errai.codegen.apt.test.ErraiAptTest;
 import org.jboss.errai.common.apt.TestMetaClassFinder;
 import org.jboss.errai.common.apt.configuration.ErraiTestCustomModule1.IocWhitelisted1;
+import org.jboss.errai.common.apt.configuration.ErraiTestCustomModule1.NonBindable1;
 import org.jboss.errai.common.apt.configuration.ErraiTestCustomModule2.IocAlternative2;
+import org.jboss.errai.common.apt.configuration.ErraiTestCustomModule2.NonBindable2;
 import org.jboss.errai.common.apt.configuration.ErraiTestCustomModule2.Serializable2;
 import org.junit.Assert;
 import org.junit.Test;
@@ -53,6 +55,7 @@ public class AptErraiModulesConfigurationTest extends ErraiAptTest {
     final AptErraiModulesConfiguration config = new AptErraiModulesConfiguration(metaClassFinder);
 
     assertTrue(config.getBindableTypes().isEmpty());
+    assertTrue(config.getNonBindableTypes().isEmpty());
     assertTrue(config.getIocEnabledAlternatives().isEmpty());
     assertTrue(config.getIocBlacklist().isEmpty());
     assertTrue(config.getIocWhitelist().isEmpty());
@@ -67,6 +70,7 @@ public class AptErraiModulesConfigurationTest extends ErraiAptTest {
     final AptErraiModulesConfiguration config = new AptErraiModulesConfiguration(metaClassFinder);
 
     assertContainsOnly(config.getBindableTypes(), aptClass(Bindable1.class));
+    assertContainsOnly(config.getNonBindableTypes(), aptClass(NonBindable1.class));
     assertContainsOnly(config.getIocEnabledAlternatives(), aptClass(IocAlternative1.class));
     assertContainsOnly(config.getIocBlacklist(), aptClass(IocBlacklisted1.class));
     assertContainsOnly(config.getIocWhitelist(), aptClass(IocWhitelisted1.class));
@@ -86,6 +90,7 @@ public class AptErraiModulesConfigurationTest extends ErraiAptTest {
     final AptErraiModulesConfiguration config = new AptErraiModulesConfiguration(metaClassFinder);
 
     assertContainsOnly(config.getBindableTypes(), aptClass(Bindable1.class), aptClass(Bindable2.class));
+    assertContainsOnly(config.getNonBindableTypes(), aptClass(NonBindable1.class), aptClass(NonBindable2.class));
     assertContainsOnly(config.getIocEnabledAlternatives(), aptClass(IocAlternative1.class), aptClass(IocAlternative2.class));
     assertContainsOnly(config.getIocBlacklist(), aptClass(IocBlacklisted1.class), aptClass(IocBlacklisted2.class));
     assertContainsOnly(config.getIocWhitelist(), aptClass(IocWhitelisted1.class), aptClass(IocWhitelisted2.class));

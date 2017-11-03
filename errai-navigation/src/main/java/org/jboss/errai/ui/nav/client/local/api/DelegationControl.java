@@ -14,40 +14,35 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.config;
-
-import org.jboss.errai.codegen.meta.MetaClass;
-
-import java.util.Map;
-import java.util.Set;
+package org.jboss.errai.ui.nav.client.local.api;
 
 /**
- * @author Tiago Bento <tfernand@redhat.com>
+ * Instances of this class are passed to the {@link org.jboss.errai.ui.nav.client.local.ContentDelegation}.
  */
-interface ErraiSeparateModuleConfiguration {
+public class DelegationControl {
 
-  interface DataBinding {
+  private final Runnable runnable;
 
-    Set<MetaClass> getBindableTypes();
+  private boolean hasRun;
 
-    Set<MetaClass> getNonBindableTypes();
+  public DelegationControl(final Runnable runnable) {
+    this.runnable = runnable;
   }
 
-  interface Marshalling {
-
-    Set<MetaClass> portableTypes();
-
-    Set<MetaClass> nonPortableTypes();
-
-    Map<String, String> getMappingAliases();
+  /**
+   * Causes page navigation to proceed.
+   */
+  public void proceed() {
+    if (!hasRun) {
+      runnable.run();
+      hasRun = true;
+    }
+    else {
+      throw new IllegalStateException("proceed() method can only be called once.");
+    }
   }
 
-  interface Ioc {
-
-    Set<MetaClass> getIocEnabledAlternatives();
-
-    Set<MetaClass> getIocBlacklist();
-
-    Set<MetaClass> getIocWhitelist();
+  public boolean hasRun() {
+    return hasRun;
   }
 }

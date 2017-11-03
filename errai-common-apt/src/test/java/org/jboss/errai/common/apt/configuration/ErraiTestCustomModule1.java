@@ -26,6 +26,7 @@ import java.util.Collection;
  * @author Tiago Bento <tfernand@redhat.com>
  */
 @ErraiModule(bindableTypes = ErraiTestCustomModule1.Bindable1.class,
+             nonBindableTypes = ErraiTestCustomModule1.NonBindable1.class,
              serializableTypes = ErraiTestCustomModule1.Serializable1.class,
              nonSerializableTypes = ErraiTestCustomModule1.NonSerializable1.class,
              iocAlternatives = ErraiTestCustomModule1.IocAlternative1.class,
@@ -41,6 +42,9 @@ class ErraiTestCustomModule1 {
   }
 
   static class Bindable1 {
+  }
+
+  static class NonBindable1 {
   }
 
   static class IocAlternative1 {
