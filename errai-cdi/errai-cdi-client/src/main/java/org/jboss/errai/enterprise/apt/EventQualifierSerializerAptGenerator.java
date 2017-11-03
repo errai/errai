@@ -33,8 +33,6 @@ import java.util.Set;
 import static java.util.Collections.singleton;
 
 /**
- * IMPORTANT: Do not move this class. ErraiAppAptGenerator depends on it being in this exact package.
- *
  * @author Tiago Bento <tfernand@redhat.com>
  */
 @ErraiGenerator

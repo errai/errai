@@ -25,8 +25,6 @@ import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCGenerator;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IocRelevantClassesFinder;
 
 /**
- * IMPORTANT: Do not move this class. ErraiAppAptGenerator depends on it being in this exact package.
- *
  * @author Tiago Bento <tfernand@redhat.com>
  */
 @ErraiGenerator

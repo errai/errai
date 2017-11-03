@@ -26,8 +26,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * IMPORTANT: Do not move this class. ErraiAppAptGenerator depends on it being in this exact package.
- *
  * @author Tiago Bento <tfernand@redhat.com>
  */
 @ErraiGenerator
