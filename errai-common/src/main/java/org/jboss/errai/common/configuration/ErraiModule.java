@@ -25,6 +25,8 @@ public @interface ErraiModule {
 
   Class<?>[] bindableTypes() default {};
 
+  Class<?>[] nonBindableTypes() default {};
+
   Class<?>[] serializableTypes() default {};
 
   Class<?>[] nonSerializableTypes() default {};
@@ -37,6 +39,7 @@ public @interface ErraiModule {
 
   interface Property {
     String BINDABLE_TYPES = "bindableTypes";
+    String NON_BINDABLE_TYPES = "nonBindableTypes";
     String SERIALIZABLE_TYPES = "serializableTypes";
     String NON_SERIALIZABLE_TYPES = "nonSerializableTypes";
     String IOC_ALTERNATIVES = "iocAlternatives";

@@ -20,7 +20,6 @@ import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.meta.HasAnnotations;
 import org.jboss.errai.codegen.meta.MetaClass;
-import org.jboss.errai.databinding.client.api.Bindable;
 import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.ioc.client.api.IOCExtension;
 import org.jboss.errai.ioc.client.container.RefHolder;
@@ -43,9 +42,9 @@ import org.jboss.errai.ui.shared.api.annotations.Model;
 import javax.enterprise.context.Dependent;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
 import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
@@ -77,9 +76,8 @@ public class DataBindingIOCExtension implements IOCExtensionConfigurator {
       }
     };
 
-    final Collection<MetaClass> allBindableTypes = context.metaClassFinder()
-            .extend(Bindable.class, context.erraiConfiguration().modules()::getBindableTypes)
-            .findAnnotatedWith(Bindable.class);
+    final Set<MetaClass> allBindableTypes = DataBindingUtil.getAllBindableTypes(context.erraiConfiguration(),
+            context.metaClassFinder());
 
     for (final MetaClass modelBean : allBindableTypes) {
       final InjectableHandle handle = new InjectableHandle(modelBean,

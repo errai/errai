@@ -49,7 +49,8 @@ public class BindableProxyLoaderAptGenerator extends ErraiAptGenerators.SingleFi
 
     final ErraiConfiguration erraiConfiguration = new AptErraiConfiguration(metaClassFinder());
     final MetaClassFinder metaClassFinder = metaClassFinder().extend(Bindable.class,
-            erraiConfiguration.modules()::getBindableTypes);
+            erraiConfiguration.modules()::getBindableTypes)
+            .remove(Bindable.class, erraiConfiguration.modules()::getNonBindableTypes);
 
     final String generatedSource = bindableProxyLoaderGenerator.generate(metaClassFinder);
 

@@ -16,19 +16,6 @@
 
 package org.jboss.errai.databinding.rebind;
 
-import static org.jboss.errai.codegen.util.Stmt.invokeStatic;
-
-import java.lang.annotation.Annotation;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Target;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.Variable;
 import org.jboss.errai.codegen.exception.GenerationException;
@@ -42,7 +29,8 @@ import org.jboss.errai.codegen.meta.MetaParameter;
 import org.jboss.errai.codegen.meta.MetaParameterizedType;
 import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.util.PrivateAccessUtil;
-import org.jboss.errai.config.ErraiAppPropertiesConfiguration;
+import org.jboss.errai.common.apt.MetaClassFinder;
+import org.jboss.errai.config.ErraiConfiguration;
 import org.jboss.errai.databinding.client.api.Bindable;
 import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraphBuilder.Dependency;
@@ -54,6 +42,18 @@ import org.jboss.errai.ioc.rebind.ioc.injector.api.Decorable.DecorableType;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.FactoryController;
 import org.jboss.errai.ui.shared.api.annotations.AutoBound;
 import org.jboss.errai.ui.shared.api.annotations.Model;
+
+import java.lang.annotation.Annotation;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Target;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+
+import static org.jboss.errai.codegen.util.Stmt.invokeStatic;
 
 /**
  * Utility to retrieve a data binder reference. The reference is either to an
@@ -71,6 +71,12 @@ public class DataBindingUtil {
 
   private DataBindingUtil() {}
 
+  public static Set<MetaClass> getAllBindableTypes(final ErraiConfiguration erraiConfiguration,
+          final MetaClassFinder metaClassFinder) {
+    return metaClassFinder.extend(Bindable.class, erraiConfiguration.modules()::getBindableTypes)
+            .remove(Bindable.class, erraiConfiguration.modules()::getNonBindableTypes)
+            .findAnnotatedWith(Bindable.class);
+  }
   /**
    * Represents a reference to an injected or generated data binder.
    */
@@ -351,7 +357,7 @@ public class DataBindingUtil {
     }
   }
 
-  private static boolean isTypeBindable(MetaClass type, Set<MetaClass> allConfiguredBindableTypes) {
+  private static boolean isTypeBindable(final MetaClass type, final Set<MetaClass> allConfiguredBindableTypes) {
     return type.isAnnotationPresent(Bindable.class) || allConfiguredBindableTypes.contains(type);
   }
 }

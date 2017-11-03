@@ -16,6 +16,8 @@
 
 package org.jboss.errai.config;
 
+import java.util.Collection;
+
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */

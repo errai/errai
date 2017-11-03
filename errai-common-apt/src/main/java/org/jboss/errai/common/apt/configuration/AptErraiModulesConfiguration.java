@@ -30,6 +30,7 @@ import java.util.stream.Stream;
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toSet;
 import static org.jboss.errai.common.configuration.ErraiModule.Property.BINDABLE_TYPES;
+import static org.jboss.errai.common.configuration.ErraiModule.Property.NON_BINDABLE_TYPES;
 import static org.jboss.errai.common.configuration.ErraiModule.Property.IOC_ALTERNATIVES;
 import static org.jboss.errai.common.configuration.ErraiModule.Property.IOC_BLACKLIST;
 import static org.jboss.errai.common.configuration.ErraiModule.Property.IOC_WHITELIST;
@@ -54,6 +55,11 @@ public class AptErraiModulesConfiguration implements ErraiModulesConfiguration {
   @Override
   public Set<MetaClass> getBindableTypes() {
     return getConfiguredArrayProperty(a -> stream(a.valueAsArray(BINDABLE_TYPES, MetaClass[].class)));
+  }
+
+  @Override
+  public Set<MetaClass> getNonBindableTypes() {
+    return getConfiguredArrayProperty(a -> stream(a.valueAsArray(NON_BINDABLE_TYPES, MetaClass[].class)));
   }
 
   @Override

@@ -78,11 +78,9 @@ public class BoundDecorator extends IOCDecoratorExtension<Bound> {
   @Override
   public void generateDecorator(final Decorable decorable, final FactoryController controller) {
 
-    final Set<MetaClass> allConfiguredBindableTypes = decorable.getInjectionContext()
-            .getProcessingContext()
-            .erraiConfiguration()
-            .modules()
-            .getBindableTypes();
+    final Set<MetaClass> allConfiguredBindableTypes = DataBindingUtil.getAllBindableTypes(
+            decorable.getInjectionContext().getProcessingContext().erraiConfiguration(),
+            decorable.getInjectionContext().getProcessingContext().metaClassFinder());
 
     final MetaClass targetClass = decorable.getEnclosingInjectable().getInjectedType();
     final List<Statement> statements = new ArrayList<Statement>();

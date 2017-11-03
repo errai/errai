@@ -36,7 +36,8 @@ import java.util.Set;
  */
 public class DataBindingValidatorTest {
 
-  private static final Set<MetaClass> ALL_CONFIGURED_BINDABLE_TYPES = new ErraiAppPropertiesConfiguration().modules().getBindableTypes();
+  private static final Set<MetaClass> ALL_CONFIGURED_BINDABLE_TYPES = new ErraiAppPropertiesConfiguration().modules()
+          .getBindableTypes();
 
   private final MetaClass testClass = MetaClassFactory.get(TestModel.class);
 

@@ -18,6 +18,7 @@ package org.jboss.errai.config;
 
 import org.jboss.errai.codegen.meta.MetaClass;
 
+import java.util.Collection;
 import java.util.Set;
 
 /**
@@ -28,6 +29,8 @@ interface ErraiSeparateModuleConfiguration {
   interface DataBinding {
 
     Set<MetaClass> getBindableTypes();
+
+    Set<MetaClass> getNonBindableTypes();
   }
 
   interface Marshalling {
