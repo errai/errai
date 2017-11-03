@@ -16,13 +16,17 @@
 
 package org.jboss.errai.codegen.meta;
 
+import org.jboss.errai.codegen.meta.impl.java.JavaReflectionAnnotation;
 import org.jboss.errai.codegen.util.GenUtil;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.stream.Collectors;
 
-public abstract class MetaField extends AbstractHasAnnotations implements MetaClassMember {
+public abstract class MetaField implements MetaClassMember, HasAnnotations {
 
   /**
    * Returns an actual MetaClass (a class, interface, primitive type, array, or
@@ -53,17 +57,6 @@ public abstract class MetaField extends AbstractHasAnnotations implements MetaCl
    */
   @Override
   public abstract String getName();
-
-  /**
-   * Returns the annotations present on this field.
-   *
-   * @return A shared reference to the array of the annotations on this field.
-   *         Returns an empty array (never null) if the field has no
-   *         annotations. Callers should refrain from modifying the returned
-   *         array.
-   */
-  @Override
-  public abstract Annotation[] unsafeGetAnnotations();
 
   /**
    * Returns a string which includes the declaring class's name and the field
@@ -132,6 +125,7 @@ public abstract class MetaField extends AbstractHasAnnotations implements MetaCl
    *           if the field or its containing class cannot be located using Java
    *           Reflection.
    */
+  @Deprecated
   public Field asField() {
     try {
       final Class<?> aClass = getDeclaringClass().unsafeAsClass();
@@ -170,8 +164,8 @@ public abstract class MetaField extends AbstractHasAnnotations implements MetaCl
     }
 
     @Override
-    public Annotation[] unsafeGetAnnotations() {
-      return new Annotation[0];
+    public Collection<MetaAnnotation> getAnnotations() {
+      return Collections.emptyList();
     }
 
     @Override
@@ -232,16 +226,6 @@ public abstract class MetaField extends AbstractHasAnnotations implements MetaCl
     @Override
     public boolean isSynchronized() {
       return false;
-    }
-
-    @Override
-    public boolean unsafeIsAnnotationPresent(Class<? extends Annotation> annotation) {
-      return false;
-    }
-
-    @Override
-    public <A extends Annotation> A unsafeGetAnnotation(Class<A> annotation) {
-      return null;
     }
   }
 }

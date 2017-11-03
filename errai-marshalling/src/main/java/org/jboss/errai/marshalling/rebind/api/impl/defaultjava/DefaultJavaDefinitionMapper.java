@@ -16,6 +16,7 @@
 
 package org.jboss.errai.marshalling.rebind.api.impl.defaultjava;
 
+import org.jboss.errai.codegen.meta.MetaAnnotation;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassMember;
 import org.jboss.errai.codegen.meta.MetaConstructor;
@@ -26,6 +27,7 @@ import org.jboss.errai.marshalling.client.api.annotations.Key;
 import org.jboss.errai.marshalling.client.api.exceptions.InvalidMappingException;
 import org.jboss.errai.marshalling.rebind.DefinitionsFactory;
 import org.jboss.errai.marshalling.rebind.api.model.ConstructorMapping;
+import org.jboss.errai.marshalling.rebind.api.model.InstantiationMapping;
 import org.jboss.errai.marshalling.rebind.api.model.Mapping;
 import org.jboss.errai.marshalling.rebind.api.model.MappingDefinition;
 import org.jboss.errai.marshalling.rebind.api.model.MemberMapping;
@@ -38,6 +40,7 @@ import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -64,17 +67,16 @@ public class DefaultJavaDefinitionMapper {
       final List<Boolean> hasMapsTos = new ArrayList<>();
       if (c.getParameters().length != 0) {
         for (int i = 0; i < c.getParameters().length; i++) {
-          final Annotation[] annotations = c.getParameters()[i].unsafeGetAnnotations();
-          if (annotations.length == 0) {
+          final Collection<MetaAnnotation> annotations = c.getParameters()[i].getAnnotations();
+          if (annotations.isEmpty()) {
             hasMapsTos.add(false);
           }
           else {
             boolean hasMapsTo = false;
-            for (final Annotation a : annotations) {
-              if (MapsTo.class.isAssignableFrom(a.annotationType())) {
+            for (final MetaAnnotation a : annotations) {
+              if (a.annotationType().isAssignableTo(MapsTo.class)) {
                 hasMapsTo = true;
-                final MapsTo mapsTo = (MapsTo) a;
-                final String key = mapsTo.value();
+                final String key = a.value();
                 simpleConstructorMapping.mapParmToIndex(key, i, c.getParameters()[i].getType());
               }
             }
@@ -119,17 +121,16 @@ public class DefaultJavaDefinitionMapper {
         if (method.isStatic()) {
           final List<Boolean> hasMapsTos = new ArrayList<>();
           for (int i = 0; i < method.getParameters().length; i++) {
-            final Annotation[] annotations = method.getParameters()[i].unsafeGetAnnotations();
-            if (annotations.length == 0) {
+            final Collection<MetaAnnotation> annotations = method.getParameters()[i].getAnnotations();
+            if (annotations.isEmpty()) {
               hasMapsTos.add(false);
             }
             else {
               boolean hasMapsTo = false;
-              for (final Annotation a : annotations) {
-                if (MapsTo.class.isAssignableFrom(a.annotationType())) {
+              for (final MetaAnnotation a : annotations) {
+                if (a.annotationType().isAssignableTo(MapsTo.class)) {
                   hasMapsTo = true;
-                  final MapsTo mapsTo = (MapsTo) a;
-                  final String key = mapsTo.value();
+                  final String key = a.value();
                   simpleFactoryMapping.mapParmToIndex(key, i, method.getParameters()[i].getType());
                 }
               }
@@ -176,9 +177,7 @@ public class DefaultJavaDefinitionMapper {
     }
 
     for (final MetaMethod method : toMap.getDeclaredMethods()) {
-      if (method.unsafeIsAnnotationPresent(Key.class)) {
-        final String key = method.unsafeGetAnnotation(Key.class).value();
-
+      method.getAnnotation(Key.class).map(MetaAnnotation::<String>value).ifPresent(key -> {
         if (method.getParameters().length == 0) {
           // assume this is a getter
 
@@ -190,12 +189,11 @@ public class DefaultJavaDefinitionMapper {
 
           definition.addMemberMapping(new WriteMapping(key, method.getParameters()[0].getType(), method.getName()));
           writeKeys.add(key);
-        }
-        else {
+        } else {
           throw new InvalidMappingException("annotated @Key method is unrecognizable as a setter or getter: "
                   + toMap.getFullyQualifiedName() + "#" + method.getName());
         }
-      }
+      });
     }
 
     MetaClass c = toMap;

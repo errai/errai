@@ -29,6 +29,7 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Parameterizable;
 import javax.lang.model.element.TypeParameterElement;
+import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
@@ -100,18 +101,32 @@ public final class APTClassUtil {
     final TypeMirror typeMirror = types.asMemberOf(enclosedMetaObject, target);
 
     if (typeMirror instanceof Type.MethodType) {
-      final AtomicInteger i = new AtomicInteger(0);
+      final AtomicInteger parameterIndex = new AtomicInteger(0);
       final List<Type> parameterTypes = ((Type.MethodType) typeMirror).getParameterTypes();
-      return target.getParameters()
-              .stream()
-              .map(parameter -> new APTParameter(parameter, parameterTypes.get(i.getAndIncrement())))
-              .toArray(MetaParameter[]::new);
+      return target.getParameters().stream().map(parameter -> {
+        int currentIndex = parameterIndex.getAndIncrement();
+        final TypeMirror actualParameterType = getActualParameterType(parameterTypes, parameter, currentIndex);
+        return new APTParameter(parameter, actualParameterType);
+      }).toArray(MetaParameter[]::new);
     }
 
     return target.getParameters()
             .stream()
             .map(parameter -> new APTParameter(parameter, parameter.asType()))
             .toArray(MetaParameter[]::new);
+  }
+
+  private static TypeMirror getActualParameterType(final List<Type> parameterTypes,
+          final VariableElement parameter,
+          int parameterIndex) {
+
+    switch (parameter.asType().getKind()) {
+    case WILDCARD:
+    case TYPEVAR:
+      return parameterTypes.get(parameterIndex);
+    default:
+      return parameter.asType();
+    }
   }
 
   static MetaType[] getGenericParameterTypes(final ExecutableElement target) {
@@ -195,22 +210,7 @@ public final class APTClassUtil {
   }
 
   @Deprecated
-  public static Annotation[] unsafeGetAnnotations() {
-    throw new RuntimeException("Unsafe methods should not be called in APT environment");
-  }
-
-  @Deprecated
   public static Class<?> unsafeAsClass() {
-    throw new RuntimeException("Unsafe methods should not be called in APT environment");
-  }
-
-  @Deprecated
-  public static <A extends Annotation> A unsafeGetAnnotation() {
-    throw new RuntimeException("Unsafe methods should not be called in APT environment");
-  }
-
-  @Deprecated
-  public static boolean unsafeIsAnnotationPresent() {
     throw new RuntimeException("Unsafe methods should not be called in APT environment");
   }
 }

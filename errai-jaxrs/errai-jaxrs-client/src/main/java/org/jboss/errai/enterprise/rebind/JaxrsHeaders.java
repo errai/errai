@@ -24,7 +24,6 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.Produces;
 
 import org.apache.commons.lang3.StringUtils;
-import org.jboss.errai.codegen.meta.AbstractHasAnnotations;
 import org.jboss.errai.codegen.meta.HasAnnotations;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaMethod;
@@ -92,7 +91,7 @@ public class JaxrsHeaders {
     return Collections.<String, String>unmodifiableMap(headers);
   }
 
-  private static JaxrsHeaders getJaxrsHeaders(final AbstractHasAnnotations annotated) {
+  private static JaxrsHeaders getJaxrsHeaders(final HasAnnotations annotated) {
     JaxrsHeaders headers = new JaxrsHeaders();
     annotated.getAnnotation(Produces.class).ifPresent(a -> headers.setAcceptHeader(a.valueAsArray(String[].class)));
     annotated.getAnnotation(Consumes.class).ifPresent(a -> headers.setContentTypeHeader(a.valueAsArray(String[].class)));

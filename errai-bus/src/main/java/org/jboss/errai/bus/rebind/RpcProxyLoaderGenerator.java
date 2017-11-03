@@ -30,7 +30,6 @@ import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.MethodBlockBuilder;
 import org.jboss.errai.codegen.builder.impl.ClassBuilder;
 import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
-import org.jboss.errai.common.apt.MetaClassFinder;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.util.AnnotationFilter;
 import org.jboss.errai.codegen.util.InterceptorProvider;
@@ -41,6 +40,7 @@ import org.jboss.errai.common.client.api.interceptor.InterceptsRemoteCall;
 import org.jboss.errai.common.client.framework.ProxyProvider;
 import org.jboss.errai.common.client.framework.RemoteServiceProxyFactory;
 import org.jboss.errai.common.metadata.RebindUtils;
+import org.jboss.errai.config.MetaClassFinder;
 import org.jboss.errai.config.rebind.AbstractAsyncGenerator;
 import org.jboss.errai.config.rebind.GenerateAsync;
 import org.jboss.errai.config.util.ClassScanner;
@@ -77,8 +77,7 @@ public class RpcProxyLoaderGenerator extends AbstractAsyncGenerator {
     final Boolean iocEnabled = RebindUtils.isModuleInherited(context, IOC_MODULE_NAME);
     final Set<String> translatablePackages = RebindUtils.findTranslatablePackages(context);
     final AnnotationFilter gwtAnnotationFilter = new RuntimeAnnotationFilter(translatablePackages);
-    final MetaClassFinder metaClassFinder = annotation -> getMetaClasses(context, annotation,
-            translatablePackages);
+    final MetaClassFinder metaClassFinder = annotation -> getMetaClasses(context, annotation, translatablePackages);
 
     return generate(metaClassFinder, iocEnabled, gwtAnnotationFilter);
   }
@@ -135,15 +134,9 @@ public class RpcProxyLoaderGenerator extends AbstractAsyncGenerator {
 
   @Override
   protected boolean isRelevantClass(final MetaClass clazz) {
-    // It's ok to use unsafe methods here because the APT environment doesn't call this method
-    for (final Annotation annotation : clazz.unsafeGetAnnotations()) {
-      if (annotation.annotationType().equals(Remote.class) || annotation.annotationType()
-              .equals(FeatureInterceptor.class) || annotation.annotationType().equals(InterceptsRemoteCall.class)) {
-        return true;
-      }
-    }
-
-    return false;
+    return clazz.isAnnotationPresent(Remote.class)
+            || clazz.isAnnotationPresent(FeatureInterceptor.class)
+            || clazz.isAnnotationPresent(InterceptsRemoteCall.class);
   }
 
   private Set<MetaClass> getMetaClasses(final GeneratorContext context,

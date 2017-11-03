@@ -16,30 +16,31 @@
 
 package org.jboss.errai.marshalling.rebind;
 
-import java.io.PrintWriter;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
-import org.apache.commons.lang3.StringUtils;
-import org.jboss.errai.codegen.builder.ClassStructureBuilder;
-import org.jboss.errai.codegen.meta.MetaClass;
-import org.jboss.errai.codegen.meta.MetaClassFactory;
-import org.jboss.errai.codegen.meta.impl.AbstractMetaClass;
-import org.jboss.errai.codegen.meta.impl.build.BuildMetaClass;
-import org.jboss.errai.common.metadata.RebindUtils;
-import org.jboss.errai.marshalling.client.api.MarshallerFramework;
-import org.jboss.errai.marshalling.rebind.api.GeneratorMappingContextFactory;
-import org.jboss.errai.marshalling.rebind.api.MappingStrategy;
-import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.IncrementalGenerator;
 import com.google.gwt.core.ext.RebindMode;
 import com.google.gwt.core.ext.RebindResult;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.UnableToCompleteException;
+import org.apache.commons.lang3.StringUtils;
+import org.jboss.errai.codegen.builder.ClassStructureBuilder;
+import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaClassFactory;
+import org.jboss.errai.codegen.meta.impl.AbstractMetaClass;
+import org.jboss.errai.common.metadata.RebindUtils;
+import org.jboss.errai.config.propertiesfile.ErraiAppPropertiesConfiguration;
+import org.jboss.errai.config.ErraiConfiguration;
+import org.jboss.errai.marshalling.client.api.MarshallerFramework;
+import org.jboss.errai.marshalling.rebind.api.GeneratorMappingContext;
+import org.jboss.errai.marshalling.rebind.api.GeneratorMappingContextFactory;
+import org.jboss.errai.marshalling.rebind.api.MappingStrategy;
+import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.PrintWriter;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Generator used to generate marshallers for custom portable types
@@ -52,7 +53,7 @@ import com.google.gwt.core.ext.UnableToCompleteException;
  */
 public class MarshallerGenerator extends IncrementalGenerator {
   private static final Logger log = LoggerFactory.getLogger(MarshallerGenerator.class);
-  private final String packageName = MarshallerFramework.class.getPackage().getName();
+  public static final String PACKAGE_NAME = MarshallerFramework.class.getPackage().getName();
 
   // We're keeping this cache of portable types to compare their contents and
   // find out if they have changed since the last refresh.
@@ -69,14 +70,15 @@ public class MarshallerGenerator extends IncrementalGenerator {
   private static final long GENERATOR_VERSION_ID = 1L;
 
   @Override
-  public RebindResult generateIncrementally(final TreeLogger logger, final GeneratorContext context, final String typeName) throws UnableToCompleteException {
+  public RebindResult generateIncrementally(final TreeLogger logger,
+          final GeneratorContext context,
+          final String typeName) throws UnableToCompleteException {
     final String fullyQualifiedTypeName = distillTargetTypeName(typeName);
     final MetaClass type = MetaClassFactory.get(fullyQualifiedTypeName);
     final String className = MarshallerGeneratorFactory.getMarshallerImplClassName(type, true);
-    final String marshallerTypeName = packageName + "." + className;
     final MetaClass cachedType = cachedPortableTypes.get(fullyQualifiedTypeName);
 
-    final PrintWriter printWriter = context.tryCreate(logger, packageName, className);
+    final PrintWriter printWriter = context.tryCreate(logger, PACKAGE_NAME, className);
     if (printWriter != null) {
       if (!RebindUtils.NO_CACHE && cachedType != null && cachedType.hashContent() == type.hashContent()) {
         log.debug("Reusing cached marshaller for {}", fullyQualifiedTypeName);
@@ -84,42 +86,44 @@ public class MarshallerGenerator extends IncrementalGenerator {
         context.commit(logger, printWriter);
       } else {
         log.debug("Generating marshaller for {}", fullyQualifiedTypeName);
-        final String generatedSource = generateMarshaller(context, type, className, marshallerTypeName, logger, printWriter);
+        final ErraiConfiguration erraiConfiguration = new ErraiAppPropertiesConfiguration();
+        final String generatedSource = generateMarshaller(context, type, erraiConfiguration);
+        printWriter.append(generatedSource);
+        RebindUtils.writeStringToJavaSourceFileInErraiCacheDir(PACKAGE_NAME, className, generatedSource);
+        context.commit(logger, printWriter);
         cachedPortableTypes.put(fullyQualifiedTypeName, type);
         cachedSourceByTypeName.put(fullyQualifiedTypeName, generatedSource);
       }
 
-      return new RebindResult(RebindMode.USE_ALL_NEW, marshallerTypeName);
+      return new RebindResult(RebindMode.USE_ALL_NEW, getMarshallerTypeName(className));
     } else {
       log.debug("Reusing existing marshaller for {}", fullyQualifiedTypeName);
-      return new RebindResult(RebindMode.USE_EXISTING, marshallerTypeName);
+      return new RebindResult(RebindMode.USE_EXISTING, getMarshallerTypeName(className));
     }
   }
 
-  private String generateMarshaller(final GeneratorContext context, final MetaClass type, final String className,
-          final String marshallerTypeName, final TreeLogger logger, final PrintWriter printWriter) {
+  private String getMarshallerTypeName(final String className) {
+    return PACKAGE_NAME + "." + className;
+  }
 
+  public String generateMarshaller(final GeneratorContext context,
+          final MetaClass type,
+          final ErraiConfiguration erraiConfiguration) {
+
+    final String className = MarshallerGeneratorFactory.getMarshallerImplClassName(type, true);
+    final String marshallerTypeName = getMarshallerTypeName(className);
     final MarshallerOutputTarget target = MarshallerOutputTarget.GWT;
-    final MappingStrategy strategy =
-        MappingStrategyFactory.createStrategy(true, GeneratorMappingContextFactory.getFor(context, target), type);
+    final GeneratorMappingContext generatorMappingContext = GeneratorMappingContextFactory.getFor(context, target);
+    final MappingStrategy strategy = MappingStrategyFactory.createStrategy(true, generatorMappingContext, type, erraiConfiguration);
 
-    String gen = null;
     if (type.isArray()) {
-      final BuildMetaClass marshallerClass =
-          MarshallerGeneratorFactory.generateArrayMarshaller(type, marshallerTypeName, true);
-      gen = marshallerClass.toJavaString();
+      return MarshallerGeneratorFactory.getFor(context, target, erraiConfiguration)
+              .generateArrayMarshaller(type, marshallerTypeName, true)
+              .toJavaString();
     }
-    else {
-      final ClassStructureBuilder<?> marshaller = strategy.getMapper().getMarshaller(marshallerTypeName);
-      gen = marshaller.toJavaString();
-    }
-    printWriter.append(gen);
 
-    RebindUtils.writeStringToJavaSourceFileInErraiCacheDir(packageName, className, gen);
-
-    context.commit(logger, printWriter);
-
-    return gen;
+    final ClassStructureBuilder<?> marshaller = strategy.getMapper().getMarshaller(marshallerTypeName);
+    return marshaller.toJavaString();
   }
 
   private String distillTargetTypeName(final String marshallerName) {

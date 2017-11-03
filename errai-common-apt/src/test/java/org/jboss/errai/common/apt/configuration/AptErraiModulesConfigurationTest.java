@@ -16,6 +16,7 @@
 
 package org.jboss.errai.common.apt.configuration;
 
+import com.google.common.collect.ImmutableMap;
 import org.jboss.errai.codegen.apt.test.ErraiAptTest;
 import org.jboss.errai.common.apt.TestMetaClassFinder;
 import org.jboss.errai.common.apt.configuration.ErraiTestCustomModule1.IocWhitelisted1;
@@ -26,7 +27,10 @@ import org.jboss.errai.common.apt.configuration.ErraiTestCustomModule2.Serializa
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
 
 import static org.jboss.errai.common.apt.configuration.ErraiTestCustomModule1.Bindable1;
@@ -55,10 +59,9 @@ public class AptErraiModulesConfigurationTest extends ErraiAptTest {
     assertTrue(config.getIocEnabledAlternatives().isEmpty());
     assertTrue(config.getIocBlacklist().isEmpty());
     assertTrue(config.getIocWhitelist().isEmpty());
-    assertTrue(config.getSerializableTypes().isEmpty());
-    assertTrue(config.getNonSerializableTypes().isEmpty());
-    assertTrue(config.getNonSerializableTypes().isEmpty());
-    assertTrue(config.getNonSerializableTypes().isEmpty());
+    assertTrue(config.portableTypes().isEmpty());
+    assertTrue(config.nonPortableTypes().isEmpty());
+    assertTrue(config.getMappingAliases().isEmpty());
   }
 
   @Test
@@ -71,8 +74,11 @@ public class AptErraiModulesConfigurationTest extends ErraiAptTest {
     assertContainsOnly(config.getIocEnabledAlternatives(), aptClass(IocAlternative1.class));
     assertContainsOnly(config.getIocBlacklist(), aptClass(IocBlacklisted1.class));
     assertContainsOnly(config.getIocWhitelist(), aptClass(IocWhitelisted1.class));
-    assertContainsOnly(config.getSerializableTypes(), aptClass(Serializable1.class));
-    assertContainsOnly(config.getNonSerializableTypes(), aptClass(NonSerializable1.class));
+    assertContainsOnly(config.portableTypes(), aptClass(Serializable1.class));
+    assertContainsOnly(config.nonPortableTypes(), aptClass(NonSerializable1.class));
+
+    Assert.assertEquals(config.getMappingAliases(),
+            ImmutableMap.of(ArrayList.class.getName(), Collection.class.getName()));
   }
 
   @Test
@@ -88,9 +94,11 @@ public class AptErraiModulesConfigurationTest extends ErraiAptTest {
     assertContainsOnly(config.getIocEnabledAlternatives(), aptClass(IocAlternative1.class), aptClass(IocAlternative2.class));
     assertContainsOnly(config.getIocBlacklist(), aptClass(IocBlacklisted1.class), aptClass(IocBlacklisted2.class));
     assertContainsOnly(config.getIocWhitelist(), aptClass(IocWhitelisted1.class), aptClass(IocWhitelisted2.class));
-    assertContainsOnly(config.getSerializableTypes(), aptClass(Serializable1.class), aptClass(Serializable2.class));
-    assertContainsOnly(config.getNonSerializableTypes(), aptClass(NonSerializable1.class),
-            aptClass(NonSerializable2.class));
+    assertContainsOnly(config.portableTypes(), aptClass(Serializable1.class), aptClass(Serializable2.class));
+    assertContainsOnly(config.nonPortableTypes(), aptClass(NonSerializable1.class), aptClass(NonSerializable2.class));
+
+    assertContainsOnly(config.getMappingAliases().keySet(), ArrayList.class.getName(), HashSet.class.getName());
+    assertContainsOnly(new HashSet<>(config.getMappingAliases().values()), Collection.class.getName());
   }
 
   private static void assertContainsOnly(final Set<?> configValue, final Object... objects) {

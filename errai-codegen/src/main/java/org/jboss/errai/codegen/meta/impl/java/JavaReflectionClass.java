@@ -16,26 +16,7 @@
 
 package org.jboss.errai.codegen.meta.impl.java;
 
-import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
-import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
-
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.enterprise.util.TypeLiteral;
-
+import org.jboss.errai.codegen.meta.MetaAnnotation;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaConstructor;
@@ -45,8 +26,28 @@ import org.jboss.errai.codegen.meta.MetaTypeVariable;
 import org.jboss.errai.codegen.meta.impl.AbstractMetaClass;
 import org.jboss.errai.codegen.util.GenUtil;
 
+import javax.enterprise.util.TypeLiteral;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import static java.util.stream.Collectors.toList;
+import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
+import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
+
 public class JavaReflectionClass extends AbstractMetaClass<Class> {
-  private Annotation[] _annotationsCache;
 
   protected JavaReflectionClass(final Class clazz, final boolean erased) {
     this(clazz, null, erased);
@@ -372,18 +373,14 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
   }
 
   @Override
-  public synchronized Annotation[] unsafeGetAnnotations() {
-    if (_annotationsCache == null) {
-      _annotationsCache = getEnclosedMetaObject().getAnnotations();
-    }
-    return _annotationsCache;
+  public synchronized Collection<MetaAnnotation> getAnnotations() {
+    return Arrays.stream(getEnclosedMetaObject().getAnnotations()).map(JavaReflectionAnnotation::new).collect(toList());
   }
 
   @Override
   public MetaTypeVariable[] getTypeParameters() {
     return JavaReflectionUtil.fromTypeVariable(getEnclosedMetaObject().getTypeParameters());
   }
-
 
   @Override
   public boolean isPrimitive() {

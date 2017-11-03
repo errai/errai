@@ -73,6 +73,7 @@ public class ErraiAppAptGenerator extends AbstractProcessor {
           final AnnotatedSourceElementsFinder annotatedElementsFinder) {
 
     for (final TypeElement erraiAppAnnotation : annotations) {
+      final long start = System.currentTimeMillis();
       System.out.println("Generating files using Errai APT Generators..");
 
       final Types types = processingEnv.getTypeUtils();
@@ -82,7 +83,7 @@ public class ErraiAppAptGenerator extends AbstractProcessor {
       this.erraiAptExportedTypes = new ErraiAptExportedTypes(types, elements, annotatedElementsFinder, new AptResourceFilesFinder(processingEnv.getFiler()));
 
       findGenerators(elements).stream().flatMap(generator -> generator.files().stream()).forEach(this::saveFile);
-      System.out.println("Successfully generated files using Errai APT Generators");
+      System.out.println("Successfully generated files using Errai APT Generators in " + (System.currentTimeMillis() - start) + "ms");
     }
   }
 

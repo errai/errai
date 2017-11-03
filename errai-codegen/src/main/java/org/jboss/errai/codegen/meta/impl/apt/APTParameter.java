@@ -38,7 +38,7 @@ public class APTParameter extends MetaParameter {
   private final VariableElement parameter;
   private final TypeMirror actualParameterType;
 
-  public APTParameter(final VariableElement parameter, final TypeMirror actualParameterType) {
+  APTParameter(final VariableElement parameter, final TypeMirror actualParameterType) {
     this.parameter = parameter;
     this.actualParameterType = actualParameterType;
   }
@@ -50,7 +50,14 @@ public class APTParameter extends MetaParameter {
 
   @Override
   public MetaClass getType() {
-    return new APTClass(actualParameterType).getErased();
+    final APTClass aptClass = new APTClass(actualParameterType);
+    switch (actualParameterType.getKind()) {
+    case TYPEVAR:
+    case WILDCARD:
+      return aptClass.getErased();
+    default:
+      return aptClass;
+    }
   }
 
   @Override
@@ -78,21 +85,6 @@ public class APTParameter extends MetaParameter {
   @Override
   public Boolean isAnnotationPresent(final MetaClass metaClass) {
     return APTClassUtil.isAnnotationPresent(parameter, metaClass);
-  }
-
-  @Override
-  public boolean unsafeIsAnnotationPresent(Class<? extends Annotation> annotation) {
-    return APTClassUtil.unsafeIsAnnotationPresent();
-  }
-
-  @Override
-  public Annotation[] unsafeGetAnnotations() {
-    return APTClassUtil.unsafeGetAnnotations();
-  }
-
-  @Override
-  public <A extends Annotation> A unsafeGetAnnotation(final Class<A> annotation) {
-    return APTClassUtil.unsafeGetAnnotation();
   }
 
   public Element getParameter() {

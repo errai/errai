@@ -18,12 +18,16 @@ package org.jboss.errai.codegen.meta.impl.gwt;
 
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.stream.Collectors;
 
+import org.jboss.errai.codegen.meta.MetaAnnotation;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
 import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.meta.MetaTypeVariable;
+import org.jboss.errai.codegen.meta.impl.java.JavaReflectionAnnotation;
 import org.jboss.errai.codegen.util.GenUtil;
 
 import com.google.gwt.core.ext.typeinfo.JMethod;
@@ -59,12 +63,12 @@ public class GWTMethod extends MetaMethod {
   public MetaParameter[] getParameters() {
     return Arrays.stream(method.getParameters())
             .map(p -> new GWTParameter(oracle, p, this))
-            .toArray(s -> new GWTParameter[s]);
+            .toArray(GWTParameter[]::new);
   }
 
   @Override
-  public synchronized Annotation[] unsafeGetAnnotations() {
-    return annotations;
+  public synchronized Collection<MetaAnnotation> getAnnotations() {
+    return Arrays.stream(annotations).map(JavaReflectionAnnotation::new).collect(Collectors.toList());
   }
 
   @Override
@@ -97,7 +101,7 @@ public class GWTMethod extends MetaMethod {
   public MetaType[] getGenericParameterTypes() {
     return Arrays.stream(method.getParameters())
             .map(p -> GWTUtil.fromType(oracle, p.getType()))
-            .toArray(s -> new MetaType[s]);
+            .toArray(MetaType[]::new);
   }
 
   @Override

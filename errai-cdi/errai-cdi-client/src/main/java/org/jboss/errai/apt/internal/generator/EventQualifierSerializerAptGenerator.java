@@ -22,6 +22,8 @@ import org.jboss.errai.common.apt.ErraiAptExportedTypes;
 import org.jboss.errai.common.apt.ErraiAptGenerators;
 import org.jboss.errai.enterprise.client.cdi.EventQualifierSerializer;
 import org.jboss.errai.enterprise.rebind.EventQualifierSerializerGenerator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Named;
 import javax.inject.Qualifier;
@@ -36,6 +38,8 @@ import static java.util.Collections.singleton;
  */
 public class EventQualifierSerializerAptGenerator extends ErraiAptGenerators.SingleFile {
 
+  public static final Logger logger = LoggerFactory.getLogger(EventQualifierSerializerAptGenerator.class);
+
   private final EventQualifierSerializerGenerator eventQualifierSerializerGenerator;
 
   // IMPORTANT: Do not remove. ErraiAppAptGenerator depends on this constructor
@@ -46,7 +50,10 @@ public class EventQualifierSerializerAptGenerator extends ErraiAptGenerators.Sin
 
   @Override
   public String generate() {
-    return eventQualifierSerializerGenerator.generate(qualifiers());
+    logger.info("Generating " + getClassSimpleName() + "...");
+    final String generated = eventQualifierSerializerGenerator.generate(qualifiers());
+    logger.info("Generated " + getClassSimpleName());
+    return generated;
   }
 
   private Set<MetaClass> qualifiers() {

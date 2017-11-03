@@ -18,48 +18,19 @@ package org.jboss.errai.marshalling.rebind;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+import org.jboss.errai.codegen.meta.MetaAnnotation;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.common.client.api.annotations.Portable;
-import org.jboss.errai.common.metadata.MetaDataScanner;
-import org.jboss.errai.common.metadata.ScannerSingleton;
-import org.jboss.errai.config.rebind.EnvUtil;
-import org.jboss.errai.config.rebind.EnvironmentConfig;
-import org.jboss.errai.config.util.ClassScanner;
+import org.jboss.errai.config.ErraiConfiguration;
+import org.jboss.errai.config.MetaClassFinder;
+import org.jboss.errai.config.marshalling.MarshallingConfiguration;
+import org.jboss.errai.config.propertiesfile.ErraiAppPropertiesConfigurationUtil;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
 import org.jboss.errai.marshalling.client.api.annotations.ImplementationAliases;
 import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
 import org.jboss.errai.marshalling.client.api.exceptions.InvalidMappingException;
-import org.jboss.errai.marshalling.client.marshallers.BigDecimalMarshaller;
-import org.jboss.errai.marshalling.client.marshallers.BigIntegerMarshaller;
-import org.jboss.errai.marshalling.client.marshallers.BooleanMarshaller;
-import org.jboss.errai.marshalling.client.marshallers.ByteMarshaller;
-import org.jboss.errai.marshalling.client.marshallers.CharacterMarshaller;
-import org.jboss.errai.marshalling.client.marshallers.DateMarshaller;
-import org.jboss.errai.marshalling.client.marshallers.DoubleMarshaller;
-import org.jboss.errai.marshalling.client.marshallers.FloatMarshaller;
-import org.jboss.errai.marshalling.client.marshallers.IntegerMarshaller;
-import org.jboss.errai.marshalling.client.marshallers.LinkedHashSetMarshaller;
-import org.jboss.errai.marshalling.client.marshallers.LinkedListMarshaller;
-import org.jboss.errai.marshalling.client.marshallers.LinkedMapMarshaller;
-import org.jboss.errai.marshalling.client.marshallers.ListMarshaller;
-import org.jboss.errai.marshalling.client.marshallers.LongMarshaller;
-import org.jboss.errai.marshalling.client.marshallers.MapMarshaller;
-import org.jboss.errai.marshalling.client.marshallers.ObjectMarshaller;
-import org.jboss.errai.marshalling.client.marshallers.OptionalMarshaller;
-import org.jboss.errai.marshalling.client.marshallers.PriorityQueueMarshaller;
-import org.jboss.errai.marshalling.client.marshallers.QueueMarshaller;
-import org.jboss.errai.marshalling.client.marshallers.SQLDateMarshaller;
-import org.jboss.errai.marshalling.client.marshallers.SetMarshaller;
-import org.jboss.errai.marshalling.client.marshallers.ShortMarshaller;
-import org.jboss.errai.marshalling.client.marshallers.SortedMapMarshaller;
-import org.jboss.errai.marshalling.client.marshallers.SortedSetMarshaller;
-import org.jboss.errai.marshalling.client.marshallers.StringBufferMarshaller;
-import org.jboss.errai.marshalling.client.marshallers.StringBuilderMarshaller;
-import org.jboss.errai.marshalling.client.marshallers.StringMarshaller;
-import org.jboss.errai.marshalling.client.marshallers.TimeMarshaller;
-import org.jboss.errai.marshalling.client.marshallers.TimestampMarshaller;
 import org.jboss.errai.marshalling.rebind.api.CustomMapping;
 import org.jboss.errai.marshalling.rebind.api.InheritedMappings;
 import org.jboss.errai.marshalling.rebind.api.impl.defaultjava.DefaultJavaDefinitionMapper;
@@ -69,10 +40,7 @@ import org.jboss.errai.marshalling.rebind.api.model.Mapping;
 import org.jboss.errai.marshalling.rebind.api.model.MappingDefinition;
 import org.jboss.errai.marshalling.rebind.api.model.MemberMapping;
 import org.jboss.errai.marshalling.rebind.api.model.impl.SimpleConstructorMapping;
-import org.jboss.errai.marshalling.rebind.mappings.builtin.StackTraceElementDefinition;
-import org.jboss.errai.marshalling.rebind.mappings.builtin.ThrowableDefinition;
 import org.jboss.errai.marshalling.server.marshallers.DefaultDefinitionMarshaller;
-import org.jboss.errai.marshalling.server.marshallers.ServerClassMarshaller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -86,12 +54,13 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.Stream.Builder;
 
-import static org.jboss.errai.config.rebind.EnvUtil.getEnvironmentConfig;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 
 /**
  * The default implementation of {@link DefinitionsFactory}. This implementation covers the detection and mapping of
@@ -121,7 +90,12 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
   private final Multimap<String, String> inheritanceMap
       = HashMultimap.create();
 
-  DefinitionsFactoryImpl() {
+  private final ErraiConfiguration erraiConfiguration;
+  private final MetaClassFinder metaClassFinder;
+
+  DefinitionsFactoryImpl(final ErraiConfiguration erraiConfiguration, final MetaClassFinder metaClassFinder) {
+    this.erraiConfiguration = erraiConfiguration;
+    this.metaClassFinder = metaClassFinder;
     loadCustomMappings();
   }
 
@@ -193,13 +167,10 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
   private void loadCustomMappings() {
     exposedClasses.add(MetaClassFactory.get(Object.class));
 
-    final MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
+    ErraiAppPropertiesConfigurationUtil.clearCache();
+    final Set<MetaClass> envExposedClasses = MarshallingConfiguration.allExposedPortableTypes(erraiConfiguration, metaClassFinder);
 
-    EnvUtil.clearCache();
-    final EnvironmentConfig environmentConfig = getEnvironmentConfig();
-    final Set<MetaClass> envExposedClasses = environmentConfig.getExposedClasses();
-
-    for (final Class<?> cls : findCustomMappings(scanner)) {
+    for (final Class<?> cls : findCustomMappings()) {
       if (!MappingDefinition.class.isAssignableFrom(cls)) {
         throw new RuntimeException("@CustomMapping class: " + cls.getName() + " does not inherit "
             + MappingDefinition.class.getName());
@@ -248,36 +219,32 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
       mergeDefinition(def);
     }
 
-    final Collection<MetaClass> cliMarshallers = ClassScanner.getTypesAnnotatedWith(ClientMarshaller.class, true);
+    final Collection<MetaClass> cliMarshallers = metaClassFinder.findAnnotatedWith(ClientMarshaller.class);
     final MetaClass Marshaller_MC = MetaClassFactory.get(Marshaller.class);
 
     for (final MetaClass marshallerMetaClass : cliMarshallers) {
       if (Marshaller_MC.isAssignableFrom(marshallerMetaClass)) {
-        final Class<? extends Marshaller> marshallerCls = marshallerMetaClass.unsafeAsClass().asSubclass(Marshaller.class);
-        try {
-          final Class<?> type = marshallerMetaClass.unsafeGetAnnotation(ClientMarshaller.class).value();
+        final MetaClass type = marshallerMetaClass.getAnnotation(ClientMarshaller.class).get().value();
 
-          final MappingDefinition marshallMappingDef = new MappingDefinition(type, true);
-          marshallMappingDef.setClientMarshallerClass(marshallerCls);
-          addDefinition(marshallMappingDef);
+        final MappingDefinition marshallMappingDef = new MappingDefinition(type, true);
+        marshallMappingDef.setClientMarshallerClass(marshallerMetaClass);
+        addDefinition(marshallMappingDef);
 
-          exposedClasses.add(MetaClassFactory.get(type).asBoxed());
-          typesWithBuiltInMarshallers.add(MetaClassFactory.get(type).asBoxed());
+        exposedClasses.add(type.asBoxed());
+        typesWithBuiltInMarshallers.add(type.asBoxed());
 
-          if (marshallerCls.isAnnotationPresent(ImplementationAliases.class)) {
-            for (final Class<?> aliasCls : marshallerCls.getAnnotation(ImplementationAliases.class).value()) {
-              final MappingDefinition aliasMappingDef = new MappingDefinition(aliasCls, true);
-              aliasMappingDef.setClientMarshallerClass(marshallerCls.asSubclass(Marshaller.class));
-              addDefinition(aliasMappingDef);
+        final MetaClass[] implementationAliases = marshallerMetaClass.getAnnotation(ImplementationAliases.class)
+                .map(a -> a.valueAsArray(MetaClass[].class))
+                .orElse(new MetaClass[0]);
 
-              exposedClasses.add(MetaClassFactory.get(aliasCls).asBoxed());
-              typesWithBuiltInMarshallers.add(MetaClassFactory.get(type).asBoxed());
-              mappingAliases.put(aliasCls.getName(), type.getName());
-            }
-          }
-        }
-        catch (final Throwable t) {
-          throw new RuntimeException("could not instantiate marshaller class: " + marshallerCls.getName(), t);
+        for (final MetaClass aliasCls : implementationAliases) {
+          final MappingDefinition aliasMappingDef = new MappingDefinition(aliasCls, true);
+          aliasMappingDef.setClientMarshallerClass(marshallerMetaClass);
+          addDefinition(aliasMappingDef);
+
+          exposedClasses.add(aliasCls.asBoxed());
+          typesWithBuiltInMarshallers.add(type.asBoxed());
+          mappingAliases.put(aliasCls.getFullyQualifiedName(), type.getFullyQualifiedName());
         }
       }
       else {
@@ -286,46 +253,44 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
       }
     }
 
-    final Set<Class<?>> serverMarshallers = findServerMarshallers(scanner);
-
-    for (final Class<?> marshallerCls : serverMarshallers) {
-      if (Marshaller.class.isAssignableFrom(marshallerCls)) {
+    for (final MetaClass marshallerCls : metaClassFinder.findAnnotatedWith(ServerMarshaller.class)) {
+      if (marshallerCls.isAssignableTo(Marshaller.class)) {
         try {
-          final Class<?> type = marshallerCls.getAnnotation(ServerMarshaller.class).value();
+          final MetaClass type = marshallerCls.getAnnotation(ServerMarshaller.class).get().value();
           final MappingDefinition definition;
 
           if (hasDefinition(type)) {
             definition = getDefinition(type);
-            definition.setServerMarshallerClass(marshallerCls.asSubclass(Marshaller.class));
+            definition.setServerMarshallerClass(marshallerCls);
           }
           else {
             definition = new MappingDefinition(type, true);
-            definition.setServerMarshallerClass(marshallerCls.asSubclass(Marshaller.class));
+            definition.setServerMarshallerClass(marshallerCls);
             addDefinition(definition);
 
-            exposedClasses.add(MetaClassFactory.get(type).asBoxed());
-            typesWithBuiltInMarshallers.add(MetaClassFactory.get(type).asBoxed());
+            exposedClasses.add(type.asBoxed());
+            typesWithBuiltInMarshallers.add(type.asBoxed());
           }
 
           if (marshallerCls.isAnnotationPresent(ImplementationAliases.class)) {
-            for (final Class<?> aliasCls : marshallerCls.getAnnotation(ImplementationAliases.class).value()) {
+            for (final MetaClass aliasCls : marshallerCls.getAnnotation(ImplementationAliases.class).get().valueAsArray(MetaClass[].class)) {
               if (hasDefinition(aliasCls)) {
-                getDefinition(aliasCls).setServerMarshallerClass(marshallerCls.asSubclass(Marshaller.class));
+                getDefinition(aliasCls).setServerMarshallerClass(marshallerCls);
               }
               else {
                 final MappingDefinition aliasMappingDef = new MappingDefinition(aliasCls, true);
-                aliasMappingDef.setServerMarshallerClass(marshallerCls.asSubclass(Marshaller.class));
+                aliasMappingDef.setServerMarshallerClass(marshallerCls);
                 addDefinition(aliasMappingDef);
 
-                exposedClasses.add(MetaClassFactory.get(aliasCls));
-                typesWithBuiltInMarshallers.add(MetaClassFactory.get(type).asBoxed());
-                mappingAliases.put(aliasCls.getName(), type.getName());
+                exposedClasses.add(aliasCls);
+                typesWithBuiltInMarshallers.add(type.asBoxed());
+                mappingAliases.put(aliasCls.getFullyQualifiedName(), type.getFullyQualifiedName());
               }
             }
           }
         }
         catch (final Throwable t) {
-          throw new RuntimeException("could not instantiate marshaller class: " + marshallerCls.getName(), t);
+          throw new RuntimeException("could not instantiate marshaller class: " + marshallerCls.getFullyQualifiedName(), t);
         }
       }
       else {
@@ -339,20 +304,20 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
 
     final List<MetaClass> exposedSuperTypes = exposedClasses
       .stream()
-      .filter(mc -> mc.unsafeIsAnnotationPresent(Portable.class) && mc.unsafeGetAnnotation(Portable.class).mapSuperTypes())
+      .filter(mc -> mc.getAnnotation(Portable.class).map(a -> a.<Boolean>value("mapSuperTypes")).orElse(false))
       .flatMap(mc -> {
         final Builder<MetaClass> builder = Stream.builder();
         MetaClass cur = mc;
         while (cur.getSuperClass() != null && !cur.getSuperClass().getFullyQualifiedName().equals(Object.class.getName())) {
           builder.accept((cur = cur.getSuperClass()));
         }
-        return builder.build().filter(superType -> superType.isConcrete());
+        return builder.build().filter(MetaClass::isConcrete);
       })
-      .collect(Collectors.toList());
+      .collect(toList());
     exposedClasses.addAll(exposedSuperTypes);
 
     final Map<String, String> configuredMappingAliases = new HashMap<>();
-    configuredMappingAliases.putAll(environmentConfig.getMappingAliases());
+    configuredMappingAliases.putAll(erraiConfiguration.modules().getMappingAliases());
     configuredMappingAliases.putAll(defaultMappingAliases());
 
     mappingAliases.putAll(configuredMappingAliases);
@@ -374,9 +339,9 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
       if (mappedClass.isSynthetic())
         continue;
 
-      final Portable portable = mappedClass.unsafeGetAnnotation(Portable.class);
-      if (portable != null && !portable.aliasOf().equals(Object.class)) {
-        aliasToMarshaller.put(mappedClass, MetaClassFactory.get(portable.aliasOf()));
+      final Optional<MetaAnnotation> portable = mappedClass.getAnnotation(Portable.class);
+      if (portable.isPresent() && !portable.get().<MetaClass>value("aliasOf").instanceOf(Object.class)) {
+        aliasToMarshaller.put(mappedClass, portable.get().value("aliasOf"));
       }
       else if (!hasDefinition(mappedClass)) {
         final MappingDefinition def = DefaultJavaDefinitionMapper.map(mappedClass, this);
@@ -393,11 +358,10 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
 
     for (final MetaClass enumType : enums) {
       if (!hasDefinition(enumType)) {
-        final MappingDefinition enumDef = DefaultJavaDefinitionMapper
-            .map(MetaClassFactory.get(enumType.unsafeAsClass()), this);
+        final MappingDefinition enumDef = DefaultJavaDefinitionMapper.map(enumType, this);
         enumDef.setMarshallerInstance(new DefaultDefinitionMarshaller(enumDef));
         addDefinition(enumDef);
-        exposedClasses.add(MetaClassFactory.get(enumType.unsafeAsClass()));
+        exposedClasses.add(enumType);
       }
     }
 
@@ -460,58 +424,15 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
     log.debug("comprehended " + exposedClasses.size() + " classes");
   }
 
-  private Set<Class<?>> findCustomMappings(final MetaDataScanner scanner) {
-    Set<Class<?>> scannedMappings = scanner.getTypesAnnotatedWith(CustomMapping.class, true);
-    if (scannedMappings.isEmpty()) {
-      // This should only happen in OSGI environments where we can't get classpath URLs
-      log.warn("Unable to scan classpath for CustomMappings. Falling back to default.");
-      scannedMappings = new HashSet<>();
-      scannedMappings.add(ThrowableDefinition.class);
-      scannedMappings.add(StackTraceElementDefinition.class);
-    }
-
-    return scannedMappings;
-  }
-
-  private Set<Class<?>> findServerMarshallers(final MetaDataScanner scanner) {
-    Set<Class<?>> serverMarshallers = scanner.getTypesAnnotatedWith(ServerMarshaller.class, true);
-
-    if (serverMarshallers.isEmpty()) {
-      // This should only happen in OSGI environments where we can't get classpath URLs
-      log.warn("Unable to scan classpath for ServerMarshallers. Falling back to default.");
-      serverMarshallers = new HashSet<>();
-      serverMarshallers.add(BigDecimalMarshaller.class);
-      serverMarshallers.add(BigIntegerMarshaller.class);
-      serverMarshallers.add(BooleanMarshaller.class);
-      serverMarshallers.add(ByteMarshaller.class);
-      serverMarshallers.add(CharacterMarshaller.class);
-      serverMarshallers.add(DateMarshaller.class);
-      serverMarshallers.add(DoubleMarshaller.class);
-      serverMarshallers.add(FloatMarshaller.class);
-      serverMarshallers.add(IntegerMarshaller.class);
-      serverMarshallers.add(LinkedHashSetMarshaller.class);
-      serverMarshallers.add(LinkedListMarshaller.class);
-      serverMarshallers.add(LinkedMapMarshaller.class);
-      serverMarshallers.add(ListMarshaller.class);
-      serverMarshallers.add(LongMarshaller.class);
-      serverMarshallers.add(MapMarshaller.class);
-      serverMarshallers.add(ObjectMarshaller.class);
-      serverMarshallers.add(PriorityQueueMarshaller.class);
-      serverMarshallers.add(QueueMarshaller.class);
-      serverMarshallers.add(SetMarshaller.class);
-      serverMarshallers.add(ShortMarshaller.class);
-      serverMarshallers.add(SortedMapMarshaller.class);
-      serverMarshallers.add(SortedSetMarshaller.class);
-      serverMarshallers.add(SQLDateMarshaller.class);
-      serverMarshallers.add(StringBufferMarshaller.class);
-      serverMarshallers.add(StringBuilderMarshaller.class);
-      serverMarshallers.add(StringMarshaller.class);
-      serverMarshallers.add(TimeMarshaller.class);
-      serverMarshallers.add(TimestampMarshaller.class);
-      serverMarshallers.add(ServerClassMarshaller.class);
-      serverMarshallers.add(OptionalMarshaller.class);
-    }
-    return serverMarshallers;
+  private Set<Class<?>> findCustomMappings() {
+    // Classes annotated with @CustomMapping annotation have to be pre-compiled
+    return metaClassFinder.findAnnotatedWith(CustomMapping.class).stream().map(s -> {
+      try {
+        return Class.forName(s.getFullyQualifiedName());
+      } catch (final ClassNotFoundException e) {
+        throw new RuntimeException("Failed to load @CustomMapping class " + s.getFullyQualifiedName(), e);
+      }
+    }).collect(toSet());
   }
 
   @Override

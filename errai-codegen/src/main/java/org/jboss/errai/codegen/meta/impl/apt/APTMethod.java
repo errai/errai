@@ -44,13 +44,9 @@ public class APTMethod extends MetaMethod implements APTMember {
   private final ExecutableElement method;
   private final DeclaredType enclosedMetaObject;
 
-  @SuppressWarnings("unchecked")
-  public APTMethod(final ExecutableElement method, final MetaClass metaClass) {
+  APTMethod(final ExecutableElement method, final APTClass metaClass) {
     this.method = method;
-
-    //We know for sure that every MetaClass is an AbstractMetaClass
-    final AbstractMetaClass<TypeMirror> abstractMetaClass = (AbstractMetaClass<TypeMirror>) metaClass;
-    this.enclosedMetaObject = (DeclaredType) abstractMetaClass.getEnclosedMetaObject();
+    this.enclosedMetaObject = (DeclaredType) metaClass.getEnclosedMetaObject();
   }
 
   @Override
@@ -113,20 +109,5 @@ public class APTMethod extends MetaMethod implements APTMember {
   @Override
   public Boolean isAnnotationPresent(final MetaClass metaClass) {
     return APTClassUtil.isAnnotationPresent(method, metaClass);
-  }
-
-  @Override
-  public boolean unsafeIsAnnotationPresent(Class<? extends Annotation> annotation) {
-    return APTClassUtil.unsafeIsAnnotationPresent();
-  }
-
-  @Override
-  public Annotation[] unsafeGetAnnotations() {
-    return APTClassUtil.unsafeGetAnnotations();
-  }
-
-  @Override
-  public <A extends Annotation> A unsafeGetAnnotation(final Class<A> annotation) {
-    return APTClassUtil.unsafeGetAnnotation();
   }
 }

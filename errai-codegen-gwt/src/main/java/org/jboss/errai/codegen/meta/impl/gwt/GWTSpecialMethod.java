@@ -17,10 +17,13 @@
 package org.jboss.errai.codegen.meta.impl.gwt;
 
 import java.lang.annotation.Annotation;
+import java.util.Collection;
+import java.util.Collections;
 
 import org.jboss.errai.codegen.DefModifiers;
 import org.jboss.errai.codegen.Modifier;
 import org.jboss.errai.codegen.builder.impl.Scope;
+import org.jboss.errai.codegen.meta.MetaAnnotation;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaMethod;
@@ -78,8 +81,8 @@ public class GWTSpecialMethod extends MetaMethod {
   }
 
   @Override
-  public Annotation[] unsafeGetAnnotations() {
-    return new Annotation[0];
+  public Collection<MetaAnnotation> getAnnotations() {
+    return Collections.emptyList();
   }
 
   @Override

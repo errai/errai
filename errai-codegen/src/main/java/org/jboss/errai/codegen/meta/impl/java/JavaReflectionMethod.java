@@ -16,13 +16,8 @@
 
 package org.jboss.errai.codegen.meta.impl.java;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.List;
-
+import com.google.common.reflect.TypeToken;
+import org.jboss.errai.codegen.meta.MetaAnnotation;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaMethod;
@@ -31,7 +26,16 @@ import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.meta.MetaTypeVariable;
 import org.jboss.errai.common.client.api.Assert;
 
-import com.google.common.reflect.TypeToken;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+
+import static java.util.stream.Collectors.toList;
 
 public class JavaReflectionMethod extends MetaMethod {
   private final Method method;
@@ -98,13 +102,9 @@ public class JavaReflectionMethod extends MetaMethod {
     return JavaReflectionUtil.fromTypeVariable(method.getTypeParameters());
   }
 
-  private volatile Annotation[] _annotationsCache;
-
   @Override
-  public synchronized Annotation[] unsafeGetAnnotations() {
-    if (_annotationsCache != null)
-      return _annotationsCache;
-    return _annotationsCache = method.getAnnotations();
+  public Collection<MetaAnnotation> getAnnotations() {
+    return Arrays.stream(method.getAnnotations()).map(JavaReflectionAnnotation::new).collect(toList());
   }
 
   @Override

@@ -18,7 +18,7 @@ package org.jboss.errai.apt.internal.generator;
 
 import org.jboss.errai.common.apt.ErraiAptExportedTypes;
 import org.jboss.errai.common.apt.ErraiAptGenerators;
-import org.jboss.errai.common.apt.MetaClassFinder;
+import org.jboss.errai.config.MetaClassFinder;
 import org.jboss.errai.common.apt.configuration.AptErraiConfiguration;
 import org.jboss.errai.config.ErraiConfiguration;
 import org.jboss.errai.databinding.client.api.Bindable;

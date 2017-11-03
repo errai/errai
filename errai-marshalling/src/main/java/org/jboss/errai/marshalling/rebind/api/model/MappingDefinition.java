@@ -36,8 +36,8 @@ public class MappingDefinition {
   private boolean lazy;
   private final boolean doNotGenerate;
 
-  private Class<? extends Marshaller> clientMarshallerClass;
-  private Class<? extends Marshaller> serverMarshallerClass;
+  private MetaClass clientMarshallerClass;
+  private MetaClass serverMarshallerClass;
 
   private Marshaller<Object> marshallerInstance;
 
@@ -50,22 +50,18 @@ public class MappingDefinition {
     setMarshallerInstance(marshaller);
     instantiationMapping = new NoConstructMapping();
     this.doNotGenerate = doNotGenerate;
-    this.memberMappings = new ArrayList<MemberMapping>();
+    this.memberMappings = new ArrayList<>();
   }
 
   protected MappingDefinition(final Class<?> toMap) {
-    this(toMap, false);
-  }
-
-  public MappingDefinition(final Class<?> toMap, final boolean doNotGenerate) {
-    this(JavaReflectionClass.newUncachedInstance(toMap), doNotGenerate);
+    this(JavaReflectionClass.newUncachedInstance(toMap), false);
   }
 
   public MappingDefinition(final MetaClass toMap, final boolean doNotGenerate) {
     this.toMap = toMap;
     setInstantiationMapping(new SimpleConstructorMapping());
     this.doNotGenerate = doNotGenerate;
-    this.memberMappings = new ArrayList<MemberMapping>();
+    this.memberMappings = new ArrayList<>();
   }
 
 
@@ -73,19 +69,19 @@ public class MappingDefinition {
     return toMap;
   }
 
-  public Class<? extends Marshaller> getClientMarshallerClass() {
+  public MetaClass getClientMarshallerClass() {
     return clientMarshallerClass;
   }
 
-  public void setClientMarshallerClass(final Class<? extends Marshaller> clientMarshallerClass) {
+  public void setClientMarshallerClass(final MetaClass clientMarshallerClass) {
     this.clientMarshallerClass = clientMarshallerClass;
   }
 
-  public Class<? extends Marshaller> getServerMarshallerClass() {
+  public MetaClass getServerMarshallerClass() {
     return serverMarshallerClass;
   }
 
-  public void setServerMarshallerClass(final Class<? extends Marshaller> serverMarshallerClass) {
+  public void setServerMarshallerClass(final MetaClass serverMarshallerClass) {
     this.serverMarshallerClass = serverMarshallerClass;
   }
 

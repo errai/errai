@@ -87,7 +87,7 @@ public final class ClassScanner {
       for (final MetaClass metaClass : getAllReloadableCachedClasses(genCtx)) {
         for (final MetaMethod method : metaClass.getDeclaredMethods()) {
           for (final MetaParameter parameter : method.getParameters()) {
-            if (parameter.unsafeIsAnnotationPresent(annotation)) {
+            if (parameter.isAnnotationPresent(annotation)) {
               result.add(parameter);
             }
           }
@@ -99,7 +99,7 @@ public final class ClassScanner {
           if (!isReloadable(clazz) && MetaClassFactory.isKnownType(clazz.getName())) {
             MetaMethod mm = new JavaReflectionMethod(m);
             for (final MetaParameter parameter : mm.getParameters()) {
-              if (parameter.unsafeIsAnnotationPresent(annotation)) {
+              if (parameter.isAnnotationPresent(annotation)) {
                 result.add(parameter);
               }
             }
@@ -112,7 +112,7 @@ public final class ClassScanner {
       for (final MetaClass metaClass : MetaClassFactory.getAllCachedClasses()) {
         for (final MetaMethod method : metaClass.getDeclaredMethods()) {
           for (final MetaParameter parameter : method.getParameters()) {
-            if (parameter.unsafeIsAnnotationPresent(annotation)) {
+            if (parameter.isAnnotationPresent(annotation)) {
               result.add(parameter);
             }
           }
@@ -136,7 +136,7 @@ public final class ClassScanner {
 
     if (genCtx != null) {
       for (final MetaClass metaClass : getAllReloadableCachedClasses(genCtx)) {
-        if (metaClass.unsafeIsAnnotationPresent(annotation)) {
+        if (metaClass.isAnnotationPresent(annotation)) {
           result.add(metaClass);
         }
       }
@@ -151,7 +151,7 @@ public final class ClassScanner {
     }
     else {
       for (final MetaClass metaClass : MetaClassFactory.getAllCachedClasses()) {
-        if (metaClass.unsafeIsAnnotationPresent(annotation)) {
+        if (metaClass.isAnnotationPresent(annotation)) {
           result.add(metaClass);
         }
       }
@@ -201,7 +201,7 @@ public final class ClassScanner {
     if (genCtx != null) {
       for (final MetaClass metaClass : getAllReloadableCachedClasses(genCtx)) {
         for (final MetaMethod metaMethod : metaClass.getDeclaredMethods()) {
-          if (metaMethod.unsafeIsAnnotationPresent(annotation)) {
+          if (metaMethod.isAnnotationPresent(annotation)) {
             result.add(metaMethod);
           }
         }
@@ -220,7 +220,7 @@ public final class ClassScanner {
     else {
       for (final MetaClass metaClass : MetaClassFactory.getAllCachedClasses()) {
         for (final MetaMethod metaMethod : metaClass.getDeclaredMethods()) {
-          if (metaMethod.unsafeIsAnnotationPresent(annotation)) {
+          if (metaMethod.isAnnotationPresent(annotation)) {
             result.add(metaMethod);
           }
         }
@@ -238,7 +238,7 @@ public final class ClassScanner {
     if (genCtx != null) {
       for (final MetaClass metaClass : getAllReloadableCachedClasses(genCtx)) {
         for (final MetaField metaField : metaClass.getDeclaredFields()) {
-          if (metaField.unsafeIsAnnotationPresent(annotation)) {
+          if (metaField.isAnnotationPresent(annotation)) {
             result.add(metaField);
           }
         }
@@ -256,7 +256,7 @@ public final class ClassScanner {
     else {
       for (final MetaClass metaClass : MetaClassFactory.getAllCachedClasses()) {
         for (final MetaField metaField : metaClass.getDeclaredFields()) {
-          if (metaField.unsafeIsAnnotationPresent(annotation)) {
+          if (metaField.isAnnotationPresent(annotation)) {
             result.add(metaField);
           }
         }

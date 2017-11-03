@@ -16,14 +16,20 @@
 
 package org.jboss.errai.codegen.meta.impl.java;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-
+import org.jboss.errai.codegen.meta.MetaAnnotation;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaType;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.*;
 
 public class JavaReflectionField extends MetaField {
   private final Field field;
@@ -42,14 +48,9 @@ public class JavaReflectionField extends MetaField {
     return MetaClassFactory.get(field.getType(), field.getGenericType());
   }
 
-  private volatile Annotation[] _annotationsCache;
-
   @Override
-  public synchronized Annotation[] unsafeGetAnnotations() {
-    if (_annotationsCache != null) {
-      return _annotationsCache;
-    }
-    return _annotationsCache = field.getAnnotations();
+  public Collection<MetaAnnotation> getAnnotations() {
+    return Arrays.stream(field.getAnnotations()).map(JavaReflectionAnnotation::new).collect(toList());
   }
 
   @Override

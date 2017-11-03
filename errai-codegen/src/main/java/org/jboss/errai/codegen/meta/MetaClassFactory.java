@@ -588,7 +588,7 @@ public final class MetaClassFactory {
     return asClassArray(type);
   }
 
-  public static Class<?>[] asClassArray(final MetaType[] cls) {
+  private static Class<?>[] asClassArray(final MetaType[] cls) {
     final Class<?>[] newClasses = new Class<?>[cls.length];
     for (int i = 0; i < cls.length; i++) {
       if (cls[i] instanceof MetaParameterizedType) {

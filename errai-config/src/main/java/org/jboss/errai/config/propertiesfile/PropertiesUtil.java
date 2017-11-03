@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.config;
+package org.jboss.errai.config.propertiesfile;
 
 import org.jboss.errai.common.metadata.ScannerSingleton;
 
@@ -34,18 +34,17 @@ public class PropertiesUtil {
    * 
    * @param propertyName
    *          The name of the property for which to get values.
-   * @param split
+   * @param splitCharacter
    *          The regex used to split lists in individual ErraiApp.properties
    *          files (or {@literal null}).
    * @return A collection of values for the property name.
    */
-  public static Collection<String> getPropertyValues(final String propertyName, final String split) {
+  public static Collection<String> getPropertyValues(final String propertyName, final String splitCharacter) {
     final Collection<String> retVal = new HashSet<String>();
 
-    final Collection<String> valueCollection = ScannerSingleton.getOrCreateInstance().getErraiProperties()
-            .get(propertyName);
+    final Collection<String> valueCollection = ScannerSingleton.getOrCreateInstance().getErraiProperties().get(propertyName);
     for (final String list : valueCollection) {
-      final String[] values = list.split(split);
+      final String[] values = list.split(splitCharacter);
       for (final String value : values) {
         retVal.add(value.trim());
       }

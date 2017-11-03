@@ -17,12 +17,19 @@
 package org.jboss.errai.codegen;
 
 import org.jboss.errai.codegen.builder.callstack.LoadClassReference;
+import org.jboss.errai.codegen.meta.MetaAnnotation;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaClassMember;
 import org.jboss.errai.codegen.meta.MetaParameter;
+import org.jboss.errai.codegen.meta.impl.java.JavaReflectionAnnotation;
 
 import java.lang.annotation.Annotation;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -134,18 +141,8 @@ public class Parameter extends AbstractStatement {
       }
 
       @Override
-      public Annotation[] unsafeGetAnnotations() {
-        return new Annotation[0];
-      }
-
-      @Override
-      public boolean unsafeIsAnnotationPresent(Class<? extends Annotation> annotation) {
-        return false;
-      }
-
-      @Override
-      public <A extends Annotation> A unsafeGetAnnotation(Class<A> annotation) {
-        return null;
+      public Collection<MetaAnnotation> getAnnotations() {
+        return Collections.emptyList();
       }
     };
   }

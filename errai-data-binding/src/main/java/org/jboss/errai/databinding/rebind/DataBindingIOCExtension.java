@@ -18,8 +18,9 @@ package org.jboss.errai.databinding.rebind;
 
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
-import org.jboss.errai.codegen.meta.HasAnnotations;
 import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.impl.java.JavaReflectionAnnotation;
+import org.jboss.errai.databinding.client.api.Bindable;
 import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.ioc.client.api.IOCExtension;
 import org.jboss.errai.ioc.client.container.RefHolder;
@@ -80,32 +81,8 @@ public class DataBindingIOCExtension implements IOCExtensionConfigurator {
             context.metaClassFinder());
 
     for (final MetaClass modelBean : allBindableTypes) {
-      final InjectableHandle handle = new InjectableHandle(modelBean,
-              injectionContext.getQualifierFactory().forSource(new HasAnnotations() {
-
-                @Override
-                public boolean unsafeIsAnnotationPresent(Class<? extends Annotation> annotation) {
-                  return Model.class.equals(annotation);
-                }
-
-                @Override
-                public Annotation[] unsafeGetAnnotations() {
-                  return new Annotation[] {
-                      anno
-                  };
-                }
-
-                @SuppressWarnings("unchecked")
-                @Override
-                public <A extends Annotation> A unsafeGetAnnotation(Class<A> annotation) {
-                  if (unsafeIsAnnotationPresent(annotation)) {
-                    return (A) anno;
-                  }
-                  else {
-                    return null;
-                  }
-                }
-              }));
+      final InjectableHandle handle = new InjectableHandle(modelBean, injectionContext.getQualifierFactory()
+              .forSource(() -> Collections.singleton(new JavaReflectionAnnotation(anno))));
 
       injectionContext.registerInjectableProvider(handle, new InjectableProvider() {
 

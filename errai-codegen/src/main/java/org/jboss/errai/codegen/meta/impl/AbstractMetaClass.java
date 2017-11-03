@@ -388,34 +388,6 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
   }
 
   @Override
-  public List<MetaMethod> getMethodsWithMetaAnnotations(final Class<? extends Annotation> annotation) {
-    final List<MetaMethod> methods = new ArrayList<>();
-    MetaClass scanTarget = this;
-    while (scanTarget != null) {
-      for (final MetaMethod m : scanTarget.getDeclaredMethods()) {
-        for (final Annotation a : m.unsafeGetAnnotations()) {
-          if (_findMetaAnnotation(a.annotationType(), annotation)) {
-            methods.add(m);
-          }
-        }
-      }
-      scanTarget = scanTarget.getSuperClass();
-    }
-
-    return methods;
-  }
-
-  private static boolean _findMetaAnnotation(final Class<? extends Annotation> root,
-                                             final Class<? extends Annotation> annotation) {
-    if (root.isAnnotationPresent(annotation)) {
-      return true;
-    }
-    else {
-      return Arrays.stream(root.getAnnotations()).anyMatch(a -> _findMetaAnnotation(a.annotationType(), annotation));
-    }
-  }
-
-  @Override
   public final List<MetaField> getFieldsAnnotatedWith(final Class<? extends Annotation> annotation) {
     final List<MetaField> fields = new ArrayList<>();
     MetaClass scanTarget = this;
@@ -428,24 +400,6 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
       scanTarget = scanTarget.getSuperClass();
     }
     return Collections.unmodifiableList(fields);
-  }
-
-  @Override
-  public List<MetaField> getFieldsWithMetaAnnotations(final Class<? extends Annotation> annotation) {
-    final List<MetaField> methods = new ArrayList<>();
-    MetaClass scanTarget = this;
-    while (scanTarget != null) {
-      for (final MetaField m : scanTarget.getDeclaredFields()) {
-        for (final Annotation a : m.unsafeGetAnnotations()) {
-          if (_findMetaAnnotation(a.annotationType(), annotation)) {
-            methods.add(m);
-          }
-        }
-      }
-      scanTarget = scanTarget.getSuperClass();
-    }
-
-    return methods;
   }
 
   @Override

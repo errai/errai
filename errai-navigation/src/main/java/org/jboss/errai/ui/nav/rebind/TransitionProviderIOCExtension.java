@@ -27,7 +27,8 @@ import org.jboss.errai.codegen.builder.impl.StatementBuilder;
 import org.jboss.errai.codegen.exception.GenerationException;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
-import org.jboss.errai.common.apt.MetaClassFinder;
+import org.jboss.errai.codegen.meta.impl.java.JavaReflectionAnnotation;
+import org.jboss.errai.config.MetaClassFinder;
 import org.jboss.errai.common.client.dom.Anchor;
 import org.jboss.errai.common.client.dom.Event;
 import org.jboss.errai.common.client.dom.EventListener;
@@ -54,6 +55,7 @@ import org.jboss.errai.ui.nav.client.local.api.TransitionToRole;
 import javax.enterprise.context.Dependent;
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -114,9 +116,9 @@ public class TransitionProviderIOCExtension implements IOCExtensionConfigurator 
   public void afterInitialization(final IOCProcessingContext context, final InjectionContext injectionContext) {
     final QualifierFactory qualifierFactory = injectionContext.getQualifierFactory();
     final InjectableHandle transitionToHandle = new InjectableHandle(MetaClassFactory.get(Anchor.class),
-            qualifierFactory.forSource(() -> new Annotation[] { TRANSITION_TO }));
+            qualifierFactory.forSource(() -> Collections.singleton(new JavaReflectionAnnotation(TRANSITION_TO))));
     final InjectableHandle transitionToRoleHandle = new InjectableHandle(MetaClassFactory.get(Anchor.class),
-            qualifierFactory.forSource(() -> new Annotation[] { TRANSITION_TO_ROLE }));
+            qualifierFactory.forSource(() -> Collections.singleton(new JavaReflectionAnnotation(TRANSITION_TO_ROLE))));
 
     scanForUniquePageRoles(context.metaClassFinder());
     registerProvider(injectionContext, transitionToHandle);

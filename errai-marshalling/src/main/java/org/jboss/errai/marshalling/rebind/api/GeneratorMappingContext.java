@@ -16,22 +16,23 @@
 
 package org.jboss.errai.marshalling.rebind.api;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassMember;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.util.PrivateAccessUtil;
+import org.jboss.errai.config.ErraiConfiguration;
+import org.jboss.errai.config.MetaClassFinder;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.rebind.DefinitionsFactory;
 import org.jboss.errai.marshalling.rebind.DefinitionsFactorySingleton;
 import org.jboss.errai.marshalling.rebind.MarshallerGeneratorFactory;
 import org.jboss.errai.marshalling.server.ServerMappingContext;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -39,24 +40,23 @@ import org.jboss.errai.marshalling.server.ServerMappingContext;
 public class GeneratorMappingContext implements ServerMappingContext {
 
   private final MarshallerGeneratorFactory marshallerGeneratorFactory;
-  private final DefinitionsFactory definitionsFactory = DefinitionsFactorySingleton.get();
+  private final DefinitionsFactory definitionsFactory;
 
   private final Set<String> generatedMarshallers = new HashSet<String>();
   private final List<String> renderedMarshallers = new ArrayList<String>();
 
-  private final ClassStructureBuilder<?> classStructureBuilder;
   private final ArrayMarshallerCallback arrayMarshallerCallback;
 
   private final Set<String> exposedMembers = new HashSet<String>();
 
-  public GeneratorMappingContext(final MarshallerGeneratorFactory marshallerGeneratorFactory,
-      final ClassStructureBuilder<?> classStructureBuilder,
+  GeneratorMappingContext(final MarshallerGeneratorFactory marshallerGeneratorFactory,
+          final ArrayMarshallerCallback callback,
+          final ErraiConfiguration erraiConfiguration,
+          final MetaClassFinder metaClassFinder) {
 
-      final ArrayMarshallerCallback callback) {
-
+    this.definitionsFactory = DefinitionsFactorySingleton.get(erraiConfiguration, metaClassFinder);
     this.marshallerGeneratorFactory = marshallerGeneratorFactory;
     this.arrayMarshallerCallback = callback;
-    this.classStructureBuilder = classStructureBuilder;
   }
 
   public MarshallerGeneratorFactory getMarshallerGeneratorFactory() {
@@ -118,9 +118,5 @@ public class GeneratorMappingContext implements ServerMappingContext {
 
   public boolean isExposed(final MetaClassMember member, final String marshallerClass) {
     return exposedMembers.contains(marshallerClass  + "." + getPrivateMemberName(member));
-  }
-
-  public ClassStructureBuilder<?> getClassStructureBuilder() {
-    return classStructureBuilder;
   }
 }

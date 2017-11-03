@@ -21,13 +21,10 @@ import org.jboss.errai.codegen.meta.MetaClass;
 /**
  * @author Max Barkley <mbarkley@redhat.com>
  */
+@FunctionalInterface
 public interface MarshallerGenerationCallback {
 
-  public static final MarshallerGenerationCallback NO_OP = new MarshallerGenerationCallback() {
-    @Override
-    public void callback(MetaClass _) {
-      return;
-    }
+  MarshallerGenerationCallback NO_OP = x -> {
   };
 
   void callback(MetaClass marshalledType);

@@ -21,6 +21,7 @@ import org.jboss.errai.marshalling.client.api.json.EJValue;
 /**
  * @author Mike Brock
  */
+@FunctionalInterface
 public interface Parser {
   public EJValue parse(String input);
 }

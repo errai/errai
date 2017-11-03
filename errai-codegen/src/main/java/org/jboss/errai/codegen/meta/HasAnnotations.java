@@ -16,14 +16,9 @@
 
 package org.jboss.errai.codegen.meta;
 
-import org.jboss.errai.codegen.meta.impl.java.JavaReflectionAnnotation;
-
 import java.lang.annotation.Annotation;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Optional;
-
-import static java.util.stream.Collectors.toList;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -32,47 +27,21 @@ import static java.util.stream.Collectors.toList;
 @FunctionalInterface
 public interface HasAnnotations {
 
-  /**
-   * @deprecated This method is not safe to use in APT environment.
-   */
-  @Deprecated
-  Annotation[] unsafeGetAnnotations();
-
-  /**
-   * @deprecated This method is not safe to use in APT environment.
-   */
-  @Deprecated
-  default boolean unsafeIsAnnotationPresent(final Class<? extends Annotation> annotation) {
-    return isAnnotationPresent(annotation);
-  }
-
-  /**
-   * @deprecated This method is not safe to use in APT environment.
-   */
-  @Deprecated
-  @SuppressWarnings("unchecked")
-  default <A extends Annotation> A unsafeGetAnnotation(final Class<A> annotation) {
-    // Please no hate or else null.
-    return (A) Arrays.stream(unsafeGetAnnotations())
-            .filter(a -> a.annotationType().equals(annotation))
-            .findFirst()
-            .orElse(null);
-  }
+  Collection<MetaAnnotation> getAnnotations();
 
   default Optional<MetaAnnotation> getAnnotation(final Class<? extends Annotation> annotationClass) {
-    return Optional.ofNullable(unsafeGetAnnotation(annotationClass)).map(JavaReflectionAnnotation::new);
+    return getAnnotations().stream().filter(a -> a.annotationType().instanceOf(annotationClass)).findFirst();
   }
 
-  @SuppressWarnings("unchecked")
-  default Boolean isAnnotationPresent(final MetaClass metaClass) {
-    return unsafeIsAnnotationPresent((Class<? extends Annotation>) metaClass.unsafeAsClass());
-  }
-
-  default Collection<MetaAnnotation> getAnnotations() {
-    return Arrays.stream(unsafeGetAnnotations()).map(JavaReflectionAnnotation::new).collect(toList());
+  default Optional<MetaAnnotation> getAnnotation(final MetaClass annotationClass) {
+    return getAnnotations().stream().filter(a -> a.annotationType().equals(annotationClass)).findFirst();
   }
 
   default Boolean isAnnotationPresent(final Class<? extends Annotation> annotationClass) {
     return getAnnotation(annotationClass).isPresent();
+  }
+
+  default Boolean isAnnotationPresent(final MetaClass metaClass) {
+    return getAnnotation(metaClass).isPresent();
   }
 }

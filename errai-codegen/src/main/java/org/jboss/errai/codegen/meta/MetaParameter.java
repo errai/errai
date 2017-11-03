@@ -19,7 +19,7 @@ package org.jboss.errai.codegen.meta;
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-public abstract class MetaParameter extends AbstractHasAnnotations {
+public abstract class MetaParameter implements HasAnnotations {
   public abstract String getName();
 
   public abstract MetaClass getType();

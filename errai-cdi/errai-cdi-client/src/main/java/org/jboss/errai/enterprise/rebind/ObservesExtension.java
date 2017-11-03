@@ -19,8 +19,6 @@ package org.jboss.errai.enterprise.rebind;
 import jsinterop.annotations.JsType;
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.Subscription;
-import org.jboss.errai.bus.rebind.RpcTypesProvider;
-import org.jboss.errai.bus.server.annotations.Remote;
 import org.jboss.errai.codegen.Context;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
@@ -29,16 +27,13 @@ import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.builder.ContextualStatementBuilder;
 import org.jboss.errai.codegen.meta.MetaAnnotation;
 import org.jboss.errai.codegen.meta.MetaClass;
-import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
 import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
-import org.jboss.errai.common.apt.MetaClassFinder;
+import org.jboss.errai.config.MetaClassFinder;
+import org.jboss.errai.config.marshalling.MarshallingConfiguration;
 import org.jboss.errai.common.client.api.annotations.LocalEvent;
-import org.jboss.errai.common.client.api.annotations.Portable;
-import org.jboss.errai.common.client.types.TypeHandler;
-import org.jboss.errai.common.client.types.TypeHandlerFactory;
 import org.jboss.errai.config.ErraiConfiguration;
 import org.jboss.errai.enterprise.client.cdi.AbstractCDIEventCallback;
 import org.jboss.errai.enterprise.client.cdi.JsTypeEventObserver;
@@ -55,13 +50,10 @@ import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Any;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import static java.util.stream.Collectors.toMap;
-import static java.util.stream.Collectors.toSet;
 import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
 import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
 import static org.jboss.errai.codegen.util.Stmt.castTo;
@@ -143,7 +135,7 @@ public class ObservesExtension extends IOCDecoratorExtension<Observes> {
       subscribeMethod = "subscribeJsType";
       callBackBlock = getJsTypeSubscriptionCallback(decorable, controller);
     }
-    else if (isPortableType(metaClassFinder, erraiConfiguration, eventType) && !eventType.isAnnotationPresent(LocalEvent.class)) {
+    else if (MarshallingConfiguration.isPortableType(metaClassFinder, erraiConfiguration, eventType) && !eventType.isAnnotationPresent(LocalEvent.class)) {
       subscribeMethod = "subscribe";
       callBackBlock = getSubscriptionCallback(decorable, controller);
     }
@@ -162,7 +154,7 @@ public class ObservesExtension extends IOCDecoratorExtension<Observes> {
       initStatements.add(subscribeStatement);
     }
 
-    for (final MetaClass cls : allPortableConcreteSubtypes(erraiConfiguration,
+    for (final MetaClass cls : MarshallingConfiguration.allPortableConcreteSubtypes(erraiConfiguration,
             metaClassFinder, eventType)) {
       if (!cls.isAnnotationPresent(LocalEvent.class)) {
         final ContextualStatementBuilder routingSubStmt = Stmt.invokeStatic(ErraiBus.class, "get").invoke("subscribe",
@@ -246,64 +238,6 @@ public class ObservesExtension extends IOCDecoratorExtension<Observes> {
         ._(Stmt.load("JsTypeObserver: " + parmClassName).returnValue());
 
     return callBackBlock;
-  }
-
-  //FIXME: All methods below will be used by errai-marshalling as well, so here's not the definitive place for them
-
-  private Set<MetaClass> allPortableConcreteSubtypes(final ErraiConfiguration erraiConfiguration,
-          final MetaClassFinder metaClassFinder,
-          final MetaClass metaClass) {
-
-    final Set<MetaClass> allPortableConcreteSubtypes = allPortableTypes(metaClassFinder, erraiConfiguration).stream()
-            .filter(s -> !s.isInterface())
-            .filter(s -> s.isAssignableTo(metaClass))
-            .collect(toSet());
-
-    if (isPortableType(metaClassFinder, erraiConfiguration, metaClass)) {
-      allPortableConcreteSubtypes.add(metaClass);
-    }
-
-    return allPortableConcreteSubtypes;
-  }
-
-  private boolean isPortableType(final MetaClassFinder metaClassFinder, final ErraiConfiguration erraiConfiguration,
-          final MetaClass metaClass) {
-
-    return metaClass.instanceOf(String.class) || isBuiltinPortable(metaClass) || allPortableTypes(metaClassFinder, erraiConfiguration).contains(metaClass);
-  }
-
-  private Set<MetaClass> allPortableTypes(final MetaClassFinder metaClassFinder,
-          final ErraiConfiguration erraiConfiguration) {
-
-    return metaClassFinder.extend(Portable.class, () -> allRemoteTypesReturnTypesAndParametersTypes(metaClassFinder))
-            .extend(Portable.class, erraiConfiguration.modules()::getSerializableTypes)
-            .findAnnotatedWith(Portable.class);
-  }
-
-  private Collection<MetaClass> allRemoteTypesReturnTypesAndParametersTypes(final MetaClassFinder metaClassFinder) {
-    return new RpcTypesProvider().returnTypesAndParametersTypes(metaClassFinder.findAnnotatedWith(Remote.class));
-  }
-
-  //FIXME: Cache this map
-  private boolean isBuiltinPortable(final MetaClass metaClass) {
-    final Map<MetaClass, MetaClass> inheritanceMap = TypeHandlerFactory.inheritanceMap()
-            .entrySet()
-            .stream()
-            .collect(toMap(e -> MetaClassFactory.get(e.getKey()), e -> MetaClassFactory.get(e.getValue())));
-
-    final Map<MetaClass, Map<MetaClass, TypeHandler>> handlers = TypeHandlerFactory.handlers()
-            .entrySet()
-            .stream()
-            .collect(toMap(e -> MetaClassFactory.get(e.getKey()), s -> s.getValue()
-                    .entrySet()
-                    .stream()
-                    .collect(toMap(x -> MetaClassFactory.get(x.getKey()), Map.Entry::getValue))));
-
-    if (!handlers.containsKey(metaClass) && inheritanceMap.containsKey(metaClass)) {
-      return isBuiltinPortable(inheritanceMap.get(metaClass));
-    } else {
-      return handlers.get(metaClass) != null;
-    }
   }
 
 }

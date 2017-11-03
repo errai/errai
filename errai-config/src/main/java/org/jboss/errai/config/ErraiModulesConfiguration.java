@@ -16,12 +16,12 @@
 
 package org.jboss.errai.config;
 
-import java.util.Collection;
+import static org.jboss.errai.config.ErraiSeparateModuleConfiguration.DataBinding;
+import static org.jboss.errai.config.ErraiSeparateModuleConfiguration.Ioc;
+import static org.jboss.errai.config.ErraiSeparateModuleConfiguration.Marshalling;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
-public interface ErraiModulesConfiguration extends ErraiSeparateModuleConfiguration.Ioc,
-        ErraiSeparateModuleConfiguration.DataBinding, ErraiSeparateModuleConfiguration.Marshalling {
-
+public interface ErraiModulesConfiguration extends Ioc, DataBinding, Marshalling {
 }

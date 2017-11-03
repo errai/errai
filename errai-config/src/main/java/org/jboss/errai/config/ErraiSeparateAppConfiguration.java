@@ -21,6 +21,17 @@ package org.jboss.errai.config;
  */
 interface ErraiSeparateAppConfiguration {
 
+  interface Marshalling {
+
+    boolean forceStaticMarshallers();
+
+    boolean useStaticMarshallers();
+
+    boolean lazyLoadBuiltinMarshallers();
+
+    boolean makeDefaultArrayMarshallers();
+  }
+
   //FIXME: Find out which modules use these properties
   interface Others {
 

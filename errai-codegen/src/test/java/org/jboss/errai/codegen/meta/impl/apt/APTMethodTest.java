@@ -17,41 +17,113 @@
 package org.jboss.errai.codegen.meta.impl.apt;
 
 import org.jboss.errai.codegen.apt.test.ErraiAptTest;
+import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.junit.Assert;
 import org.junit.Test;
 
 import javax.lang.model.type.TypeMirror;
+import java.util.List;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
 public class APTMethodTest extends ErraiAptTest {
 
-
   @Test
   public void testGetReturnTypeConcreteClass() {
-    TypeMirror typeMirror = getTypeElement(TestConcreteClass.class).asType();
-    MetaMethod[] methods = new APTClass(typeMirror).getMethods();
-
-    Assert.assertEquals("java.lang.String", methods[11].getReturnType().toString());
+    final TypeMirror typeMirror = getTypeElement(TestConcreteClass.class).asType();
+    final MetaMethod method = new APTClass(typeMirror).getDeclaredMethod("foo", withNoParameters());
+    Assert.assertEquals("java.lang.String", method.getReturnType().toString());
+    Assert.assertEquals(metaClass(String.class), method.getReturnType());
   }
 
   @Test
   public void testGetReturnTypeConcreteInterface() {
-    TypeMirror typeMirror = getTypeElement(TestConcreteInterface.class).asType();
-    MetaMethod[] methods = new APTClass(typeMirror).getMethods();
-
-    Assert.assertEquals("java.lang.String", methods[9].getReturnType().toString());
+    final TypeMirror typeMirror = getTypeElement(TestConcreteInterface.class).asType();
+    final MetaMethod method = new APTClass(typeMirror).getMethod("foo", withNoParameters());
+    Assert.assertEquals("java.lang.String", method.getReturnType().toString());
+    Assert.assertEquals(metaClass(String.class), method.getReturnType());
   }
 
   @Test
   public void testGetReturnTypeGenericInterface() {
-    TypeMirror typeMirror = getTypeElement(TestGenericInterface.class).asType();
-    MetaMethod[] methods = new APTClass(typeMirror).getDeclaredMethods();
-
-    Assert.assertEquals(1, methods.length);
-    Assert.assertEquals("T", methods[0].getReturnType().toString());
+    final TypeMirror typeMirror = getTypeElement(TestGenericInterface.class).asType();
+    final MetaMethod method = new APTClass(typeMirror).getDeclaredMethod("foo", withNoParameters());
+    Assert.assertEquals("T", method.getReturnType().toString());
   }
 
+  @Test
+  public void testGetReturnTypeGenericReturnType() {
+    final TypeMirror typeMirror = getTypeElement(TestConcreteClass.class).asType();
+    final MetaMethod method = new APTClass(typeMirror).getDeclaredMethod("bar", withNoParameters());
+    Assert.assertEquals("java.lang.Object", method.getReturnType().toString());
+    Assert.assertEquals(metaClass(Object.class), method.getReturnType());
+  }
+
+  @Test
+  public void testGetReturnTypeBoundedGenericReturnType() {
+    final TypeMirror typeMirror = getTypeElement(TestConcreteClass.class).asType();
+    final MetaMethod method = new APTClass(typeMirror).getDeclaredMethod("boundedBar", withNoParameters());
+    Assert.assertEquals("java.lang.Long", method.getReturnType().toString());
+    Assert.assertEquals(metaClass(Long.class), method.getReturnType());
+  }
+
+  @Test
+  public void testGetReturnTypeWildcard() {
+    final TypeMirror typeMirror = getTypeElement(TestConcreteClass.class).asType();
+    final MetaMethod method = new APTClass(typeMirror).getDeclaredMethod("wildcardBar", withNoParameters());
+    Assert.assertEquals("java.util.List<?>", method.getReturnType().toString());
+  }
+
+  @Test
+  public void testGetParameters() {
+    final TypeMirror typeMirror = getTypeElement(TestConcreteClass.class).asType();
+    final MetaMethod method = new APTClass(typeMirror).getDeclaredMethod("par", String.class);
+    Assert.assertEquals(1, method.getParameters().length);
+    Assert.assertEquals(metaClass(String.class), method.getParameters()[0].getType());
+  }
+
+  @Test
+  public void testGetParametersGeneric() {
+    final TypeMirror typeMirror = getTypeElement(TestConcreteClass.class).asType();
+    final MetaMethod method = new APTClass(typeMirror).getDeclaredMethod("unboundedPar", String.class, Object.class);
+    Assert.assertEquals(2, method.getParameters().length);
+    Assert.assertEquals(metaClass(String.class), method.getParameters()[0].getType());
+    Assert.assertEquals(metaClass(Object.class), method.getParameters()[1].getType());
+  }
+
+  @Test
+  public void testGetParametersBoundedGeneric() {
+    final TypeMirror typeMirror = getTypeElement(TestConcreteClass.class).asType();
+    final MetaMethod method = new APTClass(typeMirror).getDeclaredMethod("boundedPar", String.class, Long.class);
+    Assert.assertEquals(2, method.getParameters().length);
+    Assert.assertEquals(metaClass(String.class), method.getParameters()[0].getType());
+    Assert.assertEquals(metaClass(Long.class), method.getParameters()[1].getType());
+  }
+
+  @Test
+  public void testGetParametersConcreteInterface() {
+    final TypeMirror typeMirror = getTypeElement(TestConcreteInterface.class).asType();
+    final MetaMethod method = new APTClass(typeMirror).getMethod("par", String.class);
+    Assert.assertEquals(1, method.getParameters().length);
+    Assert.assertEquals(metaClass(String.class), method.getParameters()[0].getType());
+  }
+
+  @Test
+  public void testGetParametersGenericInterface() {
+    final TypeMirror typeMirror = getTypeElement(TestGenericInterface.class).asType();
+    final MetaMethod method = new APTClass(typeMirror).getDeclaredMethod("par", Object.class);
+    Assert.assertEquals(1, method.getParameters().length);
+    Assert.assertEquals(metaClass(Object.class), method.getParameters()[0].getType());
+  }
+
+  private static MetaClass metaClass(final Class<?> clazz) {
+    return MetaClassFactory.get(clazz);
+  }
+
+  private static MetaClass[] withNoParameters() {
+    return new MetaClass[0];
+  }
 }

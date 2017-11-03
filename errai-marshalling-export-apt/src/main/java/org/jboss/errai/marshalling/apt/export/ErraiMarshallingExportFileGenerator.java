@@ -22,15 +22,18 @@ import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 
-import static org.jboss.errai.marshalling.apt.export.SupportedAnnotationTypes.PORTABLE;
+import static org.jboss.errai.marshalling.apt.export.SupportedAnnotationTypes.CLIENT_MARSHALLER;
+import static org.jboss.errai.marshalling.apt.export.SupportedAnnotationTypes.CUSTOM_MAPPING;
+import static org.jboss.errai.marshalling.apt.export.SupportedAnnotationTypes.ENVIRONMENT_CONFIG_EXTENSION;
 import static org.jboss.errai.marshalling.apt.export.SupportedAnnotationTypes.NON_PORTABLE;
-
+import static org.jboss.errai.marshalling.apt.export.SupportedAnnotationTypes.PORTABLE;
+import static org.jboss.errai.marshalling.apt.export.SupportedAnnotationTypes.SERVER_MARSHALLER;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
-@SupportedAnnotationTypes({ PORTABLE, NON_PORTABLE })
+@SupportedAnnotationTypes({ PORTABLE, NON_PORTABLE, CLIENT_MARSHALLER, SERVER_MARSHALLER, ENVIRONMENT_CONFIG_EXTENSION, CUSTOM_MAPPING })
 public class ErraiMarshallingExportFileGenerator extends AbstractErraiModuleExportFileGenerator {
 
   @Override

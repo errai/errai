@@ -16,28 +16,35 @@
 
 package org.jboss.errai.marshalling.rebind;
 
+import org.jboss.errai.config.ErraiConfiguration;
+import org.jboss.errai.config.MetaClassFinder;
+
 /**
  * @author Mike Brock
  */
 public class DefinitionsFactorySingleton {
-  private static final DefinitionsFactory factory;
-  static {
-    try {
-      factory = newInstance();
-    }
-    catch (Exception e) {
-      // This exception will probably be swallowed by the VM, which is why we print the stack trace here.
-      System.err.println("Failed to bootstrap errai marshalling system!");
-      e.printStackTrace();
-      throw new RuntimeException(e);
-    }
-  }
 
-  public static DefinitionsFactory get() {
+  private static DefinitionsFactory factory;
+
+  public static synchronized DefinitionsFactory get(final ErraiConfiguration erraiConfiguration,
+          final MetaClassFinder metaClassFinder) {
+
+    if (factory == null) {
+      try {
+        factory = newInstance(erraiConfiguration, metaClassFinder);
+      } catch (Exception e) {
+        // This exception will probably be swallowed by the VM, which is why we print the stack trace here.
+        System.err.println("Failed to bootstrap errai marshalling system!");
+        e.printStackTrace();
+        throw new RuntimeException(e);
+      }
+    }
+
     return factory;
   }
 
-  public static DefinitionsFactory newInstance() {
-    return new DefinitionsFactoryImpl();
+  public static DefinitionsFactory newInstance(final ErraiConfiguration erraiConfiguration,
+          final MetaClassFinder metaClassFinder) {
+    return new DefinitionsFactoryImpl(erraiConfiguration, metaClassFinder);
   }
 }

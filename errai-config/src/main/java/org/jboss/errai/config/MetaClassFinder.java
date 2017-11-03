@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.common.apt;
+package org.jboss.errai.config;
 
 import org.jboss.errai.codegen.meta.MetaClass;
 

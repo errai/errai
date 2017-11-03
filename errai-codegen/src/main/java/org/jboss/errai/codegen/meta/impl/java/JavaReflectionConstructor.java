@@ -16,13 +16,7 @@
 
 package org.jboss.errai.codegen.meta.impl.java;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.List;
-
+import org.jboss.errai.codegen.meta.MetaAnnotation;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaConstructor;
@@ -31,6 +25,17 @@ import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.meta.MetaTypeVariable;
 import org.jboss.errai.codegen.util.GenUtil;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+
+import static java.util.stream.Collectors.toList;
+
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
@@ -38,7 +43,6 @@ public class JavaReflectionConstructor extends MetaConstructor {
   private final Constructor constructor;
   private MetaParameter[] parameters;
   private MetaClass declaringClass;
-  private volatile Annotation[] annotationsCache;
 
   JavaReflectionConstructor(final Constructor c) {
     constructor = c;
@@ -109,11 +113,8 @@ public class JavaReflectionConstructor extends MetaConstructor {
   }
 
   @Override
-  public synchronized Annotation[] unsafeGetAnnotations() {
-    if (annotationsCache == null) {
-      annotationsCache = constructor.getAnnotations();
-    }
-    return annotationsCache;
+  public Collection<MetaAnnotation> getAnnotations() {
+    return Arrays.stream(constructor.getAnnotations()).map(JavaReflectionAnnotation::new).collect(toList());
   }
 
   @Override

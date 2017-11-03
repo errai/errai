@@ -17,10 +17,16 @@
 package org.jboss.errai.ui.rebind.ioc.element;
 
 import org.jboss.errai.codegen.meta.HasAnnotations;
+import org.jboss.errai.codegen.meta.MetaAnnotation;
+import org.jboss.errai.codegen.meta.impl.java.JavaReflectionAnnotation;
 import org.jboss.errai.codegen.util.CDIAnnotationUtils;
 
 import javax.inject.Named;
 import java.lang.annotation.Annotation;
+import java.util.Collection;
+import java.util.Optional;
+
+import static java.util.Collections.singleton;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
@@ -60,22 +66,7 @@ class HasNamedAnnotation implements HasAnnotations {
   }
 
   @Override
-  public boolean unsafeIsAnnotationPresent(final Class<? extends Annotation> annotation) {
-    return Named.class.equals(annotation);
-  }
-
-  @Override
-  public Annotation[] unsafeGetAnnotations() {
-    return new Annotation[] { named };
-  }
-
-  @Override
-  @SuppressWarnings("unchecked")
-  public <A extends Annotation> A unsafeGetAnnotation(final Class<A> annotation) {
-    if (unsafeIsAnnotationPresent(annotation)) {
-      return (A) named;
-    } else {
-      return null;
-    }
+  public Collection<MetaAnnotation> getAnnotations() {
+    return singleton(new JavaReflectionAnnotation(named));
   }
 }

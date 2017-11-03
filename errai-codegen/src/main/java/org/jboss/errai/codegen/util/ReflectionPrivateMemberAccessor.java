@@ -140,7 +140,7 @@ public class ReflectionPrivateMemberAccessor implements PrivateMemberAccessor {
 
     classBuilder.privateField(fieldName, Method.class).modifiers(Modifier.Static)
             .initializesWith(Stmt.invokeStatic(classBuilder.getClassDefinition(), JAVA_REFL_METH_UTIL_METH,
-                    m.getDeclaringClass(), m.getName(), MetaClassFactory.asClassArray(m.getParameters()))).finish();
+                    m.getDeclaringClass(), m.getName(), MetaClassFactory.asMetaClassArray(m.getParameters()))).finish();
 
     return fieldName;
   }
@@ -152,7 +152,7 @@ public class ReflectionPrivateMemberAccessor implements PrivateMemberAccessor {
 
     classBuilder.privateField(fieldName, Constructor.class).modifiers(Modifier.Static)
             .initializesWith(Stmt.invokeStatic(classBuilder.getClassDefinition(), JAVA_REFL_CONSTRUCTOR_UTIL_METH,
-                    c.getDeclaringClass(), MetaClassFactory.asClassArray(c.getParameters()))).finish();
+                    c.getDeclaringClass(), MetaClassFactory.asMetaClassArray(c.getParameters()))).finish();
 
     return fieldName;
   }

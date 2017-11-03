@@ -51,9 +51,9 @@ import org.jboss.errai.common.client.api.WrappedPortable;
 import org.jboss.errai.common.metadata.MetaDataScanner;
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.common.metadata.ScannerSingleton;
+import org.jboss.errai.config.propertiesfile.PropertiesUtil;
 import org.jboss.errai.config.rebind.AbstractAsyncGenerator;
 import org.jboss.errai.config.rebind.GenerateAsync;
-import org.jboss.errai.config.PropertiesUtil;
 import org.jboss.errai.jpa.client.local.BigIntegerIdGenerator;
 import org.jboss.errai.jpa.client.local.ErraiEntityManager;
 import org.jboss.errai.jpa.client.local.ErraiEntityManagerFactory;
@@ -408,12 +408,10 @@ public class ErraiEntityManagerGenerator extends AbstractAsyncGenerator {
       List<MetaClass> listenerClasses = new ArrayList<MetaClass>();
       listenerClasses.addAll(globalEntityListeners);
 
-      EntityListeners entityListeners = entityType.unsafeGetAnnotation(EntityListeners.class);
-      if (entityListeners != null) {
-        for (Class<?> listenerClass : entityListeners.value()) {
-          listenerClasses.add(MetaClassFactory.get(listenerClass));
-        }
-      }
+      entityType.getAnnotation(EntityListeners.class)
+              .map(a -> a.valueAsArray(MetaClass[].class))
+              .map(Arrays::asList)
+              .ifPresent(listenerClasses::addAll);
 
       for (MetaClass listenerMetaClass : listenerClasses) {
         for (MetaMethod callback : listenerMetaClass.getMethodsAnnotatedWith(eventType)) {
@@ -466,11 +464,11 @@ public class ErraiEntityManagerGenerator extends AbstractAsyncGenerator {
   protected boolean isGeneratedValue(Member javaMember) {
     if (javaMember instanceof Field) {
       MetaField field = MetaClassFactory.get((Field) javaMember);
-      return field.unsafeIsAnnotationPresent(GeneratedValue.class);
+      return field.isAnnotationPresent(GeneratedValue.class);
     }
     else if (javaMember instanceof Method) {
       MetaMethod method = MetaClassFactory.get((Method) javaMember);
-      return method.unsafeIsAnnotationPresent(GeneratedValue.class);
+      return method.isAnnotationPresent(GeneratedValue.class);
     }
     throw new IllegalArgumentException("Given member is a "
         + javaMember.getClass().getName()

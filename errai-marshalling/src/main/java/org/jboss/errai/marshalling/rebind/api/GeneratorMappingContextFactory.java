@@ -16,15 +16,15 @@
 
 package org.jboss.errai.marshalling.rebind.api;
 
-import java.util.Map;
-import java.util.WeakHashMap;
-
-import org.jboss.errai.codegen.builder.ClassStructureBuilder;
+import com.google.gwt.core.ext.GeneratorContext;
 import org.jboss.errai.codegen.exception.GenerationException;
+import org.jboss.errai.config.ErraiConfiguration;
+import org.jboss.errai.config.MetaClassFinder;
 import org.jboss.errai.marshalling.rebind.MarshallerGeneratorFactory;
 import org.jboss.errai.marshalling.rebind.MarshallerOutputTarget;
 
-import com.google.gwt.core.ext.GeneratorContext;
+import java.util.Map;
+import java.util.WeakHashMap;
 
 /**
  * Creates and holds references to {@link GeneratorMappingContext}s for different
@@ -33,8 +33,7 @@ import com.google.gwt.core.ext.GeneratorContext;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class GeneratorMappingContextFactory {
-  private static final Map<GeneratorContext, GeneratorMappingContext> gwtContexts =
-      new WeakHashMap<GeneratorContext, GeneratorMappingContext>();
+  private static final Map<GeneratorContext, GeneratorMappingContext> gwtContexts = new WeakHashMap<>();
 
   private static GeneratorMappingContext javaContext = null;
 
@@ -55,15 +54,15 @@ public class GeneratorMappingContextFactory {
     return mappingContext;
   }
 
-  public static GeneratorMappingContext create(
-      final GeneratorContext context,
-      final MarshallerOutputTarget target,
-      final MarshallerGeneratorFactory marshallerGeneratorFactory,
-      final ClassStructureBuilder<?> classStructureBuilder,
-      final ArrayMarshallerCallback arrayMarshallerCallback) {
+  public static GeneratorMappingContext create(final GeneratorContext context,
+          final MarshallerOutputTarget target,
+          final MarshallerGeneratorFactory marshallerGeneratorFactory,
+          final ArrayMarshallerCallback arrayMarshallerCallback,
+          final ErraiConfiguration erraiConfiguration,
+          final MetaClassFinder metaClassFinder) {
 
     GeneratorMappingContext mappingContext =
-        new GeneratorMappingContext(marshallerGeneratorFactory, classStructureBuilder, arrayMarshallerCallback);
+        new GeneratorMappingContext(marshallerGeneratorFactory, arrayMarshallerCallback, erraiConfiguration, metaClassFinder);
 
     if (target == MarshallerOutputTarget.GWT) {
       gwtContexts.put(context, mappingContext);

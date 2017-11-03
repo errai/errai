@@ -18,7 +18,7 @@ package org.jboss.errai.config;
 
 import org.jboss.errai.codegen.meta.MetaClass;
 
-import java.util.Collection;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -35,9 +35,11 @@ interface ErraiSeparateModuleConfiguration {
 
   interface Marshalling {
 
-    Set<MetaClass> getSerializableTypes();
+    Set<MetaClass> portableTypes();
 
-    Set<MetaClass> getNonSerializableTypes();
+    Set<MetaClass> nonPortableTypes();
+
+    Map<String, String> getMappingAliases();
   }
 
   interface Ioc {

@@ -14,28 +14,13 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.config;
+package org.jboss.errai.common.configuration;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
-public class ErraiAppPropertiesConfiguration implements ErraiConfiguration {
+public @interface CustomProperty {
+  String name();
 
-  private final ErraiAppConfiguration app;
-  private final ErraiModulesConfiguration modules;
-
-  public ErraiAppPropertiesConfiguration() {
-    this.modules = new ErraiAppPropertiesErraiModulesConfiguration();
-    this.app = new ErraiAppPropertiesErraiAppConfiguration();
-  }
-
-  @Override
-  public ErraiModulesConfiguration modules() {
-    return modules;
-  }
-
-  @Override
-  public ErraiAppConfiguration app() {
-    return app;
-  }
+  String value();
 }

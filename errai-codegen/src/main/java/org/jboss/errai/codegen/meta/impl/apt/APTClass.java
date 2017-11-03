@@ -247,7 +247,7 @@ public class APTClass extends AbstractMetaClass<TypeMirror> {
       final List<VariableElement> fields = ElementFilter.fieldsIn(elements.getAllMembers(element));
       return fields.stream()
               .filter(field -> field.getModifiers().contains(Modifier.PUBLIC))
-              .map(APTField::new)
+              .map(field -> new APTField(field, this))
               .toArray(MetaField[]::new);
     case ARRAY:
     case BOOLEAN:
@@ -272,7 +272,7 @@ public class APTClass extends AbstractMetaClass<TypeMirror> {
     case TYPEVAR:
       final TypeElement element = (TypeElement) types.asElement(mirror);
       final List<VariableElement> fields = ElementFilter.fieldsIn(element.getEnclosedElements());
-      return fields.stream().map(APTField::new).toArray(MetaField[]::new);
+      return fields.stream().map(field -> new APTField(field, this)).toArray(MetaField[]::new);
     case ARRAY:
     case BOOLEAN:
     case BYTE:
@@ -298,7 +298,7 @@ public class APTClass extends AbstractMetaClass<TypeMirror> {
       final List<VariableElement> fields = ElementFilter.fieldsIn(elements.getAllMembers(element));
       return fields.stream()
               .filter(field -> field.getModifiers().contains(Modifier.PUBLIC))
-              .map(APTField::new)
+              .map(field -> new APTField(field, this))
               .findFirst()
               .orElse(null);
     case BOOLEAN:
@@ -326,7 +326,7 @@ public class APTClass extends AbstractMetaClass<TypeMirror> {
       final List<VariableElement> fields = ElementFilter.fieldsIn(element.getEnclosedElements());
       return fields.stream()
               .filter(field -> field.getSimpleName().contentEquals(name))
-              .map(APTField::new)
+              .map(field -> new APTField(field, this))
               .findFirst()
               .orElse(null);
     case BOOLEAN:
@@ -829,23 +829,8 @@ public class APTClass extends AbstractMetaClass<TypeMirror> {
   }
 
   @Override
-  public boolean unsafeIsAnnotationPresent(Class<? extends Annotation> annotation) {
-    return APTClassUtil.unsafeIsAnnotationPresent();
-  }
-
-  @Override
   public synchronized Class<?> unsafeAsClass() {
     return APTClassUtil.unsafeAsClass();
-  }
-
-  @Override
-  public Annotation[] unsafeGetAnnotations() {
-    return APTClassUtil.unsafeGetAnnotations();
-  }
-
-  @Override
-  public <A extends Annotation> A unsafeGetAnnotation(final Class<A> annotation) {
-    return APTClassUtil.unsafeGetAnnotation();
   }
 
 }

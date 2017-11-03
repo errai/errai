@@ -17,6 +17,10 @@
 package org.jboss.errai.common.apt.configuration;
 
 import org.jboss.errai.common.configuration.ErraiModule;
+import org.jboss.errai.common.configuration.MappingAlias;
+
+import java.util.ArrayList;
+import java.util.Collection;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
@@ -27,7 +31,8 @@ import org.jboss.errai.common.configuration.ErraiModule;
              nonSerializableTypes = ErraiTestCustomModule1.NonSerializable1.class,
              iocAlternatives = ErraiTestCustomModule1.IocAlternative1.class,
              iocBlacklist = ErraiTestCustomModule1.IocBlacklisted1.class,
-             iocWhitelist = ErraiTestCustomModule1.IocWhitelisted1.class)
+             iocWhitelist = ErraiTestCustomModule1.IocWhitelisted1.class,
+             mappingAliases = { @MappingAlias(from = ArrayList.class, to = Collection.class) })
 class ErraiTestCustomModule1 {
 
   static class Serializable1 {
