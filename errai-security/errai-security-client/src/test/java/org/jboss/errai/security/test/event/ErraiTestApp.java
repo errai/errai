@@ -26,6 +26,7 @@ import org.jboss.errai.ioc.ErraiIocModule;
 import org.jboss.errai.ioc.support.bus.ErraiBusSupportModule;
 import org.jboss.errai.marshalling.ErraiMarshallingModule;
 import org.jboss.errai.security.ErraiSecurityClientModule;
+import org.jboss.errai.security.ErraiSecurityServerModule;
 import org.jboss.errai.ui.ErraiUiModule;
 import org.jboss.errai.ui.nav.ErraiNavigationModule;
 
@@ -44,7 +45,8 @@ import org.jboss.errai.ui.nav.ErraiNavigationModule;
                       ErraiUiModule.class,
                       ErraiNavigationModule.class,
                       ErraiJaxrsModule.class,
-                      ErraiSecurityClientModule.class })
+                      ErraiSecurityClientModule.class,
+                      ErraiSecurityServerModule.class})
 @ErraiModule
 public class ErraiTestApp {
 }

@@ -144,7 +144,7 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-log4j12</artifactId>
-      <scope>test</scope>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.deltaspike.core</groupId>
@@ -255,7 +255,6 @@
                 <additionalClasspathElement>${basedir}/src/main/java/</additionalClasspathElement>
                 <additionalClasspathElement>${basedir}/src/test/java/</additionalClasspathElement>
                 <additionalClasspathElement>${basedir}/src/test/java/</additionalClasspathElement>
-                <additionalClasspathElement>${basedir}/target/generated-test-sources/test-annotations</additionalClasspathElement>
               </additionalClasspathElements>
             </configuration>
           </plugin>
@@ -265,7 +264,9 @@
               <forkMode>always</forkMode>
               <argLine>-Xmx1500m ${argLine} -Dgwt.args='-prod'</argLine>
               <useManifestOnlyJar>true</useManifestOnlyJar>
-
+              <additionalClasspathElements>
+                <additionalClasspathElement>${basedir}/target/generated-test-sources/test-annotations</additionalClasspathElement>
+              </additionalClasspathElements>
               <systemProperties>
                 <property>
                   <name>java.io.tmpdir</name>
