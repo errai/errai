@@ -33,6 +33,7 @@ import java.util.stream.Stream;
 import org.jboss.errai.common.client.dom.DOMUtil;
 import org.jboss.errai.common.client.dom.HTMLElement;
 import org.jboss.errai.common.client.ui.ElementWrapperWidget;
+import org.jboss.errai.common.client.ui.ElementWrapperWidgetFactory;
 import org.jboss.errai.common.client.util.CreationalCallback;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.IOCResolutionException;
@@ -494,7 +495,7 @@ public final class TemplateUtil {
 
   public static <T extends EventHandler> Widget setupPlainElementEventHandler(final Composite component, final Element element,
           final T handler, final com.google.gwt.event.dom.client.DomEvent.Type<T> type) {
-    final ElementWrapperWidget widget = ElementWrapperWidget.getWidget(element);
+    final ElementWrapperWidget widget = ElementWrapperWidgetFactory.getWidget(element);
     widget.addDomHandler(handler, type);
     // TODO add to Composite as child.
     return widget;

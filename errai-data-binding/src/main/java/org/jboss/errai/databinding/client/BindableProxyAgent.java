@@ -39,6 +39,7 @@ import com.google.gwt.user.client.ui.Widget;
 import org.jboss.errai.common.client.api.Assert;
 import org.jboss.errai.common.client.api.IsElement;
 import org.jboss.errai.common.client.ui.ElementWrapperWidget;
+import org.jboss.errai.common.client.ui.ElementWrapperWidgetFactory;
 import org.jboss.errai.databinding.client.api.Convert;
 import org.jboss.errai.databinding.client.api.Converter;
 import org.jboss.errai.databinding.client.api.DataBinder;
@@ -216,7 +217,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
 
   private Optional<Supplier<Object>> maybeCreateElementValueGetter(final Element element) {
     final Optional<Supplier<Object>> uiGetter;
-    final Supplier<ElementWrapperWidget> toWidget = () -> ElementWrapperWidget.getWidget(element);
+    final Supplier<ElementWrapperWidget> toWidget = () -> ElementWrapperWidgetFactory.getWidget(element);
     final ElementWrapperWidget wrapper = toWidget.get();
     if (wrapper instanceof HasValue) {
       uiGetter = Optional.ofNullable(() -> ((HasValue) toWidget.get()).getValue());
@@ -752,7 +753,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
               || component instanceof org.jboss.errai.common.client.api.elemental2.IsElement || isElement(component)) {
 
         final Element element = BoundUtil.asElement(getUIPart(component));
-        final ElementWrapperWidget<?> wrapper = ElementWrapperWidget.getWidget(element);
+        final ElementWrapperWidget<?> wrapper = ElementWrapperWidgetFactory.getWidget(element);
 
         if (wrapper instanceof TakesValue) {
           updateComponentValue(newValue, (TakesValue) wrapper, converter);

@@ -61,6 +61,7 @@ import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.apt.ResourceFilesFinder;
 import org.jboss.errai.common.client.api.annotations.BrowserEvent;
 import org.jboss.errai.common.client.ui.ElementWrapperWidget;
+import org.jboss.errai.common.client.ui.ElementWrapperWidgetFactory;
 import org.jboss.errai.common.client.ui.HasValue;
 import org.jboss.errai.ioc.client.api.CodeDecorator;
 import org.jboss.errai.ioc.client.container.DestructionCallback;
@@ -209,7 +210,7 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
       final MetaClass fieldType = dataFieldTypes.get(fieldName);
 
       if (fieldType.isAssignableTo(Element.class)) {
-        destructionStatements.add(Stmt.invokeStatic(ElementWrapperWidget.class, "removeWidget", field));
+        destructionStatements.add(Stmt.invokeStatic(ElementWrapperWidgetFactory.class, "removeWidget", field));
       }
     }
 

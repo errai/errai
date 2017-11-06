@@ -33,6 +33,7 @@ import com.google.web.bindery.event.shared.HandlerRegistration;
 import org.jboss.errai.common.client.api.IsElement;
 import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.common.client.ui.ElementWrapperWidget;
+import org.jboss.errai.common.client.ui.ElementWrapperWidgetFactory;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 import org.jboss.errai.ioc.client.container.Factory;
 import org.jboss.errai.ioc.client.container.Proxy;
@@ -416,10 +417,10 @@ public class Navigation {
         widget = ((IsWidget) unwrappedComponent).asWidget();
       }
       else if (unwrappedComponent instanceof IsElement) {
-        widget = ElementWrapperWidget.getWidget(((IsElement) unwrappedComponent).getElement());
+        widget = ElementWrapperWidgetFactory.getWidget(((IsElement) unwrappedComponent).getElement());
       }
       else if (unwrappedComponent instanceof org.jboss.errai.common.client.api.elemental2.IsElement) {
-        widget = ElementWrapperWidget.getWidget(((org.jboss.errai.common.client.api.elemental2.IsElement) unwrappedComponent).getElement(), null);
+        widget = ElementWrapperWidgetFactory.getWidget(((org.jboss.errai.common.client.api.elemental2.IsElement) unwrappedComponent).getElement(), null);
       }
       else if (TemplateWidgetMapper.containsKey(unwrappedComponent)) {
         widget = TemplateWidgetMapper.get(unwrappedComponent);

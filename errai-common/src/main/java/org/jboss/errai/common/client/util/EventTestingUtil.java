@@ -24,6 +24,7 @@ import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.user.client.ui.HasValue;
+import org.jboss.errai.common.client.ui.ElementWrapperWidgetFactory;
 
 /**
  * Contains utility methods for intercepting calls to add and remove web browser event listeners necessary for tests
@@ -105,7 +106,7 @@ public abstract class EventTestingUtil {
   public static void invokeEventListeners(final HTMLElement element, final String eventType) {
     invokeEventListeners((Object) element, eventType);
     if ("change".equals(eventType)) {
-      final ElementWrapperWidget elem = ElementWrapperWidget.getWidget(element);
+      final ElementWrapperWidget elem = ElementWrapperWidgetFactory.getWidget(element);
       if (elem instanceof HasValue) {
         ValueChangeEvent.fire(((HasValue) elem), ((HasValue) elem).getValue());
       }
@@ -116,7 +117,7 @@ public abstract class EventTestingUtil {
   public static void invokeEventListeners(final Element element, final String eventType) {
     invokeEventListeners((Object) element, eventType);
     if ("change".equals(eventType)) {
-      final ElementWrapperWidget elem = ElementWrapperWidget.getWidget(element);
+      final ElementWrapperWidget elem = ElementWrapperWidgetFactory.getWidget(element);
       if (elem instanceof HasValue) {
         ValueChangeEvent.fire(((HasValue) elem), ((HasValue) elem).getValue());
       }

@@ -436,7 +436,7 @@ public abstract class DOMUtil {
     }
   }
 
-  private static native void onAttach(Widget w)/*-{
+  public static native void onAttach(Widget w)/*-{
     w.@com.google.gwt.user.client.ui.Widget::onAttach()();
   }-*/;
 

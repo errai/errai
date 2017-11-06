@@ -19,6 +19,7 @@ package org.jboss.errai.ui.test.element.client;
 import static elemental.client.Browser.getDocument;
 
 import org.jboss.errai.common.client.ui.ElementWrapperWidget;
+import org.jboss.errai.common.client.ui.ElementWrapperWidgetFactory;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ui.shared.TemplateUtil;
@@ -63,10 +64,10 @@ public class ElementTemplateTest extends AbstractErraiCDITest {
 
   private void assertWrapperWidgetIsRemovedOnDestruction(final ElementTemplateTestApp app) {
     final Element formElement = app.getForm().getForm();
-    final ElementWrapperWidget<?> wrapper = ElementWrapperWidget.getWidget(formElement);
-    assertSame("Control failed: This method should return the same instance until it is removed.", wrapper, ElementWrapperWidget.getWidget(formElement));
+    final ElementWrapperWidget<?> wrapper = ElementWrapperWidgetFactory.getWidget(formElement);
+    assertSame("Control failed: This method should return the same instance until it is removed.", wrapper, ElementWrapperWidgetFactory.getWidget(formElement));
     IOC.getBeanManager().destroyBean(app);
-    assertNotSame("Wrapper widget was not removed.", wrapper, ElementWrapperWidget.getWidget(formElement));
+    assertNotSame("Wrapper widget was not removed.", wrapper, ElementWrapperWidgetFactory.getWidget(formElement));
   }
 
   private void assertContentIsCorrect(final ElementTemplateTestApp app) {
