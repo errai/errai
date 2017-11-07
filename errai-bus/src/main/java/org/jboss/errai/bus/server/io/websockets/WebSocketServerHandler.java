@@ -76,6 +76,7 @@ import org.jboss.errai.bus.client.protocols.BusCommand;
 import org.jboss.errai.bus.server.api.MessageQueue;
 import org.jboss.errai.bus.server.io.DirectDeliveryHandler;
 import org.jboss.errai.bus.server.io.MessageFactory;
+import org.jboss.errai.bus.server.service.ErraiConfigAttribs;
 import org.jboss.errai.bus.server.service.ErraiService;
 import org.jboss.errai.bus.server.util.LocalContext;
 import org.jboss.errai.common.client.protocols.MessageParts;
@@ -125,9 +126,11 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler {
       return;
     }
 
+    int maxFrameSize = ErraiConfigAttribs.WEB_SOCKET_MAX_FRAME_SIZE.getInt(svc.getConfiguration());
+
     // Handshake
     final WebSocketServerHandshakerFactory wsFactory = new WebSocketServerHandshakerFactory(
-        this.getWebSocketLocation(req), null, false);
+        this.getWebSocketLocation(req), null, false, maxFrameSize);
     this.handshaker = wsFactory.newHandshaker(req);
     if (this.handshaker == null) {
       wsFactory.sendUnsupportedWebSocketVersionResponse(ctx.channel());

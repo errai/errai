@@ -81,6 +81,7 @@ public enum ErraiConfigAttribs {
   WEB_SOCKET_KEYSTORE_TYPE("errai.bus.web_socket_keystore_type", "JKS"),
   WEB_SOCKET_KEYSTORE_PASSWORD("errai.bus.web_socket_keystore_password"),
   WEB_SOCKET_KEY_PASSWORD("errai.bus.web_socket_key_password"),
+  WEB_SOCKET_MAX_FRAME_SIZE("errai.bus.web_socket_max_frame_size", "65536"),
 
   WEBSOCKET_SERVLET_ENABLED("errai.bus.websocket.servlet.enabled", "false"),
   WEBSOCKET_SERVLET_CONTEXT_PATH("errai.bus.websocket.servlet.path", "in.erraiBusWebSocket"),
