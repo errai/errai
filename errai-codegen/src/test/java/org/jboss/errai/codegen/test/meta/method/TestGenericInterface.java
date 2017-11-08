@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.codegen.meta.impl.apt;
+package org.jboss.errai.codegen.test.meta.method;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>

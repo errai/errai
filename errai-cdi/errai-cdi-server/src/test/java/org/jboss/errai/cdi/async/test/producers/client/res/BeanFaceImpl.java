@@ -16,8 +16,11 @@
 
 package org.jboss.errai.cdi.async.test.producers.client.res;
 
+import javax.enterprise.context.Dependent;
+
 /**
  * @author Mike Brock
  */
+@Dependent
 public class BeanFaceImpl implements BeanFace {
 }

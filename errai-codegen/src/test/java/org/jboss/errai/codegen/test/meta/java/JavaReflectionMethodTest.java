@@ -14,37 +14,35 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.codegen.meta.impl.apt;
+package org.jboss.errai.codegen.test.meta.java;
 
-import java.util.List;
+import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.impl.java.JavaReflectionClass;
+import org.jboss.errai.codegen.test.meta.method.MetaMethodTest;
+import org.junit.Ignore;
+import org.junit.Test;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
-class TestConcreteClass implements TestConcreteInterface {
+public class JavaReflectionMethodTest extends MetaMethodTest {
+
+  @Ignore
+  @Test
   @Override
-  public String foo() {
-    return "foo";
+  public void testGetReturnTypeConcreteInterface() {
+
   }
 
-  public <X> X bar() {
-    return null;
+  @Ignore
+  @Test
+  @Override
+  public void testGetParametersConcreteInterface() {
+    super.testGetParametersConcreteInterface();
   }
 
-  public <X extends Long> X boundedBar() {
-    return null;
-  }
-
-  public List<?> wildcardBar() {
-    return null;
-  }
-
-  public void par(final String string) {
-  }
-
-  public <X> void unboundedPar(final String string, final X foo) {
-  }
-
-  public <X extends Long> void boundedPar(final String string, final X foo) {
+  @Override
+  protected MetaClass getMetaClass(Class<?> clazz) {
+    return JavaReflectionClass.newUncachedInstance(clazz);
   }
 }

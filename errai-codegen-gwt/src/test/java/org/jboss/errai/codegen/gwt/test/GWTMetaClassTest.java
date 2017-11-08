@@ -62,6 +62,9 @@ public class GWTMetaClassTest extends AbstractMetaClassTest {
     f.addTestClass("org.jboss.errai.codegen.test.model.SingleValue");
     f.addTestClass("org.jboss.errai.codegen.test.model.MultipleValues");
     f.addTestClass("org.jboss.errai.codegen.test.model.Nested");
+    f.addTestClass("org.jboss.errai.codegen.test.meta.method.TestGenericInterface");
+    f.addTestClass("org.jboss.errai.codegen.test.meta.method.TestConcreteInterface");
+    f.addTestClass("org.jboss.errai.codegen.test.meta.method.TestConcreteClass");
     f.addTestClass(PrimitiveFieldContainer.class.getName());
 
     mockacle = f.generateMockacle();
@@ -69,7 +72,10 @@ public class GWTMetaClassTest extends AbstractMetaClassTest {
 
   @Override
   protected MetaClass getMetaClassImpl(Class<?> javaClass) {
+    return getMetaClass(javaClass);
+  }
 
+  static MetaClass getMetaClass(Class<?> javaClass) {
     int dims = 0;
     while (javaClass.isArray()) {
       javaClass = javaClass.getComponentType();

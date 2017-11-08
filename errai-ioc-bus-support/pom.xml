@@ -103,6 +103,12 @@ runtime dependencies on it and it breaks deployment on JBoss AS and Tomcat -->
 runtime dependencies on it and it breaks deployment on JBoss AS and Tomcat -->
       <scope>provided</scope>
     </dependency>
+
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-log4j12</artifactId>
+      <scope>provided</scope>
+    </dependency>
   </dependencies>
 
   <profiles>
@@ -148,6 +154,7 @@ runtime dependencies on it and it breaks deployment on JBoss AS and Tomcat -->
                <additionalClasspathElements>
                  <additionalClasspathElement>${basedir}/test-classes/</additionalClasspathElement>
                  <additionalClasspathElement>${basedir}/src/test/java/</additionalClasspathElement>
+                 <additionalClasspathElement>${basedir}/target/generated-test-sources/test-annotations/</additionalClasspathElement>
                </additionalClasspathElements>
                <useSystemClassLoader>false</useSystemClassLoader>
 
@@ -155,7 +162,7 @@ runtime dependencies on it and it breaks deployment on JBoss AS and Tomcat -->
           prevents subsequent tests from succeeding -->
                <forkMode>pertest</forkMode>
 
-               <argLine>${argLine} -Xmx2048m -Dgwt.gen=/tmp/gwt_test_gen_out/ -Dgwt.args='-testBeginTimeout 5 ${gwtArgs}' -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005</argLine>
+               <argLine>${argLine} -Xmx2048m -Dgwt.gen=/tmp/gwt_test_gen_out/ -Dgwt.args='-testBeginTimeout 5 ${gwtArgs}'</argLine>
 
                <systemProperties>
                  <property>

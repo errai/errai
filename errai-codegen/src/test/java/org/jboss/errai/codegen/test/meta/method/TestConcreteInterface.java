@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 Red Hat, Inc. and/or its affiliates.
+ * Copyright (C) 2017 Red Hat, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,11 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ioc.async.test.scopes.dependent.client.res;
-
-
-import org.jboss.errai.ioc.client.api.LoadAsync;
-
-import javax.enterprise.context.Dependent;
+package org.jboss.errai.codegen.test.meta.method;
 
 /**
- * @author Mike Brock
+ * @author Tiago Bento <tfernand@redhat.com>
  */
-@LoadAsync
-@Dependent
-public class DependentScopedBeanB implements InterfaceContainerClass.SomeInterface {
+interface TestConcreteInterface extends TestGenericInterface<String> {
+
 }

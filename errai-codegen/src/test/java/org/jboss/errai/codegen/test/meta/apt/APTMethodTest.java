@@ -14,11 +14,18 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.codegen.meta.impl.apt;
+package org.jboss.errai.codegen.test.meta.apt;
+
+import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.impl.apt.APTClass;
+import org.jboss.errai.codegen.test.meta.method.MetaMethodTest;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
-interface TestConcreteInterface extends TestGenericInterface<String> {
-
+public class APTMethodTest extends MetaMethodTest {
+  @Override
+  protected MetaClass getMetaClass(final Class<?> clazz) {
+    return new APTClass(getTypeElement(clazz).asType());
+  }
 }

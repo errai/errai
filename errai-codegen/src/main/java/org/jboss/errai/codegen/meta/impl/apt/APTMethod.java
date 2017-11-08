@@ -23,7 +23,6 @@ import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
 import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.meta.MetaTypeVariable;
-import org.jboss.errai.codegen.meta.impl.AbstractMetaClass;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
@@ -60,7 +59,14 @@ public class APTMethod extends MetaMethod implements APTMember {
     final TypeMirror typeMirror = types.asMemberOf(enclosedMetaObject, method);
 
     if (typeMirror instanceof Type.MethodType) {
-      return new APTClass(((Type.MethodType) typeMirror).getReturnType());
+      final Type returnType = ((Type.MethodType) typeMirror).getReturnType();
+      switch (returnType.getKind()) {
+      case TYPEVAR:
+      case WILDCARD:
+        return new APTClass(returnType.getUpperBound());
+      default:
+        return new APTClass(returnType);
+      }
     }
 
     return new APTClass(method.getReturnType()).getErased();

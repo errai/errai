@@ -120,7 +120,7 @@ public class SnapshotMakerTest extends AbstractCodegenTest {
 
     final String expectedValue =
             "new org.jboss.errai.codegen.test.model.SnapshotInterfaceWithCollections() {\n" +
-                    "  public java.util.List getPersons() {\n" +
+                    "  public java.util.List<org.jboss.errai.codegen.test.model.Person> getPersons() {\n" +
                     "    return new java.util.ArrayList() {\n" +
                     "      {\n" +
                     "        add(new org.jboss.errai.codegen.test.model.Person() {\n" +
