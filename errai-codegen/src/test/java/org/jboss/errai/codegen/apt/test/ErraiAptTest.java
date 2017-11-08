@@ -33,19 +33,6 @@ import javax.lang.model.util.Types;
  */
 public abstract class ErraiAptTest extends AbstractCodegenTest {
 
-  @Rule
-  public CompilationRule rule = new CompilationRule();
-
-  protected Elements elements;
-  protected Types types;
-
-  @Before
-  public void beforeErraiAptTest() {
-    elements = rule.getElements();
-    types = rule.getTypes();
-    APTClassUtil.init(types, elements);
-  }
-
   protected TypeElement getTypeElement(final Class<?> clazz) {
     return elements.getTypeElement(clazz.getCanonicalName());
   }

@@ -24,6 +24,7 @@ import java.util.List;
 import org.jboss.errai.codegen.Context;
 import org.jboss.errai.codegen.InnerClass;
 import org.jboss.errai.codegen.ProxyMaker;
+import org.jboss.errai.codegen.meta.impl.apt.APTClassUtil;
 import org.jboss.errai.codegen.test.model.ToProxyBean;
 import org.junit.Assert;
 import org.junit.Test;
