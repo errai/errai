@@ -604,7 +604,7 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
     final MetaClass handlerType = MetaClassFactory.get(EventListener.class);
     final BlockBuilder<AnonymousClassStructureBuilder> listenerBuilder = ObjectBuilder.newInstanceOf(handlerType)
         .extend()
-        .publicOverridesMethod(handlerType.getMethods()[0].getName(), Parameter.of(eventType, "event"));
+        .publicOverridesMethod(handlerType.getDeclaredMethods()[0].getName(), Parameter.of(eventType, "event"));
     listenerBuilder.append(InjectUtil.invokePublicOrPrivateMethod(controller, method, Stmt.loadVariable("event")));
 
     final ObjectBuilder listenerInstance = listenerBuilder.finish().finish();

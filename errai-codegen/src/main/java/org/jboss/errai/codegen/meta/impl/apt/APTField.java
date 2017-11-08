@@ -16,6 +16,7 @@
 
 package org.jboss.errai.codegen.meta.impl.apt;
 
+import com.sun.tools.javac.code.Type;
 import org.jboss.errai.codegen.meta.MetaAnnotation;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaField;
@@ -52,15 +53,14 @@ public class APTField extends MetaField implements APTMember {
 
   @Override
   public MetaClass getType() {
-    final TypeMirror type = field.asType();
-    switch (type.getKind()) {
+    final DeclaredType declaringClassType = (DeclaredType) declaringClass.getEnclosedMetaObject();
+    final TypeMirror typeMirror = types.asMemberOf(declaringClassType, field);
+    switch (typeMirror.getKind()) {
     case WILDCARD:
     case TYPEVAR:
-      final DeclaredType declaringClassType = (DeclaredType) declaringClass.getEnclosedMetaObject();
-      final TypeMirror typeMirror = types.asMemberOf(declaringClassType, field);
-      return new APTClass(typeMirror);
+      return new APTClass(((Type) typeMirror).getUpperBound());
     default:
-      return new APTClass(type);
+      return new APTClass(typeMirror);
     }
   }
 

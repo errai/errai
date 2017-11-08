@@ -16,12 +16,34 @@
 
 package org.jboss.errai.codegen.meta;
 
-import java.io.File;
+import org.jboss.errai.codegen.BlockStatement;
+import org.jboss.errai.codegen.Context;
+import org.jboss.errai.codegen.DefParameters;
+import org.jboss.errai.codegen.Parameter;
+import org.jboss.errai.codegen.Statement;
+import org.jboss.errai.codegen.ThrowsDeclaration;
+import org.jboss.errai.codegen.builder.callstack.LoadClassReference;
+import org.jboss.errai.codegen.meta.impl.apt.APTClass;
+import org.jboss.errai.codegen.meta.impl.apt.APTClassUtil;
+import org.jboss.errai.codegen.meta.impl.build.BuildMetaClass;
+import org.jboss.errai.codegen.meta.impl.build.BuildMetaConstructor;
+import org.jboss.errai.codegen.meta.impl.build.BuildMetaField;
+import org.jboss.errai.codegen.meta.impl.build.BuildMetaMethod;
+import org.jboss.errai.codegen.meta.impl.build.BuildMetaParameterizedType;
+import org.jboss.errai.codegen.meta.impl.build.ShadowBuildMetaField;
+import org.jboss.errai.codegen.meta.impl.build.ShadowBuildMetaMethod;
+import org.jboss.errai.codegen.meta.impl.java.JavaReflectionClass;
+import org.jboss.errai.codegen.util.EmptyStatement;
+import org.jboss.errai.codegen.util.GenUtil;
+import org.jboss.errai.common.rebind.CacheUtil;
+import org.mvel2.ConversionHandler;
+import org.mvel2.DataConversion;
+
+import javax.enterprise.util.TypeLiteral;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -32,31 +54,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import javax.enterprise.util.TypeLiteral;
-
-import org.jboss.errai.codegen.BlockStatement;
-import org.jboss.errai.codegen.Context;
-import org.jboss.errai.codegen.DefParameters;
-import org.jboss.errai.codegen.Parameter;
-import org.jboss.errai.codegen.Statement;
-import org.jboss.errai.codegen.ThrowsDeclaration;
-import org.jboss.errai.codegen.builder.callstack.LoadClassReference;
-import org.jboss.errai.codegen.meta.impl.build.BuildMetaClass;
-import org.jboss.errai.codegen.meta.impl.build.BuildMetaConstructor;
-import org.jboss.errai.codegen.meta.impl.build.BuildMetaField;
-import org.jboss.errai.codegen.meta.impl.build.BuildMetaMethod;
-import org.jboss.errai.codegen.meta.impl.build.BuildMetaParameterizedType;
-import org.jboss.errai.codegen.meta.impl.build.ShadowBuildMetaField;
-import org.jboss.errai.codegen.meta.impl.build.ShadowBuildMetaMethod;
-import org.jboss.errai.codegen.meta.impl.java.JavaReflectionClass;
-import org.jboss.errai.codegen.util.ClassChangeUtil;
-import org.jboss.errai.codegen.util.EmptyStatement;
-import org.jboss.errai.codegen.util.GenUtil;
-import org.jboss.errai.common.metadata.RebindUtils;
-import org.jboss.errai.common.rebind.CacheUtil;
-import org.mvel2.ConversionHandler;
-import org.mvel2.DataConversion;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -121,17 +118,11 @@ public final class MetaClassFactory {
     return cache;
   }
 
-  public static MetaClass get(final String fullyQualifiedClassName, final boolean erased) {
-    return createOrGet(fullyQualifiedClassName, erased);
-  }
-
   public static MetaClass get(final String fullyQualifiedClassName) {
     return createOrGet(fullyQualifiedClassName);
   }
 
   public static MetaClass get(final Class<?> clazz) {
-    if (clazz == null)
-      return null;
     return createOrGet(clazz, null);
   }
 
@@ -168,7 +159,7 @@ public final class MetaClassFactory {
   }
 
   public static Statement getAsStatement(final Class<?> clazz) {
-    return getAsStatement(createOrGet(clazz.getName(), false));
+    return getAsStatement(createOrGet_(clazz.getName()));
   }
 
   public static Statement getAsStatement(final MetaClass metaClass) {
@@ -191,7 +182,7 @@ public final class MetaClassFactory {
 
   private static MetaClass createOrGet(final String fullyQualifiedClassName) {
     if (!getMetaClassCache().isKnownErasedType(fullyQualifiedClassName)) {
-      return createOrGet(fullyQualifiedClassName, false);
+      return createOrGet_(fullyQualifiedClassName);
     }
 
     return getMetaClassCache().getErased(fullyQualifiedClassName);
@@ -204,36 +195,51 @@ public final class MetaClassFactory {
     if (!getMetaClassCache().isKnownErasedType(type.toString())) {
       final MetaClass gwtClass = JavaReflectionClass.newUncachedInstance(type);
 
-      addLookups(type, gwtClass);
+      getMetaClassCache().pushErasedCache(type.toString(), gwtClass);
       return gwtClass;
     }
 
     return getMetaClassCache().getErased(type.toString());
   }
 
-  private static MetaClass createOrGet(final String clsName, final boolean erased) {
-    if (clsName == null)
+  private static MetaClass createOrGet_(final String clsName) {
+    if (clsName == null) {
       return null;
+    }
 
-    MetaClass mCls;
-    if (erased) {
-      mCls = getMetaClassCache().getErased(clsName);
-      if (mCls == null) {
-        getMetaClassCache().pushErasedCache(clsName, mCls = JavaReflectionClass.newUncachedInstance(loadClass(clsName), erased));
-      }
+    final MetaClass mCls = getMetaClassCache().get(clsName);
+    if (mCls != null) {
+      return mCls;
     }
-    else {
-      mCls = getMetaClassCache().get(clsName);
-      if (mCls == null) {
-        getMetaClassCache().pushCache(clsName, mCls = JavaReflectionClass.newUncachedInstance(loadClass(clsName), erased));
-      }
+
+    if (APTClassUtil.elements != null) {
+      return getAptClass(clsName);
     }
-    return mCls;
+
+    return getJavaReflectionClass(clsName);
+  }
+
+  private static MetaClass getJavaReflectionClass(final String clsName) {
+    final MetaClass javaReflectionClass = JavaReflectionClass.newUncachedInstance(loadClass(clsName), false);
+    getMetaClassCache().pushCache(clsName, javaReflectionClass);
+    return javaReflectionClass;
+  }
+
+  private static MetaClass getAptClass(final String clsName) {
+    try {
+      final MetaClass aptClass = new APTClass(APTClassUtil.elements.getTypeElement(clsName).asType());
+      getMetaClassCache().pushCache(clsName, aptClass);
+      return aptClass;
+    } catch (final NullPointerException e) {
+      // This exception happens inside getTypeElement call
+      return getJavaReflectionClass(clsName);
+    }
   }
 
   private static MetaClass createOrGet(final Class cls, final Type type) {
-    if (cls == null)
+    if (cls == null) {
       return null;
+    }
 
     if (type != null) {
       if (cls.getTypeParameters() != null) {
@@ -242,19 +248,14 @@ public final class MetaClassFactory {
 
       if (!getMetaClassCache().isKnownErasedType(cls.getName())) {
         final MetaClass javaReflectionClass = JavaReflectionClass.newUncachedInstance(cls, type);
-        addLookups(cls, javaReflectionClass);
+        getMetaClassCache().pushErasedCache(cls.getName(), javaReflectionClass);
         return javaReflectionClass;
       }
 
       return getMetaClassCache().getErased(cls.getName());
     }
     else {
-      MetaClass mCls;
-      mCls = getMetaClassCache().get(cls.getName());
-      if (mCls == null) {
-        getMetaClassCache().pushCache(cls.getName(), mCls = JavaReflectionClass.newUncachedInstance(cls));
-      }
-      return mCls;
+      return createOrGet_(cls.getName());
     }
   }
 
@@ -270,10 +271,6 @@ public final class MetaClassFactory {
                                           final MetaParameterizedType parameterizedType,
                                           final boolean reifyRecursively) {
     return cloneToBuildMetaClass(clazz, parameterizedType, reifyRecursively);
-  }
-
-  private static BuildMetaClass cloneToBuildMetaClass(final MetaClass clazz) {
-    return cloneToBuildMetaClass(clazz, null, false);
   }
 
   private static BuildMetaClass cloneToBuildMetaClass(final MetaClass clazz,
@@ -493,14 +490,6 @@ public final class MetaClassFactory {
     return new BuildMetaParameterizedType(classes, null, null);
   }
 
-  private static void addLookups(final TypeLiteral literal, final MetaClass metaClass) {
-    getMetaClassCache().pushErasedCache(literal.toString(), metaClass);
-  }
-
-  private static void addLookups(final Class cls, final MetaClass metaClass) {
-    getMetaClassCache().pushErasedCache(cls.getName(), metaClass);
-  }
-
   public static final Map<String, Class<?>> PRIMITIVE_LOOKUP = Collections.unmodifiableMap(new HashMap<String, Class<?>>() {
     {
       put("void", void.class);
@@ -517,40 +506,14 @@ public final class MetaClassFactory {
 
   public static Class<?> loadClass(final String fullyQualifiedName) {
     try {
-      Class<?> cls = PRIMITIVE_LOOKUP.get(fullyQualifiedName);
-      if (cls == null) {
-        cls = Class.forName(fullyQualifiedName, false, Thread.currentThread().getContextClassLoader());
+      return Class.forName(fullyQualifiedName);
+    } catch (ClassNotFoundException e1) {
+      try {
+        return PRIMITIVE_LOOKUP.getOrDefault(fullyQualifiedName,
+                Class.forName(fullyQualifiedName, false, Thread.currentThread().getContextClassLoader()));
+      } catch (final ClassNotFoundException e) {
+        throw new RuntimeException("Could not load class: " + fullyQualifiedName);
       }
-      return cls;
-    }
-    catch (final ClassNotFoundException e) {
-      final URL url = MetaClassFactory.class.getClassLoader()
-          .getResource(fullyQualifiedName.replace('.', '/') + ".java");
-
-      if (url != null) {
-        final File sourceFile = new File(url.getFile()).getAbsoluteFile();
-        if (sourceFile.exists()) {
-
-          final File directory = sourceFile.getParentFile();
-          final String packageName = fullyQualifiedName.substring(0, fullyQualifiedName.lastIndexOf('.'));
-          final String className = fullyQualifiedName.substring(fullyQualifiedName.lastIndexOf('.') + 1);
-
-          final String location = ClassChangeUtil.compileClass(directory.getAbsolutePath(),
-              packageName,
-              className,
-              RebindUtils.getTempDirectory() + "/hotload/");
-
-          try {
-            return ClassChangeUtil.loadClassDefinition(location,
-                packageName, className);
-          }
-          catch (final Exception e2) {
-            throw new RuntimeException("Could not load class: " + fullyQualifiedName, e2);
-          }
-        }
-      }
-
-      throw new RuntimeException("Could not load class: " + fullyQualifiedName);
     }
   }
 
@@ -567,7 +530,7 @@ public final class MetaClassFactory {
   public static MetaClass[] fromClassArray(final Class<?>[] classes) {
     final MetaClass[] newClasses = new MetaClass[classes.length];
     for (int i = 0; i < classes.length; i++) {
-      newClasses[i] = createOrGet(classes[i].getName(), false);
+      newClasses[i] = createOrGet_(classes[i].getName());
     }
     return newClasses;
   }
@@ -605,14 +568,6 @@ public final class MetaClassFactory {
     return getMetaClassCache().getAllNewOrUpdated();
   }
 
-  public static Collection<MetaClass> getNewClasses() {
-    return getMetaClassCache().getAllNewClasses();
-  }
-
-  public static boolean isChangedOrDeleted(final String fqcn) {
-    return getMetaClassCache().getAllDeletedClasses().contains(fqcn) || getMetaClassCache().isNewOrUpdated(fqcn);
-  }
-
   public static Set<String> getAllDeletedClasses() {
     return getMetaClassCache().getAllDeletedClasses();
   }
@@ -633,7 +588,4 @@ public final class MetaClassFactory {
     return JavaReflectionClass.newUncachedInstance(clazz);
   }
 
-  public static MetaClass getUncached(final String fqcn) {
-    return JavaReflectionClass.newUncachedInstance(loadClass(fqcn));
-  }
 }

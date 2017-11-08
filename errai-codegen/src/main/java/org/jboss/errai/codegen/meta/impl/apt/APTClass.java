@@ -20,6 +20,7 @@ import com.sun.tools.javac.code.Symbol;
 import com.sun.tools.javac.code.Type;
 import org.jboss.errai.codegen.meta.MetaAnnotation;
 import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaConstructor;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
@@ -847,7 +848,10 @@ public class APTClass extends AbstractMetaClass<TypeMirror> {
 
   @Override
   public synchronized Class<?> unsafeAsClass() {
-    return APTClassUtil.unsafeAsClass();
+    if (isArray()) {
+      return MetaClassFactory.loadClass("[L" + getComponentType().getFullyQualifiedName() + ";");
+    }
+    return MetaClassFactory.loadClass(getFullyQualifiedName());
   }
 
 }
