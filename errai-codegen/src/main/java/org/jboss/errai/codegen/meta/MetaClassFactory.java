@@ -219,9 +219,30 @@ public final class MetaClassFactory {
     return getJavaReflectionClass(clsName);
   }
 
+  private static MetaClass createOrGet_(final Class<?> clazz) {
+    if (clazz == null) {
+      return null;
+    }
+
+    final MetaClass mCls = getMetaClassCache().get(clazz.getName());
+    if (mCls != null) {
+      return mCls;
+    }
+
+    if (APTClassUtil.elements != null && !clazz.isPrimitive()) {
+      return getAptClass(clazz.getName());
+    }
+
+    return getJavaReflectionClass(clazz);
+  }
+
   private static MetaClass getJavaReflectionClass(final String clsName) {
-    final MetaClass javaReflectionClass = JavaReflectionClass.newUncachedInstance(loadClass(clsName), false);
-    getMetaClassCache().pushCache(clsName, javaReflectionClass);
+    return getJavaReflectionClass(loadClass(clsName));
+  }
+
+  private static MetaClass getJavaReflectionClass(final Class<?> clazz) {
+    final MetaClass javaReflectionClass = JavaReflectionClass.newUncachedInstance(clazz, false);
+    getMetaClassCache().pushCache(clazz.getName(), javaReflectionClass);
     return javaReflectionClass;
   }
 
@@ -255,7 +276,7 @@ public final class MetaClassFactory {
       return getMetaClassCache().getErased(cls.getName());
     }
     else {
-      return createOrGet_(cls.getName());
+      return createOrGet_(cls);
     }
   }
 
