@@ -526,14 +526,33 @@ public final class MetaClassFactory {
   });
 
   public static Class<?> loadClass(final String fullyQualifiedName) {
-    try {
-      return Class.forName(fullyQualifiedName);
-    } catch (ClassNotFoundException e1) {
+    switch (fullyQualifiedName) {
+    case "byte":
+      return byte.class;
+    case "short":
+      return short.class;
+    case "int":
+      return int.class;
+    case "long":
+      return long.class;
+    case "float":
+      return float.class;
+    case "double":
+      return double.class;
+    case "boolean":
+      return boolean.class;
+    case "char":
+      return char.class;
+    default:
       try {
-        return PRIMITIVE_LOOKUP.getOrDefault(fullyQualifiedName,
-                Class.forName(fullyQualifiedName, false, Thread.currentThread().getContextClassLoader()));
-      } catch (final ClassNotFoundException e) {
-        throw new RuntimeException("Could not load class: " + fullyQualifiedName);
+        return Class.forName(fullyQualifiedName);
+      } catch (ClassNotFoundException e1) {
+        try {
+          return PRIMITIVE_LOOKUP.getOrDefault(fullyQualifiedName,
+                  Class.forName(fullyQualifiedName, false, Thread.currentThread().getContextClassLoader()));
+        } catch (final ClassNotFoundException e) {
+          throw new RuntimeException("Could not load class: " + fullyQualifiedName);
+        }
       }
     }
   }

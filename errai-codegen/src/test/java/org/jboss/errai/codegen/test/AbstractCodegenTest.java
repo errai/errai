@@ -17,6 +17,7 @@
 package org.jboss.errai.codegen.test;
 
 import org.jboss.errai.codegen.builder.impl.StatementBuilder;
+import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.util.GenUtil;
 import org.junit.Before;
 
@@ -30,6 +31,7 @@ public abstract class AbstractCodegenTest {
   @Before
   public void onBefore() {
     GenUtil.setPermissiveMode(false);
+    MetaClassFactory.getMetaClassCache().clear();
   }
 
   /**
