@@ -135,7 +135,7 @@ public final class MetaClassFactory {
     return getArrayOf(clazz, da);
   }
 
-  public static MetaClass getArrayOf(final Class<?> clazz, int... dims) {
+  private static MetaClass getArrayOf(final Class<?> clazz, int... dims) {
     if (dims.length == 0) {
       dims = new int[1];
     }
@@ -159,7 +159,7 @@ public final class MetaClassFactory {
   }
 
   public static Statement getAsStatement(final Class<?> clazz) {
-    return getAsStatement(createOrGet_(clazz.getName()));
+    return getAsStatement(createOrGetAptFirst(clazz.getName()));
   }
 
   public static Statement getAsStatement(final MetaClass metaClass) {
@@ -182,7 +182,7 @@ public final class MetaClassFactory {
 
   private static MetaClass createOrGet(final String fullyQualifiedClassName) {
     if (!getMetaClassCache().isKnownErasedType(fullyQualifiedClassName)) {
-      return createOrGet_(fullyQualifiedClassName);
+      return createOrGetAptFirst(fullyQualifiedClassName);
     }
 
     return getMetaClassCache().getErased(fullyQualifiedClassName);
@@ -202,7 +202,7 @@ public final class MetaClassFactory {
     return getMetaClassCache().getErased(type.toString());
   }
 
-  private static MetaClass createOrGet_(final String clsName) {
+  private static MetaClass createOrGetAptFirst(final String clsName) {
     if (clsName == null) {
       return null;
     }
@@ -219,7 +219,7 @@ public final class MetaClassFactory {
     return getJavaReflectionClass(clsName);
   }
 
-  private static MetaClass createOrGet_(final Class<?> clazz) {
+  private static MetaClass createOrGetAptFirst(final Class<?> clazz) {
     if (clazz == null) {
       return null;
     }
@@ -229,7 +229,7 @@ public final class MetaClassFactory {
       return mCls;
     }
 
-    if (APTClassUtil.elements != null && !clazz.isPrimitive()) {
+    if (APTClassUtil.elements != null) {
       return getAptClass(clazz.getName());
     }
 
@@ -276,7 +276,7 @@ public final class MetaClassFactory {
       return getMetaClassCache().getErased(cls.getName());
     }
     else {
-      return createOrGet_(cls);
+      return createOrGetAptFirst(cls);
     }
   }
 
@@ -526,33 +526,16 @@ public final class MetaClassFactory {
   });
 
   public static Class<?> loadClass(final String fullyQualifiedName) {
-    switch (fullyQualifiedName) {
-    case "byte":
-      return byte.class;
-    case "short":
-      return short.class;
-    case "int":
-      return int.class;
-    case "long":
-      return long.class;
-    case "float":
-      return float.class;
-    case "double":
-      return double.class;
-    case "boolean":
-      return boolean.class;
-    case "char":
-      return char.class;
-    default:
+    try {
+      if (PRIMITIVE_LOOKUP.containsKey(fullyQualifiedName)) {
+        return PRIMITIVE_LOOKUP.get(fullyQualifiedName);
+      }
+      return Class.forName(fullyQualifiedName);
+    } catch (final ClassNotFoundException e1) {
       try {
-        return Class.forName(fullyQualifiedName);
-      } catch (ClassNotFoundException e1) {
-        try {
-          return PRIMITIVE_LOOKUP.getOrDefault(fullyQualifiedName,
-                  Class.forName(fullyQualifiedName, false, Thread.currentThread().getContextClassLoader()));
-        } catch (final ClassNotFoundException e) {
-          throw new RuntimeException("Could not load class: " + fullyQualifiedName);
-        }
+        return Class.forName(fullyQualifiedName, false, Thread.currentThread().getContextClassLoader());
+      } catch (final ClassNotFoundException e) {
+        throw new RuntimeException("Could not load class: " + fullyQualifiedName);
       }
     }
   }
@@ -570,7 +553,7 @@ public final class MetaClassFactory {
   public static MetaClass[] fromClassArray(final Class<?>[] classes) {
     final MetaClass[] newClasses = new MetaClass[classes.length];
     for (int i = 0; i < classes.length; i++) {
-      newClasses[i] = createOrGet_(classes[i].getName());
+      newClasses[i] = createOrGetAptFirst(classes[i].getName());
     }
     return newClasses;
   }
