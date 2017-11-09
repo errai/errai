@@ -14,18 +14,14 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.cdi.async.test.bm.client.res;
+package org.jboss.errai.cdi.async.test.bm.client;
 
-import org.jboss.errai.cdi.async.test.bm.client.FoobieScope;
-import org.jboss.errai.ioc.client.api.LoadAsync;
-
-import javax.enterprise.context.ApplicationScoped;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * @author Mike Brock
  */
-@FoobieScope
-@ApplicationScoped
-@LoadAsync
-public class FoobieScopedOverriddenBean {
+@Retention(RetentionPolicy.RUNTIME)
+public @interface FoobieScope {
 }

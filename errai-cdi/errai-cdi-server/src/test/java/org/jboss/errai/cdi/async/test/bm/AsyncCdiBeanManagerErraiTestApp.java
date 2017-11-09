@@ -22,6 +22,7 @@ import org.jboss.errai.common.configuration.ErraiModule;
 import org.jboss.errai.enterprise.ErraiCdiClientModule;
 import org.jboss.errai.enterprise.ErraiCdiSharedModule;
 import org.jboss.errai.ioc.ErraiIocModule;
+import org.jboss.errai.ioc.support.bus.ErraiBusSupportModule;
 import org.jboss.errai.marshalling.ErraiMarshallingModule;
 
 /**
@@ -33,7 +34,9 @@ import org.jboss.errai.marshalling.ErraiMarshallingModule;
                       ErraiBusModule.class,
                       ErraiIocModule.class,
                       ErraiCdiClientModule.class,
+                      ErraiBusSupportModule.class,
                       ErraiCdiSharedModule.class,
+                      ErraiCdiBeanManagerTestModule.class,
                       AsyncCdiBeanManagerErraiTestApp.class })
 @ErraiModule
 public class AsyncCdiBeanManagerErraiTestApp {

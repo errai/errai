@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Red Hat, Inc. and/or its affiliates.
+ * Copyright (C) 2017 Red Hat, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,13 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.cdi.async.test.bm.client.res;
+package org.jboss.errai.cdi.injection;
 
-import org.jboss.errai.cdi.async.test.bm.client.FoobieScope;
-import org.jboss.errai.ioc.client.api.LoadAsync;
-
-import javax.enterprise.context.ApplicationScoped;
+import org.jboss.errai.common.configuration.ErraiModule;
 
 /**
- * @author Mike Brock
+ * @author Tiago Bento <tfernand@redhat.com>
  */
-@FoobieScope
-@ApplicationScoped
-@LoadAsync
-public class FoobieScopedOverriddenBean {
+@ErraiModule
+public class ErraiCdiInjectionTestModule {
 }

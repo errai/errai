@@ -20,11 +20,13 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.user.client.ui.Widget;
 
+import javax.enterprise.context.Dependent;
 import java.util.List;
 
 /**
  * @author Mike Brock
  */
+@Dependent
 public class ContactsView implements ContactsPresenter.Display {
   @Override
   public HasClickHandlers getAddButton() {

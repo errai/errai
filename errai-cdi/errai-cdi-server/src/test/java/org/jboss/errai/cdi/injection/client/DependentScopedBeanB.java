@@ -18,9 +18,11 @@ package org.jboss.errai.cdi.injection.client;
 
 import org.jboss.errai.cdi.injection.client.InterfaceContainerClass.SomeInterface;
 
+import javax.enterprise.context.Dependent;
 
 /**
  * @author Mike Brock
  */
+@Dependent
 public class DependentScopedBeanB implements InterfaceContainerClass.SomeInterface {
 }
