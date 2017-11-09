@@ -54,6 +54,10 @@ public abstract class ElementWrapperWidget<T> extends Widget {
     return getWidget(element, null);
   }
 
+  public static ElementWrapperWidget<?> getWidget(final elemental2.dom.HTMLElement element) {
+    return getWidget(element, null);
+  }
+
   public static ElementWrapperWidget<?> getWidget(final Element element, final Class<?> valueType) {
     return getWidget((Object) element, valueType);
   }
