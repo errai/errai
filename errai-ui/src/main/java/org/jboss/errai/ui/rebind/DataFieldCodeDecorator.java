@@ -27,7 +27,6 @@ import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.client.api.IsElement;
 import org.jboss.errai.common.client.ui.ElementWrapperWidget;
-import org.jboss.errai.common.client.ui.ElementWrapperWidgetFactory;
 import org.jboss.errai.common.client.ui.HasValue;
 import org.jboss.errai.ioc.client.api.CodeDecorator;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCDecoratorExtension;
@@ -68,19 +67,19 @@ public class DataFieldCodeDecorator extends IOCDecoratorExtension<DataField> {
     if (!isWidget && decorable.getType().isAnnotationPresent(Templated.class)) {
       instance = Stmt.invokeStatic(TemplateWidgetMapper.class, "get", instance);
     } else if (decorable.getType().isAssignableTo(Element.class)) {
-      instance = Stmt.invokeStatic(ElementWrapperWidgetFactory.class, "getWidget", instance);
+      instance = Stmt.invokeStatic(ElementWrapperWidget.class, "getWidget", instance);
     } else if (decorable.getType().isAssignableTo(IsElement.class)) {
-      instance = Stmt.invokeStatic(ElementWrapperWidgetFactory.class, "getWidget", Stmt.nestedCall(instance).invoke("getElement"));
+      instance = Stmt.invokeStatic(ElementWrapperWidget.class, "getWidget", Stmt.nestedCall(instance).invoke("getElement"));
     } else if (decorable.getType().isAssignableTo(org.jboss.errai.common.client.api.elemental2.IsElement.class)) {
-      instance = Stmt.invokeStatic(ElementWrapperWidgetFactory.class, "getWidget", Stmt.nestedCall(instance).invoke("getElement"), null);
+      instance = Stmt.invokeStatic(ElementWrapperWidget.class, "getWidget", Stmt.nestedCall(instance).invoke("getElement"), null);
     } else if (RebindUtil.isNativeJsType(decorable.getType()) || RebindUtil.isElementalIface(decorable.getType())) {
       if (decorable.getType().isAssignableTo(HasValue.class)) {
         final MetaClass valueType = decorable.getType().getMethod("getValue", new Class[0]).getReturnType();
-        instance = Stmt.invokeStatic(ElementWrapperWidgetFactory.class, "getWidget",
+        instance = Stmt.invokeStatic(ElementWrapperWidget.class, "getWidget",
                 Stmt.invokeStatic(TemplateUtil.class, "asElement", instance), loadLiteral(valueType));
       }
       else {
-        instance = Stmt.invokeStatic(ElementWrapperWidgetFactory.class, "getWidget", Stmt.invokeStatic(TemplateUtil.class, "asElement", instance));
+        instance = Stmt.invokeStatic(ElementWrapperWidget.class, "getWidget", Stmt.invokeStatic(TemplateUtil.class, "asElement", instance));
       }
     } else if (decorable.getType().isAssignableTo( IsWidget.class )) {
       instance = Stmt.nestedCall( instance ).invoke( "asWidget" );

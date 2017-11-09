@@ -44,6 +44,63 @@ import com.google.gwt.user.client.ui.Widget;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public abstract class ElementWrapperWidget<T> extends Widget {
+  private static Map<Object, ElementWrapperWidget<?>> widgetMap = new HashMap<>();
+
+  public static ElementWrapperWidget<?> getWidget(final Element element) {
+    return getWidget(element, null);
+  }
+
+  public static ElementWrapperWidget<?> getWidget(final HTMLElement element) {
+    return getWidget(element, null);
+  }
+
+  public static ElementWrapperWidget<?> getWidget(final Element element, final Class<?> valueType) {
+    return getWidget((Object) element, valueType);
+  }
+
+  public static ElementWrapperWidget<?> getWidget(final Object obj, final Class<?> valueType) {
+    final Element element = asElement(obj);
+    ElementWrapperWidget<?> widget = widgetMap.get(element);
+    if (widget == null) {
+      widget = createElementWrapperWidget(element, valueType);
+      // Always call onAttach so that events propogatge even if this has no widget parent.
+      widget.onAttach();
+      RootPanel.detachOnWindowClose(widget);
+      widgetMap.put(element, widget);
+    }
+    else if (valueType != null && !valueType.equals(widget.getValueType())) {
+      throw new RuntimeException(
+              "There already exists a widget for the given element with a different value type. Expected "
+                      + widget.getValueType().getName() + " but was passed in " + valueType.getName());
+    }
+
+    return widget;
+  }
+
+  private static native Element asElement(Object obj) /*-{
+    return obj;
+  }-*/;
+
+  @SuppressWarnings({ "rawtypes", "unchecked" })
+  private static ElementWrapperWidget<?> createElementWrapperWidget(final Element element, final Class<?> valueType) {
+    if (valueType != null) {
+      final Accessor accessor;
+      if (NativeHasValueAccessors.hasValueAccessor(element)) {
+        accessor = NativeHasValueAccessors.getAccessor(element);
+      }
+      else {
+        accessor = new DefaultAccessor((org.jboss.errai.common.client.ui.HasValue) element);
+      }
+
+      return new JsTypeHasValueElementWrapperWidget<>(element, accessor, valueType);
+    }
+    else if (InputElement.is(element) || TextAreaElement.is(element)) {
+      return new InputElementWrapperWidget<>(element);
+    }
+    else {
+      return new DefaultElementWrapperWidget<>(element);
+    }
+  }
 
   public static Class<?> getValueClassForInputType(final String inputType) {
     if ("checkbox".equalsIgnoreCase(inputType) || "radio".equalsIgnoreCase(inputType)) {
@@ -58,7 +115,15 @@ public abstract class ElementWrapperWidget<T> extends Widget {
     return (oldValue == null ^ newValue == null) || (oldValue != null && !oldValue.equals(newValue));
   }
 
-  static abstract class HasValueElementWrapperWidget<T> extends ElementWrapperWidget<T> implements HasValue<T> {
+  public static ElementWrapperWidget<?> removeWidget(final Element element) {
+    return widgetMap.remove(element);
+  }
+
+  public static ElementWrapperWidget<?> removeWidget(final ElementWrapperWidget<?> widget) {
+    return widgetMap.remove(widget.getElement());
+  }
+
+  private static abstract class HasValueElementWrapperWidget<T> extends ElementWrapperWidget<T> implements HasValue<T> {
 
     private final ValueChangeManager<T, HasValueElementWrapperWidget<T>> valueChangeManager = new ValueChangeManager<>(this);
 
@@ -82,11 +147,11 @@ public abstract class ElementWrapperWidget<T> extends Widget {
 
   }
 
-  static class DefaultAccessor<T> implements Accessor<T> {
+  private static class DefaultAccessor<T> implements Accessor<T> {
 
     private final org.jboss.errai.common.client.ui.HasValue<T> instance;
 
-    DefaultAccessor(final org.jboss.errai.common.client.ui.HasValue<T> instance) {
+    private DefaultAccessor(final org.jboss.errai.common.client.ui.HasValue<T> instance) {
       this.instance = instance;
     }
 
@@ -110,12 +175,12 @@ public abstract class ElementWrapperWidget<T> extends Widget {
 
   }
 
-  static class JsTypeHasValueElementWrapperWidget<T> extends HasValueElementWrapperWidget<T> {
+  private static class JsTypeHasValueElementWrapperWidget<T> extends HasValueElementWrapperWidget<T> {
 
     private final Class<T> valueType;
     private final Accessor<T> accessor;
 
-    JsTypeHasValueElementWrapperWidget(final Element element, final Accessor<T> accessor, final Class<T> valueType) {
+    private JsTypeHasValueElementWrapperWidget(final Element element, final Accessor<T> accessor, final Class<T> valueType) {
       super(element);
       this.accessor = accessor;
       this.valueType = valueType;
@@ -138,9 +203,9 @@ public abstract class ElementWrapperWidget<T> extends Widget {
 
   }
 
-  static class InputElementWrapperWidget<T> extends HasValueElementWrapperWidget<T> {
+  private static class InputElementWrapperWidget<T> extends HasValueElementWrapperWidget<T> {
 
-    InputElementWrapperWidget(final Element element) {
+    private InputElementWrapperWidget(final Element element) {
       super(element);
     }
 
@@ -182,9 +247,9 @@ public abstract class ElementWrapperWidget<T> extends Widget {
 
   }
 
-  static class DefaultElementWrapperWidget<T> extends ElementWrapperWidget<T> implements HasHTML {
+  private static class DefaultElementWrapperWidget<T> extends ElementWrapperWidget<T> implements HasHTML {
 
-    DefaultElementWrapperWidget(final Element element) {
+    private DefaultElementWrapperWidget(final Element element) {
       super(element);
     }
 
