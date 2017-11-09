@@ -20,13 +20,17 @@ import org.jboss.errai.common.configuration.ErraiApp;
 import org.jboss.errai.common.configuration.ErraiModule;
 import org.jboss.errai.ioc.ErraiIocModule;
 import org.jboss.errai.ioc.tests.common.ErraiTestModule;
+import org.jboss.errai.ioc.tests.extensions.rebind.ErraiIocExtensionsTestModule;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
 @ErraiApp(gwtModuleName = "org.jboss.errai.ioc.tests.extensions.IOCExtensionTests",
           local = true,
-          modules = { ErraiTestApp.class, ErraiIocModule.class, ErraiTestModule.class })
+          modules = { ErraiTestApp.class,
+                      ErraiIocModule.class,
+                      ErraiTestModule.class,
+                      ErraiIocExtensionsTestModule.class })
 @ErraiModule
 public class ErraiTestApp {
 }

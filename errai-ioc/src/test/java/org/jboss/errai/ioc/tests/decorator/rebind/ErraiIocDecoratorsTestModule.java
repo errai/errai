@@ -14,19 +14,13 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ioc.tests.decorator;
+package org.jboss.errai.ioc.tests.decorator.rebind;
 
-import org.jboss.errai.common.configuration.ErraiApp;
 import org.jboss.errai.common.configuration.ErraiModule;
-import org.jboss.errai.ioc.ErraiIocModule;
-import org.jboss.errai.ioc.tests.common.ErraiTestModule;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
-@ErraiApp(gwtModuleName = "org.jboss.errai.ioc.tests.decorator.DecoratorAPITests",
-          local = true,
-          modules = { ErraiTestApp.class, ErraiIocModule.class, ErraiTestModule.class })
 @ErraiModule
-public class ErraiTestApp {
+public class ErraiIocDecoratorsTestModule {
 }

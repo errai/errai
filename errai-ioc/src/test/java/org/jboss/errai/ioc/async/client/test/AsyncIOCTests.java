@@ -22,8 +22,6 @@ import org.jboss.errai.ioc.async.test.beanmanager.client.AsyncBeanManagerTests;
 import org.jboss.errai.ioc.async.test.constructor.client.AsyncConstructorInjectionTests;
 import org.jboss.errai.ioc.async.test.scopes.dependent.client.AsyncDependentScopeIntegrationTest;
 import org.jboss.errai.ioc.async.test.scopes.dependent.client.AsyncSpecializationIntegrationTest;
-import org.jboss.errai.ioc.tests.decorator.client.DecoratorAPITests;
-import org.jboss.errai.ioc.tests.extensions.client.IOCLoggingInjectorTest;
 import org.jboss.errai.ioc.tests.lifecycle.client.local.IOCLifecycleTest;
 import org.jboss.errai.ioc.tests.qualifiers.client.QualifierEqualityTests;
 import org.jboss.errai.ioc.tests.qualifiers.client.QualifierRegressionTests;
@@ -50,9 +48,7 @@ import org.junit.runners.Suite.SuiteClasses;
 
   // Rerun as async
   BasicIOCTest.class,
-  IOCLoggingInjectorTest.class,
   IOCLifecycleTest.class,
-  DecoratorAPITests.class,
   QualifierEqualityTests.class,
   QualifierRegressionTests.class,
   AlternativeBeanIntegrationTest.class,
