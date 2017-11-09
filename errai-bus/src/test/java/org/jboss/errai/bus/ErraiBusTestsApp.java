@@ -34,6 +34,3 @@ import org.jboss.errai.marshalling.ErraiMarshallingModule;
              nonSerializableTypes = { NonSerializable.class, BuilderEntity.NonPortableNestedClass.class })
 public class ErraiBusTestsApp {
 }
-
-
-

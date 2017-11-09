@@ -17,12 +17,10 @@
 package org.jboss.errai.common.apt;
 
 import javax.annotation.processing.Filer;
-import javax.annotation.processing.RoundEnvironment;
 import javax.tools.JavaFileManager;
 import javax.tools.StandardLocation;
 import java.io.File;
 import java.net.URI;
-import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;

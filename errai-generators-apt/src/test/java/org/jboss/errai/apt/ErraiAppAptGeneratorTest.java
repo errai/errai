@@ -2,7 +2,6 @@ package org.jboss.errai.apt;
 
 import org.jboss.errai.codegen.apt.test.ErraiAptTest;
 import org.jboss.errai.common.apt.AnnotatedSourceElementsFinder;
-import org.jboss.errai.common.apt.ResourceFilesFinder;
 import org.junit.Assert;
 import org.junit.Test;
 

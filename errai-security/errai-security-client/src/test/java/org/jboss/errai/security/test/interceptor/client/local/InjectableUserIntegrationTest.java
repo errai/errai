@@ -25,6 +25,7 @@ import org.jboss.errai.security.test.interceptor.client.local.res.BeanWithInject
 import org.jboss.errai.security.shared.api.identity.User;
 import org.jboss.errai.security.shared.api.identity.UserImpl;
 
+
 public class InjectableUserIntegrationTest extends AbstractErraiCDITest {
 
   @Override

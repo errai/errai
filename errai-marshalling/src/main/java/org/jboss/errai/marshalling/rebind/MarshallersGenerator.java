@@ -138,5 +138,4 @@ public class MarshallersGenerator extends AbstractAsyncGenerator {
   public boolean alreadyGeneratedSourcesViaAptGenerators(final GeneratorContext context) {
     return RebindUtils.isErraiUseAptGeneratorsPropertyEnabled(context);
   }
-
 }

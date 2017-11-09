@@ -178,7 +178,6 @@
   </dependencies>
 
   <profiles>
-
     <profile>
       <id>apt-generators</id>
       <activation>

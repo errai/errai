@@ -16,6 +16,23 @@
 
 package org.jboss.errai.codegen.meta;
 
+import java.lang.reflect.Array;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import javax.enterprise.util.TypeLiteral;
+
 import org.jboss.errai.codegen.BlockStatement;
 import org.jboss.errai.codegen.Context;
 import org.jboss.errai.codegen.DefParameters;
@@ -38,22 +55,6 @@ import org.jboss.errai.codegen.util.GenUtil;
 import org.jboss.errai.common.rebind.CacheUtil;
 import org.mvel2.ConversionHandler;
 import org.mvel2.DataConversion;
-
-import javax.enterprise.util.TypeLiteral;
-import java.lang.reflect.Array;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>

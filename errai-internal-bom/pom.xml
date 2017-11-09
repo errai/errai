@@ -362,6 +362,7 @@
         <artifactId>errai-cdi-export-apt</artifactId>
         <version>${project.version}</version>
       </dependency>
+
     </dependencies>
   </dependencyManagement>
 

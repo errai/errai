@@ -16,13 +16,10 @@
 
 package org.jboss.errai.common.apt.generator;
 
-import org.jboss.errai.config.ErraiConfiguration;
-
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
 public class ErraiAptGeneratedSourceFile {
-
   private final String packageName;
   private final String classSimpleName;
   private final String sourceCode;
