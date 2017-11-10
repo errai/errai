@@ -22,6 +22,9 @@ import org.jboss.errai.common.apt.configuration.AptErraiAppConfiguration;
 import org.jboss.errai.common.apt.exportfile.ExportFile;
 import org.jboss.errai.common.apt.exportfile.ExportFileName;
 import org.jboss.errai.common.apt.generator.ExportFileGenerator;
+import org.jboss.errai.common.apt.strategies.ErraiExportingStrategies;
+import org.jboss.errai.common.apt.strategies.ErraiExportingStrategiesFactory;
+import org.jboss.errai.common.apt.strategies.ExportingStrategies;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -144,7 +147,13 @@ public final class ErraiAptExportedTypes {
   }
 
   private ExportFileGenerator getLocalExportFileGenerator(final Set<TypeElement> allExportableAnnotations) {
-    return new ExportFileGenerator("localExportableTypes", allExportableAnnotations, annotatedSourceElementsFinder);
+    return new ExportFileGenerator("localExportableTypes", allExportableAnnotations, annotatedSourceElementsFinder,
+            buildExportingStrategies());
+  }
+
+  private ExportingStrategies buildExportingStrategies() {
+    return new ErraiExportingStrategiesFactory(elements).buildFrom(
+            findAnnotatedMetaClasses(ErraiExportingStrategies.class));
   }
 
   private void addExportableLocalTypes(final Map.Entry<String, Set<TypeMirror>> entry) {

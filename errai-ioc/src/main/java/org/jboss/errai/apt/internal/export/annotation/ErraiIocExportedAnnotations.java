@@ -29,6 +29,7 @@ import org.jboss.errai.ioc.client.api.SharedSingleton;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Alternative;
+import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
 import javax.inject.Qualifier;
 import javax.inject.Singleton;
@@ -58,4 +59,7 @@ public final class ErraiIocExportedAnnotations {
   private IOCProducer iocProducer;
   private Qualifier qualifier;
   private JsType jsType;
+  private Produces produces;
+
+
 }

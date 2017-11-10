@@ -25,7 +25,6 @@ import org.junit.Test;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
-import java.util.Optional;
 import java.util.Set;
 
 import static java.util.Collections.emptySet;
@@ -72,6 +71,6 @@ public class ExportFileGeneratorTest extends ErraiAptTest {
 
   private TestGenerator getTestGenerator(final Set<? extends TypeElement> annotations,
           final AnnotatedSourceElementsFinder annotatedElementsFinder) {
-    return new TestGenerator(null, annotations, annotatedElementsFinder);
+    return new TestGenerator(annotations, annotatedElementsFinder);
   }
 }

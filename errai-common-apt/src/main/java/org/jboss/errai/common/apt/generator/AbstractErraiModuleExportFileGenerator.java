@@ -19,6 +19,8 @@ package org.jboss.errai.common.apt.generator;
 import org.jboss.errai.codegen.meta.impl.apt.APTClassUtil;
 import org.jboss.errai.common.apt.AnnotatedSourceElementsFinder;
 import org.jboss.errai.common.apt.AptAnnotatedSourceElementsFinder;
+import org.jboss.errai.common.apt.strategies.ErraiExportingStrategiesFactory;
+import org.jboss.errai.common.apt.strategies.ExportingStrategies;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.Filer;
@@ -34,6 +36,8 @@ import java.util.Set;
 public abstract class AbstractErraiModuleExportFileGenerator extends AbstractProcessor {
 
   protected abstract String getCamelCaseErraiModuleName();
+
+  protected abstract Class<?> getExportingStrategiesClass();
 
   @Override
   public boolean process(final Set<? extends TypeElement> annotations, final RoundEnvironment roundEnv) {
@@ -54,7 +58,7 @@ public abstract class AbstractErraiModuleExportFileGenerator extends AbstractPro
           final AnnotatedSourceElementsFinder annotatedSourceElementsFinder) {
     try {
       APTClassUtil.init(types, elements);
-      generateAndSaveExportFiles(annotations, annotatedSourceElementsFinder, filer);
+      generateAndSaveExportFiles(annotations, annotatedSourceElementsFinder, getExportingStrategies(elements), filer);
     } catch (final Exception e) {
       System.out.println("Error generating export files");
       e.printStackTrace();
@@ -63,12 +67,14 @@ public abstract class AbstractErraiModuleExportFileGenerator extends AbstractPro
 
   void generateAndSaveExportFiles(final Set<? extends TypeElement> exportableAnnotations,
           final AnnotatedSourceElementsFinder annotatedSourceElementsFinder,
+          final ExportingStrategies exportingStrategies,
           final Filer filer) {
 
-    final String camelCaseErraiModuleName = getCamelCaseErraiModuleName();
-    final ExportFileGenerator generator = new ExportFileGenerator(camelCaseErraiModuleName, exportableAnnotations,
-            annotatedSourceElementsFinder);
+    new ExportFileGenerator(getCamelCaseErraiModuleName(), exportableAnnotations, annotatedSourceElementsFinder,
+            exportingStrategies).generateAndSaveExportFiles(filer);
+  }
 
-    generator.generateAndSaveExportFiles(filer);
+  private ExportingStrategies getExportingStrategies(final Elements elements) {
+    return new ErraiExportingStrategiesFactory(elements).buildFrom(getExportingStrategiesClass());
   }
 }

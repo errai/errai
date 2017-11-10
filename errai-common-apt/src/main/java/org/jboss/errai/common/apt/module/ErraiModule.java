@@ -21,9 +21,10 @@ import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.impl.apt.APTClassUtil;
 import org.jboss.errai.common.apt.AnnotatedSourceElementsFinder;
 import org.jboss.errai.common.apt.exportfile.ExportFile;
+import org.jboss.errai.common.apt.strategies.ExportedElement;
+import org.jboss.errai.common.apt.strategies.ExportingStrategies;
 
 import javax.lang.model.element.Element;
-import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import java.util.Optional;
@@ -46,15 +47,18 @@ public class ErraiModule {
   private final MetaClass erraiModuleMetaClass;
   private final AnnotatedSourceElementsFinder annotatedSourceElementsFinder;
   private final String packageName;
+  private final ExportingStrategies exportingStrategies;
 
   public ErraiModule(final String camelCaseErraiModuleName,
           final MetaClass erraiModuleMetaClass,
-          final AnnotatedSourceElementsFinder annotatedSourceElementsFinder) {
+          final AnnotatedSourceElementsFinder annotatedSourceElementsFinder,
+          final ExportingStrategies exportingStrategies) {
 
     this.camelCaseErraiModuleName = camelCaseErraiModuleName;
     this.erraiModuleMetaClass = erraiModuleMetaClass;
     this.annotatedSourceElementsFinder = annotatedSourceElementsFinder;
     this.packageName = erraiModuleMetaClass.getPackageName();
+    this.exportingStrategies = exportingStrategies;
   }
 
   public Stream<ExportFile> exportFiles(final Set<? extends TypeElement> exportableAnnotations) {
@@ -76,7 +80,8 @@ public class ErraiModule {
     return annotatedSourceElementsFinder.findSourceElementsAnnotatedWith(annotationTypeElement)
             .stream()
             .filter(this::isPartOfModule)
-            .flatMap(this::getExportableElements)
+            .flatMap(a -> exportingStrategies.getExportedElements(annotationTypeElement, a)
+                    .map(ExportedElement::getElement))
             .map(Element::asType)
             .filter(this::isPublic)
             .collect(toSet());
@@ -105,20 +110,6 @@ public class ErraiModule {
     }
 
     return false;
-  }
-
-  private Stream<? extends Element> getExportableElements(final Element element) {
-    if (element.getKind().isClass() || element.getKind().isInterface()) {
-      return Stream.of(element);
-    } else if (element.getKind().isField()) {
-      return Stream.of(APTClassUtil.types.asElement(element.asType()));
-    } else if (element.getKind().equals(METHOD) || element.getKind().equals(CONSTRUCTOR)) {
-      return ((ExecutableElement) element).getParameters().stream();
-    } else if (element.getKind().equals(PARAMETER)) {
-      return Stream.of(element);
-    } else {
-      return Stream.of();
-    }
   }
 
   private boolean isPartOfModule(final Element element) {

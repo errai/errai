@@ -14,23 +14,28 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.common.apt.generator;
+package org.jboss.errai.common.apt.strategies;
 
-import org.jboss.errai.common.apt.AnnotatedSourceElementsFinder;
-import org.jboss.errai.common.apt.strategies.ExportingStrategies;
-
-import javax.annotation.processing.Filer;
+import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
-import java.util.Set;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
-class TestGenerator extends ExportFileGenerator {
+public class ExportedElement {
+  private final TypeElement annotation;
+  private final Element element;
 
-  TestGenerator(final Set<? extends TypeElement> exportableAnnotations,
-          final AnnotatedSourceElementsFinder annotatedSourceElementsFinder) {
-    super("test", exportableAnnotations, annotatedSourceElementsFinder, ExportingStrategies.defaultStrategies());
+  public ExportedElement(final TypeElement annotation, final Element element) {
+    this.annotation = annotation;
+    this.element = element;
   }
 
+  public TypeElement getAnnotation() {
+    return annotation;
+  }
+
+  public Element getElement() {
+    return element;
+  }
 }

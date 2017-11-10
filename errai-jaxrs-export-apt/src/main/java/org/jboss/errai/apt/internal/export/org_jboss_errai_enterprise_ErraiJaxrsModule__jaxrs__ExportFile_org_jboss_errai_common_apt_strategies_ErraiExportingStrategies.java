@@ -14,23 +14,13 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.common.apt.generator;
+package org.jboss.errai.apt.internal.export;
 
-import org.jboss.errai.common.apt.AnnotatedSourceElementsFinder;
-import org.jboss.errai.common.apt.strategies.ExportingStrategies;
-
-import javax.annotation.processing.Filer;
-import javax.lang.model.element.TypeElement;
-import java.util.Set;
+import org.jboss.errai.enterprise.apt.export.ErraiJaxrsExportingStrategies;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
-class TestGenerator extends ExportFileGenerator {
-
-  TestGenerator(final Set<? extends TypeElement> exportableAnnotations,
-          final AnnotatedSourceElementsFinder annotatedSourceElementsFinder) {
-    super("test", exportableAnnotations, annotatedSourceElementsFinder, ExportingStrategies.defaultStrategies());
-  }
-
+public class org_jboss_errai_enterprise_ErraiJaxrsModule__jaxrs__ExportFile_org_jboss_errai_common_apt_strategies_ErraiExportingStrategies {
+  private ErraiJaxrsExportingStrategies exportingStrategies;
 }

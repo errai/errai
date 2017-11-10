@@ -40,4 +40,9 @@ public class ErraiMarshallingExportFileGenerator extends AbstractErraiModuleExpo
   protected String getCamelCaseErraiModuleName() {
     return "marshalling";
   }
+
+  @Override
+  protected Class<?> getExportingStrategiesClass() {
+    return ErraiMarshallingExportingStrategies.class;
+  }
 }

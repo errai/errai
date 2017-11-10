@@ -5,6 +5,7 @@ import org.jboss.errai.common.apt.AnnotatedSourceElementsFinder;
 import org.jboss.errai.common.apt.TestAnnotatedSourceElementsFinder;
 import org.jboss.errai.common.apt.configuration.TestAnnotation;
 import org.jboss.errai.common.apt.exportfile.ExportFile;
+import org.jboss.errai.common.apt.strategies.ExportingStrategies;
 import org.jboss.errai.common.apt.module2.AnnotatedTypeOutOfModule;
 import org.junit.Assert;
 import org.junit.Test;
@@ -106,7 +107,7 @@ public class ErraiModuleTest extends ErraiAptTest {
   }
 
   private ErraiModule getErraiModule(final AnnotatedSourceElementsFinder annotatedElementsFinder) {
-    return new ErraiModule("test", aptClass(ErraiDefaultTestModule.class), annotatedElementsFinder);
+    return new ErraiModule("test", aptClass(ErraiDefaultTestModule.class), annotatedElementsFinder, ExportingStrategies.defaultStrategies());
   }
 
   private static void assertContainsOnly(final Set<?> actual, final Object... expected) {

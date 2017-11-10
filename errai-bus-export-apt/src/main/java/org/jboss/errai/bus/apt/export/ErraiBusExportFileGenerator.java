@@ -38,4 +38,9 @@ public class ErraiBusExportFileGenerator extends AbstractErraiModuleExportFileGe
   protected String getCamelCaseErraiModuleName() {
     return "bus";
   }
+
+  @Override
+  protected Class<?> getExportingStrategiesClass() {
+    return ErraiBusExportingStrategies.class;
+  }
 }

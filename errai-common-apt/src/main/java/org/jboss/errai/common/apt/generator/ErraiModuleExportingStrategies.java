@@ -16,21 +16,8 @@
 
 package org.jboss.errai.common.apt.generator;
 
-import org.jboss.errai.common.apt.AnnotatedSourceElementsFinder;
-import org.jboss.errai.common.apt.strategies.ExportingStrategies;
-
-import javax.annotation.processing.Filer;
-import javax.lang.model.element.TypeElement;
-import java.util.Set;
-
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
-class TestGenerator extends ExportFileGenerator {
-
-  TestGenerator(final Set<? extends TypeElement> exportableAnnotations,
-          final AnnotatedSourceElementsFinder annotatedSourceElementsFinder) {
-    super("test", exportableAnnotations, annotatedSourceElementsFinder, ExportingStrategies.defaultStrategies());
-  }
-
+public class ErraiModuleExportingStrategies {
 }

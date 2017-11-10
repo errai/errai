@@ -17,8 +17,8 @@
 package org.jboss.errai.common.apt.generator;
 
 import org.jboss.errai.common.apt.AnnotatedSourceElementsFinder;
-import org.jboss.errai.common.apt.AptAnnotatedSourceElementsFinder;
 import org.jboss.errai.common.apt.TestAnnotatedSourceElementsFinder;
+import org.jboss.errai.common.apt.strategies.ExportingStrategies;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -33,6 +33,10 @@ import static java.util.Collections.emptySet;
  */
 public class AbstractErraiModuleExportFileGeneratorTest {
 
+  private static class Empty {
+
+  }
+
   @Test
   public void testThrownExceptionDoesNotBreakIt() {
     try {
@@ -43,8 +47,14 @@ public class AbstractErraiModuleExportFileGeneratorTest {
         }
 
         @Override
+        protected Class<?> getExportingStrategiesClass() {
+          return Empty.class;
+        }
+
+        @Override
         void generateAndSaveExportFiles(Set<? extends TypeElement> exportableAnnotations,
                 AnnotatedSourceElementsFinder annotatedSourceElementsFinder,
+                ExportingStrategies exportingStrategies,
                 Filer filer) {
           throw new TestException();
         }
@@ -61,6 +71,11 @@ public class AbstractErraiModuleExportFileGeneratorTest {
         @Override
         protected String getCamelCaseErraiModuleName() {
           return "test";
+        }
+
+        @Override
+        protected Class<?> getExportingStrategiesClass() {
+          return Empty.class;
         }
       }.process(emptySet(), null, null, null, new TestAnnotatedSourceElementsFinder());
     } catch (final Exception e) {

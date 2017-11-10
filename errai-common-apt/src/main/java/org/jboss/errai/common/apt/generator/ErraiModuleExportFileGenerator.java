@@ -33,4 +33,9 @@ public class ErraiModuleExportFileGenerator extends AbstractErraiModuleExportFil
   public String getCamelCaseErraiModuleName() {
     return "errai";
   }
+
+  @Override
+  protected Class<?> getExportingStrategiesClass() {
+    return ErraiModuleExportingStrategies.class;
+  }
 }
