@@ -16,12 +16,18 @@
 
 package org.jboss.errai.common.apt.strategies;
 
+import org.jboss.errai.codegen.meta.impl.apt.APTClassUtil;
+
 import javax.lang.model.element.Element;
+import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import java.util.Map;
 import java.util.stream.Stream;
 
 import static java.util.Collections.emptyMap;
+import static javax.lang.model.element.ElementKind.CONSTRUCTOR;
+import static javax.lang.model.element.ElementKind.METHOD;
+import static javax.lang.model.element.ElementKind.PARAMETER;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
@@ -30,19 +36,27 @@ public class ExportingStrategies {
 
   private final Map<TypeElement, ExportingStrategy> strategies;
 
-  public static ExportingStrategies defaultStrategies() {
-    return new ExportingStrategies(emptyMap());
-  }
-
   ExportingStrategies(final Map<TypeElement, ExportingStrategy> strategies) {
     this.strategies = strategies;
   }
 
   public Stream<ExportedElement> getExportedElements(final TypeElement annotation, final Element element) {
-    return strategies.getOrDefault(annotation, e -> getDefaultStrategy(annotation, e)).getExportedElements(element);
+    return strategies.getOrDefault(annotation, defaultStrategy(annotation)).getExportedElements(element);
   }
 
-  private Stream<ExportedElement> getDefaultStrategy(final TypeElement annotation, final Element element) {
-    return ExportingStrategy.defaultGetElements(annotation, element);
+  private ExportingStrategy defaultStrategy(final TypeElement annotation) {
+    return element -> {
+      if (element.getKind().isClass() || element.getKind().isInterface()) {
+        return Stream.of(new ExportedElement(annotation, element));
+      } else if (element.getKind().isField()) {
+        return Stream.of(new ExportedElement(annotation, APTClassUtil.types.asElement(element.asType())));
+      } else if (element.getKind().equals(METHOD) || element.getKind().equals(CONSTRUCTOR)) {
+        return ((ExecutableElement) element).getParameters().stream().map(p -> new ExportedElement(annotation, p));
+      } else if (element.getKind().equals(PARAMETER)) {
+        return Stream.of(new ExportedElement(annotation, element));
+      } else {
+        return Stream.of();
+      }
+    };
   }
 }

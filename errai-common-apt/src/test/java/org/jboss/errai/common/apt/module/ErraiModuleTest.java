@@ -18,6 +18,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import static java.util.Collections.emptyMap;
 import static java.util.Collections.singleton;
 
 public class ErraiModuleTest extends ErraiAptTest {
@@ -107,7 +108,8 @@ public class ErraiModuleTest extends ErraiAptTest {
   }
 
   private ErraiModule getErraiModule(final AnnotatedSourceElementsFinder annotatedElementsFinder) {
-    return new ErraiModule("test", aptClass(ErraiDefaultTestModule.class), annotatedElementsFinder, ExportingStrategies.defaultStrategies());
+    return new ErraiModule("test", aptClass(ErraiDefaultTestModule.class), annotatedElementsFinder,
+            new ExportingStrategies(emptyMap()));
   }
 
   private static void assertContainsOnly(final Set<?> actual, final Object... expected) {

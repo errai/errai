@@ -16,16 +16,8 @@
 
 package org.jboss.errai.common.apt.strategies;
 
-import org.jboss.errai.codegen.meta.impl.apt.APTClassUtil;
-
 import javax.lang.model.element.Element;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.TypeElement;
 import java.util.stream.Stream;
-
-import static javax.lang.model.element.ElementKind.CONSTRUCTOR;
-import static javax.lang.model.element.ElementKind.METHOD;
-import static javax.lang.model.element.ElementKind.PARAMETER;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
@@ -34,22 +26,4 @@ import static javax.lang.model.element.ElementKind.PARAMETER;
 public interface ExportingStrategy {
 
   Stream<ExportedElement> getExportedElements(final Element annotatedElement);
-
-  static Stream<ExportedElement> defaultGetElements(final TypeElement annotation, final Element element) {
-    if (element.getKind().isClass() || element.getKind().isInterface()) {
-      return Stream.of(new ExportedElement(annotation, element));
-    } else if (element.getKind().isField()) {
-      return Stream.of(new ExportedElement(annotation, APTClassUtil.types.asElement(element.asType())));
-    } else if (element.getKind().equals(METHOD) || element.getKind().equals(CONSTRUCTOR)) {
-      return ((ExecutableElement) element).getParameters().stream().map(p -> new ExportedElement(annotation, p));
-    } else if (element.getKind().equals(PARAMETER)) {
-      return Stream.of(new ExportedElement(annotation, element));
-    } else {
-      return Stream.of();
-    }
-  }
-
-  static ExportingStrategy defaultStrategy(final TypeElement annotation) {
-    return e -> ExportingStrategy.defaultGetElements(annotation, e);
-  }
 }
