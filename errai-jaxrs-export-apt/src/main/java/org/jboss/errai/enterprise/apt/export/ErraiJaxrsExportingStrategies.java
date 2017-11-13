@@ -20,6 +20,7 @@ import org.jboss.errai.common.apt.strategies.ErraiExportingStrategy;
 import org.jboss.errai.common.apt.strategies.ExportedElement;
 
 import javax.lang.model.element.Element;
+import javax.lang.model.element.TypeElement;
 import java.util.stream.Stream;
 
 import static org.jboss.errai.codegen.meta.impl.apt.APTClassUtil.getTypeElement;
@@ -35,11 +36,12 @@ import static org.jboss.errai.enterprise.apt.export.SupportedAnnotationTypes.PRO
 public interface ErraiJaxrsExportingStrategies {
 
   @ErraiExportingStrategy(PATH)
-  static Stream<ExportedElement> pathStrategy(final Element element) {
+  static Stream<ExportedElement> path(final Element element) {
+    final TypeElement pathAnnotation = getTypeElement(PATH);
     if (element.getKind().isInterface() || element.getKind().isClass()) {
-      return Stream.of(new ExportedElement(getTypeElement(PATH), element));
+      return Stream.of(new ExportedElement(pathAnnotation, element));
     }
-    return Stream.of(new ExportedElement(getTypeElement(PATH), element.getEnclosingElement()));
+    return Stream.of(new ExportedElement(pathAnnotation, element.getEnclosingElement()));
   }
 
   @ErraiExportingStrategy(PROVIDER)

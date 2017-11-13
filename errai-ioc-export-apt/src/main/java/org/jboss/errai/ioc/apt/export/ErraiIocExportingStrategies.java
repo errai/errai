@@ -16,12 +16,16 @@
 
 package org.jboss.errai.ioc.apt.export;
 
+import org.jboss.errai.codegen.meta.impl.apt.APTClassUtil;
 import org.jboss.errai.common.apt.strategies.ErraiExportingStrategy;
 import org.jboss.errai.common.apt.strategies.ExportedElement;
 
 import javax.lang.model.element.Element;
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.TypeElement;
 import java.util.stream.Stream;
 
+import static java.util.stream.Stream.concat;
 import static org.jboss.errai.codegen.meta.impl.apt.APTClassUtil.getTypeElement;
 import static org.jboss.errai.ioc.apt.export.SupportedAnnotationTypes.ALTERNATIVE;
 import static org.jboss.errai.ioc.apt.export.SupportedAnnotationTypes.APPLICATION_SCOPED;
@@ -47,60 +51,82 @@ import static org.jboss.errai.ioc.apt.export.SupportedAnnotationTypes.SINGLETON;
 public interface ErraiIocExportingStrategies {
 
   @ErraiExportingStrategy(PRODUCES)
-  static Stream<ExportedElement> producesStrategy(final Element element) {
+  static Stream<ExportedElement> produces(final Element element) {
+    final TypeElement annotation = getTypeElement(PRODUCES);
+
     if (element.getKind().isInterface() || element.getKind().isClass()) {
-      return Stream.of(new ExportedElement(getTypeElement(PRODUCES), element));
+      return Stream.of(new ExportedElement(annotation, element));
     }
-    return Stream.of(new ExportedElement(getTypeElement(PRODUCES), element.getEnclosingElement()));
+
+    // Method
+    return Stream.of(new ExportedElement(annotation, element.getEnclosingElement()));
   }
 
   @ErraiExportingStrategy(IOC_PRODUCER)
-  static Stream<ExportedElement> iocProducerStrategy(final Element element) {
+  static Stream<ExportedElement> iocProducer(final Element element) {
     return Stream.of(new ExportedElement(getTypeElement(IOC_PRODUCER), element.getEnclosingElement()));
   }
 
-  @ErraiExportingStrategy(IOC_BOOTSTRAP_TASK)
-  void iocBootstrapTaskStrategy();
-
-  @ErraiExportingStrategy(IOC_EXTENSION)
-  void iocExtensionStrategy();
-
-  @ErraiExportingStrategy(CODE_DECORATOR)
-  void codeDecoratorStrategy();
-
-  @ErraiExportingStrategy(SCOPE_CONTEXT)
-  void scopeContextStrategy();
-
   @ErraiExportingStrategy(JAVAX_INJECT)
-  void javaxInjectStrategy();
+  static Stream<ExportedElement> javaxInject(final Element element) {
+    return anyInject(element, getTypeElement(JAVAX_INJECT));
+  }
 
   @ErraiExportingStrategy(GOOGLE_INJECT)
-  void googleInjectStrategy();
+  static Stream<ExportedElement> googleInject(final Element element) {
+    return anyInject(element, getTypeElement(GOOGLE_INJECT));
+  }
+
+  @ErraiExportingStrategy(IOC_BOOTSTRAP_TASK)
+  void iocBootstrapTask();
+
+  @ErraiExportingStrategy(IOC_EXTENSION)
+  void iocExtension();
+
+  @ErraiExportingStrategy(CODE_DECORATOR)
+  void codeDecorator();
+
+  @ErraiExportingStrategy(SCOPE_CONTEXT)
+  void scopeContext();
 
   @ErraiExportingStrategy(IOC_PROVIDER)
-  void iocProviderStrategy();
+  void iocProvider();
 
   @ErraiExportingStrategy(DEPENDENT)
-  void dependentStrategy();
+  void dependent();
 
   @ErraiExportingStrategy(APPLICATION_SCOPED)
-  void applicationScopedStrategy();
+  void applicationScoped();
 
   @ErraiExportingStrategy(ALTERNATIVE)
-  void alternativeStrategy();
+  void alternative();
 
   @ErraiExportingStrategy(SINGLETON)
-  void singletonStrategy();
+  void singleton();
 
   @ErraiExportingStrategy(ENTRY_POINT)
-  void entryPointStrategy();
+  void entryPoint();
 
   @ErraiExportingStrategy(SHARED_SINGLETON)
-  void sharedSingletonStrategy();
+  void sharedSingleton();
 
   @ErraiExportingStrategy(QUALIFIER)
-  void qualifierStrategy();
+  void qualifier();
 
   @ErraiExportingStrategy(JS_TYPE)
-  void jsTypeStrategy();
+  void jsType();
+
+  static Stream<ExportedElement> anyInject(final Element element, final TypeElement annotation) {
+    final Stream<ExportedElement> type = Stream.of(new ExportedElement(annotation, element.getEnclosingElement()));
+
+    if (element.getKind().isField()) {
+      return concat(type, Stream.of(new ExportedElement(annotation, APTClassUtil.types.asElement(element.asType()))));
+    }
+
+    final Stream<ExportedElement> parameters = ((ExecutableElement) element).getParameters()
+            .stream()
+            .map(p -> new ExportedElement(annotation, p));
+
+    return concat(type, parameters);
+  }
 }
