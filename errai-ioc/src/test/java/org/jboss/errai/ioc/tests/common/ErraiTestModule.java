@@ -20,6 +20,7 @@ import org.jboss.errai.common.configuration.ErraiModule;
 import org.jboss.errai.ioc.tests.wiring.client.res.AlternativeBeanA;
 import org.jboss.errai.ioc.tests.wiring.client.res.BlacklistedBean;
 import org.jboss.errai.ioc.tests.wiring.client.res.OverridingAltCommonInterfaceBImpl;
+import org.jboss.errai.ioc.tests.wiring.client.res.sub.BlacklistedPackageBean;
 import org.jboss.tests.errai.ioc.wiring.client.res.WhitelistedAndBlacklistedBean;
 import org.jboss.tests.errai.ioc.wiring.client.res.WhitelistedBean;
 import org.jboss.tests.errai.ioc.wiring.client.res.sub.WhitelistedPackageBean;
@@ -32,6 +33,7 @@ import org.jboss.tests.errai.ioc.wiring.client.res.sub.WhitelistedPackageBean;
                               WhitelistedAndBlacklistedBean.class,
                               WhitelistedPackageBean.class },
              iocBlacklist = { BlacklistedBean.class,
+                              BlacklistedPackageBean.class,
                               WhitelistedAndBlacklistedBean.class,
                               WhitelistedPackageBean.class })
 public class ErraiTestModule {
