@@ -34,7 +34,6 @@ import org.jboss.tests.errai.ioc.wiring.client.res.sub.WhitelistedPackageBean;
                               WhitelistedPackageBean.class },
              iocBlacklist = { BlacklistedBean.class,
                               BlacklistedPackageBean.class,
-                              WhitelistedAndBlacklistedBean.class,
-                              WhitelistedPackageBean.class })
+                              WhitelistedAndBlacklistedBean.class })
 public class ErraiTestModule {
 }

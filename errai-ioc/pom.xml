@@ -203,10 +203,7 @@
           <plugin>
             <artifactId>maven-failsafe-plugin</artifactId>
             <configuration>
-              <additionalClasspathElements>
-                <additionalClasspathElement>${basedir}/target/generated-test-sources/test-annotations</additionalClasspathElement>
-              </additionalClasspathElements>
-              <!-- This is required because the BasicIOCTest is run in "simulated 
+              <!-- This is required because the BasicIOCTest is run in "simulated
                 client" mode, which prevents subsequent tests from succeeding -->
               <forkMode>pertest</forkMode>
               <argLine>-Xmx1500m -Dgwt.gen=/tmp/gwt_test_gen_out/ -Derrai.codegen.details=true -Dgwt.args='-testBeginTimeout 5 -generateJsInteropExports ${gwtArgs}' -Xdebug</argLine>
