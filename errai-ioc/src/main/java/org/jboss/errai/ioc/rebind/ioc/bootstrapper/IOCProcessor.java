@@ -19,7 +19,6 @@ package org.jboss.errai.ioc.rebind.ioc.bootstrapper;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import jsinterop.annotations.JsType;
-import org.jboss.errai.ioc.apt.FactoriesAptGenerator;
 import org.jboss.errai.codegen.ArithmeticExpression;
 import org.jboss.errai.codegen.ArithmeticOperator;
 import org.jboss.errai.codegen.Modifier;
@@ -46,6 +45,7 @@ import org.jboss.errai.codegen.util.If;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.client.api.Assert;
 import org.jboss.errai.config.ErraiConfiguration;
+import org.jboss.errai.ioc.apt.FactoriesAptGenerator;
 import org.jboss.errai.ioc.client.Bootstrapper;
 import org.jboss.errai.ioc.client.JsArray;
 import org.jboss.errai.ioc.client.WindowInjectionContext;
@@ -146,11 +146,6 @@ public class IOCProcessor {
   private static final Predicate<List<InjectableHandle>> EXACT_TYPE = IOCProcessor::exactTypePredicate;
 
   private static final String REACHABILITY_PROPERTY = "errai.ioc.reachability";
-  private static final String PLUGIN_PROPERTY = "errai.ioc.jsinterop.support";
-
-  public static boolean isJsInteropSupportEnabled() {
-    return Boolean.getBoolean(PLUGIN_PROPERTY);
-  }
 
   private final Set<Class<? extends Annotation>> nonSimpletonTypeAnnotations = new HashSet<>();
 
@@ -217,7 +212,7 @@ public class IOCProcessor {
 
     declareAndRegisterFactories(processingContext, dependencyGraph, scopeContexts, scopeContextSet, registerFactoriesBody);
     final String contextManagerFieldName = declareContextManagerField(processingContext);
-    if (isJsInteropSupportEnabled()) {
+    if (erraiConfiguration.app().jsInteropSupportEnabled()) {
       declareWindowInjectionContextField(processingContext);
     }
     declareStaticLogger(processingContext);
@@ -438,8 +433,7 @@ public class IOCProcessor {
     registerFactoryWithContext(injectable, factoryClass, scopeContexts, registerFactoriesBody);
     final boolean windowScoped = injectable.getWiringElementTypes().contains(WiringElementType.SharedSingleton);
     final boolean jsType = injectable.getWiringElementTypes().contains(WiringElementType.JsType);
-    final boolean jsinteropSupportEnabled = isJsInteropSupportEnabled();
-    if (jsinteropSupportEnabled && (jsType || windowScoped)) {
+    if (erraiConfiguration.app().jsInteropSupportEnabled() && (jsType || windowScoped)) {
       final List<Statement> stmts = new ArrayList<>();
       stmts.add(loadVariable("windowContext").invoke("addBeanProvider",
               injectable.getInjectedType().getFullyQualifiedName(), createJsTypeProviderFor(injectable)));

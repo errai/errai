@@ -32,6 +32,7 @@ import org.jboss.errai.common.configuration.ErraiApp;
           useStaticMarshallers = true,
           makeDefaultArrayMarshallers = true,
           lazyLoadBuiltinMarshallers = true,
+          jsInteropSupportEnabled = true,
           customProperties = @CustomProperty(name = "existent", value = "test"))
 class ErraiTestApp {
 }

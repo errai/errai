@@ -26,7 +26,6 @@ import org.jboss.errai.ioc.client.WindowInjectionContextImpl;
 import org.jboss.errai.ioc.client.WindowInjectionContextStorage;
 import org.jboss.errai.ioc.client.api.ActivatedBy;
 import org.jboss.errai.ioc.client.api.builtin.DummyJsTypeProvider;
-import org.jboss.errai.ioc.client.container.BeanActivator;
 import org.jboss.errai.ioc.client.container.FactoryHandleImpl;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.Injectable;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
@@ -59,7 +58,7 @@ public class JsTypeFactoryBodyGenerator extends AbstractBodyGenerator {
   protected List<Statement> generateFactoryInitStatements(final ClassStructureBuilder<?> bodyBlockBuilder,
           final Injectable injectable, final InjectionContext injectionContext) {
     final MetaClass type = injectable.getInjectedType();
-    if (IOCProcessor.isJsInteropSupportEnabled() && requiresAntiInliningDummy(type)) {
+    if (injectionContext.getProcessingContext().erraiConfiguration().app().jsInteropSupportEnabled() && requiresAntiInliningDummy(type)) {
       final int count = numberOfRequiredAntiInliningDummies(type);
       final List<Statement> stmts = new ArrayList<>(count);
 

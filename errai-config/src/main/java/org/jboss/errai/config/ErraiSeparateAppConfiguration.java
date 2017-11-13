@@ -44,6 +44,8 @@ interface ErraiSeparateAppConfiguration {
 
   interface Ioc {
 
+    boolean jsInteropSupportEnabled();
+
     boolean isAutoDiscoverServicesEnabled();
 
     boolean asyncBeanManager();

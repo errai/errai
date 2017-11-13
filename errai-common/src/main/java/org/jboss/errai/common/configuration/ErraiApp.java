@@ -49,6 +49,8 @@ public @interface ErraiApp {
 
   boolean makeDefaultArrayMarshallers() default false;
 
+  boolean jsInteropSupportEnabled() default false;
+
   CustomProperty[] customProperties() default {};
 
   interface Property {
@@ -61,6 +63,7 @@ public @interface ErraiApp {
     String FORCE_STATIC_MARSHALLERS = "forceStaticMarshallers";
     String LAZY_LOAD_BUILTIN_MARSHALLERS = "lazyLoadBuiltinMarshallers";
     String MAKE_DEFAULT_ARRAY_MARSHALLERS = "makeDefaultArrayMarshallers";
+    String JS_INTEROP_SUPPORT_ENABLED = "jsInteropSupportEnabled";
     String CUSTOM_PROPERTIES = "customProperties";
     String LOCAL  = "local";
     String MODULES  = "modules";

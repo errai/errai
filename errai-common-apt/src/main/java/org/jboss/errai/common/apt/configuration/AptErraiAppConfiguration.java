@@ -32,6 +32,7 @@ import static org.jboss.errai.common.configuration.ErraiApp.Property.CUSTOM_PROP
 import static org.jboss.errai.common.configuration.ErraiApp.Property.ENABLE_WEB_SOCKET_SERVER;
 import static org.jboss.errai.common.configuration.ErraiApp.Property.FORCE_STATIC_MARSHALLERS;
 import static org.jboss.errai.common.configuration.ErraiApp.Property.GWT_MODULE_NAME;
+import static org.jboss.errai.common.configuration.ErraiApp.Property.JS_INTEROP_SUPPORT_ENABLED;
 import static org.jboss.errai.common.configuration.ErraiApp.Property.LAZY_LOAD_BUILTIN_MARSHALLERS;
 import static org.jboss.errai.common.configuration.ErraiApp.Property.LOCAL;
 import static org.jboss.errai.common.configuration.ErraiApp.Property.MAKE_DEFAULT_ARRAY_MARSHALLERS;
@@ -96,6 +97,11 @@ public class AptErraiAppConfiguration implements ErraiAppConfiguration {
   @Override
   public boolean makeDefaultArrayMarshallers() {
     return erraiAppMetaAnnotation.value(MAKE_DEFAULT_ARRAY_MARSHALLERS);
+  }
+
+  @Override
+  public boolean jsInteropSupportEnabled() {
+    return erraiAppMetaAnnotation.value(JS_INTEROP_SUPPORT_ENABLED);
   }
 
   @Override

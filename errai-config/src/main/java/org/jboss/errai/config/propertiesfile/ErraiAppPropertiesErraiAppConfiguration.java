@@ -30,6 +30,7 @@ public class ErraiAppPropertiesErraiAppConfiguration implements ErraiAppConfigur
   public static final String ERRAI_IOC_ASYNC_BEAN_MANAGER = "errai.ioc.async_bean_manager";
   public static final String FORCE_STATIC_MARSHALLERS = "errai.marshalling.force_static_marshallers";
   public static final String USE_STATIC_MARSHALLERS = "errai.marshalling.use_static_marshallers";
+  private static final String JS_INTEROP_SUPPORT_ENABLED = "errai.ioc.jsinterop.support";
 
   @Override
   public boolean isUserEnabledOnHostPage() {
@@ -44,6 +45,11 @@ public class ErraiAppPropertiesErraiAppConfiguration implements ErraiAppConfigur
   @Override
   public String getApplicationContext() {
     return null; //FIXME: Implement when migrating owner module to APT generators
+  }
+
+  @Override
+  public boolean jsInteropSupportEnabled() {
+    return Boolean.getBoolean(JS_INTEROP_SUPPORT_ENABLED);
   }
 
   @Override

@@ -48,6 +48,7 @@ public class AptErraiConfigurationTest extends ErraiAptTest {
     Assert.assertEquals(false, config.useStaticMarshallers());
     Assert.assertEquals(false, config.makeDefaultArrayMarshallers());
     Assert.assertEquals(false, config.lazyLoadBuiltinMarshallers());
+    Assert.assertEquals(false, config.jsInteropSupportEnabled());
     Assert.assertFalse(config.custom("nonexistent").isPresent());
   }
 
@@ -63,6 +64,7 @@ public class AptErraiConfigurationTest extends ErraiAptTest {
     Assert.assertEquals(true, config.useStaticMarshallers());
     Assert.assertEquals(true, config.makeDefaultArrayMarshallers());
     Assert.assertEquals(true, config.lazyLoadBuiltinMarshallers());
+    Assert.assertEquals(true, config.jsInteropSupportEnabled());
     Assert.assertEquals("test", config.custom("existent").get());
   }
 }

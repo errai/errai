@@ -25,6 +25,7 @@ import org.jboss.errai.ioc.tests.common.ErraiTestModule;
  * @author Tiago Bento <tfernand@redhat.com>
  */
 @ErraiApp(gwtModuleName = "org.jboss.errai.ioc.tests.wiring.IOCWiringTests",
+          jsInteropSupportEnabled = true,
           local = true,
           modules = { ErraiTestApp.class, ErraiIocModule.class, ErraiTestModule.class })
 @ErraiModule
