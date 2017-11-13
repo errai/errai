@@ -16,12 +16,11 @@
 
 package org.jboss.errai.apt.internal.export;
 
-import org.jboss.errai.common.apt.ErraiAptExportedTypesTestExportedType;
-import org.jboss.errai.common.apt.exportfile.TestExportedType;
+import org.jboss.errai.common.apt.ErraiAptExportedTypesExportingStrategies;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
-public class test_hYbKGF_ExportFile_org_jboss_errai_common_apt_exportfile_TestAnnotation {
-  TestExportedType randomName;
+public class org_jboss_errai_common_apt_localapps_localapp2_module2_TestModule2__test__ExportFile_org_jboss_errai_common_apt_strategies_ErraiExportingStrategies {
+  ErraiAptExportedTypesExportingStrategies erraiExportingStrategies;
 }

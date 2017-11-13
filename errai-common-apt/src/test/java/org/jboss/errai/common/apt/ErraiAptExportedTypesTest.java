@@ -58,7 +58,8 @@ public class ErraiAptExportedTypesTest extends ErraiAptTest {
 
   @Test
   public void testFindAnnotatedMetaClassesWithNoExportedOrLocallyExportableTypes() {
-    final ErraiAptExportedTypes erraiAptExportedTypes = new ErraiAptExportedTypes(erraiAppAnnotatedMetaClass, elements, new TestAnnotatedSourceElementsFinder(), resourceFilesFinder());
+    final ErraiAptExportedTypes erraiAptExportedTypes = new ErraiAptExportedTypes(erraiAppAnnotatedMetaClass, elements,
+            new TestAnnotatedSourceElementsFinder(), resourceFilesFinder());
 
     Assert.assertTrue(
             erraiAptExportedTypes.findAnnotatedMetaClasses(ErraiAptExportedTypesUnusedTestAnnotation.class).isEmpty());
@@ -66,7 +67,8 @@ public class ErraiAptExportedTypesTest extends ErraiAptTest {
 
   @Test
   public void testFindAnnotatedMetaClassesWithNoLocallyExportableTypes() {
-    final ErraiAptExportedTypes erraiAptExportedTypes = new ErraiAptExportedTypes(erraiAppAnnotatedMetaClass, elements, new TestAnnotatedSourceElementsFinder(), resourceFilesFinder());
+    final ErraiAptExportedTypes erraiAptExportedTypes = new ErraiAptExportedTypes(erraiAppAnnotatedMetaClass, elements,
+            new TestAnnotatedSourceElementsFinder(), resourceFilesFinder());
 
     Assert.assertEquals(ImmutableSet.of(aptClass(ErraiAptExportedTypesTestExportedType.class)),
             erraiAptExportedTypes.findAnnotatedMetaClasses(ErraiAptExportedTypesTestAnnotation.class));
@@ -96,8 +98,8 @@ public class ErraiAptExportedTypesTest extends ErraiAptTest {
   @Test
   public void testFindAnnotatedMetaClassesForLocalErraiAppWithThreeExportedTypes() {
     final ErraiAptExportedTypes erraiAptExportedTypes = new ErraiAptExportedTypes(
-            aptClass(TestLocalAppWithTwoSubErraiApps.class), elements,
-            localErraiAppAnnotatedSourceElementsFinder(), resourceFilesFinder());
+            aptClass(TestLocalAppWithTwoSubErraiApps.class), elements, localErraiAppAnnotatedSourceElementsFinder(),
+            resourceFilesFinder());
 
     Assert.assertEquals(ImmutableSet.of(aptClass(TestExportedType1.class), aptClass(TestExportedType21.class),
             aptClass(TestExportedType22.class)),
@@ -105,7 +107,7 @@ public class ErraiAptExportedTypesTest extends ErraiAptTest {
   }
 
   @Test
-  public void testFindAnnotatedMetaClassesForLocalErraiAppWithOneExportedTypes() {
+  public void testFindAnnotatedMetaClassesForLocalErraiAppWithOneExportedType() {
     final ErraiAptExportedTypes erraiAptExportedTypes = new ErraiAptExportedTypes(aptClass(TestLocalErraiApp1.class),
             elements, localErraiAppAnnotatedSourceElementsFinder(), resourceFilesFinder());
 

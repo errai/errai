@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.apt.internal.export;
+package org.jboss.errai.common.apt;
 
-import org.jboss.errai.common.apt.ErraiAptExportedTypesTestExportedType;
+import org.jboss.errai.common.apt.strategies.ErraiExportingStrategy;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
-public class test_hYbKGF_ExportFile_org_jboss_errai_common_apt_ErraiAptExportedTypesTestAnnotation {
-  ErraiAptExportedTypesTestExportedType sa7H9hdg;
+public interface ErraiAptExportedTypesExportingStrategies {
+
+  @ErraiExportingStrategy("org.jboss.errai.common.apt.ErraiAptExportedTypesTestAnnotation")
+  void erraiAptExportedTypesTestAnnotation();
+
 }
