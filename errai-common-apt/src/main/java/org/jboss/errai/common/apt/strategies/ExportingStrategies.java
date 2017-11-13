@@ -18,13 +18,11 @@ package org.jboss.errai.common.apt.strategies;
 
 import org.jboss.errai.codegen.meta.impl.apt.APTClassUtil;
 
-import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static java.util.Collections.emptyMap;
 import static javax.lang.model.element.ElementKind.CONSTRUCTOR;
 import static javax.lang.model.element.ElementKind.METHOD;
 import static javax.lang.model.element.ElementKind.PARAMETER;
@@ -40,8 +38,8 @@ public class ExportingStrategies {
     this.strategies = strategies;
   }
 
-  public Stream<ExportedElement> getExportedElements(final TypeElement annotation, final Element element) {
-    return strategies.getOrDefault(annotation, defaultStrategy(annotation)).getExportedElements(element);
+  public ExportingStrategy getStrategy(final TypeElement annotation) {
+    return strategies.getOrDefault(annotation, defaultStrategy(annotation));
   }
 
   private ExportingStrategy defaultStrategy(final TypeElement annotation) {

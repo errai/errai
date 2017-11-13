@@ -88,8 +88,7 @@
                         <artifactId>maven-failsafe-plugin</artifactId>
                         <configuration>
                             <additionalClasspathElements>
-                                <additionalClasspathElement>${basedir}/target/generated-test-sources/test-annotations
-                                </additionalClasspathElement>
+                                <additionalClasspathElement>${basedir}/target/generated-test-sources/test-annotations</additionalClasspathElement>
                             </additionalClasspathElements>
                         </configuration>
                     </plugin>

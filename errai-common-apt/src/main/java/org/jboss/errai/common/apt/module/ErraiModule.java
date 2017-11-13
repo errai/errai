@@ -23,6 +23,7 @@ import org.jboss.errai.common.apt.AnnotatedSourceElementsFinder;
 import org.jboss.errai.common.apt.exportfile.ExportFile;
 import org.jboss.errai.common.apt.strategies.ExportedElement;
 import org.jboss.errai.common.apt.strategies.ExportingStrategies;
+import org.jboss.errai.common.apt.strategies.ExportingStrategy;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
@@ -77,11 +78,12 @@ public class ErraiModule {
   }
 
   Set<TypeMirror> findAnnotatedElements(final TypeElement annotationTypeElement) {
+    final ExportingStrategy strategy = exportingStrategies.getStrategy(annotationTypeElement);
     return annotatedSourceElementsFinder.findSourceElementsAnnotatedWith(annotationTypeElement)
             .stream()
             .filter(this::isPartOfModule)
-            .flatMap(a -> exportingStrategies.getExportedElements(annotationTypeElement, a)
-                    .map(ExportedElement::getElement))
+            .flatMap(strategy::getExportedElements)
+            .map(ExportedElement::getElement)
             .map(Element::asType)
             .filter(this::isPublic)
             .collect(toSet());

@@ -154,7 +154,7 @@ runtime dependencies on it and it breaks deployment on JBoss AS and Tomcat -->
                <additionalClasspathElements>
                  <additionalClasspathElement>${basedir}/test-classes/</additionalClasspathElement>
                  <additionalClasspathElement>${basedir}/src/test/java/</additionalClasspathElement>
-                 <additionalClasspathElement>${basedir}/target/generated-test-sources/test-annotations/</additionalClasspathElement>
+                 <additionalClasspathElement>${basedir}/target/generated-test-sources/test-annotations</additionalClasspathElement>
                </additionalClasspathElements>
                <useSystemClassLoader>false</useSystemClassLoader>
 

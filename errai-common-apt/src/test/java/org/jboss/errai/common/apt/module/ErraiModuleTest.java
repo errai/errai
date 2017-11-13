@@ -5,8 +5,8 @@ import org.jboss.errai.common.apt.AnnotatedSourceElementsFinder;
 import org.jboss.errai.common.apt.TestAnnotatedSourceElementsFinder;
 import org.jboss.errai.common.apt.configuration.TestAnnotation;
 import org.jboss.errai.common.apt.exportfile.ExportFile;
-import org.jboss.errai.common.apt.strategies.ExportingStrategies;
 import org.jboss.errai.common.apt.module2.AnnotatedTypeOutOfModule;
+import org.jboss.errai.common.apt.strategies.ErraiExportingStrategiesFactory;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -18,7 +18,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import static java.util.Collections.emptyMap;
 import static java.util.Collections.singleton;
 
 public class ErraiModuleTest extends ErraiAptTest {
@@ -109,7 +108,7 @@ public class ErraiModuleTest extends ErraiAptTest {
 
   private ErraiModule getErraiModule(final AnnotatedSourceElementsFinder annotatedElementsFinder) {
     return new ErraiModule("test", aptClass(ErraiDefaultTestModule.class), annotatedElementsFinder,
-            new ExportingStrategies(emptyMap()));
+            new ErraiExportingStrategiesFactory(elements).buildFrom());
   }
 
   private static void assertContainsOnly(final Set<?> actual, final Object... expected) {

@@ -17,12 +17,11 @@
 package org.jboss.errai.common.apt.generator;
 
 import org.jboss.errai.common.apt.AnnotatedSourceElementsFinder;
-import org.jboss.errai.common.apt.strategies.ExportingStrategies;
+import org.jboss.errai.common.apt.strategies.ErraiExportingStrategiesFactory;
 
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.util.Elements;
 import java.util.Set;
-
-import static java.util.Collections.emptyMap;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
@@ -30,8 +29,11 @@ import static java.util.Collections.emptyMap;
 class TestGenerator extends ExportFileGenerator {
 
   TestGenerator(final Set<? extends TypeElement> exportableAnnotations,
-          final AnnotatedSourceElementsFinder annotatedSourceElementsFinder) {
-    super("test", exportableAnnotations, annotatedSourceElementsFinder, new ExportingStrategies(emptyMap()));
+          final AnnotatedSourceElementsFinder annotatedSourceElementsFinder,
+          final Elements elements) {
+
+    super("test", exportableAnnotations, annotatedSourceElementsFinder,
+            new ErraiExportingStrategiesFactory(elements).buildFrom());
   }
 
 }

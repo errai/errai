@@ -59,6 +59,7 @@ import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toSet;
 import static org.jboss.errai.codegen.meta.impl.apt.APTClassUtil.getTypeElement;
 import static org.jboss.errai.common.apt.ErraiAptPackages.exportFilesPackageElement;
+import static org.jboss.errai.common.apt.exportfile.ExportFileName.decodeModuleClassCanonicalNameFromExportFileSimpleName;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
@@ -107,8 +108,8 @@ public final class ErraiAptExportedTypes {
 
   private boolean localErraiAppContainsModuleOfExportFileElement(final String exportFileClassSimpleName) {
     if (aptErraiAppConfiguration.local()) {
-      return moduleNames.contains(
-              ExportFileName.decodeModuleClassCanonicalNameFromExportFileSimpleName(exportFileClassSimpleName));
+      final String moduleName = decodeModuleClassCanonicalNameFromExportFileSimpleName(exportFileClassSimpleName);
+      return moduleNames.contains(moduleName);
     }
     return true;
   }
@@ -133,6 +134,7 @@ public final class ErraiAptExportedTypes {
             .map(APTClassUtil::getTypeElement)
             .collect(Collectors.toSet());
 
+    // Theses annotations are exported using the default exporting strategy
     allExportableAnnotations.add(getTypeElement(ErraiGenerator.class.getCanonicalName()));
     allExportableAnnotations.add(getTypeElement(ErraiModule.class.getCanonicalName()));
     allExportableAnnotations.add(getTypeElement(ErraiApp.class.getCanonicalName()));

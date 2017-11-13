@@ -71,6 +71,6 @@ public class ExportFileGeneratorTest extends ErraiAptTest {
 
   private TestGenerator getTestGenerator(final Set<? extends TypeElement> annotations,
           final AnnotatedSourceElementsFinder annotatedElementsFinder) {
-    return new TestGenerator(annotations, annotatedElementsFinder);
+    return new TestGenerator(annotations, annotatedElementsFinder, elements);
   }
 }
