@@ -169,9 +169,6 @@
               <forkMode>always</forkMode>
               <argLine>-Xmx1500m ${argLine} -Dgwt.args='-prod'</argLine>
               <useManifestOnlyJar>true</useManifestOnlyJar>
-              <additionalClasspathElements>
-                <additionalClasspathElement>${basedir}/target/generated-test-sources/test-annotations</additionalClasspathElement>
-              </additionalClasspathElements>
 
               <systemProperties>
                 <property>

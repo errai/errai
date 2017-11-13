@@ -28,7 +28,6 @@ import org.jboss.errai.marshalling.ErraiMarshallingModule;
 @ErraiApp(gwtModuleName = "org.jboss.errai.validation.ValidationTestModule",
           local = true,
           modules = { ErraiTestApp.class,
-                      ErraiMarshallingModule.class,
                       ErraiIocModule.class,
                       ErraiDataBindingModule.class,
                       ErraiValidationModule.class })
