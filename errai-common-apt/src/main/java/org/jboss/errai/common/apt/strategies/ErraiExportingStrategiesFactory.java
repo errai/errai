@@ -22,6 +22,7 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -47,6 +48,7 @@ public class ErraiExportingStrategiesFactory {
   public ExportingStrategies buildFrom(final Class<?>... classes) {
     return new ExportingStrategies(stream(classes).flatMap(c -> stream(c.getDeclaredMethods()))
             .filter(m -> m.isAnnotationPresent(ErraiExportingStrategy.class))
+            .filter(m -> Modifier.isStatic(m.getModifiers()))
             .collect(toMap(this::getStrategyAnnotationTypeElement, ReflectionExportingStrategy::new)));
   }
 

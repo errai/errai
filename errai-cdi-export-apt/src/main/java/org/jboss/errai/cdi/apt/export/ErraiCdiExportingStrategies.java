@@ -16,8 +16,15 @@
 
 package org.jboss.errai.cdi.apt.export;
 
+import org.jboss.errai.common.apt.strategies.ErraiExportingStrategy;
+
+import static org.jboss.errai.cdi.apt.export.SupportedAnnotationTypes.OBSERVES;
+
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
-public class ErraiCdiExportingStrategies {
+public interface ErraiCdiExportingStrategies {
+
+  @ErraiExportingStrategy(OBSERVES)
+  void observes();
 }

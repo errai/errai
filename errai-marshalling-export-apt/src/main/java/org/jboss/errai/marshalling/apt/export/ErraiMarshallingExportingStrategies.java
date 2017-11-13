@@ -16,8 +16,36 @@
 
 package org.jboss.errai.marshalling.apt.export;
 
+import org.jboss.errai.common.apt.strategies.ErraiExportingStrategy;
+
+import static org.jboss.errai.marshalling.apt.export.SupportedAnnotationTypes.CLIENT_MARSHALLER;
+import static org.jboss.errai.marshalling.apt.export.SupportedAnnotationTypes.CUSTOM_MAPPING;
+import static org.jboss.errai.marshalling.apt.export.SupportedAnnotationTypes.ENVIRONMENT_CONFIG_EXTENSION;
+import static org.jboss.errai.marshalling.apt.export.SupportedAnnotationTypes.NON_PORTABLE;
+import static org.jboss.errai.marshalling.apt.export.SupportedAnnotationTypes.PORTABLE;
+import static org.jboss.errai.marshalling.apt.export.SupportedAnnotationTypes.SERVER_MARSHALLER;
+
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
-public class ErraiMarshallingExportingStrategies {
+public interface ErraiMarshallingExportingStrategies {
+
+  @ErraiExportingStrategy(PORTABLE)
+  void portable();
+
+  @ErraiExportingStrategy(NON_PORTABLE)
+  void nonPortable();
+
+  @ErraiExportingStrategy(CLIENT_MARSHALLER)
+  void clientMarshaller();
+
+  @ErraiExportingStrategy(SERVER_MARSHALLER)
+  void serverMarshaller();
+
+  @ErraiExportingStrategy(CUSTOM_MAPPING)
+  void customMapping();
+
+  // not ideal to be here, but errai-marshalling is really the only place where it's used
+  @ErraiExportingStrategy(ENVIRONMENT_CONFIG_EXTENSION)
+  void environmentConfigExtension();
 }

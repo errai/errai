@@ -16,8 +16,15 @@
 
 package org.jboss.errai.ui.apt.export;
 
+import org.jboss.errai.common.apt.strategies.ErraiExportingStrategy;
+
+import static org.jboss.errai.ui.apt.export.SupportedAnnotationTypes.TEMPLATED;
+
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
-public class ErraiUiExportingStrategies {
+public interface ErraiUiExportingStrategies {
+
+  @ErraiExportingStrategy(TEMPLATED)
+  void templated();
 }

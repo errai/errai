@@ -92,7 +92,7 @@ public class ErraiAppAptGenerator extends AbstractProcessor {
               .map(Element::asType)
               .map(APTClass::new)
               .sorted(comparing(APTClass::getFullyQualifiedName))
-              .map(app -> newErraiAptExportedTypes(annotatedElementsFinder, types, elements, filer, app))
+              .map(app -> newErraiAptExportedTypes(annotatedElementsFinder, elements, filer, app))
               .peek(this::generateAptCompatibleGwtModuleFile)
               .flatMap(this::findGenerators)
               .flatMap(this::generatedFiles)
@@ -120,13 +120,12 @@ public class ErraiAppAptGenerator extends AbstractProcessor {
   }
 
   private ErraiAptExportedTypes newErraiAptExportedTypes(final AnnotatedSourceElementsFinder annotatedElementsFinder,
-          final Types types,
           final Elements elements,
           final Filer filer,
           final MetaClass erraiAppAnnotatedMetaClass) {
 
     log.info("Processing {}", erraiAppAnnotatedMetaClass.getFullyQualifiedName());
-    return new ErraiAptExportedTypes(erraiAppAnnotatedMetaClass, types, elements, annotatedElementsFinder,
+    return new ErraiAptExportedTypes(erraiAppAnnotatedMetaClass, elements, annotatedElementsFinder,
             new AptResourceFilesFinder(filer));
   }
 

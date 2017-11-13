@@ -20,13 +20,15 @@ import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 
+import static org.jboss.errai.common.apt.generator.SupportedAnnotationTypes.ERRAI_APP;
+import static org.jboss.errai.common.apt.generator.SupportedAnnotationTypes.ERRAI_GENERATOR;
+import static org.jboss.errai.common.apt.generator.SupportedAnnotationTypes.ERRAI_MODULE;
+
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
-@SupportedAnnotationTypes({ "org.jboss.errai.common.configuration.ErraiApp",
-                            "org.jboss.errai.common.configuration.ErraiModule",
-                            "org.jboss.errai.common.configuration.ErraiGenerator" })
+@SupportedAnnotationTypes({ ERRAI_APP, ERRAI_MODULE, ERRAI_GENERATOR })
 public class ErraiModuleExportFileGenerator extends AbstractErraiModuleExportFileGenerator {
 
   @Override

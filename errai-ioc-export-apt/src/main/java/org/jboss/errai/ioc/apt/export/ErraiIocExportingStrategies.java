@@ -16,24 +16,38 @@
 
 package org.jboss.errai.ioc.apt.export;
 
-import org.jboss.errai.codegen.meta.impl.apt.APTClassUtil;
 import org.jboss.errai.common.apt.strategies.ErraiExportingStrategy;
 import org.jboss.errai.common.apt.strategies.ExportedElement;
 
 import javax.lang.model.element.Element;
-import javax.lang.model.element.TypeElement;
 import java.util.stream.Stream;
 
+import static org.jboss.errai.codegen.meta.impl.apt.APTClassUtil.getTypeElement;
+import static org.jboss.errai.ioc.apt.export.SupportedAnnotationTypes.ALTERNATIVE;
+import static org.jboss.errai.ioc.apt.export.SupportedAnnotationTypes.APPLICATION_SCOPED;
+import static org.jboss.errai.ioc.apt.export.SupportedAnnotationTypes.CODE_DECORATOR;
+import static org.jboss.errai.ioc.apt.export.SupportedAnnotationTypes.DEPENDENT;
+import static org.jboss.errai.ioc.apt.export.SupportedAnnotationTypes.ENTRY_POINT;
+import static org.jboss.errai.ioc.apt.export.SupportedAnnotationTypes.GOOGLE_INJECT;
+import static org.jboss.errai.ioc.apt.export.SupportedAnnotationTypes.IOC_BOOTSTRAP_TASK;
+import static org.jboss.errai.ioc.apt.export.SupportedAnnotationTypes.IOC_EXTENSION;
 import static org.jboss.errai.ioc.apt.export.SupportedAnnotationTypes.IOC_PRODUCER;
+import static org.jboss.errai.ioc.apt.export.SupportedAnnotationTypes.IOC_PROVIDER;
+import static org.jboss.errai.ioc.apt.export.SupportedAnnotationTypes.JAVAX_INJECT;
+import static org.jboss.errai.ioc.apt.export.SupportedAnnotationTypes.JS_TYPE;
 import static org.jboss.errai.ioc.apt.export.SupportedAnnotationTypes.PRODUCES;
+import static org.jboss.errai.ioc.apt.export.SupportedAnnotationTypes.QUALIFIER;
+import static org.jboss.errai.ioc.apt.export.SupportedAnnotationTypes.SCOPE_CONTEXT;
+import static org.jboss.errai.ioc.apt.export.SupportedAnnotationTypes.SHARED_SINGLETON;
+import static org.jboss.errai.ioc.apt.export.SupportedAnnotationTypes.SINGLETON;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
-public class ErraiIocExportingStrategies {
+public interface ErraiIocExportingStrategies {
 
   @ErraiExportingStrategy(PRODUCES)
-  public static Stream<ExportedElement> producesStrategy(final Element element) {
+  static Stream<ExportedElement> producesStrategy(final Element element) {
     if (element.getKind().isInterface() || element.getKind().isClass()) {
       return Stream.of(new ExportedElement(getTypeElement(PRODUCES), element));
     }
@@ -41,11 +55,52 @@ public class ErraiIocExportingStrategies {
   }
 
   @ErraiExportingStrategy(IOC_PRODUCER)
-  public static Stream<ExportedElement> iocProducerStrategy(final Element element) {
+  static Stream<ExportedElement> iocProducerStrategy(final Element element) {
     return Stream.of(new ExportedElement(getTypeElement(IOC_PRODUCER), element.getEnclosingElement()));
   }
 
-  private static TypeElement getTypeElement(final String annotationFqcn) {
-    return APTClassUtil.elements.getTypeElement(annotationFqcn);
-  }
+  @ErraiExportingStrategy(IOC_BOOTSTRAP_TASK)
+  void iocBootstrapTaskStrategy();
+
+  @ErraiExportingStrategy(IOC_EXTENSION)
+  void iocExtensionStrategy();
+
+  @ErraiExportingStrategy(CODE_DECORATOR)
+  void codeDecoratorStrategy();
+
+  @ErraiExportingStrategy(SCOPE_CONTEXT)
+  void scopeContextStrategy();
+
+  @ErraiExportingStrategy(JAVAX_INJECT)
+  void javaxInjectStrategy();
+
+  @ErraiExportingStrategy(GOOGLE_INJECT)
+  void googleInjectStrategy();
+
+  @ErraiExportingStrategy(IOC_PROVIDER)
+  void iocProviderStrategy();
+
+  @ErraiExportingStrategy(DEPENDENT)
+  void dependentStrategy();
+
+  @ErraiExportingStrategy(APPLICATION_SCOPED)
+  void applicationScopedStrategy();
+
+  @ErraiExportingStrategy(ALTERNATIVE)
+  void alternativeStrategy();
+
+  @ErraiExportingStrategy(SINGLETON)
+  void singletonStrategy();
+
+  @ErraiExportingStrategy(ENTRY_POINT)
+  void entryPointStrategy();
+
+  @ErraiExportingStrategy(SHARED_SINGLETON)
+  void sharedSingletonStrategy();
+
+  @ErraiExportingStrategy(QUALIFIER)
+  void qualifierStrategy();
+
+  @ErraiExportingStrategy(JS_TYPE)
+  void jsTypeStrategy();
 }

@@ -16,30 +16,42 @@
 
 package org.jboss.errai.enterprise.apt.export;
 
-import org.jboss.errai.codegen.meta.impl.apt.APTClassUtil;
 import org.jboss.errai.common.apt.strategies.ErraiExportingStrategy;
 import org.jboss.errai.common.apt.strategies.ExportedElement;
 
 import javax.lang.model.element.Element;
-import javax.lang.model.element.TypeElement;
 import java.util.stream.Stream;
 
+import static org.jboss.errai.codegen.meta.impl.apt.APTClassUtil.getTypeElement;
+import static org.jboss.errai.enterprise.apt.export.SupportedAnnotationTypes.FEATURE_INTERCEPTOR;
+import static org.jboss.errai.enterprise.apt.export.SupportedAnnotationTypes.INTERCEPTED_CALL;
+import static org.jboss.errai.enterprise.apt.export.SupportedAnnotationTypes.INTERCEPTS_REMOTE_CALL;
 import static org.jboss.errai.enterprise.apt.export.SupportedAnnotationTypes.PATH;
+import static org.jboss.errai.enterprise.apt.export.SupportedAnnotationTypes.PROVIDER;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
-public class ErraiJaxrsExportingStrategies {
+public interface ErraiJaxrsExportingStrategies {
 
   @ErraiExportingStrategy(PATH)
-  public static Stream<ExportedElement> pathStrategy(final Element element) {
+  static Stream<ExportedElement> pathStrategy(final Element element) {
     if (element.getKind().isInterface() || element.getKind().isClass()) {
       return Stream.of(new ExportedElement(getTypeElement(PATH), element));
     }
     return Stream.of(new ExportedElement(getTypeElement(PATH), element.getEnclosingElement()));
   }
 
-  private static TypeElement getTypeElement(final String annotationFqcn) {
-    return APTClassUtil.elements.getTypeElement(annotationFqcn);
-  }
+  @ErraiExportingStrategy(PROVIDER)
+  void provider();
+
+  @ErraiExportingStrategy(INTERCEPTED_CALL)
+  void interceptedCall();
+
+  @ErraiExportingStrategy(FEATURE_INTERCEPTOR)
+  void featureInterceptor();
+
+  @ErraiExportingStrategy(INTERCEPTS_REMOTE_CALL)
+  void interceptsRemoteCall();
+
 }

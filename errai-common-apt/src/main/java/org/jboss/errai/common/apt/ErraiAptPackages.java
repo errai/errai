@@ -31,7 +31,6 @@ public final class ErraiAptPackages {
   private static final Logger log = LoggerFactory.getLogger(ErraiAptPackages.class);
 
   private static final String EXPORT_FILES_PACKAGE_PATH = "org.jboss.errai.apt.internal.export";
-  private static final String EXPORTED_ANNOTATIONS_PACKAGE_PATH = "org.jboss.errai.apt.internal.export.annotation";
 
   private ErraiAptPackages() {
   }
@@ -40,28 +39,13 @@ public final class ErraiAptPackages {
     return EXPORT_FILES_PACKAGE_PATH;
   }
 
-  public static String exportedAnnotationsPackagePath() {
-    return EXPORTED_ANNOTATIONS_PACKAGE_PATH;
-  }
-
-  public static Optional<PackageElement> exportFilesPackageElement(final Elements elementUtils) {
-    final PackageElement packageElement = elementUtils.getPackageElement(exportFilesPackagePath());
+  static Optional<PackageElement> exportFilesPackageElement(final Elements elements) {
+    final PackageElement packageElement = elements.getPackageElement(exportFilesPackagePath());
 
     if (packageElement == null) {
-      log.error("Export files package not found");
+      log.error("Export files package not found.");
     }
 
     return Optional.ofNullable(packageElement);
   }
-
-  public static Optional<PackageElement> exportedAnnotationsPackageElement(final Elements elementUtils) {
-    final PackageElement packageElement = elementUtils.getPackageElement(exportedAnnotationsPackagePath());
-
-    if (packageElement == null) {
-      log.error("Exported annotations package not found");
-    }
-
-    return Optional.ofNullable(packageElement);
-  }
-
 }

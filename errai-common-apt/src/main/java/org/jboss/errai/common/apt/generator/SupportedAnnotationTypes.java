@@ -14,22 +14,14 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.databinding.apt.export;
-
-import org.jboss.errai.common.apt.strategies.ErraiExportingStrategy;
-
-import static org.jboss.errai.databinding.apt.export.SupportedAnnotationTypes.BINDABLE;
-import static org.jboss.errai.databinding.apt.export.SupportedAnnotationTypes.DEFAULT_CONVERTER;
+package org.jboss.errai.common.apt.generator;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
-public interface ErraiDataBindingExportingStrategies {
+public interface SupportedAnnotationTypes {
 
-  @ErraiExportingStrategy(BINDABLE)
-  void bindable();
-
-  @ErraiExportingStrategy(DEFAULT_CONVERTER)
-  void defaultConverter();
-
+  String ERRAI_GENERATOR = "org.jboss.errai.common.configuration.ErraiGenerator";
+  String ERRAI_MODULE = "org.jboss.errai.common.configuration.ErraiModule";
+  String ERRAI_APP = "org.jboss.errai.common.configuration.ErraiApp";
 }

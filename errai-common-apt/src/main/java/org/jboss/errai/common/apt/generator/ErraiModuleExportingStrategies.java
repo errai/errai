@@ -19,5 +19,5 @@ package org.jboss.errai.common.apt.generator;
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
-public class ErraiModuleExportingStrategies {
+public interface ErraiModuleExportingStrategies {
 }

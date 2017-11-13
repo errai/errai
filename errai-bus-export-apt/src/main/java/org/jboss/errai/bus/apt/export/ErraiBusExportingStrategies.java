@@ -16,8 +16,27 @@
 
 package org.jboss.errai.bus.apt.export;
 
+import org.jboss.errai.common.apt.strategies.ErraiExportingStrategy;
+
+import static org.jboss.errai.bus.apt.export.SupportedAnnotationTypes.FEATURE_INTERCEPTOR;
+import static org.jboss.errai.bus.apt.export.SupportedAnnotationTypes.INTERCEPTED_CALL;
+import static org.jboss.errai.bus.apt.export.SupportedAnnotationTypes.INTERCEPTS_REMOTE_CALL;
+import static org.jboss.errai.bus.apt.export.SupportedAnnotationTypes.REMOTE;
+
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
-public class ErraiBusExportingStrategies {
+public interface ErraiBusExportingStrategies {
+
+  @ErraiExportingStrategy(REMOTE)
+  void remote();
+
+  @ErraiExportingStrategy(INTERCEPTED_CALL)
+  void interceptedCall();
+
+  @ErraiExportingStrategy(FEATURE_INTERCEPTOR)
+  void featureInterceptor();
+
+  @ErraiExportingStrategy(INTERCEPTS_REMOTE_CALL)
+  void interceptsRemoteCall();
 }

@@ -1,4 +1,4 @@
-/*
+package org.jboss.errai.apt.internal.export;/*
  * Copyright (C) 2017 Red Hat, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,22 +14,11 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.databinding.apt.export;
-
-import org.jboss.errai.common.apt.strategies.ErraiExportingStrategy;
-
-import static org.jboss.errai.databinding.apt.export.SupportedAnnotationTypes.BINDABLE;
-import static org.jboss.errai.databinding.apt.export.SupportedAnnotationTypes.DEFAULT_CONVERTER;
+import org.jboss.errai.cdi.apt.export.ErraiCdiExportingStrategies;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
-public interface ErraiDataBindingExportingStrategies {
-
-  @ErraiExportingStrategy(BINDABLE)
-  void bindable();
-
-  @ErraiExportingStrategy(DEFAULT_CONVERTER)
-  void defaultConverter();
-
+public class org_jboss_errai_enterprise_ErraiCdiClientModule__cdi__ExportFile_org_jboss_errai_common_apt_strategies_ErraiExportingStrategies {
+  private ErraiCdiExportingStrategies exportingStrategies;
 }

@@ -16,8 +16,16 @@
 
 package org.jboss.errai.navigation.apt.export;
 
+import org.jboss.errai.common.apt.strategies.ErraiExportingStrategy;
+
+import static org.jboss.errai.navigation.apt.export.SupportedAnnotationTypes.PAGE;
+
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
-public class ErraiNavigationExportingStrategies {
+public interface ErraiNavigationExportingStrategies {
+
+  @ErraiExportingStrategy(PAGE)
+  void page();
+
 }
