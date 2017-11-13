@@ -18,11 +18,15 @@ package org.jboss.errai.enterprise.jaxrs;
 
 import org.jboss.errai.common.configuration.ErraiApp;
 import org.jboss.errai.common.configuration.ErraiModule;
+import org.jboss.errai.common.configuration.MappingAlias;
+
+import java.util.ArrayList;
+import java.util.Collection;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
 @ErraiApp(gwtModuleName = "org.jboss.errai.enterprise.jaxrs.TestModule")
-@ErraiModule
+@ErraiModule(mappingAliases = @MappingAlias(from = Collection.class, to = ArrayList.class))
 public class ErraiJaxrsTestApp {
 }

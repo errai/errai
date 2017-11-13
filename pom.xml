@@ -564,8 +564,8 @@
                 <additionalClasspathElement>${basedir}/target/classes/</additionalClasspathElement>
                 <additionalClasspathElement>${basedir}/test-classes/</additionalClasspathElement>
                 <additionalClasspathElement>${basedir}/src/main/java/</additionalClasspathElement>
-		<additionalClasspathElement>${basedir}/src/test/java/</additionalClasspathElement>
-		<additionalClasspathElement>${basedir}/target/generated-test-sources/test-annotations/</additionalClasspathElement>
+                <additionalClasspathElement>${basedir}/src/test/java/</additionalClasspathElement>
+                <additionalClasspathElement>${basedir}/target/generated-test-sources/test-annotations/</additionalClasspathElement>
               </additionalClasspathElements>
               <systemProperties>
                 <!-- Must disable long polling for automated tests to succeed -->
