@@ -31,6 +31,7 @@ public class ErraiAppPropertiesErraiAppConfiguration implements ErraiAppConfigur
   public static final String FORCE_STATIC_MARSHALLERS = "errai.marshalling.force_static_marshallers";
   public static final String USE_STATIC_MARSHALLERS = "errai.marshalling.use_static_marshallers";
   private static final String JS_INTEROP_SUPPORT_ENABLED = "errai.ioc.jsinterop.support";
+  private static final String DYNAMIC_VALIDATION_ENABLED = "errai.dynamic_validation.enabled";
 
   @Override
   public boolean isUserEnabledOnHostPage() {
@@ -50,6 +51,11 @@ public class ErraiAppPropertiesErraiAppConfiguration implements ErraiAppConfigur
   @Override
   public boolean jsInteropSupportEnabled() {
     return Boolean.getBoolean(JS_INTEROP_SUPPORT_ENABLED);
+  }
+
+  @Override
+  public boolean dynamicValidationEnabled() {
+    return Boolean.getBoolean(DYNAMIC_VALIDATION_ENABLED);
   }
 
   @Override

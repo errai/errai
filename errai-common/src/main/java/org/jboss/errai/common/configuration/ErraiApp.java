@@ -51,6 +51,8 @@ public @interface ErraiApp {
 
   boolean jsInteropSupportEnabled() default false;
 
+  boolean dynamicValidationEnabled() default false;
+
   CustomProperty[] customProperties() default {};
 
   interface Property {
@@ -64,6 +66,7 @@ public @interface ErraiApp {
     String LAZY_LOAD_BUILTIN_MARSHALLERS = "lazyLoadBuiltinMarshallers";
     String MAKE_DEFAULT_ARRAY_MARSHALLERS = "makeDefaultArrayMarshallers";
     String JS_INTEROP_SUPPORT_ENABLED = "jsInteropSupportEnabled";
+    String DYNAMIC_VALIDATION_ENABLED = "dynamicValidationEnabled";
     String CUSTOM_PROPERTIES = "customProperties";
     String LOCAL  = "local";
     String MODULES  = "modules";

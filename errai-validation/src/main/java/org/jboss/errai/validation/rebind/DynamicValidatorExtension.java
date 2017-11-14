@@ -25,6 +25,7 @@ import javax.validation.ConstraintValidator;
 
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
+import org.jboss.errai.config.propertiesfile.ErraiAppPropertiesErraiAppConfiguration;
 import org.jboss.errai.ioc.client.api.IOCExtension;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCExtensionConfigurator;
@@ -39,7 +40,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * An {@link IOCExtension} for generating an injectable {@link DynamicValidator}. Does nothing by default unless
- * activated by the {@link #DYNAMIC_VALIDATION_ENABLED_PROP dynamic validator property}.
+ * activated by the {@link ErraiAppPropertiesErraiAppConfiguration#DYNAMIC_VALIDATION_ENABLED dynamic validator property}.
  *
  * @author Max Barkley <mbarkley@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
@@ -49,13 +50,6 @@ public class DynamicValidatorExtension implements IOCExtensionConfigurator {
 
   private static final Logger logger = LoggerFactory.getLogger(DynamicValidatorExtension.class);
 
-  /**
-   * System property used to enable generation of dynamic validators.
-   */
-  public static final String DYNAMIC_VALIDATION_ENABLED_PROP = "errai.dynamic_validation.enabled";
-
-  public static final boolean DYNAMIC_VALIDATION_ENABLED = Boolean.getBoolean(DYNAMIC_VALIDATION_ENABLED_PROP);
-
   private final List<MetaClass> validators = new ArrayList<>();
 
   @Override
@@ -64,7 +58,7 @@ public class DynamicValidatorExtension implements IOCExtensionConfigurator {
 
   @Override
   public void afterInitialization(final IOCProcessingContext context, final InjectionContext injectionContext) {
-    if (DYNAMIC_VALIDATION_ENABLED) {
+    if (context.erraiConfiguration().app().dynamicValidationEnabled()) {
       injectionContext.registerExtensionTypeCallback(type -> {
         if (type.isConcrete() && type.isAssignableTo(ConstraintValidator.class)
                 && !type.getFullyQualifiedName().equals(NullType.class.getName())) {

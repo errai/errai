@@ -29,6 +29,7 @@ import static org.jboss.errai.common.configuration.ErraiApp.Property.APPLICATION
 import static org.jboss.errai.common.configuration.ErraiApp.Property.ASYNC_BEAN_MANAGER;
 import static org.jboss.errai.common.configuration.ErraiApp.Property.AUTO_DISCOVER_SERVICES;
 import static org.jboss.errai.common.configuration.ErraiApp.Property.CUSTOM_PROPERTIES;
+import static org.jboss.errai.common.configuration.ErraiApp.Property.DYNAMIC_VALIDATION_ENABLED;
 import static org.jboss.errai.common.configuration.ErraiApp.Property.ENABLE_WEB_SOCKET_SERVER;
 import static org.jboss.errai.common.configuration.ErraiApp.Property.FORCE_STATIC_MARSHALLERS;
 import static org.jboss.errai.common.configuration.ErraiApp.Property.GWT_MODULE_NAME;
@@ -103,6 +104,13 @@ public class AptErraiAppConfiguration implements ErraiAppConfiguration {
   public boolean jsInteropSupportEnabled() {
     return erraiAppMetaAnnotation.value(JS_INTEROP_SUPPORT_ENABLED);
   }
+
+  @Override
+  public boolean dynamicValidationEnabled() {
+    return erraiAppMetaAnnotation.value(DYNAMIC_VALIDATION_ENABLED);
+  }
+
+
 
   @Override
   public boolean isAptEnvironment() {
