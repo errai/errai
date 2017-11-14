@@ -22,13 +22,14 @@ import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 
+import static org.jboss.errai.ui.apt.export.SupportedAnnotationTypes.STYLE_BINDING;
 import static org.jboss.errai.ui.apt.export.SupportedAnnotationTypes.TEMPLATED;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
-@SupportedAnnotationTypes({ TEMPLATED })
+@SupportedAnnotationTypes({ TEMPLATED, STYLE_BINDING })
 public class ErraiUiExportFileGenerator extends AbstractErraiModuleExportFileGenerator {
 
   @Override

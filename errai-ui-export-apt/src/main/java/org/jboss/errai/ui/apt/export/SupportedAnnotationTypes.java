@@ -22,4 +22,5 @@ package org.jboss.errai.ui.apt.export;
 interface SupportedAnnotationTypes {
 
   String TEMPLATED = "org.jboss.errai.ui.shared.api.annotations.Templated";
+  String STYLE_BINDING = "org.jboss.errai.ui.shared.api.annotations.style.StyleBinding";
 }

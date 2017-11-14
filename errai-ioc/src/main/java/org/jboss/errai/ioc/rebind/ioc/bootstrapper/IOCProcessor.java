@@ -746,23 +746,23 @@ public class IOCProcessor {
 
     final Collection<Class<? extends Annotation>> producerAnnos = injectionContext.getAnnotationsForElementType(WiringElementType.ProducerElement);
     for (final Class<? extends Annotation> producerAnnoType : producerAnnos) {
-      final List<MetaMethod> producerMethods = type.getMethodsAnnotatedWith(producerAnnoType);
+      final List<MetaMethod> producerMethods = type.getMethodsAnnotatedWith(MetaClassFactory.get(producerAnnoType));
       if (!producerMethods.isEmpty() && producerMethods.stream().anyMatch(method -> !method.isStatic())) {
         return false;
       }
-      final List<MetaField> producerFields = type.getFieldsAnnotatedWith(producerAnnoType);
+      final List<MetaField> producerFields = type.getFieldsAnnotatedWith(MetaClassFactory.get(producerAnnoType));
       if (!producerFields.isEmpty() && producerFields.stream().anyMatch(field -> !field.isStatic())) {
         return false;
       }
     }
 
-    if (!type.getMethodsAnnotatedWith(PostConstruct.class).isEmpty()) {
+    if (!type.getMethodsAnnotatedWith(MetaClassFactory.get(PostConstruct.class)).isEmpty()) {
       return false;
     }
 
     final Collection<Class<? extends Annotation>> injectAnnos = injectionContext.getAnnotationsForElementType(WiringElementType.InjectionPoint);
     for (final Class<? extends Annotation> anno : injectAnnos) {
-      if (!type.getFieldsAnnotatedWith(anno).isEmpty()) {
+      if (!type.getFieldsAnnotatedWith(MetaClassFactory.get(anno)).isEmpty()) {
         return false;
       }
     }
@@ -997,7 +997,7 @@ public class IOCProcessor {
         continue;
       }
 
-      final List<MetaParameter> disposerParams = method.getParametersAnnotatedWith(Disposes.class);
+      final List<MetaParameter> disposerParams = method.getParametersAnnotatedWith(MetaClassFactory.get(Disposes.class));
       if (disposerParams.size() > 1) {
         throw new RuntimeException("Found method " + method + " in " + method.getDeclaringClassName()
                 + " with multiple @Disposes parameters.");
@@ -1015,7 +1015,7 @@ public class IOCProcessor {
     final MetaClass producedType = getProducedType(member);
 
     for (final MetaMethod candidate : disposesMethods) {
-      final MetaParameter disposesParam = candidate.getParametersAnnotatedWith(Disposes.class).iterator().next();
+      final MetaParameter disposesParam = candidate.getParametersAnnotatedWith(MetaClassFactory.get(Disposes.class)).iterator().next();
       if (producedType.isAssignableTo(disposesParam.getType())) {
         final Qualifier paramQual = qualFactory.forSink(disposesParam);
         if (paramQual.isSatisfiedBy(memberQual)) {
@@ -1066,7 +1066,7 @@ public class IOCProcessor {
     final boolean staticOnly = (producerInjectable == null);
     final Collection<Class<? extends Annotation>> producerAnnos = injectionContext.getAnnotationsForElementType(WiringElementType.ProducerElement);
     for (final Class<? extends Annotation> producerAnno : producerAnnos) {
-      final List<MetaField> fields = producerType.getFieldsAnnotatedWith(producerAnno);
+      final List<MetaField> fields = producerType.getFieldsAnnotatedWith(MetaClassFactory.get(producerAnno));
       for (final MetaField field : fields) {
         if (!staticOnly || field.isStatic()) {
           processProducerField(producerInjectable, producerType, builder, disposesMethods, field, enabled, problems);
@@ -1123,7 +1123,7 @@ public class IOCProcessor {
     final MetaClass type = typeInjectable.getInjectedType();
     final Collection<Class<? extends Annotation>> injectAnnotations = injectionContext.getAnnotationsForElementType(WiringElementType.InjectionPoint);
     for (final Class<? extends Annotation> inject : injectAnnotations) {
-      for (final MetaMethod setter : type.getMethodsAnnotatedWith(inject)) {
+      for (final MetaMethod setter : type.getMethodsAnnotatedWith(MetaClassFactory.get(inject))) {
         if (setter.getParameters().length != 1) {
           problems.add("The method injection point " + setter.getName() + " in "
                   + setter.getDeclaringClass().getFullyQualifiedName() + " should have exactly one parameter, not "
@@ -1141,7 +1141,7 @@ public class IOCProcessor {
     final MetaClass type = typeInjectable.getInjectedType();
     final Collection<Class<? extends Annotation>> injectAnnotations = injectionContext.getAnnotationsForElementType(WiringElementType.InjectionPoint);
     for (final Class<? extends Annotation> inject : injectAnnotations) {
-      for (final MetaField field : type.getFieldsAnnotatedWith(inject)) {
+      for (final MetaField field : type.getFieldsAnnotatedWith(MetaClassFactory.get(inject))) {
         if (noPublicFieldsAllowed && field.isPublic()) {
           problems.add("The normal scoped bean " + type.getFullyQualifiedName() + " has a public field " + field.getName());
         }

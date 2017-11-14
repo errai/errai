@@ -18,6 +18,7 @@ package org.jboss.errai.ui.apt.export;
 
 import org.jboss.errai.common.apt.strategies.ErraiExportingStrategy;
 
+import static org.jboss.errai.ui.apt.export.SupportedAnnotationTypes.STYLE_BINDING;
 import static org.jboss.errai.ui.apt.export.SupportedAnnotationTypes.TEMPLATED;
 
 /**
@@ -27,4 +28,7 @@ public interface ErraiUiExportingStrategies {
 
   @ErraiExportingStrategy(TEMPLATED)
   void templated();
+
+  @ErraiExportingStrategy(STYLE_BINDING)
+  void styleBinding();
 }

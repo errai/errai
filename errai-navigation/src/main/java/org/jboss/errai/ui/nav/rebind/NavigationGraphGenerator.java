@@ -443,7 +443,7 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
   private MetaMethod checkMethodAndAddPrivateAccessors(AnonymousClassStructureBuilder pageImplBuilder,
       BlockBuilder<?> methodToAppendTo, MetaClass pageClass, Class<? extends Annotation> annotation,
       Parameter... optionalParams) {
-    List<MetaMethod> annotatedMethods = pageClass.getMethodsAnnotatedWith(annotation);
+    List<MetaMethod> annotatedMethods = pageClass.getMethodsAnnotatedWith(MetaClassFactory.get(annotation));
     if (annotatedMethods.size() > 1) {
       throw new UnsupportedOperationException(
           "A @Page can have at most 1 " + createAnnotionName(annotation) + " method, but " + pageClass + " has "
@@ -547,7 +547,7 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
     int idx = 0;
 
     method.append(Stmt.declareFinalVariable("pageState", Map.class, new HashMap<String, Object>()));
-    for (MetaField field : pageClass.getFieldsAnnotatedWith(PageState.class)) {
+    for (MetaField field : pageClass.getFieldsAnnotatedWith(MetaClassFactory.get(PageState.class))) {
       MetaAnnotation psAnno = field.getAnnotation(PageState.class).get();
       String fieldName = field.getName();
       String queryParamName = psAnno.value();

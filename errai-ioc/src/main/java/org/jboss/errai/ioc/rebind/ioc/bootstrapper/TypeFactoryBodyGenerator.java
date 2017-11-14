@@ -175,9 +175,8 @@ class TypeFactoryBodyGenerator extends AbstractBodyGenerator {
           final ClassStructureBuilder<?> builder, final Set<HasAnnotations> createdAccessors, final Injectable injectable) {
     final List<DecoratorRunnable> decoratorRunnables = new ArrayList<>();
 
-    final Collection<Class<? extends Annotation>> decoratorAnnos = injectionContext
-            .getDecoratorAnnotationsBy(elemType);
-    for (final Class<? extends Annotation> annoType : decoratorAnnos) {
+    final Collection<MetaClass> decoratorAnnos = injectionContext.getDecoratorAnnotationsBy(elemType);
+    for (final MetaClass annoType : decoratorAnnos) {
       final List<HasAnnotations> annotatedItems = getAnnotatedWithForElementType(type, elemType, annoType);
 
       final IOCDecoratorExtension[] decorators = injectionContext.getDecorators(annoType);
@@ -220,7 +219,7 @@ class TypeFactoryBodyGenerator extends AbstractBodyGenerator {
   }
 
   @SuppressWarnings({ "unchecked", "rawtypes" })
-  private List<HasAnnotations> getAnnotatedWithForElementType(final MetaClass type, final ElementType elemType, final Class<? extends Annotation> annoType) {
+  private List<HasAnnotations> getAnnotatedWithForElementType(final MetaClass type, final ElementType elemType, final MetaClass annoType) {
     final List annotatedItems;
     switch (elemType) {
     case FIELD:

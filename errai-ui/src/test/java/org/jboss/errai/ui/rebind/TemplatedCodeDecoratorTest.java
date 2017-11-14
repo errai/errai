@@ -125,7 +125,7 @@ public class TemplatedCodeDecoratorTest {
     when(templatedClass.getFullyQualifiedName()).thenReturn("org.foo.TestTemplated");
     when(templatedClass.getPackageName()).thenReturn("org.foo");
     when(templatedClass.getName()).thenReturn("TestTemplated");
-    when(templatedClass.getMethodsAnnotatedWith(EventHandler.class)).thenReturn(Collections.emptyList());
+    when(templatedClass.getMethodsAnnotatedWith(MetaClassFactory.get(EventHandler.class))).thenReturn(Collections.emptyList());
 
     when(iocProcessingContext.resourceFilesFinder()).thenReturn(this::getFile);
 
@@ -145,7 +145,7 @@ public class TemplatedCodeDecoratorTest {
     final MetaMethod handlerMethod = mock(MetaMethod.class);
     final MetaParameter eventParam = mock(MetaParameter.class);
 
-    when(templatedClass.getMethodsAnnotatedWith(EventHandler.class)).thenReturn(singletonList(handlerMethod));
+    when(templatedClass.getMethodsAnnotatedWith(MetaClassFactory.get(EventHandler.class))).thenReturn(singletonList(handlerMethod));
     when(handlerMethod.getAnnotation(EventHandler.class)).thenReturn(
             Optional.of(new JavaReflectionAnnotation(defaultHandlerAnno)));
     when(handlerMethod.getParameters()).thenReturn(new MetaParameter[] { eventParam });

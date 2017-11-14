@@ -409,7 +409,7 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
     final Set<String> processedNativeHandlers = new HashSet<>();
     final Set<String> processedEventHandlers = new HashSet<>();
 
-    for (final MetaMethod method : declaringClass.getMethodsAnnotatedWith(EventHandler.class)) {
+    for (final MetaMethod method : declaringClass.getMethodsAnnotatedWith(MetaClassFactory.get(EventHandler.class))) {
 
       final String[] targetDataFieldNames = method.getAnnotation(EventHandler.class).get().valueAsArray(String[].class);
 

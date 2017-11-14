@@ -159,7 +159,7 @@ public class BindableProxyGenerator {
   }
 
   private Collection<Statement> registerDeclarativeHandlers(final MetaClass bindable) {
-    final List<MetaMethod> handlerMethods = bindable.getMethodsAnnotatedWith(org.jboss.errai.ui.shared.api.annotations.PropertyChangeHandler.class);
+    final List<MetaMethod> handlerMethods = bindable.getMethodsAnnotatedWith(MetaClassFactory.get(org.jboss.errai.ui.shared.api.annotations.PropertyChangeHandler.class));
     if ( handlerMethods.isEmpty() ) return Collections.emptyList();
 
     final List<Statement> retVal = new ArrayList<>();
