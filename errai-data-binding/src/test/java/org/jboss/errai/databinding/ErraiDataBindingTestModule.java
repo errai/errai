@@ -19,6 +19,7 @@ package org.jboss.errai.databinding;
 import org.jboss.errai.common.configuration.ErraiApp;
 import org.jboss.errai.common.configuration.ErraiModule;
 import org.jboss.errai.databinding.client.TestModelWithoutBindableAnnotation;
+import org.jboss.errai.databinding.client.nonbindablepkg.TestModelInNonBindablePkg;
 import org.jboss.errai.databinding.client.scan.TestModelBindable;
 import org.jboss.errai.databinding.client.scan.TestModelWithoutBindableA;
 import org.jboss.errai.databinding.client.scan.TestModelWithoutBindableB;
@@ -39,6 +40,7 @@ import org.jboss.errai.marshalling.ErraiMarshallingModule;
                                TestModelWithoutBindableA.class,
                                TestModelWithoutBindableB.class,
                                TestModelWithoutBindableC.class,
-                               TestModelWithoutBindableAnnotation.class })
+                               TestModelWithoutBindableAnnotation.class },
+             nonBindableTypes = TestModelInNonBindablePkg.class)
 public class ErraiDataBindingTestModule {
 }

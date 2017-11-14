@@ -24,6 +24,7 @@ import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaConstructor;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
+import org.jboss.errai.codegen.meta.MetaParameter;
 import org.jboss.errai.codegen.meta.MetaParameterizedType;
 import org.jboss.errai.codegen.meta.MetaTypeVariable;
 import org.jboss.errai.codegen.meta.impl.AbstractMetaClass;
@@ -48,8 +49,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
+import static java.util.Arrays.asList;
 import static java.util.Collections.emptySet;
+import static java.util.stream.Collectors.collectingAndThen;
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.toList;
 import static org.jboss.errai.codegen.meta.impl.apt.APTClassUtil.elements;
 import static org.jboss.errai.codegen.meta.impl.apt.APTClassUtil.getSimpleName;
 import static org.jboss.errai.codegen.meta.impl.apt.APTClassUtil.sameTypes;
@@ -208,6 +214,12 @@ public class APTClass extends AbstractMetaClass<TypeMirror> {
       return methods.stream()
               .filter(method -> !method.getModifiers().contains(Modifier.PRIVATE))
               .map(method -> new APTMethod(method, this))
+              .collect(groupingBy(APTMember::getName,
+                          groupingBy(this::methodParameterList,
+                            collectingAndThen(toList(), this::filterOutInterfaceMethodsThatHaveBeenOverriden))))
+              .values()
+              .stream()
+              .flatMap(m -> m.values().stream().flatMap(mm -> mm))
               .toArray(MetaMethod[]::new);
     case ARRAY:
     case BOOLEAN:
@@ -222,6 +234,14 @@ public class APTClass extends AbstractMetaClass<TypeMirror> {
     default:
       return throwUnsupportedTypeError(mirror);
     }
+  }
+
+  private List<MetaParameter> methodParameterList(final APTMethod s) {
+    return asList(s.getParameters());
+  }
+
+  private Stream<APTMethod> filterOutInterfaceMethodsThatHaveBeenOverriden(final List<APTMethod> methods) {
+    return methods.size() == 1 ? methods.stream() : methods.stream().filter(x -> !x.getDeclaringClass().isInterface());
   }
 
   @Override
@@ -444,7 +464,7 @@ public class APTClass extends AbstractMetaClass<TypeMirror> {
     case DECLARED:
     case TYPEVAR:
       final Element element = types.asElement(mirror);
-      if (element instanceof  TypeElement) {
+      if (element instanceof TypeElement) {
         final TypeElement typeElement = (TypeElement) element;
         return typeElement.getInterfaces().stream().map(APTClass::new).toArray(MetaClass[]::new);
       }
