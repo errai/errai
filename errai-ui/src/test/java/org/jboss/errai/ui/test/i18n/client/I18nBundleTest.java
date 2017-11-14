@@ -22,7 +22,7 @@ import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.util.Map;
 
-import org.codehaus.jackson.map.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.ui.client.local.spi.TranslationService;
 import org.jboss.errai.ui.rebind.TranslationServiceGenerator;
