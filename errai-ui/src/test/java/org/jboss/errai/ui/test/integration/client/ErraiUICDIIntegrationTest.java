@@ -102,4 +102,15 @@ public class ErraiUICDIIntegrationTest extends AbstractErraiCDITest {
     assertEquals("Number input does not have proper type.", "number", bean.numberInput.getType());
     assertEquals("Number input does not have proper placeholder.", "1337", bean.numberInput.getPlaceholder());
   }
+
+  public void testJsTypeElementQualifiedClassInjection() throws Exception {
+    final BeanWithElementInjectionSites bean = IOC.getBeanManager().lookupBean(BeanWithElementInjectionSites.class).getInstance();
+
+    assertNotNull("Input with class annotation was not injected.", bean.inputWithClassAnnotation);
+    assertNotNull("Input with class and property annotations was not injected.", bean.inputWithClassAnnotationAndProperty);
+
+
+    assertEquals("input does not have class value.", "my_class my_class1", bean.inputWithClassAnnotation.getClassName());
+    assertEquals("input does not have class value.", "my_class", bean.inputWithClassAnnotationAndProperty.getClassName());
+  }
 }
