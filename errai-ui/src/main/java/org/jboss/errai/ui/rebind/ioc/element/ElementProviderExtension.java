@@ -23,6 +23,7 @@ import org.jboss.errai.codegen.builder.ContextualStatementBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.util.Stmt;
+import org.jboss.errai.common.client.api.annotations.ClassNames;
 import org.jboss.errai.common.client.api.annotations.Element;
 import org.jboss.errai.common.client.api.annotations.Properties;
 import org.jboss.errai.common.client.api.annotations.Property;
@@ -166,7 +167,7 @@ public class ElementProviderExtension implements IOCExtensionConfigurator {
     final InjectableHandle handle = new InjectableHandle(type, qualifier);
 
     final ElementProvider elementProvider = new ElementProvider(handle,
-            new ElementInjectionBodyGenerator(type, tagName, getProperties(type)) {
+            new ElementInjectionBodyGenerator(type, tagName, getProperties(type), getClassNames(type)) {
 
               @Override
               protected ContextualStatementBuilder elementInitialization() {
@@ -198,5 +199,14 @@ public class ElementProviderExtension implements IOCExtensionConfigurator {
     }
 
     return properties;
+  }
+
+  private static String getClassNames(final MetaClass type){
+    String result = "";
+    final ClassNames classNames = type.getAnnotation(ClassNames.class);
+    if(classNames != null){
+      result = String.join(" ", classNames.value());
+    }
+    return result;
   }
 }

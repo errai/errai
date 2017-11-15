@@ -51,4 +51,10 @@ public class BeanWithElementInjectionSites {
   @Inject
   public NumberInputElement numberInput;
 
+  @Inject
+  public InputElementWithClassAnnotations inputWithClassAnnotation;
+
+  @Inject
+  public InputElementWithClassAndPropertyAnnotations inputWithClassAnnotationAndProperty;
+
 }
