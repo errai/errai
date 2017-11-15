@@ -583,7 +583,7 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
 
     try {
       final JsonFactory f = new JsonFactory();
-      final JsonGenerator g = f.createJsonGenerator(bundleFile, JsonEncoding.UTF8);
+      final JsonGenerator g = f.createGenerator(bundleFile, JsonEncoding.UTF8);
       g.useDefaultPrettyPrinter();
       g.writeStartObject();
       final Set<String> orderedKeys = new TreeSet<>(i18nValues.keySet());
