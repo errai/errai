@@ -65,6 +65,7 @@ public class GWTMetaClassTest extends AbstractMetaClassTest {
     f.addTestClass("org.jboss.errai.codegen.test.meta.method.TestGenericInterface");
     f.addTestClass("org.jboss.errai.codegen.test.meta.method.TestConcreteInterface");
     f.addTestClass("org.jboss.errai.codegen.test.meta.method.TestConcreteClass");
+    f.addTestClass("org.jboss.errai.codegen.test.meta.method.TestAbstractClass");
     f.addTestClass(PrimitiveFieldContainer.class.getName());
 
     mockacle = f.generateMockacle();

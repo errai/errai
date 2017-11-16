@@ -18,6 +18,7 @@ package org.jboss.errai.codegen.test.meta.method;
 
 import org.jboss.errai.codegen.apt.test.ErraiAptTest;
 import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.junit.Assert;
 import org.junit.Test;
@@ -30,35 +31,49 @@ public abstract class MetaMethodTest extends ErraiAptTest {
   @Test
   public void testGetReturnTypeConcreteClass() {
     final MetaMethod method = getMetaClass(TestConcreteClass.class).getDeclaredMethod("foo", withNoParameters());
-    Assert.assertEquals("java.lang.String", method.getReturnType().toString());
+    Assert.assertEquals("java.lang.String", method.getReturnType().getCanonicalName());
     Assert.assertEquals(getMetaClass(String.class), method.getReturnType());
   }
 
   @Test
   public void testGetReturnTypeConcreteInterface() {
     final MetaMethod method = getMetaClass(TestConcreteInterface.class).getMethod("foo", withNoParameters());
-    Assert.assertEquals("java.lang.String", method.getReturnType().toString());
+    Assert.assertEquals("java.lang.String", method.getReturnType().getCanonicalName());
     Assert.assertEquals(getMetaClass(String.class), method.getReturnType());
   }
 
   @Test
   public void testGetReturnTypeGenericInterface() {
     final MetaMethod method = getMetaClass(TestGenericInterface.class).getDeclaredMethod("foo", withNoParameters());
-    Assert.assertEquals("java.lang.Object", method.getReturnType().toString());
+    Assert.assertEquals("java.lang.Object", method.getReturnType().getCanonicalName());
   }
 
   @Test
   public void testGetReturnTypeGenericReturnType() {
     final MetaMethod method = getMetaClass(TestConcreteClass.class).getDeclaredMethod("bar", withNoParameters());
-    Assert.assertEquals("java.lang.Object", method.getReturnType().toString());
+    Assert.assertEquals("java.lang.Object", method.getReturnType().getCanonicalName());
     Assert.assertEquals(getMetaClass(Object.class), method.getReturnType());
   }
 
   @Test
   public void testGetReturnTypeBoundedGenericReturnType() {
     final MetaMethod method = getMetaClass(TestConcreteClass.class).getDeclaredMethod("boundedBar", withNoParameters());
-    Assert.assertEquals("java.lang.Long", method.getReturnType().toString());
+    Assert.assertEquals("java.lang.Long", method.getReturnType().getCanonicalName());
     Assert.assertEquals(getMetaClass(Long.class), method.getReturnType());
+  }
+
+  @Test
+  public void testGetGenericArrayReturnType() {
+    final MetaMethod method = getMetaClass(TestConcreteClass.class).getDeclaredMethod("genericArrayReturn", withNoParameters());
+    Assert.assertEquals("java.lang.Object[]", method.getReturnType().getCanonicalName());
+    Assert.assertEquals(MetaClassFactory.get(Object[].class), method.getReturnType());
+  }
+
+  @Test
+  public void testGetBoundedGenericArrayReturnType() {
+    final MetaMethod method = getMetaClass(TestConcreteClass.class).getDeclaredMethod("boundedGenericArrayReturn", withNoParameters());
+    Assert.assertEquals("java.lang.Long[]", method.getReturnType().getCanonicalName());
+    Assert.assertEquals(MetaClassFactory.get(Long[].class), method.getReturnType());
   }
 
   @Test
@@ -112,6 +127,20 @@ public abstract class MetaMethodTest extends ErraiAptTest {
     final MetaMethod method = getMetaClass(TestGenericInterface.class).getDeclaredMethod("par", Object.class);
     Assert.assertEquals(1, method.getParameters().length);
     Assert.assertEquals(getMetaClass(Object.class), method.getParameters()[0].getType());
+  }
+
+  @Test
+  public void testGetParametersGenericArray() {
+    final MetaMethod method = getMetaClass(TestConcreteClass.class).getDeclaredMethod("genericArrayParameter", Object[].class);
+    Assert.assertEquals(1, method.getParameters().length);
+    Assert.assertEquals(MetaClassFactory.get(Object[].class), method.getParameters()[0].getType());
+  }
+
+  @Test
+  public void testGetBoundedParametersGenericArray() {
+    final MetaMethod method = getMetaClass(TestConcreteClass.class).getDeclaredMethod("boundedGenericArrayParameter", Long[].class);
+    Assert.assertEquals(1, method.getParameters().length);
+    Assert.assertEquals(MetaClassFactory.get(Long[].class), method.getParameters()[0].getType());
   }
 
   protected abstract MetaClass getMetaClass(final Class<?> clazz);

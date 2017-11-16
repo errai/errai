@@ -14,33 +14,31 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.codegen.test.meta.java;
-
-import org.jboss.errai.codegen.meta.MetaClass;
-import org.jboss.errai.codegen.meta.impl.java.JavaReflectionClass;
-import org.jboss.errai.codegen.test.meta.method.MetaMethodTest;
-import org.junit.Ignore;
-import org.junit.Test;
+package org.jboss.errai.codegen.test.meta.method;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
-public class JavaReflectionMethodTest extends MetaMethodTest {
+public class TestAbstractClass<T, R extends Number, Y> {
 
-  @Ignore
-  @Test
-  @Override
-  public void testGetReturnTypeConcreteInterface() {
+  TestAbstractClass(T t) {
+
   }
 
-  @Ignore
-  @Test
-  @Override
-  public void testGetParametersConcreteInterface() {
+  TestAbstractClass(T[] ts) {
+
   }
 
-  @Override
-  protected MetaClass getMetaClass(Class<?> clazz) {
-    return JavaReflectionClass.newUncachedInstance(clazz);
+  TestAbstractClass(R r) {
+
   }
+
+  TestAbstractClass(T t, Y y) {
+
+  }
+
+  TestAbstractClass(T t, R r, Y y) {
+
+  }
+
 }

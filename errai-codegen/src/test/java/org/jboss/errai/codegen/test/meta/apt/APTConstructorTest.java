@@ -14,33 +14,18 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.codegen.test.meta.java;
+package org.jboss.errai.codegen.test.meta.apt;
 
 import org.jboss.errai.codegen.meta.MetaClass;
-import org.jboss.errai.codegen.meta.impl.java.JavaReflectionClass;
-import org.jboss.errai.codegen.test.meta.method.MetaMethodTest;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.jboss.errai.codegen.meta.impl.apt.APTClass;
+import org.jboss.errai.codegen.test.meta.method.MetaConstructorTest;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
-public class JavaReflectionMethodTest extends MetaMethodTest {
-
-  @Ignore
-  @Test
+public class APTConstructorTest extends MetaConstructorTest {
   @Override
-  public void testGetReturnTypeConcreteInterface() {
-  }
-
-  @Ignore
-  @Test
-  @Override
-  public void testGetParametersConcreteInterface() {
-  }
-
-  @Override
-  protected MetaClass getMetaClass(Class<?> clazz) {
-    return JavaReflectionClass.newUncachedInstance(clazz);
+  protected MetaClass getMetaClass(final Class<?> clazz) {
+    return new APTClass(getTypeElement(clazz).asType());
   }
 }

@@ -64,6 +64,8 @@ public class APTMethod extends MetaMethod implements APTMember {
       case TYPEVAR:
       case WILDCARD:
         return new APTClass(returnType.getUpperBound());
+      case ARRAY:
+        return new APTClass(returnType).getErased();
       default:
         return new APTClass(returnType);
       }

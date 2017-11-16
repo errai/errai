@@ -781,7 +781,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
 
   public String hashString() {
     if (_hashString == null) {
-      _hashString = MetaClassName + ":" + getFullyQualifiedName();
+      _hashString = MetaClassName + ":" + getCanonicalName();
       if (getParameterizedType() != null) {
         _hashString += getParameterizedType().toString();
       }

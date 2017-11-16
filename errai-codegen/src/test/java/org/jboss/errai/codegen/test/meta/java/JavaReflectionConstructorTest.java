@@ -18,25 +18,19 @@ package org.jboss.errai.codegen.test.meta.java;
 
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.impl.java.JavaReflectionClass;
-import org.jboss.errai.codegen.test.meta.method.MetaMethodTest;
+import org.jboss.errai.codegen.test.meta.method.MetaConstructorTest;
 import org.junit.Ignore;
 import org.junit.Test;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
-public class JavaReflectionMethodTest extends MetaMethodTest {
+public class JavaReflectionConstructorTest extends MetaConstructorTest {
 
   @Ignore
   @Test
   @Override
-  public void testGetReturnTypeConcreteInterface() {
-  }
-
-  @Ignore
-  @Test
-  @Override
-  public void testGetParametersConcreteInterface() {
+  public void concreteTwoGenerics() {
   }
 
   @Override
