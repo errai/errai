@@ -18,10 +18,13 @@ package org.jboss.errai.ioc.apt;
 
 import org.jboss.errai.common.apt.ErraiAptExportedTypes;
 import org.jboss.errai.common.apt.ErraiAptGenerators;
+import org.jboss.errai.common.apt.generator.ErraiAptGeneratedSourceFile;
 import org.jboss.errai.common.configuration.ErraiGenerator;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCEnvironmentGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static org.jboss.errai.common.apt.generator.ErraiAptGeneratedSourceFile.Type.CLIENT;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
@@ -55,5 +58,10 @@ public class IocEnvironmentAptGenerator extends ErraiAptGenerators.SingleFile {
   @Override
   public String getClassSimpleName() {
     return IOCEnvironmentGenerator.CLASS_NAME;
+  }
+
+  @Override
+  public ErraiAptGeneratedSourceFile.Type getType() {
+    return CLIENT;
   }
 }

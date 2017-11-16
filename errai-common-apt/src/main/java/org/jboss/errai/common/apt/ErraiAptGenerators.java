@@ -24,6 +24,8 @@ import org.jboss.errai.config.MetaClassFinder;
 import java.util.Collection;
 import java.util.Collections;
 
+import static org.jboss.errai.common.apt.generator.ErraiAptGeneratedSourceFile.Type.CLIENT;
+
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
@@ -66,6 +68,8 @@ public class ErraiAptGenerators {
 
     public abstract String getClassSimpleName();
 
+    public abstract ErraiAptGeneratedSourceFile.Type getType();
+
     protected String getResolvedClassSimpleName() {
       return erraiConfiguration().app().namespace() + getClassSimpleName();
     }
@@ -77,7 +81,7 @@ public class ErraiAptGenerators {
     @Override
     public final Collection<ErraiAptGeneratedSourceFile> files() {
       return Collections.singleton(
-              new ErraiAptGeneratedSourceFile(getPackageName(), getResolvedClassSimpleName(), generate()));
+              new ErraiAptGeneratedSourceFile(getPackageName(), getResolvedClassSimpleName(), generate(), getType()));
     }
 
   }

@@ -18,12 +18,15 @@ package org.jboss.errai.databinding.apt;
 
 import org.jboss.errai.common.apt.ErraiAptExportedTypes;
 import org.jboss.errai.common.apt.ErraiAptGenerators;
+import org.jboss.errai.common.apt.generator.ErraiAptGeneratedSourceFile;
 import org.jboss.errai.common.configuration.ErraiGenerator;
 import org.jboss.errai.config.MetaClassFinder;
 import org.jboss.errai.databinding.client.api.Bindable;
 import org.jboss.errai.databinding.rebind.BindableProxyLoaderGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static org.jboss.errai.common.apt.generator.ErraiAptGeneratedSourceFile.Type.CLIENT;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
@@ -64,6 +67,11 @@ public class BindableProxyLoaderAptGenerator extends ErraiAptGenerators.SingleFi
   @Override
   public String getClassSimpleName() {
     return bindableProxyLoaderGenerator.getClassSimpleName();
+  }
+
+  @Override
+  public ErraiAptGeneratedSourceFile.Type getType() {
+    return CLIENT;
   }
 
 }

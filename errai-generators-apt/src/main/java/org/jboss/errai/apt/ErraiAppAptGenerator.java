@@ -50,6 +50,8 @@ import java.util.stream.Stream;
 import static java.util.Comparator.comparing;
 import static javax.tools.StandardLocation.CLASS_OUTPUT;
 import static javax.tools.StandardLocation.SOURCE_OUTPUT;
+import static org.jboss.errai.common.apt.generator.ErraiAptGeneratedSourceFile.Type.CLIENT;
+import static org.jboss.errai.common.apt.generator.ErraiAptGeneratedSourceFile.Type.SHARED;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
@@ -180,18 +182,28 @@ public class ErraiAppAptGenerator extends AbstractProcessor {
 
   private void saveFile(final ErraiAptGeneratedSourceFile file) {
     try {
-      // By saving .java source files as resources we skip javac compilation. This behavior is desirable since all
-      // generated code is client code and will be compiled by the GWT/J2CL compiler.
-      // FIXME: errai-marshalling will generate server code too
-
-      final FileObject sourceFile = processingEnv.getFiler()
-              .createResource(SOURCE_OUTPUT, file.getPackageName(), file.getClassSimpleName() + ".java");
-
-      try (final Writer writer = sourceFile.openWriter()) {
+      try (final Writer writer = getFileObject(file).openWriter()) {
         writer.write(file.getSourceCode());
       }
     } catch (final IOException e) {
       throw new RuntimeException("Could not write generated file", e);
     }
+  }
+
+  private FileObject getFileObject(ErraiAptGeneratedSourceFile file) throws IOException {
+    final String pkg = file.getPackageName();
+    final String classSimpleName = file.getClassSimpleName();
+
+    if (file.getType().equals(CLIENT)) {
+      // By saving .java source files as resources we skip javac compilation. This behavior is desirable since all
+      // generated code is client code and will be compiled by the GWT/J2CL compiler.
+      return processingEnv.getFiler().createResource(SOURCE_OUTPUT, pkg, classSimpleName + ".java");
+    }
+
+    if (file.getType().equals(SHARED)) {
+      return processingEnv.getFiler().createSourceFile(pkg + "." + classSimpleName);
+    }
+
+    throw new RuntimeException("Unsupported generated source file type " + file.getType());
   }
 }

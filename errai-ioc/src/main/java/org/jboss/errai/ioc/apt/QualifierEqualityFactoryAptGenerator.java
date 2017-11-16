@@ -20,6 +20,7 @@ import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.common.apt.ErraiAptExportedTypes;
 import org.jboss.errai.common.apt.ErraiAptGenerators;
+import org.jboss.errai.common.apt.generator.ErraiAptGeneratedSourceFile;
 import org.jboss.errai.common.configuration.ErraiGenerator;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.QualifierEqualityFactoryGenerator;
 import org.slf4j.Logger;
@@ -30,6 +31,7 @@ import javax.inject.Qualifier;
 import java.util.Collection;
 
 import static java.util.Collections.singleton;
+import static org.jboss.errai.common.apt.generator.ErraiAptGeneratedSourceFile.Type.CLIENT;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
@@ -69,5 +71,10 @@ public class QualifierEqualityFactoryAptGenerator extends ErraiAptGenerators.Sin
   @Override
   public String getClassSimpleName() {
     return QualifierEqualityFactoryGenerator.CLASS_NAME;
+  }
+
+  @Override
+  public ErraiAptGeneratedSourceFile.Type getType() {
+    return CLIENT;
   }
 }

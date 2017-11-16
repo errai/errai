@@ -18,10 +18,14 @@ package org.jboss.errai.marshalling.apt;
 
 import org.jboss.errai.common.apt.ErraiAptExportedTypes;
 import org.jboss.errai.common.apt.ErraiAptGenerators;
+import org.jboss.errai.common.apt.generator.ErraiAptGeneratedSourceFile;
 import org.jboss.errai.common.configuration.ErraiGenerator;
 import org.jboss.errai.marshalling.rebind.MarshallerGeneratorFactory;
 
+import static org.jboss.errai.common.apt.generator.ErraiAptGeneratedSourceFile.Type.CLIENT;
+import static org.jboss.errai.common.apt.generator.ErraiAptGeneratedSourceFile.Type.SHARED;
 import static org.jboss.errai.marshalling.rebind.MarshallerOutputTarget.GWT;
+import static org.jboss.errai.marshalling.rebind.MarshallerOutputTarget.Java;
 import static org.jboss.errai.marshalling.rebind.MarshallersGenerator.SERVER_CLASS_NAME;
 import static org.jboss.errai.marshalling.rebind.MarshallersGenerator.SERVER_PACKAGE_NAME;
 
@@ -38,7 +42,7 @@ public class ServerMarshallersAptGenerator extends ErraiAptGenerators.SingleFile
 
   @Override
   public String generate() {
-    return MarshallerGeneratorFactory.getFor(null, GWT, erraiConfiguration(), metaClassFinder())
+    return MarshallerGeneratorFactory.getFor(null, Java, erraiConfiguration(), metaClassFinder())
             .generate(getPackageName(), getResolvedClassSimpleName());
   }
 
@@ -50,6 +54,11 @@ public class ServerMarshallersAptGenerator extends ErraiAptGenerators.SingleFile
   @Override
   public String getClassSimpleName() {
     return SERVER_CLASS_NAME;
+  }
+
+  @Override
+  public ErraiAptGeneratedSourceFile.Type getType() {
+    return CLIENT;
   }
 
   @Override

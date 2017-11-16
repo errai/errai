@@ -33,6 +33,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static org.jboss.errai.common.apt.generator.ErraiAptGeneratedSourceFile.Type.CLIENT;
+import static org.jboss.errai.common.apt.generator.ErraiAptGeneratedSourceFile.Type.SHARED;
 import static org.jboss.errai.marshalling.rebind.MarshallerGenerator.PACKAGE_NAME;
 
 /**
@@ -68,7 +70,7 @@ public class MarshallerAptGenerator extends ErraiAptGenerators.MultipleFiles {
     final String classSimpleName = MarshallerGeneratorFactory.getMarshallerImplClassName(type, true,
             erraiConfiguration());
     final String generatedSource = generateSource(erraiConfiguration(), type);
-    return new ErraiAptGeneratedSourceFile(PACKAGE_NAME, classSimpleName, generatedSource);
+    return new ErraiAptGeneratedSourceFile(PACKAGE_NAME, classSimpleName, generatedSource, SHARED);
   }
 
   private String generateSource(final ErraiConfiguration erraiConfiguration, final MetaClass type) {

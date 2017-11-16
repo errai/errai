@@ -19,10 +19,13 @@ package org.jboss.errai.ioc.apt;
 import org.jboss.errai.common.apt.ErraiAptExportedTypes;
 import org.jboss.errai.common.apt.ErraiAptGenerators;
 import org.jboss.errai.common.apt.ResourceFilesFinder;
+import org.jboss.errai.common.apt.generator.ErraiAptGeneratedSourceFile;
 import org.jboss.errai.common.configuration.ErraiGenerator;
 import org.jboss.errai.ioc.apt.util.AptIocRelevantClassesFinder;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCGenerator;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IocRelevantClassesFinder;
+
+import static org.jboss.errai.common.apt.generator.ErraiAptGeneratedSourceFile.Type.CLIENT;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
@@ -55,5 +58,10 @@ public class IocAptGenerator extends ErraiAptGenerators.SingleFile {
   @Override
   public String getClassSimpleName() {
     return iocGenerator.getClassSimpleName();
+  }
+
+  @Override
+  public ErraiAptGeneratedSourceFile.Type getType() {
+    return CLIENT;
   }
 }
