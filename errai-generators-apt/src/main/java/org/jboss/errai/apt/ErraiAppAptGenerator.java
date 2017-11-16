@@ -190,13 +190,13 @@ public class ErraiAppAptGenerator extends AbstractProcessor {
     }
   }
 
-  private FileObject getFileObject(ErraiAptGeneratedSourceFile file) throws IOException {
+  private FileObject getFileObject(final ErraiAptGeneratedSourceFile file) throws IOException {
     final String pkg = file.getPackageName();
     final String classSimpleName = file.getClassSimpleName();
 
     if (file.getType().equals(CLIENT)) {
-      // By saving .java source files as resources we skip javac compilation. This behavior is desirable since all
-      // generated code is client code and will be compiled by the GWT/J2CL compiler.
+      // By saving .java source files as resources we skip javac compilation. This behavior is
+      // desirable since generated client code will be compiled by the GWT/J2CL compiler.
       return processingEnv.getFiler().createResource(SOURCE_OUTPUT, pkg, classSimpleName + ".java");
     }
 

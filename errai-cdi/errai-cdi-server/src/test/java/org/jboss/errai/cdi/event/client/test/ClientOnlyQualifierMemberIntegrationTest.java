@@ -18,7 +18,7 @@ package org.jboss.errai.cdi.event.client.test;
 
 import java.util.Arrays;
 
-import org.jboss.errai.cdi.client.qualifier.WithClazzArray;
+import org.jboss.errai.cdi.common.client.qualifier.WithClazzArray;
 import org.jboss.errai.cdi.event.client.ClientQualifiedMemberEventObserver;
 import org.jboss.errai.cdi.event.client.ClientQualifiedMemberEventProducer;
 import org.jboss.errai.cdi.event.client.FiredQualifierObserver;

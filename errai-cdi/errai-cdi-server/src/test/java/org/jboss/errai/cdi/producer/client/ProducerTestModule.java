@@ -22,11 +22,11 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Default;
 import javax.enterprise.inject.Produces;
 
-import org.jboss.errai.cdi.client.qualifier.A;
-import org.jboss.errai.cdi.client.qualifier.B;
-import org.jboss.errai.cdi.client.qualifier.C;
-import org.jboss.errai.cdi.client.qualifier.D;
-import org.jboss.errai.cdi.client.qualifier.E;
+import org.jboss.errai.cdi.common.client.qualifier.A;
+import org.jboss.errai.cdi.common.client.qualifier.B;
+import org.jboss.errai.cdi.common.client.qualifier.C;
+import org.jboss.errai.cdi.common.client.qualifier.D;
+import org.jboss.errai.cdi.common.client.qualifier.E;
 
 /**
  * Test module used by {@see ProducerIntegrationTest}.

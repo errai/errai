@@ -22,11 +22,11 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.jboss.errai.bus.server.annotations.Service;
-import org.jboss.errai.cdi.client.qualifier.Value;
-import org.jboss.errai.cdi.client.qualifier.WithClazz;
-import org.jboss.errai.cdi.client.qualifier.WithEnum;
-import org.jboss.errai.cdi.client.qualifier.WithInt;
-import org.jboss.errai.cdi.client.qualifier.WithMultiple;
+import org.jboss.errai.cdi.common.client.qualifier.Value;
+import org.jboss.errai.cdi.common.client.qualifier.WithClazz;
+import org.jboss.errai.cdi.common.client.qualifier.WithEnum;
+import org.jboss.errai.cdi.common.client.qualifier.WithInt;
+import org.jboss.errai.cdi.common.client.qualifier.WithMultiple;
 import org.jboss.errai.cdi.event.client.shared.PortableEvent;
 import org.jboss.errai.cdi.event.client.shared.QualifiedMemberEventProducer;
 

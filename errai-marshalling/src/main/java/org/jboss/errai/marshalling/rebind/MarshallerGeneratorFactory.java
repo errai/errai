@@ -18,7 +18,6 @@ package org.jboss.errai.marshalling.rebind;
 
 import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.shared.GWT;
-import org.jboss.errai.marshalling.apt.MarshallerAptGenerator;
 import org.jboss.errai.codegen.Context;
 import org.jboss.errai.codegen.InnerClass;
 import org.jboss.errai.codegen.Parameter;
@@ -44,6 +43,7 @@ import org.jboss.errai.config.ErraiConfiguration;
 import org.jboss.errai.config.MetaClassFinder;
 import org.jboss.errai.config.rebind.EnvironmentConfigExtension;
 import org.jboss.errai.config.util.ClassScanner;
+import org.jboss.errai.marshalling.apt.MarshallerAptGenerator;
 import org.jboss.errai.marshalling.client.api.DeferredMarshallerCreationCallback;
 import org.jboss.errai.marshalling.client.api.GeneratedMarshaller;
 import org.jboss.errai.marshalling.client.api.Marshaller;
@@ -338,7 +338,7 @@ public class MarshallerGeneratorFactory {
 
     return getMarshallerConditionalBlock.finish();
   }
-  
+
   private void createPutMarshallerMethod() {
     classStructureBuilder
       .privateMethod(boolean.class, "putMarshaller", Parameter.of(String.class, "fqcn"), Parameter.of(Marshaller.class, "m"))
@@ -543,14 +543,19 @@ public class MarshallerGeneratorFactory {
 
     if (!arrayMarshallers.contains(varName)) {
       final String marshallerClassName = getMarshallerImplClassName(type, gwtTarget, erraiConfiguration);
-      final InnerClass arrayMarshaller = new InnerClass(generateArrayMarshaller(type, marshallerClassName, gwtTarget));
+      final BuildMetaClass arrayMarshallerType = generateArrayMarshaller(type, marshallerClassName, gwtTarget);
 
       if (!erraiConfiguration.app().isAptEnvironment()) {
-        classStructureBuilder.declaresInnerClass(arrayMarshaller);
+        final InnerClass arrayMarshallerInner = new InnerClass(arrayMarshallerType);
+        classStructureBuilder.declaresInnerClass(arrayMarshallerInner);
+        addConditionalAssignment(type,
+                Stmt.newObject(QualifyingMarshallerWrapper.class, Stmt.newObject(arrayMarshallerInner.getType()),
+                        type));
+      } else {
+        addConditionalAssignment(type,
+                Stmt.newObject(QualifyingMarshallerWrapper.class, Stmt.newObject(arrayMarshallerType), type));
       }
 
-      addConditionalAssignment(type, 
-          Stmt.newObject(QualifyingMarshallerWrapper.class, Stmt.newObject(arrayMarshaller.getType()), type));
     }
     arrayMarshallers.add(varName);
 

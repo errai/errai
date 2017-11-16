@@ -17,9 +17,9 @@
 package org.jboss.errai.cdi.rpc.server;
 
 import org.jboss.errai.bus.server.annotations.Service;
-import org.jboss.errai.cdi.client.payload.GenericPayload;
-import org.jboss.errai.cdi.client.payload.ParameterizedSubtypePayload;
-import org.jboss.errai.cdi.client.remote.GenericService;
+import org.jboss.errai.cdi.common.client.payload.GenericPayload;
+import org.jboss.errai.cdi.common.client.payload.ParameterizedSubtypePayload;
+import org.jboss.errai.cdi.common.client.remote.GenericService;
 
 /**
  *

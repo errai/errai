@@ -19,8 +19,8 @@ package org.jboss.errai.cdi.rpc.client.test;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import org.jboss.errai.cdi.client.payload.GenericPayload;
-import org.jboss.errai.cdi.client.payload.ParameterizedSubtypePayload;
+import org.jboss.errai.cdi.common.client.payload.GenericPayload;
+import org.jboss.errai.cdi.common.client.payload.ParameterizedSubtypePayload;
 import org.jboss.errai.cdi.rpc.client.RpcTestBean;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;

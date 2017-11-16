@@ -21,11 +21,11 @@ import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
-import org.jboss.errai.cdi.client.event.FunEvent;
-import org.jboss.errai.cdi.client.event.FunFinishEvent;
-import org.jboss.errai.cdi.client.event.FunStartEvent;
-import org.jboss.errai.cdi.client.qualifier.A;
-import org.jboss.errai.cdi.client.qualifier.B;
+import org.jboss.errai.cdi.common.client.event.FunEvent;
+import org.jboss.errai.cdi.common.client.event.FunFinishEvent;
+import org.jboss.errai.cdi.common.client.event.FunStartEvent;
+import org.jboss.errai.cdi.common.client.qualifier.A;
+import org.jboss.errai.cdi.common.client.qualifier.B;
 
 @ApplicationScoped
 public class CdiEventRoutingTestService {

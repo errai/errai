@@ -19,8 +19,8 @@ package org.jboss.errai.cdi.rpc.server;
 import javax.enterprise.context.ApplicationScoped;
 
 import org.jboss.errai.bus.server.annotations.Service;
-import org.jboss.errai.cdi.client.qualifier.A;
-import org.jboss.errai.cdi.client.remote.MyRemote;
+import org.jboss.errai.cdi.common.client.qualifier.A;
+import org.jboss.errai.cdi.common.client.remote.MyRemote;
 
 /**
  * @author Mike Brock

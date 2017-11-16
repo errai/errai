@@ -17,6 +17,7 @@
 package org.jboss.errai.cdi.async.test.bm;
 
 import org.jboss.errai.bus.ErraiBusModule;
+import org.jboss.errai.cdi.common.ErraiCdiCommonTestModule;
 import org.jboss.errai.common.configuration.ErraiApp;
 import org.jboss.errai.common.configuration.ErraiModule;
 import org.jboss.errai.enterprise.ErraiCdiClientModule;
@@ -35,6 +36,7 @@ import org.jboss.errai.marshalling.ErraiMarshallingModule;
                       ErraiIocModule.class,
                       ErraiCdiClientModule.class,
                       ErraiBusSupportModule.class,
+                      ErraiCdiCommonTestModule.class,
                       ErraiCdiSharedModule.class,
                       ErraiCdiBeanManagerTestModule.class,
                       AsyncCdiBeanManagerErraiTestApp.class })

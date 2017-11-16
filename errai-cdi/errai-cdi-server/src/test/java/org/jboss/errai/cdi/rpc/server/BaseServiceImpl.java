@@ -16,7 +16,7 @@
 
 package org.jboss.errai.cdi.rpc.server;
 
-import org.jboss.errai.cdi.client.remote.BaseService;
+import org.jboss.errai.cdi.common.client.remote.BaseService;
 
 /**
  * Implementation of BaseService for the ERRAI-282 regression test.

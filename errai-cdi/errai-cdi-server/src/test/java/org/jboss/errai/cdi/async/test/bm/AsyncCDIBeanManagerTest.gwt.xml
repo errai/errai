@@ -24,7 +24,7 @@
   <inherits name="org.jboss.errai.bus.ErraiBus"/>
   <inherits name="org.jboss.errai.enterprise.CDI"/>
   <inherits name="com.google.gwt.logging.Logging"/>
-  <inherits name="org.jboss.errai.cdi.CdiTestModule"/>
+  <inherits name="org.jboss.errai.cdi.common.CdiTestModule"/>
   <inherits name="org.jboss.errai.cdi.event.EventObserverTestModule"/>
   <inherits name="org.jboss.errai.bus.TestCommon"/>
   <inherits name="org.jboss.errai.cdi.async.test.bm.BeanManagerExtensionTestModule" />

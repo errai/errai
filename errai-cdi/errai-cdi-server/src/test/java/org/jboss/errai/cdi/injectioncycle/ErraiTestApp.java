@@ -17,6 +17,7 @@
 package org.jboss.errai.cdi.injectioncycle;
 
 import org.jboss.errai.bus.ErraiBusModule;
+import org.jboss.errai.cdi.common.ErraiCdiCommonTestModule;
 import org.jboss.errai.common.configuration.ErraiApp;
 import org.jboss.errai.common.configuration.ErraiModule;
 import org.jboss.errai.enterprise.ErraiCdiClientModule;
@@ -32,6 +33,7 @@ import org.jboss.errai.marshalling.ErraiMarshallingModule;
           modules = { ErraiMarshallingModule.class,
                       ErraiBusModule.class,
                       ErraiIocModule.class,
+                      ErraiCdiCommonTestModule.class,
                       ErraiCdiClientModule.class,
                       ErraiCdiSharedModule.class,
                       ErraiTestApp.class })
