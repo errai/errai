@@ -956,12 +956,10 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     }
 
     final List<Message> lowPriority = new ArrayList<>();
-    for(Message m : deferredMessages) {
-      for (final Message message : new ArrayList<>(deferredMessages)) {
-        if (remotes.containsKey(message.getSubject())) {
-          lowPriority.add(message);
-          deferredMessages.remove(message);
-        }
+    for (final Message message : new ArrayList<>(deferredMessages)) {
+      if (remotes.containsKey(message.getSubject())) {
+        lowPriority.add(message);
+        deferredMessages.remove(message);
       }
     }
 
@@ -971,9 +969,9 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
       for (final Message message : deferredMessages) {
         String subject = message.getSubject();
-        if (!localSubscriptions.containsKey(subject) ||
-            !subscriptions.containsKey(subject) ||
-            !shadowSubscriptions.containsKey(subject)) {
+        if (!(localSubscriptions.containsKey(subject) ||
+             subscriptions.containsKey(subject) ||
+             shadowSubscriptions.containsKey(subject))) {
           try {
             throw new NoSubscribersToDeliverTo(subject);
           } catch (NoSubscribersToDeliverTo ex) {
