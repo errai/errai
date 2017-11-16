@@ -16,7 +16,7 @@
 
 package org.jboss.errai.cdi.rebind;
 
-import org.jboss.errai.cdi.injection.client.Funject;
+import org.jboss.errai.cdi.rebind.client.Funject;
 import org.jboss.errai.ioc.client.api.IOCExtension;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCExtensionConfigurator;
@@ -27,7 +27,7 @@ import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
  * @author Mike Brock
  */
 @IOCExtension
-public class IOCTestExtension  implements IOCExtensionConfigurator {
+public class IOCTestExtension implements IOCExtensionConfigurator {
   @Override
   public void configure(IOCProcessingContext context, InjectionContext injectionContext) {
     injectionContext.mapElementType(WiringElementType.InjectionPoint, Funject.class);

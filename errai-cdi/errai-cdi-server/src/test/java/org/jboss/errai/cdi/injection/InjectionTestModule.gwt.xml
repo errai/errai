@@ -24,6 +24,7 @@
     <inherits name="org.jboss.errai.enterprise.CDI"/>
     <inherits name="org.jboss.errai.cdi.common.CdiTestModule"/>
     <inherits name="org.jboss.errai.cdi.event.EventObserverTestModule"/>
+    <inherits name="org.jboss.errai.cdi.rebind.client.ErraiFunjectTestModule"/>
     <inherits name="org.jboss.errai.cdi.injection.InjectionExtensionTestModule" />
 
 </module>

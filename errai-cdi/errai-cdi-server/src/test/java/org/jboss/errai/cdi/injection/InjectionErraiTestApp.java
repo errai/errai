@@ -18,6 +18,7 @@ package org.jboss.errai.cdi.injection;
 
 import org.jboss.errai.bus.ErraiBusModule;
 import org.jboss.errai.cdi.common.ErraiCdiCommonTestModule;
+import org.jboss.errai.cdi.rebind.ErraiFunjectTestModule;
 import org.jboss.errai.common.configuration.ErraiApp;
 import org.jboss.errai.common.configuration.ErraiModule;
 import org.jboss.errai.enterprise.ErraiCdiClientModule;
@@ -39,6 +40,7 @@ import org.jboss.errai.marshalling.ErraiMarshallingModule;
                       ErraiCdiCommonTestModule.class,
                       ErraiBusSupportModule.class,
                       ErraiCdiInjectionTestModule.class,
+                      ErraiFunjectTestModule.class,
                       InjectionErraiTestApp.class })
 @ErraiModule
 public class InjectionErraiTestApp {

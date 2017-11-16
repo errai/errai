@@ -16,6 +16,8 @@
 
 package org.jboss.errai.cdi.injection.client;
 
+import org.jboss.errai.cdi.rebind.client.Funject;
+
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import java.util.ArrayList;
@@ -25,7 +27,8 @@ import java.util.ArrayList;
  */
 @ApplicationScoped
 public class BeanInjectsNonModuleDependentBeanB {
-  @Funject ArrayList<String> funArrayListOfString;
+  @Funject
+  ArrayList<String> funArrayListOfString;
 
   @PostConstruct
   private void postConstructBean() {
