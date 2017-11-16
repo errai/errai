@@ -33,7 +33,7 @@ import org.slf4j.Logger;
 public final class CSRFTokenCheck implements RequestSecurityCheck {
 
   public static CSRFTokenCheck INSTANCE = new CSRFTokenCheck();
-  private static final String CSRF_TOKEN_ATTRIBUTE_NAME = "errai.bus.csrf_token";
+  public static final String CSRF_TOKEN_ATTRIBUTE_NAME = "errai.bus.csrf_token";
 
   private CSRFTokenCheck() {}
 
