@@ -35,7 +35,8 @@ import org.jboss.errai.marshalling.ErraiMarshallingModule;
                       ErraiIocModule.class,
                       ErraiCdiClientModule.class,
                       ErraiCdiCommonTestModule.class,
-                      ErraiCdiSharedModule.class })
+                      ErraiCdiSharedModule.class,
+                      ErraiTestApp.class})
 @ErraiModule
 public class ErraiTestApp {
 }

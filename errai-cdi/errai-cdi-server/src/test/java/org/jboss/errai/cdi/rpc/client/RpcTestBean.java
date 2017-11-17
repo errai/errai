@@ -32,12 +32,13 @@ import org.jboss.errai.cdi.common.client.remote.MySessionAttributeSettingRemote;
 import org.jboss.errai.cdi.common.client.remote.SubService;
 import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.RemoteCallback;
+import org.jboss.errai.ioc.client.api.EntryPoint;
 
 /**
  * @author Mike Brock
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-@Startup
+@EntryPoint
 @ApplicationScoped
 public class RpcTestBean {
 
