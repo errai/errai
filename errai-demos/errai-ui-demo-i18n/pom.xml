@@ -4,7 +4,7 @@
   <name>Errai::UI::Demos::I18NDemo</name>
   <groupId>org.jboss.errai.demos</groupId>
   <artifactId>errai-ui-demos-i18ndemo</artifactId>
-  <version>4.1.1-SNAPSHOT</version>
+  <version>4.1.1.Final</version>
   <packaging>war</packaging>
 
   <url>http://jboss.org/errai/errai</url>
