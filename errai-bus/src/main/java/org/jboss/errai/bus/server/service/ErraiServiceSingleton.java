@@ -30,29 +30,33 @@ public final class ErraiServiceSingleton {
   private static Set<ErraiInitCallback> callbackList = Collections.synchronizedSet(new HashSet<ErraiInitCallback>());
 
   private static final Object monitor = new Object();
-  private static volatile ErraiService service = new ErraiServiceProxy();
+  private static volatile ErraiServiceProxy initProxy = new ErraiServiceProxy();
+  private static volatile ErraiService service;
 
   public static ErraiService initSingleton(final ErraiServiceConfigurator configurator) {
     synchronized (monitor) {
       if (isInitialized()) throw new IllegalStateException("service already set into singleton");
-      ErraiServiceProxy proxy = (ErraiServiceProxy) service;
+
       service = ErraiServiceFactory.create(configurator);
-      proxy.closeProxy(service);
+      if(!initProxy.isClosed()) {
+        initProxy.closeProxy(service);
+      }
 
       for (ErraiInitCallback erraiInitCallback : callbackList) {
         erraiInitCallback.onInit(service);
       }
 
+      callbackList.clear();
       return service;
     }
   }
 
   public static boolean isInitialized() {
-    return !(service instanceof ErraiServiceProxy);
+    return service != null && service.getBus() != null;
   }
 
   public static ErraiService getService() {
-    return service;
+    return service != null ? service : initProxy;
   }
 
   public static void registerInitCallback(ErraiInitCallback callback) {

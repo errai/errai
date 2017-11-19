@@ -83,6 +83,10 @@ class ErraiServiceProxy implements ErraiService<Object> {
     throw new IllegalStateException("cannot set dispatcher in proxy");
   }
 
+  public boolean isClosed() {
+    return service != null;
+  }
+
   public void closeProxy(ErraiService service) {
     this.service = service;
     messageBusProxy.closeProxy(service.getBus());
