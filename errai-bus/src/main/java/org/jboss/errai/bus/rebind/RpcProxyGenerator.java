@@ -16,14 +16,11 @@
 
 package org.jboss.errai.bus.rebind;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import com.google.gwt.core.ext.GeneratorContext;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.api.builder.RemoteCallSendable;
 import org.jboss.errai.bus.client.framework.AbstractRpcProxy;
 import org.jboss.errai.codegen.BlockStatement;
-import org.jboss.errai.codegen.BooleanOperator;
 import org.jboss.errai.codegen.DefParameters;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
@@ -31,18 +28,20 @@ import org.jboss.errai.codegen.StringStatement;
 import org.jboss.errai.codegen.Variable;
 import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
-import org.jboss.errai.codegen.builder.impl.BooleanExpressionBuilder;
 import org.jboss.errai.codegen.builder.impl.ClassBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaMethod;
+import org.jboss.errai.codegen.util.Bool;
+import org.jboss.errai.codegen.util.If;
 import org.jboss.errai.codegen.util.ProxyUtil;
 import org.jboss.errai.codegen.util.ProxyUtil.InterceptorProvider;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.client.api.interceptor.RemoteCallContext;
 import org.jboss.errai.common.client.framework.CallContextStatus;
 
-import com.google.gwt.core.ext.GeneratorContext;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Generates an Errai RPC remote proxy.
@@ -132,13 +131,12 @@ public class RpcProxyGenerator {
             .finish()
             .catch_(Throwable.class, "throwable")
             .append(
-                    Stmt.if_(BooleanExpressionBuilder
-                            .create(Stmt.loadVariable("errorCallback"), BooleanOperator.NotEquals, Stmt.loadLiteral(null)))
-                    .append(Stmt.loadVariable("errorCallback").invoke("error", Stmt.load(null), Variable.get("throwable")))
-                    .finish()
-                    .else_()
-                    .append(Stmt.loadVariable("this").invoke("invokeDefaultErrorHandlers", Variable.get("throwable")))
-                    .finish())
+                If.cond(Bool.and(
+                    Bool.notEquals(Stmt.loadVariable("errorCallback"), Stmt.loadLiteral(null)),
+                    Stmt.loadVariable("errorCallback").invoke("error", Stmt.load(null), Variable.get("throwable"))
+                  ))
+                  .append(Stmt.loadVariable("this").invoke("invokeDefaultErrorHandlers", Variable.get("throwable")))
+                .finish())
             .finish();
   }
 
