@@ -131,10 +131,13 @@ public class RpcProxyGenerator {
             .finish()
             .catch_(Throwable.class, "throwable")
             .append(
-                If.cond(Bool.and(
-                    Bool.notEquals(Stmt.loadVariable("errorCallback"), Stmt.loadLiteral(null)),
-                    Stmt.loadVariable("errorCallback").invoke("error", Stmt.load(null), Variable.get("throwable"))
-                  ))
+                If.cond(Bool.notEquals(Stmt.loadVariable("errorCallback"), Stmt.loadLiteral(null)))
+                  .append(
+                      If.cond(Stmt.loadVariable("errorCallback").invoke("error", Stmt.load(null), Variable.get("throwable")))
+                          .append(Stmt.loadVariable("this").invoke("invokeDefaultErrorHandlers", Variable.get("throwable")))
+                      .finish()
+                  ).finish()
+                .else_()
                   .append(Stmt.loadVariable("this").invoke("invokeDefaultErrorHandlers", Variable.get("throwable")))
                 .finish())
             .finish();
