@@ -56,23 +56,45 @@ public final class ErraiServiceSingleton {
     }
   }
 
+  /**
+   * Is the {@link ErraiService} still active.
+   *
+   * @return true if we aren't null and we have a valid {@link ErraiService#getBus()}.
+   */
   public static boolean isActive() {
     return service != null && service.getBus() != null;
   }
 
+  /**
+   * Get the {@link ErraiService} singleton, or if not yet active provide a valid proxy.
+   */
   public static ErraiService getService() {
     return isActive() ? service : proxy;
   }
 
+  /**
+   * Reset the proxy and dereference the service.
+   */
   public static void resetProxyAndService() {
     proxy.reset();
     service = null;
   }
 
+  /**
+   * Register an init callback that will be executed upon initialization.
+   *
+   * @param callback valid callback.
+   */
   public static void registerInitCallback(ErraiInitCallback callback) {
     registerInitCallback(callback, false);
   }
 
+  /**
+   * Register an init callback that will be executed upon initialization.
+   *
+   * @param callback valid callback.
+   * @param persistent should the callback persist after the singleton is initialized, will be removed if false.
+   */
   public static void registerInitCallback(ErraiInitCallback callback, boolean persistent) {
     synchronized (monitor) {
       InitCallbackBlock block = new InitCallbackBlock(callback, persistent);
@@ -90,9 +112,7 @@ public final class ErraiServiceSingleton {
   }
 
   public static Set<ErraiInitCallback> getInitCallbacks() {
-    return Collections.unmodifiableSet(callbacks.stream()
-            .map(block -> block.callback)
-            .collect(Collectors.toSet()));
+    return Collections.unmodifiableSet(callbacks.stream().map(block -> block.callback).collect(Collectors.toSet()));
   }
 
   static class InitCallbackBlock {
@@ -105,7 +125,7 @@ public final class ErraiServiceSingleton {
     }
   }
 
-  public static interface ErraiInitCallback {
-    public void onInit(ErraiService service);
+  public interface ErraiInitCallback {
+    void onInit(ErraiService service);
   }
 }
