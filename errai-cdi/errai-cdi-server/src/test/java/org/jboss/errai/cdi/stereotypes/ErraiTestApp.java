@@ -18,6 +18,7 @@ package org.jboss.errai.cdi.stereotypes;
 
 import org.jboss.errai.bus.ErraiBusModule;
 import org.jboss.errai.cdi.common.ErraiCdiCommonTestModule;
+import org.jboss.errai.cdi.event.EventObserverErraiTestApp;
 import org.jboss.errai.common.configuration.ErraiApp;
 import org.jboss.errai.common.configuration.ErraiModule;
 import org.jboss.errai.enterprise.ErraiCdiClientModule;
@@ -35,7 +36,9 @@ import org.jboss.errai.marshalling.ErraiMarshallingModule;
                       ErraiIocModule.class,
                       ErraiCdiClientModule.class,
                       ErraiCdiCommonTestModule.class,
-                      ErraiCdiSharedModule.class })
+                      EventObserverErraiTestApp.class,
+                      ErraiCdiSharedModule.class,
+                      ErraiTestApp.class })
 @ErraiModule
 public class ErraiTestApp {
 }
