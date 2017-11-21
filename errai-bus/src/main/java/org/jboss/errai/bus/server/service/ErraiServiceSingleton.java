@@ -18,7 +18,9 @@ package org.jboss.errai.bus.server.service;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @author Mike Brock
@@ -27,51 +29,81 @@ public final class ErraiServiceSingleton {
   private ErraiServiceSingleton() {
   }
 
-  private static Set<ErraiInitCallback> callbackList = Collections.synchronizedSet(new HashSet<ErraiInitCallback>());
+  private static Set<InitCallbackBlock> callbacks = Collections.synchronizedSet(new HashSet<>());
 
   private static final Object monitor = new Object();
-  private static volatile ErraiServiceProxy initProxy = new ErraiServiceProxy();
+
+  private static volatile ErraiServiceProxy proxy = new ErraiServiceProxy();
   private static volatile ErraiService service;
 
   public static ErraiService initSingleton(final ErraiServiceConfigurator configurator) {
     synchronized (monitor) {
-      if (isInitialized()) throw new IllegalStateException("service already set into singleton");
+      if (isActive()) throw new IllegalStateException("service already set into singleton");
 
       service = ErraiServiceFactory.create(configurator);
-      if(!initProxy.isClosed()) {
-        initProxy.closeProxy(service);
-      }
+      proxy.closeProxy(service);
 
-      for (ErraiInitCallback erraiInitCallback : callbackList) {
-        erraiInitCallback.onInit(service);
-      }
+      Iterator<InitCallbackBlock> it = callbacks.iterator();
+      while(it.hasNext()) {
+        InitCallbackBlock block = it.next();
+        block.callback.onInit(service);
 
-      callbackList.clear();
+        if(!block.persistent) {
+          it.remove();
+        }
+      }
       return service;
     }
   }
 
-  public static boolean isInitialized() {
+  public static boolean isActive() {
     return service != null && service.getBus() != null;
   }
 
   public static ErraiService getService() {
-    return service != null ? service : initProxy;
+    return isActive() ? service : proxy;
+  }
+
+  public static void resetProxyAndService() {
+    proxy.reset();
+    service = null;
   }
 
   public static void registerInitCallback(ErraiInitCallback callback) {
+    registerInitCallback(callback, false);
+  }
+
+  public static void registerInitCallback(ErraiInitCallback callback, boolean persistent) {
     synchronized (monitor) {
-      if (isInitialized()) {
+      InitCallbackBlock block = new InitCallbackBlock(callback, persistent);
+
+      if (isActive()) {
         callback.onInit(getService());
+
+        if(persistent) {
+          callbacks.add(block);
+        }
+      } else {
+        callbacks.add(block);
       }
-      callbackList.add(callback);
     }
   }
 
   public static Set<ErraiInitCallback> getInitCallbacks() {
-    return Collections.unmodifiableSet(callbackList);
+    return Collections.unmodifiableSet(callbacks.stream()
+            .map(block -> block.callback)
+            .collect(Collectors.toSet()));
   }
 
+  static class InitCallbackBlock {
+    ErraiInitCallback callback;
+    boolean persistent;
+
+    public InitCallbackBlock(ErraiInitCallback callback, boolean persistent) {
+      this.callback = callback;
+      this.persistent = persistent;
+    }
+  }
 
   public static interface ErraiInitCallback {
     public void onInit(ErraiService service);

@@ -16,12 +16,8 @@
 
 package org.jboss.errai.bus.server.service;
 
-import static org.slf4j.LoggerFactory.getLogger;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import org.jboss.errai.bus.client.api.builder.DefaultRemoteCallBuilder;
 import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.bus.client.api.messaging.RequestDispatcher;
@@ -36,8 +32,11 @@ import org.jboss.errai.bus.server.service.bootstrap.BootstrapContext;
 import org.jboss.errai.bus.server.service.bootstrap.OrderedBootstrap;
 import org.slf4j.Logger;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * Default implementation of the ErraiBus server-side service.
@@ -90,7 +89,7 @@ public class ErraiServiceImpl<S> implements ErraiService<S> {
 
     message.addResources(config.getResourceProviders());
 
-    /**
+    /*
      * Pass the message off to the messaging bus for handling.
      */
     try {
@@ -136,6 +135,7 @@ public class ErraiServiceImpl<S> implements ErraiService<S> {
     shutdownHooks = null;
 
     DefaultRemoteCallBuilder.destroyProxyFactory();
+    ErraiServiceSingleton.resetProxyAndService();
   }
 
   /**

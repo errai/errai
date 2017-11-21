@@ -80,7 +80,7 @@ public final class ServletBootstrapUtil {
 
   private static ErraiService initService(final InitConfig config) {
     synchronized (getServiceLock) {
-      if (ErraiServiceSingleton.isInitialized()) {
+      if (ErraiServiceSingleton.isActive()) {
         return ErraiServiceSingleton.getService();
       }
 

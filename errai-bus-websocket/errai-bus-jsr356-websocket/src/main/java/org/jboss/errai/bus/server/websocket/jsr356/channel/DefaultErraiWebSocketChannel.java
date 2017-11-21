@@ -61,7 +61,7 @@ public class DefaultErraiWebSocketChannel implements ErraiWebSocketChannel {
     this.session = session;
     this.httpSession = httpSession;
 
-    if (ErraiServiceSingleton.isInitialized()) {
+    if (ErraiServiceSingleton.isActive()) {
       erraiService = ErraiServiceSingleton.getService();
     }
     else {
