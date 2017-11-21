@@ -113,4 +113,13 @@ public class ErraiUICDIIntegrationTest extends AbstractErraiCDITest {
     assertEquals("input does not have class value.", "my_class my_class1", bean.inputWithClassAnnotation.getClassName());
     assertEquals("input does not have class value.", "my_class", bean.inputWithClassAnnotationAndProperty.getClassName());
   }
+
+  public void testJsTypeElementQualifiedWithoutParameterPropertyInjection() throws Exception {
+    final BeanWithElementInjectionSites bean = IOC.getBeanManager().lookupBean(BeanWithElementInjectionSites.class).getInstance();
+
+    assertNotNull("Input with disabled and selected properties was not injected.", bean.inputElementDisabled);
+
+    assertEquals("Input does not have 'disabled' property.", bean.inputElementDisabled.getDisabled());
+    assertEquals("Input does not have 'selected' property.", bean.inputElementDisabled.getSelected());
+  }
 }

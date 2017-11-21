@@ -57,4 +57,7 @@ public class BeanWithElementInjectionSites {
   @Inject
   public InputElementWithClassAndPropertyAnnotations inputWithClassAnnotationAndProperty;
 
+  @Inject
+  public InputElementDisabled inputElementDisabled;
+
 }

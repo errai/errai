@@ -41,6 +41,6 @@ public @interface Property {
   /**
    * The value of a DOM element property.
    */
-  String value();
+  String value() default " ";
 
 }
