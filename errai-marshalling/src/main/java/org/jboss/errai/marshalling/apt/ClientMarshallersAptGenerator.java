@@ -20,6 +20,7 @@ import org.jboss.errai.common.apt.ErraiAptExportedTypes;
 import org.jboss.errai.common.apt.ErraiAptGenerators;
 import org.jboss.errai.common.apt.generator.ErraiAptGeneratedSourceFile;
 import org.jboss.errai.common.configuration.ErraiGenerator;
+import org.jboss.errai.marshalling.rebind.DefinitionsFactorySingleton;
 import org.jboss.errai.marshalling.rebind.MarshallerGeneratorFactory;
 
 import static org.jboss.errai.common.apt.generator.ErraiAptGeneratedSourceFile.Type.CLIENT;
@@ -40,6 +41,7 @@ public class ClientMarshallersAptGenerator extends ErraiAptGenerators.SingleFile
 
   @Override
   public String generate() {
+    DefinitionsFactorySingleton.reset();
     return MarshallerGeneratorFactory.getFor(null, GWT, erraiConfiguration(), metaClassFinder())
             .generate(getPackageName(), getResolvedClassSimpleName());
   }

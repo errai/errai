@@ -44,6 +44,7 @@ import javax.tools.FileObject;
 import java.io.IOException;
 import java.io.Writer;
 import java.lang.reflect.Constructor;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -88,11 +89,13 @@ public class ErraiAppAptGenerator extends AbstractProcessor {
       final Elements elements = processingEnv.getElementUtils();
       final Filer filer = processingEnv.getFiler();
       APTClassUtil.init(types, elements);
+      final Optional<String> erraiApp = Optional.ofNullable(System.getProperty("errai.app"));
 
       annotatedElementsFinder.findSourceElementsAnnotatedWith(ErraiApp.class)
               .stream()
               .map(Element::asType)
               .map(APTClass::new)
+              .filter(s -> erraiApp.map(a -> a.equals(s.getFullyQualifiedName())).orElse(true))
               .sorted(comparing(APTClass::getFullyQualifiedName))
               .map(app -> newErraiAptExportedTypes(annotatedElementsFinder, elements, filer, app))
               .peek(this::generateAptCompatibleGwtModuleFile)
