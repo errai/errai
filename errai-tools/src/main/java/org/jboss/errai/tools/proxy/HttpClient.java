@@ -23,6 +23,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.Security;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -154,7 +155,7 @@ public class HttpClient {
       }
       // set basic authentication information
       String auth = userName + ":" + password;
-      String encoded = new sun.misc.BASE64Encoder().encode(auth.getBytes());
+      String encoded = Base64.getEncoder().encodeToString(auth.getBytes());
       // set basic authorization
       this.urlConnection.setRequestProperty("Authorization", "Basic " + encoded);
       this.headers = headers;
