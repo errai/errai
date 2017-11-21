@@ -28,9 +28,13 @@ import java.util.Collection;
  */
 class ErraiServiceProxy implements ErraiService<Object> {
 
-  private MessageBusProxy messageBusProxy = new MessageBusProxy();
-  private RequestDispatcherProxy requestDispatcherProxy = new RequestDispatcherProxy();
+  private MessageBusProxy messageBusProxy;
+  private RequestDispatcherProxy requestDispatcherProxy;
   private ErraiService service;
+
+  public ErraiServiceProxy() {
+    reset();
+  }
 
   @Override
   public void store(Message message) {
@@ -70,7 +74,6 @@ class ErraiServiceProxy implements ErraiService<Object> {
   @Override
   public void setSessionProvider(SessionProvider sessionProvider) {
     throw new IllegalStateException("cannot set session provider in proxy");
-
   }
 
   @Override
@@ -83,8 +86,10 @@ class ErraiServiceProxy implements ErraiService<Object> {
     throw new IllegalStateException("cannot set dispatcher in proxy");
   }
 
-  public boolean isClosed() {
-    return service != null;
+  public void reset() {
+    service = null;
+    messageBusProxy = new MessageBusProxy();
+    requestDispatcherProxy = new RequestDispatcherProxy();
   }
 
   public void closeProxy(ErraiService service) {
