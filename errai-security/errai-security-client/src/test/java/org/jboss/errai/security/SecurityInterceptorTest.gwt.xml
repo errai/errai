@@ -10,4 +10,6 @@
   
   <source path="client"/>
 
+  <!-- GWT 2.8.2 changed the value (by default) to 'REPORT_IF_NO_HANDLER' which is causing test failures. -->
+  <set-property name="gwt.uncaughtexceptionhandler.windowonerror" value="IGNORE"/>
 </module>

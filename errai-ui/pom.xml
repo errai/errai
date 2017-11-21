@@ -230,7 +230,7 @@
                 </property>
               </systemProperties>
 
-              <!-- GWT 2.8.1 has an assertion that fails on tests and works in production -->
+              <!-- GWT 2.8.1+ has an assertion that fails on tests and works in production -->
               <enableAssertions>false</enableAssertions>
             </configuration>
           </plugin>
