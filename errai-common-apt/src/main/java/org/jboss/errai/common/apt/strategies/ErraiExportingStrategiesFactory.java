@@ -56,7 +56,7 @@ public class ErraiExportingStrategiesFactory {
     return elements.getTypeElement(method.getAnnotation(ErraiExportingStrategy.class).value());
   }
 
-  public class ReflectionExportingStrategy implements ExportingStrategy {
+  private static class ReflectionExportingStrategy implements ExportingStrategy {
 
     private final Method method;
 

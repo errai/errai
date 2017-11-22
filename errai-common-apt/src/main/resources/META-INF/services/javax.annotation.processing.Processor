@@ -1,1 +1,1 @@
-org.jboss.errai.common.apt.generator.ErraiModuleExportFileGenerator
+org.jboss.errai.common.apt.export.ErraiCommonAptExportFileGenerator

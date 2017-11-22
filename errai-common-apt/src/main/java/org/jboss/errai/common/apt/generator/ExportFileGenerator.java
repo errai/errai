@@ -75,7 +75,7 @@ public class ExportFileGenerator {
   }
 
   private Stream<ExportFile> createExportFiles(final ErraiModule erraiModule) {
-    return erraiModule.exportFiles(exportableAnnotations);
+    return erraiModule.createExportFiles(exportableAnnotations);
   }
 
   private void generateSourceAndSave(final ExportFile exportFile, final Filer filer) {

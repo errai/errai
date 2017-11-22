@@ -17,10 +17,10 @@
 package org.jboss.errai.common.apt.generator;
 
 import org.jboss.errai.codegen.meta.impl.apt.APTClassUtil;
-import org.jboss.errai.common.apt.AnnotatedSourceElementsFinder;
 import org.jboss.errai.common.apt.AptAnnotatedSourceElementsFinder;
 import org.jboss.errai.common.apt.strategies.ErraiExportingStrategiesFactory;
-import org.jboss.errai.common.apt.strategies.ExportingStrategies;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.Filer;
@@ -35,6 +35,8 @@ import java.util.Set;
  */
 public abstract class AbstractErraiModuleExportFileGenerator extends AbstractProcessor {
 
+  private static final Logger log = LoggerFactory.getLogger(AbstractErraiModuleExportFileGenerator.class);
+
   protected abstract String getCamelCaseErraiModuleName();
 
   protected abstract Class<?> getExportingStrategiesClass();
@@ -46,35 +48,23 @@ public abstract class AbstractErraiModuleExportFileGenerator extends AbstractPro
     final Elements elements = processingEnv.getElementUtils();
     final Filer filer = processingEnv.getFiler();
 
-    process(annotations, types, elements, filer, new AptAnnotatedSourceElementsFinder(roundEnv));
+    try {
+      APTClassUtil.init(types, elements);
+      newExportFileGenerator(annotations, roundEnv, elements).generateAndSaveExportFiles(filer);
+    } catch (final Exception e) {
+      log.error("Error generating export files");
+      e.printStackTrace();
+    }
 
     return false;
   }
 
-  public void process(final Set<? extends TypeElement> annotations,
-          final Types types,
-          final Elements elements,
-          final Filer filer,
-          final AnnotatedSourceElementsFinder annotatedSourceElementsFinder) {
-    try {
-      APTClassUtil.init(types, elements);
-      generateAndSaveExportFiles(annotations, annotatedSourceElementsFinder, getExportingStrategies(elements), filer);
-    } catch (final Exception e) {
-      System.out.println("Error generating export files");
-      e.printStackTrace();
-    }
-  }
+  private ExportFileGenerator newExportFileGenerator(final Set<? extends TypeElement> annotations,
+          final RoundEnvironment roundEnv,
+          final Elements elements) {
 
-  void generateAndSaveExportFiles(final Set<? extends TypeElement> exportableAnnotations,
-          final AnnotatedSourceElementsFinder annotatedSourceElementsFinder,
-          final ExportingStrategies exportingStrategies,
-          final Filer filer) {
-
-    new ExportFileGenerator(getCamelCaseErraiModuleName(), exportableAnnotations, annotatedSourceElementsFinder,
-            exportingStrategies).generateAndSaveExportFiles(filer);
-  }
-
-  private ExportingStrategies getExportingStrategies(final Elements elements) {
-    return new ErraiExportingStrategiesFactory(elements).buildFrom(getExportingStrategiesClass());
+    return new ExportFileGenerator(getCamelCaseErraiModuleName(), annotations,
+            new AptAnnotatedSourceElementsFinder(roundEnv),
+            new ErraiExportingStrategiesFactory(elements).buildFrom(getExportingStrategiesClass()));
   }
 }

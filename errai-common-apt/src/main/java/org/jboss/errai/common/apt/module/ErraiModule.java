@@ -62,7 +62,7 @@ public class ErraiModule {
     this.exportingStrategies = exportingStrategies;
   }
 
-  public Stream<ExportFile> exportFiles(final Set<? extends TypeElement> exportableAnnotations) {
+  public Stream<ExportFile> createExportFiles(final Set<? extends TypeElement> exportableAnnotations) {
     return exportableAnnotations.stream().map(this::newExportFile).filter(Optional::isPresent).map(Optional::get);
   }
 

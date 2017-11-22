@@ -21,7 +21,6 @@ import org.jboss.errai.codegen.builder.impl.ClassBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.impl.apt.APTClass;
 
-import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import java.util.Set;
@@ -52,12 +51,12 @@ public class ExportFile {
             .map(APTClass::new)
             .map(APTClass::getErased)
             .distinct()
-            .forEach(exportedType -> classBuilder.publicField(fieldName(exportedType), exportedType).finish());
+            .forEach(exportedType -> classBuilder.publicField(generateFieldName(exportedType), exportedType).finish());
 
     return classBuilder.toJavaString();
   }
 
-  private String fieldName(final MetaClass exportedType) {
+  private String generateFieldName(final MetaClass exportedType) {
 
     if (exportedType.isPrimitive()) {
       return exportedType.getName() + "_";

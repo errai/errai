@@ -95,8 +95,6 @@ public class ErraiAppAptGenerator extends AbstractProcessor {
               .stream()
               .map(Element::asType)
               .map(APTClass::new)
-              .filter(s -> erraiApp.map(a -> a.equals(s.getFullyQualifiedName())).orElse(true))
-              .sorted(comparing(APTClass::getFullyQualifiedName))
               .map(app -> newErraiAptExportedTypes(annotatedElementsFinder, elements, filer, app))
               .peek(this::generateAptCompatibleGwtModuleFile)
               .flatMap(this::findGenerators)

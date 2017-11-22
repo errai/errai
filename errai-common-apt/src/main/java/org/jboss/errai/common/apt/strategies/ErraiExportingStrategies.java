@@ -23,6 +23,4 @@ import java.lang.annotation.Target;
  */
 @Target({}) // Elements exported by this annotation have to be exported using a hand-written Export File
 public @interface ErraiExportingStrategies {
-
-  String value();
 }

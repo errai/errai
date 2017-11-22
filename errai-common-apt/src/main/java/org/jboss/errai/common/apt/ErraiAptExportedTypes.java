@@ -54,6 +54,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Collections.emptySet;
+import static java.util.stream.Collectors.*;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toSet;
@@ -132,7 +133,7 @@ public final class ErraiAptExportedTypes {
             .map(Optional::get)
             .map(MetaAnnotation::<String>value)
             .map(APTClassUtil::getTypeElement)
-            .collect(Collectors.toSet());
+            .collect(toSet());
 
     // Theses annotations are exported using the default exporting strategy
     allExportableAnnotations.add(getTypeElement(ErraiGenerator.class.getCanonicalName()));

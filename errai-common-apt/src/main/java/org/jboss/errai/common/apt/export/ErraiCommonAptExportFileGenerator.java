@@ -14,22 +14,24 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.common.apt.generator;
+package org.jboss.errai.common.apt.export;
+
+import org.jboss.errai.common.apt.generator.AbstractErraiModuleExportFileGenerator;
 
 import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 
-import static org.jboss.errai.common.apt.generator.SupportedAnnotationTypes.ERRAI_APP;
-import static org.jboss.errai.common.apt.generator.SupportedAnnotationTypes.ERRAI_GENERATOR;
-import static org.jboss.errai.common.apt.generator.SupportedAnnotationTypes.ERRAI_MODULE;
+import static org.jboss.errai.common.apt.export.SupportedAnnotationTypes.ERRAI_APP;
+import static org.jboss.errai.common.apt.export.SupportedAnnotationTypes.ERRAI_GENERATOR;
+import static org.jboss.errai.common.apt.export.SupportedAnnotationTypes.ERRAI_MODULE;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 @SupportedAnnotationTypes({ ERRAI_APP, ERRAI_MODULE, ERRAI_GENERATOR })
-public class ErraiModuleExportFileGenerator extends AbstractErraiModuleExportFileGenerator {
+public class ErraiCommonAptExportFileGenerator extends AbstractErraiModuleExportFileGenerator {
 
   @Override
   public String getCamelCaseErraiModuleName() {
@@ -38,6 +40,6 @@ public class ErraiModuleExportFileGenerator extends AbstractErraiModuleExportFil
 
   @Override
   protected Class<?> getExportingStrategiesClass() {
-    return ErraiModuleExportingStrategies.class;
+    return ErraiCommonAptExportingStrategies.class;
   }
 }
