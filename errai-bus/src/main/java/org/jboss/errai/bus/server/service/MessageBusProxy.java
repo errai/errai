@@ -358,6 +358,12 @@ public class MessageBusProxy implements ServerMessageBus {
       bus.send(entry.getKey(), entry.getValue());
     }
 
+    reset();
+    this.proxied = bus;
+  }
+
+  public void reset() {
+    this.proxied = null;
     this.heldBusMonitor = null;
     this.heldSubscribe.clear();
     this.heldLocalSubscribe.clear();
@@ -366,7 +372,5 @@ public class MessageBusProxy implements ServerMessageBus {
     this.heldMessages.clear();
     this.heldGlobalMessages.clear();
     this.heldMessageFireListener.clear();
-
-    this.proxied = bus;
   }
 }

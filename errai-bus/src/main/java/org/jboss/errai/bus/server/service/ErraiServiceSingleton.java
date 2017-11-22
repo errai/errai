@@ -33,8 +33,8 @@ public final class ErraiServiceSingleton {
 
   private static final Object monitor = new Object();
 
-  private static volatile ErraiServiceProxy proxy = new ErraiServiceProxy();
   private static volatile ErraiService service;
+  private static volatile ErraiServiceProxy proxy = new ErraiServiceProxy();
 
   public static ErraiService initSingleton(final ErraiServiceConfigurator configurator) {
     synchronized (monitor) {

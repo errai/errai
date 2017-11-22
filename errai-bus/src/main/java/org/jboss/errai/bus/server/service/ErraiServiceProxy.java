@@ -28,13 +28,10 @@ import java.util.Collection;
  */
 class ErraiServiceProxy implements ErraiService<Object> {
 
-  private MessageBusProxy messageBusProxy;
-  private RequestDispatcherProxy requestDispatcherProxy;
   private ErraiService service;
 
-  public ErraiServiceProxy() {
-    reset();
-  }
+  private MessageBusProxy messageBusProxy = new MessageBusProxy();
+  private RequestDispatcherProxy requestDispatcherProxy = new RequestDispatcherProxy();
 
   @Override
   public void store(Message message) {
@@ -88,8 +85,8 @@ class ErraiServiceProxy implements ErraiService<Object> {
 
   public void reset() {
     service = null;
-    messageBusProxy = new MessageBusProxy();
-    requestDispatcherProxy = new RequestDispatcherProxy();
+    messageBusProxy.reset();
+    requestDispatcherProxy.reset();
   }
 
   public void closeProxy(ErraiService service) {
