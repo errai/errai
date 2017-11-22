@@ -53,8 +53,6 @@ public class RequestDispatcherProxy implements RequestDispatcher {
 
   void closeProxy(RequestDispatcher dispatcher) {
     try {
-      this.proxied = dispatcher;
-
       for (Message message : heldMessages) {
         dispatcher.dispatch(message);
       }
@@ -62,12 +60,17 @@ public class RequestDispatcherProxy implements RequestDispatcher {
       for (Message message : heldGlobalMessages) {
         dispatcher.dispatchGlobal(message);
       }
-
-      heldMessages.clear();
-      heldGlobalMessages.clear();
+      reset();
+      this.proxied = dispatcher;
     }
     catch (Exception e) {
       throw new RuntimeException("failed to close proxy", e);
     }
+  }
+
+  public void reset() {
+    this.proxied = null;
+    heldMessages.clear();
+    heldGlobalMessages.clear();
   }
 }
