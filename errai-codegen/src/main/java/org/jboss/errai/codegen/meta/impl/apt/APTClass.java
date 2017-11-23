@@ -45,9 +45,11 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
 import java.lang.annotation.Annotation;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -56,6 +58,7 @@ import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 import static org.jboss.errai.codegen.meta.impl.apt.APTClassUtil.elements;
 import static org.jboss.errai.codegen.meta.impl.apt.APTClassUtil.getSimpleName;
 import static org.jboss.errai.codegen.meta.impl.apt.APTClassUtil.sameTypes;
@@ -214,9 +217,8 @@ public class APTClass extends AbstractMetaClass<TypeMirror> {
       return methods.stream()
               .filter(method -> !method.getModifiers().contains(Modifier.PRIVATE))
               .map(method -> new APTMethod(method, this))
-              .collect(groupingBy(APTMember::getName,
-                          groupingBy(this::methodParameterList,
-                            collectingAndThen(toList(), this::filterOutInterfaceMethodsThatHaveBeenOverriden))))
+              .collect(groupingBy(APTMember::getName, groupingBy(this::methodParameterList,
+                      collectingAndThen(toList(), this::filterOutInterfaceMethodsThatHaveBeenOverriden))))
               .values()
               .stream()
               .flatMap(m -> m.values().stream().flatMap(mm -> mm))
@@ -840,7 +842,17 @@ public class APTClass extends AbstractMetaClass<TypeMirror> {
     switch (mirror.getKind()) {
     case DECLARED:
     case TYPEVAR:
-      return APTClassUtil.getAnnotations(mirror);
+      final Collection<MetaAnnotation> directAnnotations = APTClassUtil.getAnnotations(types.asElement(mirror));
+      final Collection<MetaAnnotation> inheritedAnnotations = types.directSupertypes(mirror)
+              .stream()
+              .map(types::asElement)
+              .flatMap(e -> APTClassUtil.getAnnotations(e).stream())
+              .collect(toSet());
+
+      final Collection<MetaAnnotation> allAnnotations = new HashSet<>();
+      allAnnotations.addAll(directAnnotations);
+      allAnnotations.addAll(inheritedAnnotations);
+      return allAnnotations;
     case ARRAY:
     case BOOLEAN:
     case BYTE:

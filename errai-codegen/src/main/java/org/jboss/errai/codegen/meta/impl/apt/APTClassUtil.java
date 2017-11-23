@@ -187,10 +187,6 @@ public final class APTClassUtil {
     return element.getAnnotationMirrors().stream().map(APTAnnotation::new).collect(toSet());
   }
 
-  public static Collection<MetaAnnotation> getAnnotations(final TypeMirror mirror) {
-    return getAnnotations(types.asElement(mirror));
-  }
-
   public static Optional<MetaAnnotation> getAnnotation(final Element element,
           final Class<? extends Annotation> annotationClass) {
 
