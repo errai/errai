@@ -235,13 +235,13 @@ public class KeycloakAuthenticationService implements AuthenticationService, Ser
     
     //Add app roles first, if any
     AccessToken.Access access = accessToken.getResourceAccess(accessToken.getIssuedFor());
-    if(access != null && access.getRoles() != null){
+    if (access != null && access.getRoles() != null){
       roleNames.addAll(access.getRoles());
     }
 
     //Add realm roles next, if any
     AccessToken.Access realmAccess = accessToken.getRealmAccess();
-    if(realmAccess != null && realmAccess.getRoles() != null){
+    if (realmAccess != null && realmAccess.getRoles() != null){
       roleNames.addAll(realmAccess.getRoles());
     }
 

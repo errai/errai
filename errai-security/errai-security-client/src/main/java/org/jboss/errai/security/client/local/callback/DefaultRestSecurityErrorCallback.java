@@ -16,18 +16,18 @@
 
 package org.jboss.errai.security.client.local.callback;
 
-import javax.enterprise.context.Dependent;
-import javax.inject.Inject;
-
+import com.google.gwt.http.client.Request;
 import org.jboss.errai.enterprise.client.jaxrs.api.RestErrorCallback;
 import org.jboss.errai.security.client.local.api.SecurityContext;
+import org.jboss.errai.security.client.local.handler.SecurityExceptionHandler;
 import org.jboss.errai.security.shared.exception.UnauthenticatedException;
 import org.jboss.errai.security.shared.exception.UnauthorizedException;
 import org.jboss.errai.ui.nav.client.local.api.LoginPage;
 import org.jboss.errai.ui.nav.client.local.api.MissingPageRoleException;
 import org.jboss.errai.ui.nav.client.local.api.SecurityError;
 
-import com.google.gwt.http.client.Request;
+import javax.enterprise.context.Dependent;
+import javax.inject.Inject;
 
 /**
  * A {@link RestErrorCallback} that catches {@link UnauthenticatedException
@@ -55,6 +55,8 @@ public class DefaultRestSecurityErrorCallback implements RestErrorCallback {
 
   private final SecurityContext context;
 
+  private final SecurityExceptionHandler handler;
+
   /**
    * Create a {@link DefaultRestSecurityErrorCallback} wrapping a given
    * {@link RestErrorCallback}.
@@ -62,15 +64,18 @@ public class DefaultRestSecurityErrorCallback implements RestErrorCallback {
    * @param wrapped
    *          The wrapped callback (should never be {@code null}, that will be
    *          invoked first when
-   *          {@link RestErrorCallback#error(Request, Throwable)} is called. If
+   *          {@link RestErrorCallback#error(Object, Throwable)} is called. If
    *          the error method on the {@code wrapped} returns {@code false}, the
    *          whole callback returns {@code false} immediately.
    * @param context
    *          The {@link SecurityContext}.
+   * @param handler
+   *          The exception handler.
    */
-  public DefaultRestSecurityErrorCallback(final RestErrorCallback wrapped, final SecurityContext context) {
+  public DefaultRestSecurityErrorCallback(final RestErrorCallback wrapped, final SecurityContext context, SecurityExceptionHandler handler) {
     this.context = context;
     this.wrapped = wrapped;
+    this.handler = handler;
   }
 
   /**
@@ -78,38 +83,23 @@ public class DefaultRestSecurityErrorCallback implements RestErrorCallback {
    * 
    * @param context
    *          The {@link SecurityContext}.
+   * @param handler
+   *          The exception handler.
    */
   @Inject
-  public DefaultRestSecurityErrorCallback(final SecurityContext context) {
-    this(defaultWrapped, context);
+  public DefaultRestSecurityErrorCallback(final SecurityContext context, SecurityExceptionHandler handler) {
+    this(defaultWrapped, context, handler);
   }
 
   @Override
-  public boolean error(final Request message, final Throwable throwable) throws MissingPageRoleException {
-    if (wrapped.error(message, throwable)) {
-      try {
-        if (throwable instanceof UnauthenticatedException) {
-          context.redirectToLoginPage();
-        }
-        else if (throwable instanceof UnauthorizedException) {
-          context.redirectToSecurityErrorPage();
-        }
-        else {
-          return true;
-        }
-      }
-      catch (MissingPageRoleException ex) {
-        throw new RuntimeException(
-                "Could not redirect the user to the appropriate page because no page with that role was found.", ex);
-      }
-    }
-
-    return false;
+  @SuppressWarnings("Duplicates")
+  public boolean error(final Request message, final Throwable caught) throws MissingPageRoleException {
+    return wrapped.error(message, caught) && handler.handleException(caught);
   }
 
   /**
    * Set the wrapped callback that will be invoked first when
-   * {@link RestErrorCallback#error(Request, Throwable)} is called. If the error
+   * {@link RestErrorCallback#error(Object, Throwable)} is called. If the error
    * method on the wrapped callback returns {@code false}, the whole callback
    * returns {@code false} immediately.
    * 

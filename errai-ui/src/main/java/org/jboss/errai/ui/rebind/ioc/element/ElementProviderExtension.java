@@ -204,7 +204,7 @@ public class ElementProviderExtension implements IOCExtensionConfigurator {
   private static String getClassNames(final MetaClass type){
     String result = "";
     final ClassNames classNames = type.getAnnotation(ClassNames.class);
-    if(classNames != null){
+    if (classNames != null){
       result = String.join(" ", classNames.value());
     }
     return result;

@@ -16,6 +16,7 @@
 
 package org.jboss.errai.security.client.local.api;
 
+import com.google.common.collect.Multimap;
 import org.jboss.errai.security.shared.api.identity.User;
 import org.jboss.errai.security.shared.service.AuthenticationService;
 import org.jboss.errai.ui.nav.client.local.DefaultPage;
@@ -24,8 +25,6 @@ import org.jboss.errai.ui.nav.client.local.Page;
 import org.jboss.errai.ui.nav.client.local.PageState;
 import org.jboss.errai.ui.nav.client.local.api.LoginPage;
 import org.jboss.errai.ui.nav.client.local.api.SecurityError;
-
-import com.google.common.collect.Multimap;
 
 /**
  * Caches information regarding security events and the current user (i.e. which

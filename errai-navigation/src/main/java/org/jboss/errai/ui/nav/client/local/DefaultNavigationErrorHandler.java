@@ -24,7 +24,6 @@ import org.slf4j.LoggerFactory;
  * Implements default error handling behavior for page navigation.
  *
  * @author Divya Dadlani <ddadlani@redhat.com>
- *
  */
 public class DefaultNavigationErrorHandler implements PageNavigationErrorHandler {
 
@@ -40,8 +39,7 @@ public class DefaultNavigationErrorHandler implements PageNavigationErrorHandler
   public void handleInvalidPageNameError(Exception exception, String pageName) {
     if (pageName.equals("")) {
       throw new Error("Failed to initialize Default Page", exception);
-    }
-    else {
+    } else {
       logger.warn("Got invalid page name \"" + pageName + "\". Redirecting to default page.", exception);
       navigation.goTo("");
     }
@@ -51,8 +49,7 @@ public class DefaultNavigationErrorHandler implements PageNavigationErrorHandler
   public void handleError(Exception exception, Class<? extends UniquePageRole> pageRole) {
     if (pageRole.equals(DefaultPage.class)) {
       throw new Error("Failed to initialize Default Page", exception);
-    }
-    else {
+    } else {
       logger.error("Got invalid page role \"" + pageRole + "\". Redirecting to default page.", exception);
       navigation.goTo("");
     }
@@ -60,13 +57,11 @@ public class DefaultNavigationErrorHandler implements PageNavigationErrorHandler
 
   @Override
   public void handleInvalidURLError(Exception exception, String urlPath) {
-    if(urlPath.equals("")) {
+    if (urlPath.equals("")) {
       throw new Error("Failed to initialize Default Page", exception);
-    }
-    else {
+    } else {
       logger.warn("Got invalid URL \"" + urlPath + "\". Redirecting to default page.", exception);
       navigation.goTo("");
     }
   }
-
 }

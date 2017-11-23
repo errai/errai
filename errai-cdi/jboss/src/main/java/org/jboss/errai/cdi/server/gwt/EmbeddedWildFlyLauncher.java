@@ -158,11 +158,11 @@ public class EmbeddedWildFlyLauncher extends ServletContainerLauncher {
 
         for (final String currentLine : lines) {
           String trimmed = currentLine.trim();
-          if(trimmed.startsWith(ERRAI_PROPERTIES_HINT_START.trim())) {
+          if (trimmed.startsWith(ERRAI_PROPERTIES_HINT_START.trim())) {
             isErraiContent = true;
-          } else if(trimmed.startsWith(ERRAI_PROPERTIES_HINT_END.trim())) {
+          } else if (trimmed.startsWith(ERRAI_PROPERTIES_HINT_END.trim())) {
             isErraiContent = false;
-          } else if(handleRealmToken && trimmed.startsWith("#") && trimmed.contains("$REALM_NAME=")) {
+          } else if (handleRealmToken && trimmed.startsWith("#") && trimmed.contains("$REALM_NAME=")) {
             realmToken = currentLine;
           } else if (!isErraiContent) {
             result.append(currentLine).append("\n");

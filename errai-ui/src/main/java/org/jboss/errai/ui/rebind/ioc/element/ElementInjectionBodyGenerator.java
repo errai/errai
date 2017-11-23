@@ -90,7 +90,7 @@ class ElementInjectionBodyGenerator extends AbstractBodyGenerator {
               loadLiteral(property.value())));
     }
 
-    if(!Strings.isNullOrEmpty(classNames)) {
+    if (!Strings.isNullOrEmpty(classNames)) {
       stmts.add(loadVariable(elementVar).invoke("addClassName", loadLiteral(classNames)));
     }
     final String retValVar = "retVal";
