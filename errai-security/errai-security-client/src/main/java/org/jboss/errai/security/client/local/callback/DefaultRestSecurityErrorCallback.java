@@ -18,7 +18,6 @@ package org.jboss.errai.security.client.local.callback;
 
 import com.google.gwt.http.client.Request;
 import org.jboss.errai.enterprise.client.jaxrs.api.RestErrorCallback;
-import org.jboss.errai.security.client.local.api.SecurityContext;
 import org.jboss.errai.security.client.local.handler.SecurityExceptionHandler;
 import org.jboss.errai.security.shared.exception.UnauthenticatedException;
 import org.jboss.errai.security.shared.exception.UnauthorizedException;
@@ -53,9 +52,7 @@ public class DefaultRestSecurityErrorCallback implements RestErrorCallback {
 
   private RestErrorCallback wrapped;
 
-  private final SecurityContext context;
-
-  private final SecurityExceptionHandler handler;
+  private SecurityExceptionHandler handler;
 
   /**
    * Create a {@link DefaultRestSecurityErrorCallback} wrapping a given
@@ -67,28 +64,23 @@ public class DefaultRestSecurityErrorCallback implements RestErrorCallback {
    *          {@link RestErrorCallback#error(Object, Throwable)} is called. If
    *          the error method on the {@code wrapped} returns {@code false}, the
    *          whole callback returns {@code false} immediately.
-   * @param context
-   *          The {@link SecurityContext}.
    * @param handler
    *          The exception handler.
    */
-  public DefaultRestSecurityErrorCallback(final RestErrorCallback wrapped, final SecurityContext context, SecurityExceptionHandler handler) {
-    this.context = context;
+  public DefaultRestSecurityErrorCallback(final RestErrorCallback wrapped, final SecurityExceptionHandler handler) {
     this.wrapped = wrapped;
     this.handler = handler;
   }
 
   /**
    * Create a {@link DefaultRestSecurityErrorCallback}.
-   * 
-   * @param context
-   *          The {@link SecurityContext}.
+   *
    * @param handler
    *          The exception handler.
    */
   @Inject
-  public DefaultRestSecurityErrorCallback(final SecurityContext context, SecurityExceptionHandler handler) {
-    this(defaultWrapped, context, handler);
+  public DefaultRestSecurityErrorCallback(SecurityExceptionHandler handler) {
+    this(defaultWrapped, handler);
   }
 
   @Override

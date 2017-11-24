@@ -14,11 +14,10 @@ import javax.inject.Singleton;
 @Singleton
 public class DefaultSecurityExceptionHandler implements SecurityExceptionHandler {
 
-  protected final SecurityContext context;
+  protected SecurityContext context;
 
   // For proxying
   public DefaultSecurityExceptionHandler() {
-    context = null;
   }
 
   @Inject

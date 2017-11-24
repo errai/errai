@@ -7,11 +7,12 @@ import org.jboss.errai.enterprise.client.jaxrs.api.RestErrorCallback;
  */
 public interface SecurityExceptionHandler {
 
-    /**
-     * Handling of a {@link SecurityException}.
-     *
-     * @param caught the exception to handle.
-     * @return true to continue with default error handling (currently only applicable to {@link RestErrorCallback}.
-     */
-    boolean handleException(Throwable caught);
+  /**
+   * Handling of a {@link SecurityException}.
+   *
+   * @param caught the exception to handle.
+   * @return true to continue with default error handling (currently only applicable to {@link RestErrorCallback}.
+   */
+  boolean handleException(Throwable caught);
+
 }
