@@ -195,7 +195,7 @@ public class ServiceAnnotationTests extends AbstractErraiTest {
             .errorsHandledBy(new ErrorCallback<Message>() {
               @Override
               public boolean error(Message message, Throwable throwable) {
-                Assert.assertTrue(throwable instanceof NoSubscribersToDeliverTo);
+                assertTrue(throwable instanceof NoSubscribersToDeliverTo);
                 finishTest();
                 return false;
               }
