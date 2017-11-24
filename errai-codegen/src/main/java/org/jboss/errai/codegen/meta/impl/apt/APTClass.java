@@ -44,12 +44,12 @@ import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
 import java.lang.annotation.Annotation;
+import java.lang.annotation.Inherited;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -836,6 +836,11 @@ public class APTClass extends AbstractMetaClass<TypeMirror> {
     return APTClassUtil.isAnnotationPresent(types.asElement(getEnclosedMetaObject()), metaClass);
   }
 
+  private Collection<TypeMirror> getAllSuperTypes(final TypeMirror typeMirror) {
+    final List<? extends TypeMirror> directSuperTypes = types.directSupertypes(typeMirror);
+    return Stream.concat(directSuperTypes.stream(), directSuperTypes.stream().flatMap(s -> getAllSuperTypes(s).stream())).collect(toSet());
+  }
+
   @Override
   public Collection<MetaAnnotation> getAnnotations() {
     final TypeMirror mirror = getEnclosedMetaObject();
@@ -843,10 +848,12 @@ public class APTClass extends AbstractMetaClass<TypeMirror> {
     case DECLARED:
     case TYPEVAR:
       final Collection<MetaAnnotation> directAnnotations = APTClassUtil.getAnnotations(types.asElement(mirror));
-      final Collection<MetaAnnotation> inheritedAnnotations = types.directSupertypes(mirror)
+      final Collection<MetaAnnotation> inheritedAnnotations = this.getAllSuperTypes(mirror)
               .stream()
               .map(types::asElement)
+              .filter(s -> s.getKind().isClass())
               .flatMap(e -> APTClassUtil.getAnnotations(e).stream())
+              .filter(a -> a.annotationType().isAnnotationPresent(Inherited.class))
               .collect(toSet());
 
       final Collection<MetaAnnotation> allAnnotations = new HashSet<>();

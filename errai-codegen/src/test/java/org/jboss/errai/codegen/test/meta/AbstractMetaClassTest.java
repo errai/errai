@@ -18,7 +18,6 @@ package org.jboss.errai.codegen.test.meta;
 
 import com.google.common.collect.Lists;
 import com.google.gwt.core.ext.typeinfo.NotFoundException;
-import org.apache.commons.lang3.AnnotationUtils;
 import org.jboss.errai.codegen.meta.HasAnnotations;
 import org.jboss.errai.codegen.meta.MetaAnnotation;
 import org.jboss.errai.codegen.meta.MetaClass;
@@ -30,12 +29,18 @@ import org.jboss.errai.codegen.meta.MetaParameterizedType;
 import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.meta.MetaTypeVariable;
 import org.jboss.errai.codegen.meta.MetaWildcardType;
+import org.jboss.errai.codegen.test.model.ClassExtendingAnnotatedSuperClass;
+import org.jboss.errai.codegen.test.model.ClassExtendingClassExtendingInheritedAnnotatedSuperClass;
+import org.jboss.errai.codegen.test.model.ClassImplementingAnnotatedInterface;
+import org.jboss.errai.codegen.test.model.ClassImplementingInheritedAnnotatedInterface;
+import org.jboss.errai.codegen.test.model.ClassExtendingInheritedAnnotatedSuperClass;
 import org.jboss.errai.codegen.test.model.ClassWithAnnotations;
 import org.jboss.errai.codegen.test.model.ClassWithArrayGenerics;
 import org.jboss.errai.codegen.test.model.ClassWithGenericCollections;
 import org.jboss.errai.codegen.test.model.ClassWithGenericMethods;
 import org.jboss.errai.codegen.test.model.ClassWithMethodsWithGenericParameters;
 import org.jboss.errai.codegen.test.model.HasManyConstructors;
+import org.jboss.errai.codegen.test.model.InheritedAnnotation;
 import org.jboss.errai.codegen.test.model.MultipleValues;
 import org.jboss.errai.codegen.test.model.Nested;
 import org.jboss.errai.codegen.test.model.ObjectWithNested;
@@ -58,13 +63,15 @@ import org.junit.Test;
 import org.mvel2.util.NullType;
 
 import java.io.Serializable;
-import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
+import static java.util.Collections.singleton;
+import static java.util.Collections.sort;
+import static java.util.stream.Collectors.toSet;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -898,8 +905,8 @@ public abstract class AbstractMetaClassTest {
     expectedMethods.add("hashCode([])");
     expectedMethods.add("wait([long, int])");
 
-    Collections.sort(expectedMethods);
-    Collections.sort(methodSignatures);
+    sort(expectedMethods);
+    sort(methodSignatures);
 
     assertEquals(expectedMethods.toString(), methodSignatures.toString());
   }
@@ -915,8 +922,8 @@ public abstract class AbstractMetaClassTest {
       actualFields.add(field.getDeclaringClass().getCanonicalName() + "." + field.getName());
     }
 
-    Collections.sort(expectedFields);
-    Collections.sort(actualFields);
+    sort(expectedFields);
+    sort(actualFields);
 
     assertEquals(expectedFields.toString(), actualFields.toString());
   }
@@ -934,8 +941,8 @@ public abstract class AbstractMetaClassTest {
       actualFields.add(field.getDeclaringClass().getCanonicalName() + "." + field.getName());
     }
 
-    Collections.sort(expectedFields);
-    Collections.sort(actualFields);
+    sort(expectedFields);
+    sort(actualFields);
 
     assertEquals(expectedFields.toString(), actualFields.toString());
   }
@@ -998,5 +1005,40 @@ public abstract class AbstractMetaClassTest {
     Assert.assertEquals(getMetaClassImpl(char.class), getMetaClassImpl(char.class).asArrayOf(0));
     Assert.assertEquals(getMetaClassImpl(char[].class), getMetaClassImpl(char.class).asArrayOf(1));
     Assert.assertEquals(getMetaClassImpl(char[][].class), getMetaClassImpl(char.class).asArrayOf(2));
+  }
+
+  @Test
+  public void testNormalAnnotationsFromInterfaces() {
+    Assert.assertTrue(getMetaClass(ClassImplementingAnnotatedInterface.class).getAnnotations().isEmpty());
+  }
+
+  @Test
+  public void testNormalAnnotationsFromSuperClasses() {
+    Assert.assertTrue(getMetaClass(ClassExtendingAnnotatedSuperClass.class).getAnnotations().isEmpty());
+  }
+
+  @Test
+  public void testInheritedAnnotationsFromInterfaces() {
+    Assert.assertTrue(getMetaClass(ClassImplementingInheritedAnnotatedInterface.class).getAnnotations().isEmpty());
+  }
+
+  @Test
+  public void testInheritedAnnotationsFromSuperClasses() {
+    final Set<MetaClass> annotationsTypes = getMetaClass(ClassExtendingInheritedAnnotatedSuperClass.class).getAnnotations()
+            .stream()
+            .map(MetaAnnotation::annotationType)
+            .collect(toSet());
+
+    Assert.assertEquals(singleton(getMetaClass(InheritedAnnotation.class)), annotationsTypes);
+  }
+
+  @Test
+  public void testInheritedAnnotationsFromSuperSuperClasses() {
+    final Set<MetaClass> annotationsTypes = getMetaClass(ClassExtendingClassExtendingInheritedAnnotatedSuperClass.class).getAnnotations()
+            .stream()
+            .map(MetaAnnotation::annotationType)
+            .collect(toSet());
+
+    Assert.assertEquals(singleton(getMetaClass(InheritedAnnotation.class)), annotationsTypes);
   }
 }
