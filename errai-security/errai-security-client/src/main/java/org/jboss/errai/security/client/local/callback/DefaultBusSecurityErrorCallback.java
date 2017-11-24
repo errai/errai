@@ -16,17 +16,16 @@
 
 package org.jboss.errai.security.client.local.callback;
 
-import javax.inject.Inject;
-
 import org.jboss.errai.ioc.client.api.EntryPoint;
 import org.jboss.errai.ioc.client.api.UncaughtExceptionHandler;
-import org.jboss.errai.security.client.local.api.SecurityContext;
+import org.jboss.errai.security.client.local.handler.SecurityExceptionHandler;
 import org.jboss.errai.security.shared.exception.SecurityException;
 import org.jboss.errai.security.shared.exception.UnauthenticatedException;
 import org.jboss.errai.security.shared.exception.UnauthorizedException;
 import org.jboss.errai.ui.nav.client.local.api.LoginPage;
-import org.jboss.errai.ui.nav.client.local.api.MissingPageRoleException;
 import org.jboss.errai.ui.nav.client.local.api.SecurityError;
+
+import javax.inject.Inject;
 
 /**
  * Catches {@link SecurityException SecurityExceptions}. If an
@@ -39,33 +38,19 @@ import org.jboss.errai.ui.nav.client.local.api.SecurityError;
 @EntryPoint
 public class DefaultBusSecurityErrorCallback {
 
-  private final SecurityContext context;
+  private SecurityExceptionHandler handler;
 
   // For proxying
   public DefaultBusSecurityErrorCallback() {
-    context = null;
   }
 
   @Inject
-  public DefaultBusSecurityErrorCallback(final SecurityContext context) {
-    this.context = context;
+  public DefaultBusSecurityErrorCallback(final SecurityExceptionHandler handler) {
+    this.handler = handler;
   }
 
   @UncaughtExceptionHandler
-  public void handleError(final Throwable throwable) {
-    try {
-      if (throwable instanceof UnauthenticatedException) {
-        context.redirectToLoginPage();
-      }
-      else if (throwable instanceof UnauthorizedException) {
-        context.redirectToSecurityErrorPage();
-      }
-    }
-    catch (MissingPageRoleException ex) {
-      throw new RuntimeException(
-              "Could not redirect the user to the appropriate page because no page with that role was found.", ex);
-    }
-
+  public void handleError(final Throwable caught) {
+    handler.handleException(caught);
   }
-
 }

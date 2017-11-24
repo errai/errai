@@ -53,7 +53,7 @@ public class ItemForm extends Form {
   // TODO (after ERRAI-366): make this method package-private
   @EventHandler("saveButton")
   public void onSaveButtonClicked(ClickEvent event) {
-    if(!isValidName())
+    if (!isValidName())
       return;
    
     String departmentText = department.getText();
