@@ -42,7 +42,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import elemental2.dom.Event;
 
@@ -125,14 +125,10 @@ public class TemplatedCodeDecoratorTest {
     when(decorable.getInjectionContext()).thenReturn(context);
     when(decorable.getFactoryMetaClass()).thenReturn(factoryBuildMetaClass);
 
-    when(elemental2EventClass.getFullyQualifiedName()).thenReturn(Event.class.getName());
-    when(elemental2EventClass.getName()).thenReturn(Event.class.getSimpleName());
-    when(elemental2EventClass.getPackageName()).thenReturn(Event.class.getPackage().getName());
-    when(elemental2EventClass.getAnnotations()).thenReturn(Event.class.getAnnotations());
     when(elemental2EventClass.getAnnotation(any()))
-            .then(inv -> Event.class.getAnnotation(inv.getArgumentAt(0, Class.class)));
+            .then(inv -> Event.class.getAnnotation(inv.getArgument(0)));
     when(elemental2EventClass.isAssignableTo(any(Class.class)))
-            .then(inv -> ofNullable(inv.getArgumentAt(0, Class.class)).filter(c -> c.isAssignableFrom(Event.class))
+            .then(inv -> ofNullable((Class)inv.getArgument(0)).filter(c -> c.isAssignableFrom(Event.class))
                     .isPresent());
   }
 

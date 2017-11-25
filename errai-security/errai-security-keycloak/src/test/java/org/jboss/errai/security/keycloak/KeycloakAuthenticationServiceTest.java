@@ -39,7 +39,7 @@ import org.keycloak.representations.AccessToken.Access;
 import org.keycloak.representations.AddressClaimSet;
 import org.mockito.InjectMocks;
 import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 /**
  * @author Max Barkley <mbarkley@redhat.com>

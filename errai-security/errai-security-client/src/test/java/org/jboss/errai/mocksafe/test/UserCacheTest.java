@@ -48,14 +48,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.internal.verification.Times;
 import org.mockito.invocation.InvocationOnMock;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 import org.slf4j.Logger;
 
-import com.google.gwtmockito.GwtMockitoTestRunner;
-import com.google.gwtmockito.WithPackagesToLoadViaStandardClassLoader;
-
-@RunWith(GwtMockitoTestRunner.class)
-@WithPackagesToLoadViaStandardClassLoader({ "org.jboss.errai.mocksafe.test", "com.google.gwtmockito" })
+@RunWith(MockitoJUnitRunner.class)
 public class UserCacheTest {
 
   @Mock
@@ -151,8 +148,6 @@ public class UserCacheTest {
   @Test
   public void testStorageDoesNotOverrideActiveUser() throws Exception {
     final User expected = new UserImpl("adam");
-
-    when(userStorageHandler.getUser()).thenReturn(new UserImpl("eve"));
 
     userCache.setUser(expected);
     assertTrue(userCache.isValid());

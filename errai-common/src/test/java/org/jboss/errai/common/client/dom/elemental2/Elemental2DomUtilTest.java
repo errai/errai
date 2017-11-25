@@ -114,7 +114,7 @@ public class Elemental2DomUtilTest {
     verify(parent).appendChild(widgetElement);
     verify(elemental2DomUtil).onAttach(child);
 
-    verifyStatic();
+    verifyStatic(RootPanel.class);
     RootPanel.detachOnWindowClose(child);
   }
 
@@ -138,7 +138,7 @@ public class Elemental2DomUtilTest {
     verify(parent).appendChild(widgetElement);
     verify(elemental2DomUtil).onAttach(child);
 
-    verifyStatic();
+    verifyStatic(RootPanel.class);
     RootPanel.detachOnWindowClose(child);
   }
 

@@ -18,7 +18,7 @@ package org.jboss.errai.security.server;
 
 import static org.jboss.errai.security.server.FormAuthenticationScheme.*;
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.*;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 import javax.servlet.http.HttpServletRequest;
