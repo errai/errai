@@ -20,7 +20,6 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import static org.powermock.api.mockito.PowerMockito.when;
 
 import java.lang.reflect.Field;
@@ -143,7 +142,6 @@ public class ValidationRulesTest {
       assertTrue(message.contains(StartPage1.class.getName()));
       assertTrue(message.contains(StartPage2.class.getName()));
     }
-    verify(ClassScanner.class);
   }
 
   private List<MetaClass> createMetaClassList(final Class<?>... classes) {
@@ -168,7 +166,6 @@ public class ValidationRulesTest {
       assertTrue(message.contains(Page1.class.getName()));
       assertTrue(message.contains(Page2.class.getName()));
     }
-    verify(ClassScanner.class);
   }
 
   @Test
@@ -184,7 +181,6 @@ public class ValidationRulesTest {
       final String message = e.getMessage();
       assertTrue(message.contains("DefaultPage"));
     }
-    verify(ClassScanner.class);
   }
 
   @Test(expected = GenerationException.class)

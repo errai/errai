@@ -32,7 +32,7 @@ import org.junit.runner.RunWith;
 import org.keycloak.KeycloakSecurityContext;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 /**
  * @author Max Barkley <mbarkley@redhat.com>
