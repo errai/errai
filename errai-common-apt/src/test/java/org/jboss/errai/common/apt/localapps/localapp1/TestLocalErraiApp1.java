@@ -23,6 +23,6 @@ import org.jboss.errai.common.configuration.ErraiModule;
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
-@ErraiApp(gwtModuleName = "", local = true, modules = TestModule1.class)
+@ErraiApp(gwtModuleName = "", modules = TestModule1.class)
 public class TestLocalErraiApp1 {
 }

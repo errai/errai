@@ -25,7 +25,6 @@ import org.jboss.errai.ioc.ErraiIocModule;
  * @author Tiago Bento <tfernand@redhat.com>
  */
 @ErraiApp(gwtModuleName = "org.jboss.errai.validation.ValidationTestModule",
-          local = true,
           dynamicValidationEnabled = true,
           modules = { ErraiTestApp.class,
                       ErraiIocModule.class,

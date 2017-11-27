@@ -128,8 +128,8 @@ public class ErraiAptExportedTypesTest extends ErraiAptTest {
     return new TestAnnotatedSourceElementsFinder() {
 
       @Override
-      public Set<? extends Element> findSourceElementsAnnotatedWith(TypeElement typeElement) {
-        if (typeElement.equals(getTypeElement(ErraiAptExportedTypesTestAnnotation.class))) {
+          public Set<? extends Element> findSourceElementsAnnotatedWith(TypeElement typeElement) {
+            if (typeElement.equals(getTypeElement(ErraiAptExportedTypesTestAnnotation.class))) {
           return ImmutableSet.of(getTypeElement(TestExportedType1.class), getTypeElement(TestExportedType21.class),
                   getTypeElement(TestExportedType22.class));
         } else {

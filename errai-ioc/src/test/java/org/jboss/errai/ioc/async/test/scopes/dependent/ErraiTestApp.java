@@ -27,7 +27,6 @@ import org.jboss.errai.marshalling.ErraiMarshallingModule;
  * @author Tiago Bento <tfernand@redhat.com>
  */
 @ErraiApp(gwtModuleName = "org.jboss.errai.ioc.async.test.scopes.dependent.AsyncDepScopeTests",
-          local = true,
           modules = { ErraiTestApp.class,
                       ErraiIocModule.class,
                       ErraiTestModule.class,

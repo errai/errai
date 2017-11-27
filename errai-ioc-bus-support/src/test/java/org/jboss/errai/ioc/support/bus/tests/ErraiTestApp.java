@@ -27,7 +27,6 @@ import org.jboss.errai.marshalling.ErraiMarshallingModule;
  * @author Tiago Bento <tfernand@redhat.com>
  */
 @ErraiApp(gwtModuleName = "org.jboss.errai.ioc.support.bus.tests.BusIOCSupportTests",
-          local = true,
           modules = { ErraiTestApp.class,
                       ErraiBusSupportModule.class,
                       ErraiBusModule.class,

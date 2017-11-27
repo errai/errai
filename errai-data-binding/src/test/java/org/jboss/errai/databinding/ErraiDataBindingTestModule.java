@@ -31,7 +31,6 @@ import org.jboss.errai.marshalling.ErraiMarshallingModule;
  * @author Tiago Bento <tfernand@redhat.com>
  */
 @ErraiApp(gwtModuleName = "org.jboss.errai.databinding.DataBindingTestModule",
-          local = true,
           modules = { ErraiDataBindingTestModule.class,
                       ErraiMarshallingModule.class,
                       ErraiDataBindingModule.class,

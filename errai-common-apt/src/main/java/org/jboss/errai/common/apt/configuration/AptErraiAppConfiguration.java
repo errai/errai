@@ -35,7 +35,6 @@ import static org.jboss.errai.common.configuration.ErraiApp.Property.FORCE_STATI
 import static org.jboss.errai.common.configuration.ErraiApp.Property.GWT_MODULE_NAME;
 import static org.jboss.errai.common.configuration.ErraiApp.Property.JS_INTEROP_SUPPORT_ENABLED;
 import static org.jboss.errai.common.configuration.ErraiApp.Property.LAZY_LOAD_BUILTIN_MARSHALLERS;
-import static org.jboss.errai.common.configuration.ErraiApp.Property.LOCAL;
 import static org.jboss.errai.common.configuration.ErraiApp.Property.MAKE_DEFAULT_ARRAY_MARSHALLERS;
 import static org.jboss.errai.common.configuration.ErraiApp.Property.MODULES;
 import static org.jboss.errai.common.configuration.ErraiApp.Property.USER_ON_HOST_PAGE_ENABLED;
@@ -118,7 +117,7 @@ public class AptErraiAppConfiguration implements ErraiAppConfiguration {
   }
 
   public boolean local() {
-    return erraiAppMetaAnnotation.value(LOCAL);
+    return !modules().isEmpty();
   }
 
   public String gwtModuleName() {

@@ -30,7 +30,6 @@ import org.jboss.errai.marshalling.ErraiMarshallingModule;
  * @author Tiago Bento <tfernand@redhat.com>
  */
 @ErraiApp(gwtModuleName = "org.jboss.errai.cdi.async.test.bm.AsyncCDIBeanManagerTest",
-          local = true,
           modules = { ErraiMarshallingModule.class,
                       ErraiBusModule.class,
                       ErraiIocModule.class,

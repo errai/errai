@@ -28,7 +28,6 @@ import org.jboss.errai.marshalling.ErraiMarshallingModule;
  */
 
 @ErraiApp(gwtModuleName = "org.jboss.errai.bus.ErraiBusTests",
-          local = true,
           modules = { ErraiMarshallingModule.class, ErraiBusModule.class, ErraiBusTestsApp.class })
 @ErraiModule(serializableTypes = { PortableType1.class },
              nonSerializableTypes = { NonSerializable.class, BuilderEntity.NonPortableNestedClass.class })

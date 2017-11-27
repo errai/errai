@@ -27,7 +27,6 @@ import org.jboss.errai.marshalling.ErraiMarshallingModule;
  * @author Tiago Bento <tfernand@redhat.com>
  */
 @ErraiApp(gwtModuleName = "org.jboss.errai.bus.ServiceAnnotationTestModule",
-          local = true,
           modules = { ErraiMarshallingModule.class, ErraiBusModule.class, ServiceAnnotationTestApp.class })
 @ErraiModule(serializableTypes = { PortableType1.class },
              nonSerializableTypes = { NonSerializable.class, BuilderEntity.NonPortableNestedClass.class })

@@ -26,7 +26,6 @@ import org.jboss.errai.ioc.tests.extensions.rebind.ErraiIocExtensionsTestModule;
  * @author Tiago Bento <tfernand@redhat.com>
  */
 @ErraiApp(gwtModuleName = "org.jboss.errai.ioc.tests.extensions.IOCExtensionTests",
-          local = true,
           modules = { ErraiTestApp.class,
                       ErraiIocModule.class,
                       ErraiTestModule.class,

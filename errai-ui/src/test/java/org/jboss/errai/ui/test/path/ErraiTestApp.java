@@ -31,7 +31,6 @@ import org.jboss.errai.ui.test.common.ErraiTestModule;
  * @author Tiago Bento <tfernand@redhat.com>
  */
 @ErraiApp(gwtModuleName = "org.jboss.errai.ui.test.path.Test",
-          local = true,
           modules = { ErraiTestApp.class,
                       ErraiMarshallingModule.class,
                       ErraiBusModule.class,

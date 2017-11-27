@@ -26,7 +26,6 @@ import org.jboss.errai.ioc.tests.decorator.rebind.ErraiIocDecoratorsTestModule;
  * @author Tiago Bento <tfernand@redhat.com>
  */
 @ErraiApp(gwtModuleName = "org.jboss.errai.ioc.tests.decorator.DecoratorAPITests",
-          local = true,
           modules = { ErraiTestApp.class,
                       ErraiIocModule.class,
                       ErraiTestModule.class,
