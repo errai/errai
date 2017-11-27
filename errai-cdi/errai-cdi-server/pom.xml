@@ -236,6 +236,21 @@
           <scope>test</scope>
         </dependency>
       </dependencies>
+
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-failsafe-plugin</artifactId>
+            <configuration>
+              <excludes>
+                <!-- Ignoring in the APT environment because these features are not yet supported -->
+                <exclude>**/org/jboss/errai/cdi/event/client/test/ClientEventSuperTypeTest/java</exclude>
+                <exclude>**/org/jboss/errai/cdi/stereotypes/client/test/StereotypesIntegrationTest</exclude>
+              </excludes>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
     </profile>
 
     <profile>
