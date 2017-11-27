@@ -32,7 +32,6 @@ import javax.inject.Qualifier;
 import java.util.Set;
 
 import static java.util.Collections.singleton;
-import static org.jboss.errai.common.apt.generator.ErraiAptGeneratedSourceFile.Type.CLIENT;
 import static org.jboss.errai.common.apt.generator.ErraiAptGeneratedSourceFile.Type.SHARED;
 
 /**

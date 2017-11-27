@@ -24,8 +24,6 @@ import org.jboss.errai.config.MetaClassFinder;
 import java.util.Collection;
 import java.util.Collections;
 
-import static org.jboss.errai.common.apt.generator.ErraiAptGeneratedSourceFile.Type.CLIENT;
-
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */

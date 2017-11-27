@@ -73,7 +73,7 @@ class AptCompatibleGwtModuleFile {
     }
   }
 
-  //FIXME: tiago: put each rule in its own module
+  //FIXME: Place each of this binding rules in its own module with a little more type safety
   private String getOverridingBindingRules(final MetaClass erraiModuleAnnotatedMetaClass) {
 
     final String name = erraiModuleAnnotatedMetaClass.getName();
@@ -110,6 +110,7 @@ class AptCompatibleGwtModuleFile {
 
     if (name.equals("ErraiIocModule")) {
       String replaceWith = "";
+
       replaceWith += replaceWith("org.jboss.errai.ioc.client.Bootstrapper",
               "org.jboss.errai.ioc.client.BootstrapperImpl");
 
@@ -127,9 +128,11 @@ class AptCompatibleGwtModuleFile {
 
   private String replaceWith(final String classToBeReplaced, final String newClass) {
 
-    final int lastDot = newClass.lastIndexOf(".");
-    final String newClassFqcn = newClass.substring(0, lastDot) + "." + erraiAptExportedTypes.erraiAppConfiguration()
-            .namespace() + newClass.substring(lastDot + 1);
+    final int lastDotIndex = newClass.lastIndexOf(".");
+    final String newClassFqcn = newClass.substring(0, lastDotIndex)
+            + "."
+            + erraiAptExportedTypes.erraiAppConfiguration().namespace()
+            + newClass.substring(lastDotIndex + 1);
 
     return "<replace-with class=\""
             + newClassFqcn

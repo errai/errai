@@ -83,7 +83,7 @@ public class GWTMetaClassTest extends AbstractMetaClassTest {
   }
 
   @Override
-  protected MetaClass getMetaClassImpl(Class<?> javaClass) {
+  protected MetaClass getMetaClassImpl(final Class<?> javaClass) {
     return getMetaClass(javaClass);
   }
 

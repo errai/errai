@@ -23,8 +23,6 @@ import org.jboss.errai.common.configuration.ErraiGenerator;
 import org.jboss.errai.marshalling.rebind.MarshallerGeneratorFactory;
 
 import static org.jboss.errai.common.apt.generator.ErraiAptGeneratedSourceFile.Type.CLIENT;
-import static org.jboss.errai.common.apt.generator.ErraiAptGeneratedSourceFile.Type.SHARED;
-import static org.jboss.errai.marshalling.rebind.MarshallerOutputTarget.GWT;
 import static org.jboss.errai.marshalling.rebind.MarshallerOutputTarget.Java;
 import static org.jboss.errai.marshalling.rebind.MarshallersGenerator.SERVER_CLASS_NAME;
 import static org.jboss.errai.marshalling.rebind.MarshallersGenerator.SERVER_PACKAGE_NAME;
