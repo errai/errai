@@ -101,6 +101,20 @@
           <scope>test</scope>
         </dependency>
       </dependencies>
+
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-failsafe-plugin</artifactId>
+            <configuration>
+              <excludes>
+                <!-- Ignoring in the APT environment because DynamicValidation is not yet supported -->
+                <exclude>**/org/jboss/errai/validation/client/test/DynamicValidationIntegrationTest.java</exclude>
+              </excludes>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
     </profile>
 
     <profile>
