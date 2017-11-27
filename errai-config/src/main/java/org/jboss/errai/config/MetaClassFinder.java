@@ -36,7 +36,7 @@ public interface MetaClassFinder {
           final Supplier<Collection<MetaClass>> metaClassSupplier) {
 
     return a -> {
-      final Set<MetaClass> metaClasses = new HashSet<>(findAnnotatedWith(annotation));
+      final Set<MetaClass> metaClasses = new HashSet<>(findAnnotatedWith(a));
 
       if (a.equals(annotation)) {
         metaClasses.addAll(metaClassSupplier.get());
@@ -48,7 +48,7 @@ public interface MetaClassFinder {
 
   default MetaClassFinder remove(final Class<? extends Annotation> annotation, final Supplier<Collection<MetaClass>> metaClassSupplier) {
     return a -> {
-      final Set<MetaClass> metaClasses = new HashSet<>(findAnnotatedWith(annotation));
+      final Set<MetaClass> metaClasses = new HashSet<>(findAnnotatedWith(a));
 
       if (a.equals(annotation)) {
         metaClasses.removeAll(metaClassSupplier.get());
