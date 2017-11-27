@@ -244,8 +244,8 @@
             <configuration>
               <excludes>
                 <!-- Ignoring in the APT environment because these features are not yet supported -->
-                <exclude>**/org/jboss/errai/cdi/event/client/test/ClientEventSuperTypeTest/java</exclude>
-                <exclude>**/org/jboss/errai/cdi/stereotypes/client/test/StereotypesIntegrationTest</exclude>
+                <exclude>**/org/jboss/errai/cdi/event/client/test/ClientEventSuperTypeTest.java</exclude>
+                <exclude>**/org/jboss/errai/cdi/stereotypes/client/test/StereotypesIntegrationTest.java</exclude>
               </excludes>
             </configuration>
           </plugin>
