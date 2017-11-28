@@ -49,6 +49,11 @@ public class ErraiAptExportedTypesTest extends ErraiAptTest {
   private static final class TestApp {
   }
 
+  @ErraiModule
+  private static final class TestModule {
+
+  }
+
   private MetaClass erraiAppAnnotatedMetaClass;
 
   @Before
@@ -77,7 +82,7 @@ public class ErraiAptExportedTypesTest extends ErraiAptTest {
   @Test
   public void testFindAnnotatedMetaClassesWithSameTypeAsExportedAndLocallyExportable() {
     final ErraiAptExportedTypes erraiAptExportedTypes = new ErraiAptExportedTypes(erraiAppAnnotatedMetaClass, elements,
-            new TestAnnotatedSourceElementsFinder(getTypeElement(ErraiAptExportedTypesTestExportedType.class)),
+            new TestAnnotatedSourceElementsFinder(getTypeElement(TestModule.class), getTypeElement(ErraiAptExportedTypesTestExportedType.class)),
             resourceFilesFinder());
 
     Assert.assertEquals(ImmutableSet.of(aptClass(ErraiAptExportedTypesTestExportedType.class)),
@@ -87,7 +92,7 @@ public class ErraiAptExportedTypesTest extends ErraiAptTest {
   @Test
   public void testFindAnnotatedMetaClassesWithOneTypeAsExportedAndOneAsLocallyExportable() {
     final ErraiAptExportedTypes erraiAptExportedTypes = new ErraiAptExportedTypes(erraiAppAnnotatedMetaClass, elements,
-            new TestAnnotatedSourceElementsFinder(getTypeElement(ErraiAptExportedTypesLocallyExportableType2.class)),
+            new TestAnnotatedSourceElementsFinder(getTypeElement(TestModule.class), getTypeElement(ErraiAptExportedTypesLocallyExportableType2.class)),
             resourceFilesFinder());
 
     Assert.assertEquals(ImmutableSet.of(aptClass(ErraiAptExportedTypesTestExportedType.class),

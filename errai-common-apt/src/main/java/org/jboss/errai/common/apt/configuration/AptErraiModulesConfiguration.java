@@ -18,9 +18,11 @@ package org.jboss.errai.common.apt.configuration;
 
 import org.jboss.errai.codegen.meta.MetaAnnotation;
 import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.common.configuration.ErraiModule;
 import org.jboss.errai.config.ErraiModulesConfiguration;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -29,6 +31,8 @@ import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
 import static org.jboss.errai.common.configuration.ErraiModule.Property.BINDABLE_TYPES;
+import static org.jboss.errai.common.configuration.ErraiModule.Property.EXCLUDES;
+import static org.jboss.errai.common.configuration.ErraiModule.Property.INCLUDES;
 import static org.jboss.errai.common.configuration.ErraiModule.Property.IOC_ALTERNATIVES;
 import static org.jboss.errai.common.configuration.ErraiModule.Property.IOC_BLACKLIST;
 import static org.jboss.errai.common.configuration.ErraiModule.Property.IOC_WHITELIST;
@@ -44,8 +48,12 @@ public class AptErraiModulesConfiguration implements ErraiModulesConfiguration {
 
   private final Set<MetaAnnotation> erraiModuleMetaAnnotations;
 
-  AptErraiModulesConfiguration(final Set<MetaAnnotation> erraiModuleMetaAnnotations) {
-    this.erraiModuleMetaAnnotations = erraiModuleMetaAnnotations;
+  public AptErraiModulesConfiguration(final Set<MetaClass> erraiModuleMetaClasses) {
+    this.erraiModuleMetaAnnotations = erraiModuleMetaClasses.stream()
+            .map(m -> m.getAnnotation(ErraiModule.class))
+            .filter(Optional::isPresent)
+            .map(Optional::get)
+            .collect(toSet());
   }
 
   @Override
@@ -83,12 +91,22 @@ public class AptErraiModulesConfiguration implements ErraiModulesConfiguration {
     return getConfiguredArrayProperty(a -> stream(a.valueAsArray(IOC_WHITELIST, MetaClass[].class)));
   }
 
+  public Set<String> includes() {
+    return getConfiguredArrayProperty(a -> stream(a.valueAsArray(INCLUDES, String[].class)));
+  }
+
+  public Set<String> excludes() {
+    return getConfiguredArrayProperty(a -> stream(a.valueAsArray(EXCLUDES, String[].class)));
+  }
+
   @Override
   public Map<String, String> getMappingAliases() {
     return getConfiguredArrayProperty(x -> stream(x.valueAsArray(MAPPING_ALIASES, MetaAnnotation[].class))).stream()
             .collect(toMap(a -> a.<MetaClass>value("from").getFullyQualifiedName(),
                     a -> a.<MetaClass>value("to").getFullyQualifiedName()));
   }
+
+
 
   private <V> Set<V> getConfiguredArrayProperty(final Function<MetaAnnotation, Stream<V>> getter) {
     return erraiModuleMetaAnnotations.stream().flatMap(getter).collect(toSet());

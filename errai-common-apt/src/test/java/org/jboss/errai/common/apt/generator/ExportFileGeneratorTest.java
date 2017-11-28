@@ -20,6 +20,7 @@ import org.jboss.errai.codegen.apt.test.ErraiAptTest;
 import org.jboss.errai.common.apt.AnnotatedSourceElementsFinder;
 import org.jboss.errai.common.apt.TestAnnotatedSourceElementsFinder;
 import org.jboss.errai.common.apt.exportfile.ExportFile;
+import org.jboss.errai.common.configuration.ErraiModule;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -35,13 +36,19 @@ import static java.util.Collections.singleton;
  */
 public class ExportFileGeneratorTest extends ErraiAptTest {
 
+  @ErraiModule
+  private static final class TestModule {
+
+  }
+
   @Test
   public void testGenerateExportFilesForUsedAnnotation() {
     final TypeElement testAnnotation = getTypeElement(TestAnnotation.class);
     final TypeElement testExportedType = getTypeElement(TestExportableType.class);
+    final TypeElement testModule = getTypeElement(TestModule.class);
 
     final TestGenerator testGenerator = getTestGenerator(singleton(testAnnotation),
-            annotatedElementsFinder(testExportedType));
+            annotatedElementsFinder(testExportedType, testModule));
     final Set<ExportFile> exportFiles = testGenerator.createExportFiles();
 
     Assert.assertEquals(1, exportFiles.size());

@@ -16,8 +16,6 @@
 
 package org.jboss.errai.common.configuration;
 
-import java.lang.annotation.Annotation;
-
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
@@ -39,6 +37,10 @@ public @interface ErraiModule {
 
   MappingAlias[] mappingAliases() default {};
 
+  String[] includes() default { ".*" };
+
+  String[] excludes() default { "server.*" };
+
   interface Property {
     String BINDABLE_TYPES = "bindableTypes";
     String NON_BINDABLE_TYPES = "nonBindableTypes";
@@ -48,6 +50,8 @@ public @interface ErraiModule {
     String IOC_BLACKLIST = "iocBlacklist";
     String IOC_WHITELIST = "iocWhitelist";
     String MAPPING_ALIASES = "mappingAliases";
+    String INCLUDES = "includes";
+    String EXCLUDES = "excludes";
   }
 
 }
