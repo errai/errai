@@ -47,7 +47,7 @@ public class ExportFileGeneratorTest extends ErraiAptTest {
     final TypeElement testExportedType = getTypeElement(TestExportableType.class);
     final TypeElement testModule = getTypeElement(TestModule.class);
 
-    final TestGenerator testGenerator = getTestGenerator(singleton(testAnnotation),
+    final TestExportFileGenerator testGenerator = getTestGenerator(singleton(testAnnotation),
             annotatedElementsFinder(testExportedType, testModule));
     final Set<ExportFile> exportFiles = testGenerator.createExportFiles();
 
@@ -67,7 +67,7 @@ public class ExportFileGeneratorTest extends ErraiAptTest {
 
   @Test
   public void testBuildExportFilesForEmptySetOfAnnotations() {
-    final TestGenerator testGenerator = getTestGenerator(emptySet(), annotatedElementsFinder());
+    final TestExportFileGenerator testGenerator = getTestGenerator(emptySet(), annotatedElementsFinder());
     final Set<ExportFile> exportFiles = testGenerator.createExportFiles();
     Assert.assertEquals(0, exportFiles.size());
   }
@@ -76,8 +76,8 @@ public class ExportFileGeneratorTest extends ErraiAptTest {
     return new TestAnnotatedSourceElementsFinder(typeElements);
   }
 
-  private TestGenerator getTestGenerator(final Set<? extends TypeElement> annotations,
+  private TestExportFileGenerator getTestGenerator(final Set<? extends TypeElement> annotations,
           final AnnotatedSourceElementsFinder annotatedElementsFinder) {
-    return new TestGenerator(annotations, annotatedElementsFinder, elements);
+    return new TestExportFileGenerator(annotations, annotatedElementsFinder, elements);
   }
 }

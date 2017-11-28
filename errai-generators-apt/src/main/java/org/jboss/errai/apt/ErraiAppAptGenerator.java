@@ -89,7 +89,6 @@ public class ErraiAppAptGenerator extends AbstractProcessor {
       final Elements elements = processingEnv.getElementUtils();
       final Filer filer = processingEnv.getFiler();
       APTClassUtil.init(types, elements);
-      final Optional<String> erraiApp = Optional.ofNullable(System.getProperty("errai.app"));
 
       annotatedElementsFinder.findSourceElementsAnnotatedWith(ErraiApp.class)
               .stream()

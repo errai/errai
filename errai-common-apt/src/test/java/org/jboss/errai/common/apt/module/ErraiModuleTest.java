@@ -7,18 +7,23 @@ import org.jboss.errai.common.apt.configuration.TestAnnotation;
 import org.jboss.errai.common.apt.exportfile.ExportFile;
 import org.jboss.errai.common.apt.module2.AnnotatedTypeOutOfModule;
 import org.jboss.errai.common.apt.strategies.ErraiExportingStrategiesFactory;
+import org.jboss.errai.common.apt.strategies.ExportedElement;
 import org.junit.Assert;
 import org.junit.Test;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
 import static java.util.Collections.singleton;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 
 public class ErraiModuleTest extends ErraiAptTest {
 
@@ -30,8 +35,10 @@ public class ErraiModuleTest extends ErraiAptTest {
     final TypeElement testEnclosedElementAnnotation = getTypeElement(TestEnclosedElementAnnotation.class);
     final ErraiModule erraiModule = getErraiModule(getTestAnnotatedElementsFinder(testExportedTypes));
 
-    final Set<TypeMirror> elements = erraiModule.findAnnotatedElements(testEnclosedElementAnnotation);
-    Assert.assertEquals(singleton(getTypeElement(String.class).asType()), elements);
+    final List<ExportedElement> elements = new ArrayList<>(
+            erraiModule.findExportedElements(testEnclosedElementAnnotation));
+    Assert.assertEquals(1, elements.size());
+    Assert.assertEquals(getTypeElement(String.class).asType(), elements.get(0).getElement().asType());
   }
 
   @Test
@@ -39,36 +46,41 @@ public class ErraiModuleTest extends ErraiAptTest {
     final TypeElement testAnnotation = getTypeElement(TestAnnotation.class);
     final TypeElement testExportedType = getTypeElement(TestExportableTypeWithFieldAnnotations.class);
 
-    final ErraiModule testGenerator = getErraiModule(getTestAnnotatedElementsFinder(testExportedType));
+    final ErraiModule erraiModule = getErraiModule(getTestAnnotatedElementsFinder(testExportedType));
 
-    final Set<TypeMirror> elements = testGenerator.findAnnotatedElements(testAnnotation);
-    Assert.assertEquals(singleton(testExportedType.asType()), elements);
+    final List<ExportedElement> elements = new ArrayList<>(erraiModule.findExportedElements(testAnnotation));
+    Assert.assertEquals(1, elements.size());
+    Assert.assertEquals(testExportedType.asType(), elements.get(0).getElement().asType());
   }
 
   @Test
   public void testFindAnnotatedClassesAndInterfacesWithInnerClasses() {
     final TypeElement testAnnotation = getTypeElement(TestAnnotation.class);
-
     final TypeElement type = getTypeElement(AnnotatedTypeWithAnnotatedInnerClasses.class);
-    final TypeElement innerStaticType = getTypeElement(
-            AnnotatedTypeWithAnnotatedInnerClasses.InnerAnnotatedStaticType.class);
+    final TypeElement innerStaticType = getTypeElement(AnnotatedTypeWithAnnotatedInnerClasses.InnerAnnotatedStaticType.class);
     final TypeElement innerType = getTypeElement(AnnotatedTypeWithAnnotatedInnerClasses.InnerAnnotatedType.class);
+
     final ErraiModule erraiModule = getErraiModule(getTestAnnotatedElementsFinder(
             Stream.concat(Stream.of(type), type.getEnclosedElements().stream()).toArray(Element[]::new)));
 
-    final Set<TypeMirror> exportedTypes = erraiModule.findAnnotatedElements(testAnnotation);
+    final Set<ExportedElement> exportedElements = erraiModule.findExportedElements(testAnnotation);
+    Assert.assertEquals(3, exportedElements.size());
+
+    final Set<TypeMirror> exportedTypes = exportedElements.stream().map(s -> s.getElement().asType()).collect(toSet());
     assertContainsOnly(exportedTypes, type.asType(), innerStaticType.asType(), innerType.asType());
   }
 
   @Test
   public void testFindAnnotatedClassesAndInterfacesWithTypesOutOfModuleScope() {
     final TypeElement testAnnotation = getTypeElement(TestAnnotation.class);
-
     final TypeElement annotatedTypeInsideModule = getTypeElement(AnnotatedTypeInsideModule.class);
+
     final ErraiModule erraiModule = getErraiModule(
             getTestAnnotatedElementsFinder(annotatedTypeInsideModule, getTypeElement(AnnotatedTypeOutOfModule.class)));
 
-    final Set<TypeMirror> exportedTypes = erraiModule.findAnnotatedElements(testAnnotation);
+    final Set<ExportedElement> exportedElements = erraiModule.findExportedElements(testAnnotation);
+    final Set<TypeMirror> exportedTypes = exportedElements.stream().map(s -> s.getElement().asType()).collect(toSet());
+    Assert.assertEquals(1, exportedElements.size());
     assertContainsOnly(exportedTypes, annotatedTypeInsideModule.asType());
   }
 
@@ -76,14 +88,13 @@ public class ErraiModuleTest extends ErraiAptTest {
   public void testNewExportFileWithOneExportedType() {
     final TypeElement testAnnotation = getTypeElement(TestAnnotation.class);
     final TypeElement testExportedType = getTypeElement(TestExportableTypeWithFieldAnnotations.class);
-    final TestAnnotatedSourceElementsFinder annotatedElementsFinder = getTestAnnotatedElementsFinder(testExportedType);
 
-    final ErraiModule erraiModule = getErraiModule(annotatedElementsFinder);
-    final Optional<ExportFile> exportFile = erraiModule.newExportFile(testAnnotation);
+    final ErraiModule erraiModule = getErraiModule(getTestAnnotatedElementsFinder(testExportedType));
+    final List<ExportFile> exportFiles = erraiModule.createExportFiles(singleton(testAnnotation)).collect(toList());
 
-    Assert.assertTrue(exportFile.isPresent());
-    Assert.assertEquals(1, exportFile.get().exportedTypes().size());
-    Assert.assertTrue(exportFile.get().exportedTypes().contains(testExportedType.asType()));
+    Assert.assertEquals(1, exportFiles.size());
+    Assert.assertEquals(1, exportFiles.get(0).exportedTypes().size());
+    Assert.assertTrue(exportFiles.get(0).exportedTypes().contains(testExportedType.asType()));
   }
 
   @Test
@@ -91,9 +102,9 @@ public class ErraiModuleTest extends ErraiAptTest {
     final TypeElement testAnnotation = getTypeElement(TestAnnotation.class);
 
     final ErraiModule erraiModule = getErraiModule(getTestAnnotatedElementsFinder());
-    final Optional<ExportFile> exportFile = erraiModule.newExportFile(testAnnotation);
+    final List<ExportFile> exportFiles = erraiModule.createExportFiles(singleton(testAnnotation)).collect(toList());
 
-    Assert.assertFalse(exportFile.isPresent());
+    Assert.assertTrue(exportFiles.isEmpty());
   }
 
   @Test

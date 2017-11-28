@@ -19,7 +19,6 @@ package org.jboss.errai.common.apt.module;
 import com.sun.tools.javac.code.Symbol;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.impl.apt.APTClass;
-import org.jboss.errai.codegen.meta.impl.apt.APTClassUtil;
 import org.jboss.errai.common.apt.AnnotatedSourceElementsFinder;
 import org.jboss.errai.common.apt.configuration.AptErraiModulesConfiguration;
 import org.jboss.errai.common.apt.exportfile.ExportFile;
@@ -36,6 +35,8 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import static java.util.Collections.singleton;
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.mapping;
 import static java.util.stream.Collectors.toSet;
 import static javax.lang.model.element.ElementKind.CONSTRUCTOR;
 import static javax.lang.model.element.ElementKind.METHOD;
@@ -69,64 +70,43 @@ public class ErraiModule {
     this.moduleConfiguration = new AptErraiModulesConfiguration(singleton(erraiModuleMetaClass));
   }
 
+  String erraiModuleUniqueNamespace() {
+    return erraiModuleMetaClass.getCanonicalName().replace(".", "_") + "__" + camelCaseErraiModuleName;
+  }
+
   public Stream<ExportFile> createExportFiles(final Set<? extends TypeElement> exportableAnnotations) {
-    return exportableAnnotations.stream().map(this::newExportFile).filter(Optional::isPresent).map(Optional::get);
+    return exportableAnnotations.stream()
+            .flatMap(s -> this.findExportedElements(s).stream())
+            .collect(groupingBy(ExportedElement::getAnnotation, mapping(s -> s.getElement().asType(), toSet())))
+            .entrySet()
+            .stream()
+            .map(e -> this.newExportFile(e.getKey(), e.getValue()))
+            .filter(Optional::isPresent)
+            .map(Optional::get);
   }
 
-  Optional<ExportFile> newExportFile(final TypeElement annotation) {
-
-    final Set<TypeMirror> exportedTypes = findAnnotatedElements(annotation);
-
-    if (exportedTypes.isEmpty()) {
-      return Optional.empty();
-    }
-
-    return Optional.of(new ExportFile(erraiModuleUniqueNamespace(), annotation, exportedTypes));
+  private Optional<ExportFile> newExportFile(final TypeElement annotation, final Set<TypeMirror> types) {
+    return Optional.of(types)
+            .filter(s -> !s.isEmpty())
+            .map(t -> new ExportFile(erraiModuleUniqueNamespace(), annotation, types));
   }
 
-  Set<TypeMirror> findAnnotatedElements(final TypeElement annotationTypeElement) {
+  Set<ExportedElement> findExportedElements(final TypeElement annotationTypeElement) {
     final ExportingStrategy strategy = exportingStrategies.getStrategy(annotationTypeElement);
     return annotatedSourceElementsFinder.findSourceElementsAnnotatedWith(annotationTypeElement)
             .stream()
             .filter(this::isPartOfModule)
             .flatMap(strategy::getExportedElements)
-            .map(ExportedElement::getElement)
-            .map(Element::asType)
             .filter(this::isPublic)
             .collect(toSet());
   }
 
   private boolean isPartOfModule(final Element element) {
-    final MetaClass prospectType = new APTClass(getTypeElement(element).asType());
+    final MetaClass prospectType = new APTClass(getTypeElementOf(element).asType());
     return isIncluded(prospectType) && !isExcluded(prospectType);
   }
 
-  private boolean isPublic(final TypeMirror typeMirror) {
-    if (typeMirror.getKind().isPrimitive()) {
-      return true;
-    }
-
-    final Element element = APTClassUtil.types.asElement(typeMirror);
-
-    if (element.getEnclosingElement().getKind().isInterface()) {
-      // Inner classes of interfaces are public if its outer class is public
-      return element.getEnclosingElement().getModifiers().contains(PUBLIC);
-    }
-
-    if (element.getEnclosingElement().getKind().isClass()) {
-      // Inner classes of non-inner classes have to contain the public modifier to be public
-      return element.getModifiers().contains(PUBLIC) && element.getEnclosingElement().getModifiers().contains(PUBLIC);
-    }
-
-    if (element.getEnclosingElement().getKind().equals(PACKAGE)) {
-      // Non-inner classes and interfaces have to contain the public modifier to be public
-      return element.getModifiers().contains(PUBLIC);
-    }
-
-    return false;
-  }
-
-  private Element getTypeElement(final Element element) {
+  private Element getTypeElementOf(final Element element) {
     if (element.getKind().isClass() || element.getKind().isInterface()) {
       return element;
     }
@@ -167,7 +147,28 @@ public class ErraiModule {
     }).anyMatch(p -> p.test(metaClass.getCanonicalName()));
   }
 
-  String erraiModuleUniqueNamespace() {
-    return erraiModuleMetaClass.getCanonicalName().replace(".", "_") + "__" + camelCaseErraiModuleName;
+  private boolean isPublic(final ExportedElement exportedElement) {
+    final Element element = exportedElement.getElement();
+
+    if (element.asType().getKind().isPrimitive()) {
+      return true;
+    }
+
+    if (element.getEnclosingElement().getKind().isInterface()) {
+      // Inner classes of interfaces are public if its outer class is public
+      return element.getEnclosingElement().getModifiers().contains(PUBLIC);
+    }
+
+    if (element.getEnclosingElement().getKind().isClass()) {
+      // Inner classes of non-inner classes have to contain the public modifier to be public
+      return element.getModifiers().contains(PUBLIC) && element.getEnclosingElement().getModifiers().contains(PUBLIC);
+    }
+
+    if (element.getEnclosingElement().getKind().equals(PACKAGE)) {
+      // Non-inner classes and interfaces have to contain the public modifier to be public
+      return element.getModifiers().contains(PUBLIC);
+    }
+
+    return false;
   }
 }

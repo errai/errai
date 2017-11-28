@@ -26,9 +26,9 @@ import java.util.Set;
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
-class TestGenerator extends ExportFileGenerator {
+class TestExportFileGenerator extends ExportFileGenerator {
 
-  TestGenerator(final Set<? extends TypeElement> exportableAnnotations,
+  TestExportFileGenerator(final Set<? extends TypeElement> exportableAnnotations,
           final AnnotatedSourceElementsFinder annotatedSourceElementsFinder,
           final Elements elements) {
 
