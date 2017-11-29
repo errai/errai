@@ -18,6 +18,7 @@ package org.jboss.errai.common.apt.strategies;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.TypeMirror;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
@@ -35,7 +36,7 @@ public class ExportedElement {
     return annotation;
   }
 
-  public Element getElement() {
-    return element;
+  public TypeMirror getTypeMirror() {
+    return element.asType();
   }
 }

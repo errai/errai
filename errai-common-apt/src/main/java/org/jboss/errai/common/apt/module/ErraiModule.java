@@ -19,6 +19,7 @@ package org.jboss.errai.common.apt.module;
 import com.sun.tools.javac.code.Symbol;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.impl.apt.APTClass;
+import org.jboss.errai.codegen.meta.impl.apt.APTClassUtil;
 import org.jboss.errai.common.apt.AnnotatedSourceElementsFinder;
 import org.jboss.errai.common.apt.configuration.AptErraiModulesConfiguration;
 import org.jboss.errai.common.apt.exportfile.ExportFile;
@@ -77,7 +78,7 @@ public class ErraiModule {
   public Stream<ExportFile> createExportFiles(final Set<? extends TypeElement> exportableAnnotations) {
     return exportableAnnotations.stream()
             .flatMap(s -> this.findExportedElements(s).stream())
-            .collect(groupingBy(ExportedElement::getAnnotation, mapping(s -> s.getElement().asType(), toSet())))
+            .collect(groupingBy(ExportedElement::getAnnotation, mapping(s -> s.getTypeMirror(), toSet())))
             .entrySet()
             .stream()
             .map(e -> this.newExportFile(e.getKey(), e.getValue()))
@@ -103,7 +104,7 @@ public class ErraiModule {
 
   private boolean isPartOfModule(final Element element) {
     final MetaClass prospectType = new APTClass(getTypeElementOf(element).asType());
-    return isIncluded(prospectType) && !isExcluded(prospectType);
+    return isIncluded(prospectType) && !isExcluded(prospectType) || prospectType.equals(erraiModuleMetaClass);
   }
 
   private Element getTypeElementOf(final Element element) {
@@ -148,7 +149,7 @@ public class ErraiModule {
   }
 
   private boolean isPublic(final ExportedElement exportedElement) {
-    final Element element = exportedElement.getElement();
+    final Element element = APTClassUtil.types.asElement(exportedElement.getTypeMirror());
 
     if (element.asType().getKind().isPrimitive()) {
       return true;

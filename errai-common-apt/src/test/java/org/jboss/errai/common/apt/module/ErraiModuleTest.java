@@ -17,7 +17,6 @@ import javax.lang.model.type.TypeMirror;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -38,7 +37,7 @@ public class ErraiModuleTest extends ErraiAptTest {
     final List<ExportedElement> elements = new ArrayList<>(
             erraiModule.findExportedElements(testEnclosedElementAnnotation));
     Assert.assertEquals(1, elements.size());
-    Assert.assertEquals(getTypeElement(String.class).asType(), elements.get(0).getElement().asType());
+    Assert.assertEquals(getTypeElement(String.class).asType(), elements.get(0).getTypeMirror());
   }
 
   @Test
@@ -50,7 +49,7 @@ public class ErraiModuleTest extends ErraiAptTest {
 
     final List<ExportedElement> elements = new ArrayList<>(erraiModule.findExportedElements(testAnnotation));
     Assert.assertEquals(1, elements.size());
-    Assert.assertEquals(testExportedType.asType(), elements.get(0).getElement().asType());
+    Assert.assertEquals(testExportedType.asType(), elements.get(0).getTypeMirror());
   }
 
   @Test
@@ -66,7 +65,7 @@ public class ErraiModuleTest extends ErraiAptTest {
     final Set<ExportedElement> exportedElements = erraiModule.findExportedElements(testAnnotation);
     Assert.assertEquals(3, exportedElements.size());
 
-    final Set<TypeMirror> exportedTypes = exportedElements.stream().map(s -> s.getElement().asType()).collect(toSet());
+    final Set<TypeMirror> exportedTypes = exportedElements.stream().map(ExportedElement::getTypeMirror).collect(toSet());
     assertContainsOnly(exportedTypes, type.asType(), innerStaticType.asType(), innerType.asType());
   }
 
@@ -79,7 +78,7 @@ public class ErraiModuleTest extends ErraiAptTest {
             getTestAnnotatedElementsFinder(annotatedTypeInsideModule, getTypeElement(AnnotatedTypeOutOfModule.class)));
 
     final Set<ExportedElement> exportedElements = erraiModule.findExportedElements(testAnnotation);
-    final Set<TypeMirror> exportedTypes = exportedElements.stream().map(s -> s.getElement().asType()).collect(toSet());
+    final Set<TypeMirror> exportedTypes = exportedElements.stream().map(ExportedElement::getTypeMirror).collect(toSet());
     Assert.assertEquals(1, exportedElements.size());
     assertContainsOnly(exportedTypes, annotatedTypeInsideModule.asType());
   }
