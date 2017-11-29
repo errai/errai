@@ -79,6 +79,7 @@
     </dependency>
 
     <dependency>
+      <!-- Needs provided scope for use in annotation processors -->
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-log4j12</artifactId>
       <scope>provided</scope>

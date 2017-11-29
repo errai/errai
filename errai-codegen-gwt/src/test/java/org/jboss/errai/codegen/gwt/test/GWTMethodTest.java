@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Red Hat, Inc. and/or its affiliates.
+ * Copyright (C) 2017 Red Hat, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,12 +22,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 /**
- * The GWT implementation of the overall MetaClass test. Inherits all the tests
- * from AbstractMetaClassTest and runs them against GWTClass. Don't remove this
- * test! It actually does something!
- *
- * @author Mike Brock
- * @author Jonathan Fuerth <jfuerth@redhat.com>
+ * @author Tiago Bento <tfernand@redhat.com>
  */
 public class GWTMethodTest extends MetaMethodTest {
 

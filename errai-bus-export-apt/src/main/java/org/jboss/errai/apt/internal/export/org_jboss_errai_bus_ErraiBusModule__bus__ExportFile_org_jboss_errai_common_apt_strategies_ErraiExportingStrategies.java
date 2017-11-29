@@ -1,4 +1,4 @@
-package org.jboss.errai.apt.internal.export;/*
+/*
  * Copyright (C) 2017 Red Hat, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +13,8 @@ package org.jboss.errai.apt.internal.export;/*
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package org.jboss.errai.apt.internal.export;
 
 import org.jboss.errai.bus.apt.export.ErraiBusExportingStrategies;
 
