@@ -5,7 +5,7 @@
   <parent>
     <artifactId>errai-parent</artifactId>
     <groupId>org.jboss.errai</groupId>
-    <version>4.1.1-SNAPSHOT</version>
+    <version>4.1.2-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
@@ -88,8 +88,8 @@
     </dependency>
 
     <dependency>
-      <groupId>org.codehaus.jackson</groupId>
-      <artifactId>jackson-mapper-asl</artifactId>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
     </dependency>
 
     <dependency>
@@ -264,7 +264,7 @@
                 </property>
               </systemProperties>
 
-              <!-- GWT 2.8.1 has an assertion that fails on tests and works in production -->
+              <!-- GWT 2.8.1+ has an assertion that fails on tests and works in production -->
               <enableAssertions>false</enableAssertions>
             </configuration>
           </plugin>

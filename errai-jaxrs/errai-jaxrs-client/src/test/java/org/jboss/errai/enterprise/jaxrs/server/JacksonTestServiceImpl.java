@@ -19,7 +19,7 @@ package org.jboss.errai.enterprise.jaxrs.server;
 import java.util.List;
 import java.util.Map;
 
-import org.codehaus.jackson.map.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jboss.errai.enterprise.jaxrs.client.shared.JacksonTestService;
 import org.jboss.errai.enterprise.jaxrs.client.shared.entity.BigNumberEntity;
 import org.jboss.errai.enterprise.jaxrs.client.shared.entity.ByteArrayTestWrapper;

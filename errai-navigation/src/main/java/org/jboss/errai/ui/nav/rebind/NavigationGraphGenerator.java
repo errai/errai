@@ -172,7 +172,7 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
         if (annotatedPageRoles.stream().anyMatch(c -> c.instanceOf(DefaultPage.class))) {
           // need to assign the page impl to a variable and add it to the map twice
           URLPattern pattern = URLPatternMatcher.generatePattern(annotation.value("path"));
-          if(pattern.getParamList().size() > 0) {
+          if (pattern.getParamList().size() > 0) {
             throw new GenerationException("Default Page must not contain any path parameters.");
           }
           ctor.append(Stmt.declareFinalVariable("defaultPage", PageNode.class, pageImplStmt));
@@ -466,7 +466,7 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
       PrivateAccessUtil.addPrivateAccessStubs("jsni", pageImplBuilder, metaMethod, new Modifier[] {});
 
       if (optionalParams != null) {
-        if(realParamLength <= optionalParams.length) {
+        if (realParamLength <= optionalParams.length) {
           for (int i = 1; i < paramValues.length; i++) {
             Parameter param = optionalParams[i - 1];
             MetaParameter realParam = metaMethod.getParameters()[i - 1];

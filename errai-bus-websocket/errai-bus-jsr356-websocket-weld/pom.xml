@@ -4,7 +4,7 @@
   <parent>
     <artifactId>errai-bus-websocket-parent</artifactId>
     <groupId>org.jboss.errai</groupId>
-    <version>4.1.1-SNAPSHOT</version>
+    <version>4.1.2-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
@@ -43,7 +43,6 @@
       <groupId>org.jboss.spec.javax.websocket</groupId>
       <artifactId>jboss-websocket-api_1.0_spec</artifactId>
       <scope>provided</scope>
-      <version>1.0.0.Final</version>
     </dependency>
 
     <dependency>
@@ -72,7 +71,6 @@
     <dependency>
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-model-builder</artifactId>
-      <version>3.1.1</version>
     </dependency>
     <dependency>
       <artifactId>maven-aether-provider</artifactId>
@@ -82,7 +80,6 @@
     <dependency>
       <groupId>org.wildfly.arquillian</groupId>
       <artifactId>wildfly-arquillian-container-embedded</artifactId>
-      <version>2.0.0.Final</version>
       <scope>test</scope>
     </dependency>
     <dependency>

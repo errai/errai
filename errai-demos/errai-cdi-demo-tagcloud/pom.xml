@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jboss.errai.demos</groupId>
   <artifactId>errai-cdi-demo-tagcloud</artifactId>
-  <version>4.1.1-SNAPSHOT</version>
+  <version>4.1.2-SNAPSHOT</version>
   <packaging>war</packaging>
   <name>Errai::CDI::Demos::TagCloud</name>
 
@@ -59,7 +59,7 @@
     <maven.war.plugin.version>2.1.1</maven.war.plugin.version>
     <maven.clean.plugin.version>2.4.1</maven.clean.plugin.version>
     <maven.deploy.plugin.version>2.7</maven.deploy.plugin.version>
-    <maven.gwt.plugin.version>2.8.1</maven.gwt.plugin.version>
+    <maven.gwt.plugin.version>2.8.2</maven.gwt.plugin.version>
     <jetty.version>9.2.14.v20151106</jetty.version>
     <!-- Dev Mode config properties -->
     <errai.dev.context>${project.artifactId}</errai.dev.context>

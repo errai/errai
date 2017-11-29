@@ -16,13 +16,8 @@
 
 package org.jboss.errai.bus.server.service;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ExecutorService;
-
+import com.google.common.collect.LinkedHashMultimap;
+import com.google.common.collect.Multimap;
 import org.jboss.errai.bus.client.api.BusMonitor;
 import org.jboss.errai.bus.client.api.QueueSession;
 import org.jboss.errai.bus.client.api.SubscribeListener;
@@ -35,8 +30,12 @@ import org.jboss.errai.bus.server.api.QueueClosedListener;
 import org.jboss.errai.bus.server.api.ServerMessageBus;
 import org.jboss.errai.common.client.api.Assert;
 
-import com.google.common.collect.LinkedHashMultimap;
-import com.google.common.collect.Multimap;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ExecutorService;
 
 /**
  * @author Mike Brock
@@ -52,26 +51,24 @@ public class MessageBusProxy implements ServerMessageBus {
   private List<SubscribeListener> heldSubscribeListener = new ArrayList<SubscribeListener>();
   private List<UnsubscribeListener> heldUnsubscribeListener = new ArrayList<UnsubscribeListener>();
   private BusMonitor heldBusMonitor;
-  // END: ONly referenced in synchronized methods.
-
+  // END: Only referenced in synchronized methods.
 
   /*
    * These fields must be volatile because they are read from unsynchronized methods.
    */
-  private volatile boolean proxyClosed;
   private volatile ServerMessageBus proxied;
 
   @Override
   public void sendGlobal(Message message) {
     Assert.notNull("message cannot be null", message);
 
-    if (proxyClosed || !offerSendGlobal(message)) {
+    if (proxied != null || !offerSendGlobal(message)) {
       proxied.sendGlobal(message);
     }
   }
 
   private synchronized boolean offerSendGlobal(Message message) {
-    if (proxyClosed) {
+    if (proxied != null) {
       return false;
     } else {
       heldGlobalMessages.add(message);
@@ -83,13 +80,13 @@ public class MessageBusProxy implements ServerMessageBus {
   public void send(Message message) {
     Assert.notNull("message cannot be null", message);
 
-    if (proxyClosed || !offerSend(message)) {
+    if (proxied != null || !offerSend(message)) {
       proxied.send(message);
     }
   }
 
   private synchronized boolean offerSend(Message message) {
-    if (proxyClosed) {
+    if (proxied != null) {
       return false;
     } else {
       heldMessages.add(message);
@@ -101,13 +98,13 @@ public class MessageBusProxy implements ServerMessageBus {
   public void send(Message message, boolean fireListeners) {
     Assert.notNull("message cannot be null", message);
 
-    if (proxyClosed || !offerSend(message, fireListeners)) {
+    if (proxied != null || !offerSend(message, fireListeners)) {
       proxied.send(message, fireListeners);
     }
   }
 
   private synchronized boolean offerSend(Message message, boolean fireListeners) {
-    if (proxyClosed) {
+    if (proxied != null) {
       return false;
     } else {
       heldMessageFireListener.put(message, fireListeners);
@@ -120,7 +117,7 @@ public class MessageBusProxy implements ServerMessageBus {
     Assert.notNull("message callback cannot be null", receiver);
 
     Subscription subscription = null;
-    if (!proxyClosed) {
+    if (proxied == null) {
       subscription = offerSubscribe(subject, receiver);
     }
     if (subscription == null) {
@@ -131,7 +128,7 @@ public class MessageBusProxy implements ServerMessageBus {
   }
 
   private synchronized Subscription offerSubscribe(String subject, MessageCallback receiver) {
-    if (proxyClosed) {
+    if (proxied != null) {
       return null;
     } else {
       heldSubscribe.put(subject, receiver);
@@ -149,7 +146,7 @@ public class MessageBusProxy implements ServerMessageBus {
     Assert.notNull("message callback cannot be null", receiver);
 
     Subscription subscription = null;
-    if (!proxyClosed) {
+    if (proxied == null) {
       subscription = offerSubscribeLocal(subject, receiver);
     }
     if (subscription == null) {
@@ -160,7 +157,7 @@ public class MessageBusProxy implements ServerMessageBus {
   }
 
   private synchronized Subscription offerSubscribeLocal(String subject, MessageCallback receiver) {
-    if (proxyClosed) {
+    if (proxied != null) {
       return null;
     } else {
       heldLocalSubscribe.put(subject, receiver);
@@ -175,14 +172,16 @@ public class MessageBusProxy implements ServerMessageBus {
 
   @Override
   public void unsubscribeAll(String subject) {
+    if (proxied != null) {
+      proxied.unsubscribeAll(subject);
+    }
   }
 
   @Override
   public synchronized boolean isSubscribed(String subject) {
-    if (proxyClosed) {
+    if (proxied != null) {
       return proxied.isSubscribed(subject);
-    }
-    else {
+    } else {
       return heldSubscribe.containsKey(subject) || heldLocalSubscribe.containsKey(subject);
     }
   }
@@ -191,13 +190,13 @@ public class MessageBusProxy implements ServerMessageBus {
   public void addSubscribeListener(SubscribeListener listener) {
     Assert.notNull("subscribe listener cannot be null", listener);
 
-    if (proxyClosed || !offerAddSubscribeListener(listener)) {
+    if (proxied != null || !offerAddSubscribeListener(listener)) {
       proxied.addSubscribeListener(listener);
     }
   }
 
   private synchronized boolean offerAddSubscribeListener(SubscribeListener listener) {
-    if (proxyClosed) {
+    if (proxied != null) {
       return false;
     } else {
       heldSubscribeListener.add(listener);
@@ -209,13 +208,13 @@ public class MessageBusProxy implements ServerMessageBus {
   public void addUnsubscribeListener(UnsubscribeListener listener) {
     Assert.notNull("unsubscribe listener cannot be null", listener);
 
-    if (proxyClosed || !offerAddUnsubscribeListener(listener)) {
+    if (proxied != null || !offerAddUnsubscribeListener(listener)) {
       proxied.addUnsubscribeListener(listener);
     }
   }
 
   private synchronized boolean offerAddUnsubscribeListener(UnsubscribeListener listener) {
-    if (proxyClosed) {
+    if (proxied != null) {
       return false;
     } else {
       heldUnsubscribeListener.add(listener);
@@ -256,7 +255,7 @@ public class MessageBusProxy implements ServerMessageBus {
   @Override
   public Collection<MessageCallback> getReceivers(String subject) {
     Collection<MessageCallback> receivers = null;
-    if (!proxyClosed) {
+    if (proxied == null) {
       receivers = offerGetReceivers(subject);
     }
     if (receivers == null) {
@@ -267,7 +266,7 @@ public class MessageBusProxy implements ServerMessageBus {
   }
 
   private synchronized Collection<MessageCallback> offerGetReceivers(String subject) {
-    if (proxyClosed) {
+    if (proxied != null) {
       return null;
     } else {
       return new ArrayList<MessageCallback>(heldSubscribe.values());
@@ -327,10 +326,6 @@ public class MessageBusProxy implements ServerMessageBus {
   public synchronized void closeProxy(ServerMessageBus bus) {
     Assert.notNull("message bus reference cannot be null", bus);
 
-    if (proxied != null) {
-      throw new IllegalStateException("proxy already closed");
-    }
-
     if (heldBusMonitor != null) {
       bus.attachMonitor(heldBusMonitor);
     }
@@ -363,16 +358,19 @@ public class MessageBusProxy implements ServerMessageBus {
       bus.send(entry.getKey(), entry.getValue());
     }
 
-    this.heldBusMonitor = null;
-    this.heldSubscribe = null;
-    this.heldLocalSubscribe = null;
-    this.heldSubscribeListener = null;
-    this.heldUnsubscribeListener = null;
-    this.heldMessages = null;
-    this.heldGlobalMessages = null;
-    this.heldMessageFireListener = null;
-
+    reset();
     this.proxied = bus;
-    this.proxyClosed = true;
+  }
+
+  public void reset() {
+    this.proxied = null;
+    this.heldBusMonitor = null;
+    this.heldSubscribe.clear();
+    this.heldLocalSubscribe.clear();
+    this.heldSubscribeListener.clear();
+    this.heldUnsubscribeListener.clear();
+    this.heldMessages.clear();
+    this.heldGlobalMessages.clear();
+    this.heldMessageFireListener.clear();
   }
 }

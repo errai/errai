@@ -75,7 +75,7 @@ public class HistoryImplPushState implements HasValueChangeHandlers<String> {
       newPushStateToken = "/" + newPushStateToken;
     }
     
-    if(replace){
+    if (replace){
       replaceState(newPushStateToken);
       if (LogConfiguration.loggingIsEnabled()) {
         LOG.fine("Replaced '" + newPushStateToken + "' (" + historyToken + ")");

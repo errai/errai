@@ -75,8 +75,8 @@ public class NavigationControl {
    * @param state Pages state map.
    */
   public <C> void redirect(final Class<C> toPage, final Multimap<String, String> state) {
-    if(!hasRun) {
-      if(interrupt != null) {
+    if (!hasRun) {
+      if (interrupt != null) {
         interrupt.run();
       }
       navigation.goTo(toPage, state);

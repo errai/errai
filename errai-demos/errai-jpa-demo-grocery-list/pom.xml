@@ -5,7 +5,7 @@
   <name>Errai::JPA::Demos::GroceryList</name>
   <groupId>org.jboss.errai.demos</groupId>
   <artifactId>errai-jpa-demo-grocery-list</artifactId>
-  <version>4.1.1-SNAPSHOT</version>
+  <version>4.1.2-SNAPSHOT</version>
   <packaging>war</packaging>
 
   <url>http://jboss.org/errai/errai</url>
@@ -59,7 +59,8 @@
     <slf4j.version>1.7.10</slf4j.version>
     <cdiapi.version>1.2</cdiapi.version>
     <servletapi.version>1.0.2.Final</servletapi.version>
-    <gwt.maven.version>2.8.1</gwt.maven.version>
+    <gwt.maven.version>2.8.2</gwt.maven.version>
+    <maven.compiler.plugin.version>3.2</maven.compiler.plugin.version>
     <maven.deploy.plugin.version>2.8.2</maven.deploy.plugin.version>
     <argLine></argLine>
     <skipTests>true</skipTests>

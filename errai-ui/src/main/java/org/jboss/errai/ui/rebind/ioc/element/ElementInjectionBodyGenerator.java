@@ -16,6 +16,8 @@
 
 package org.jboss.errai.ui.rebind.ioc.element;
 
+import com.google.common.base.Strings;
+import com.google.gwt.util.tools.shared.StringUtils;
 import elemental2.dom.DomGlobal;
 import elemental2.dom.Element;
 import jsinterop.base.Js;
@@ -59,16 +61,18 @@ class ElementInjectionBodyGenerator extends AbstractBodyGenerator {
 
   private final MetaClass type;
   private final String tagName;
+  private final String classNames;
   private final Set<Property> properties;
 
   ElementInjectionBodyGenerator(final MetaClass type, String tagName) {
-    this(type, tagName, Collections.emptySet());
+    this(type, tagName, Collections.emptySet(), "");
   }
 
-  ElementInjectionBodyGenerator(final MetaClass type, String tagName, final Set<Property> properties) {
+  ElementInjectionBodyGenerator(final MetaClass type, String tagName, final Set<Property> properties, final String classNames) {
     this.type = type;
     this.tagName = tagName;
     this.properties = properties;
+    this.classNames = classNames;
   }
 
   @Override
@@ -85,6 +89,9 @@ class ElementInjectionBodyGenerator extends AbstractBodyGenerator {
               loadLiteral(property.value())));
     }
 
+    if (!Strings.isNullOrEmpty(classNames)) {
+      stmts.add(loadVariable(elementVar).invoke("addClassName", loadLiteral(classNames)));
+    }
     final String retValVar = "retVal";
 
     stmts.add(declareFinalVariable(retValVar, type, invokeStatic(Js.class, "cast", loadVariable(elementVar))));

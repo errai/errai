@@ -22,9 +22,9 @@ import org.jboss.errai.codegen.meta.HasAnnotations;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.impl.java.JavaReflectionAnnotation;
 import org.jboss.errai.codegen.meta.impl.java.JavaReflectionClass;
-import org.jboss.errai.config.MetaClassFinder;
 import org.jboss.errai.common.client.api.IsElement;
 import org.jboss.errai.common.client.dom.HTMLElement;
+import org.jboss.errai.config.MetaClassFinder;
 import org.jboss.errai.config.util.ClassScanner;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.InjectionSite;
@@ -62,7 +62,6 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import static org.powermock.api.mockito.PowerMockito.when;
 
 /**
@@ -147,7 +146,6 @@ public class ValidationRulesTest {
       assertTrue(message.contains(StartPage1.class.getName()));
       assertTrue(message.contains(StartPage2.class.getName()));
     }
-    verify(ClassScanner.class);
   }
 
   @Test
@@ -164,7 +162,6 @@ public class ValidationRulesTest {
       assertTrue(message.contains(Page1.class.getName()));
       assertTrue(message.contains(Page2.class.getName()));
     }
-    verify(ClassScanner.class);
   }
 
   @Test
@@ -180,7 +177,6 @@ public class ValidationRulesTest {
       final String message = e.getMessage();
       assertTrue(message.contains("DefaultPage"));
     }
-    verify(ClassScanner.class);
   }
 
   @Test(expected = GenerationException.class)

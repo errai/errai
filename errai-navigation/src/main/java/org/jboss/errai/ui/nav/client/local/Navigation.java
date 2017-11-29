@@ -647,6 +647,13 @@ public class Navigation {
       return instance.@com.google.gwt.user.client.ui.Composite::widget;
   }-*/;
 
+  /**
+   * Are we in the navigation process right now.
+   */
+  public boolean isNavigating() {
+    return locked;
+  }
+
   public void setContentDelegation(ContentDelegation contentDelegation) {
     this.contentDelegation = contentDelegation;
   }

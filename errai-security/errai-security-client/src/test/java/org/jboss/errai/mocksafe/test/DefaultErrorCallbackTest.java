@@ -16,27 +16,22 @@
 
 package org.jboss.errai.mocksafe.test;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import org.jboss.errai.enterprise.client.jaxrs.api.RestErrorCallback;
 import org.jboss.errai.security.client.local.api.SecurityContext;
 import org.jboss.errai.security.client.local.callback.DefaultBusSecurityErrorCallback;
 import org.jboss.errai.security.client.local.callback.DefaultRestSecurityErrorCallback;
+import org.jboss.errai.security.client.local.handler.DefaultSecurityExceptionHandler;
+import org.jboss.errai.security.shared.exception.SecurityException;
 import org.jboss.errai.security.shared.exception.UnauthenticatedException;
 import org.jboss.errai.security.shared.exception.UnauthorizedException;
 import org.jboss.errai.ui.nav.client.local.api.LoginPage;
 import org.jboss.errai.ui.nav.client.local.api.MissingPageRoleException;
 import org.jboss.errai.ui.nav.client.local.api.SecurityError;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -44,39 +39,46 @@ import org.mockito.Mock;
 
 import com.google.gwt.http.client.Request;
 import com.google.gwtmockito.GwtMockitoTestRunner;
+import org.mockito.Spy;
 
 @RunWith(GwtMockitoTestRunner.class)
 public class DefaultErrorCallbackTest {
 
-  @Mock
+  @Mock(name = "context")
   private SecurityContext securityContext;
 
   @Mock(name = "wrapped")
   private RestErrorCallback wrapped;
 
-  @InjectMocks
-  private DefaultBusSecurityErrorCallback busErrorCallback;
+  @Spy @InjectMocks
+  private DefaultSecurityExceptionHandler handler;
 
-  @InjectMocks
+  private DefaultBusSecurityErrorCallback busErrorCallback;
   private DefaultRestSecurityErrorCallback restErrorCallback;
 
+  @Before
+  public void setup() {
+    busErrorCallback = new DefaultBusSecurityErrorCallback(handler);
+    restErrorCallback = new DefaultRestSecurityErrorCallback(handler);
+  }
+
   @Test
-  public void testBusAuthenticationErrorNavigatesToLoginPage() throws Exception {
-    busErrorCallback.handleError(new UnauthenticatedException());
+  public void testBusAuthenticationErrorRedirectsToLoginPage() throws Exception {
+    handler.handleException(new UnauthenticatedException());
 
     verify(securityContext).redirectToLoginPage();
   }
 
   @Test
-  public void testBusAuthorizationErrorNavigatesToSecurityErrorPage() throws Exception {
-    busErrorCallback.handleError(new UnauthorizedException());
+  public void testBusAuthorizationErrorRedirectsToSecurityErrorPage() throws Exception {
+    handler.handleException(new UnauthorizedException());
 
     verify(securityContext).redirectToSecurityErrorPage();
   }
 
   @Test
   public void testBusOtherErrorIsIgnored() throws Exception {
-    busErrorCallback.handleError(new Exception());
+    handler.handleException(new Exception());
 
     verifyZeroInteractions(securityContext);
   }
@@ -87,7 +89,7 @@ public class DefaultErrorCallbackTest {
     doThrow(toBeThrown).when(securityContext).redirectToLoginPage();
 
     try {
-      busErrorCallback.handleError(new UnauthenticatedException());
+      handler.handleException(new UnauthenticatedException());
       fail("No exception was thrown.");
     }
     catch (RuntimeException ex) {
@@ -104,7 +106,7 @@ public class DefaultErrorCallbackTest {
     doThrow(toBeThrown).when(securityContext).redirectToSecurityErrorPage();
 
     try {
-      busErrorCallback.handleError(new UnauthorizedException());
+      handler.handleException(new UnauthorizedException());
       fail("No exception was thrown.");
     }
     catch (RuntimeException ex) {
@@ -116,71 +118,21 @@ public class DefaultErrorCallbackTest {
   }
 
   @Test
-  public void testRestAuthenticationErrorNavigatesToLoginPage() throws Exception {
-    when(wrapped.error(any(Request.class), any(Throwable.class))).thenReturn(true);
+  public void testBusCallingHandlerWhenSecurityException() throws Exception {
+    SecurityException toBeThrown = new UnauthenticatedException();
 
-    final boolean retVal = restErrorCallback.error(mock(Request.class), new UnauthenticatedException());
+    busErrorCallback.handleError(toBeThrown);
 
-    assertFalse(retVal);
-    verify(securityContext).redirectToLoginPage();
+    verify(handler).handleException(toBeThrown);
   }
 
   @Test
-  public void testRestAuthorizationErrorNavigatesToSecurityErrorPage() throws Exception {
-    when(wrapped.error(any(Request.class), any(Throwable.class))).thenReturn(true);
+  public void testRestCallingHandlerWhenSecurityException() throws Exception {
+    SecurityException toBeThrown = new UnauthenticatedException();
 
-    final boolean retVal = restErrorCallback.error(mock(Request.class), new UnauthorizedException());
+    restErrorCallback.error(mock(Request.class), toBeThrown);
 
-    assertFalse(retVal);
-    verify(securityContext).redirectToSecurityErrorPage();
-  }
-
-  @Test
-  public void testRestOtherErrorIsIgnored() throws Exception {
-    when(wrapped.error(any(Request.class), any(Throwable.class))).thenReturn(true);
-
-    final boolean retVal = restErrorCallback.error(mock(Request.class), new Throwable());
-
-    assertTrue(retVal);
-    verifyNoMoreInteractions(securityContext);
-  }
-
-  @Test
-  public void testRestErrorCallbackThrowsErrorWhenNoSecurityErrorPageExists() throws Exception {
-    final MissingPageRoleException toBeThrown = new MissingPageRoleException(SecurityError.class);
-
-    doThrow(toBeThrown).when(securityContext).redirectToSecurityErrorPage();
-    when(wrapped.error(any(Request.class), any(Throwable.class))).thenReturn(true);
-
-    try {
-      restErrorCallback.error(mock(Request.class), new UnauthorizedException());
-      fail("No exception was thrown.");
-    }
-    catch (RuntimeException ex) {
-      // Precondition
-      verify(securityContext).redirectToSecurityErrorPage();
-
-      assertSame(toBeThrown, ex.getCause());
-    }
-  }
-
-  @Test
-  public void testRestErrorCallbackThrowsErrorWhenNoLoginPageExists() throws Exception {
-    final MissingPageRoleException toBeThrown = new MissingPageRoleException(LoginPage.class);
-
-    doThrow(toBeThrown).when(securityContext).redirectToLoginPage();
-    when(wrapped.error(any(Request.class), any(Throwable.class))).thenReturn(true);
-
-    try {
-      restErrorCallback.error(mock(Request.class), new UnauthenticatedException());
-      fail("No exception was thrown.");
-    }
-    catch (RuntimeException ex) {
-      // Precondition
-      verify(securityContext).redirectToLoginPage();
-
-      assertSame(toBeThrown, ex.getCause());
-    }
+    verify(handler).handleException(toBeThrown);
   }
 
 }

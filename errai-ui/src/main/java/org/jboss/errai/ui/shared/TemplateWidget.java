@@ -57,7 +57,7 @@ public class TemplateWidget extends Panel {
 
   @Override
   public boolean remove(final Widget child) {
-    if(child.getParent() != this)
+    if (child.getParent() != this)
     {
       return false;
     }

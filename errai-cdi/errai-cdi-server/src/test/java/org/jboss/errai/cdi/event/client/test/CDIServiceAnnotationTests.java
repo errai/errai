@@ -18,6 +18,7 @@ package org.jboss.errai.cdi.event.client.test;
 
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
+import org.jboss.errai.bus.client.api.base.NoSubscribersToDeliverTo;
 import org.jboss.errai.bus.client.api.builder.MessageBuildParms;
 import org.jboss.errai.bus.client.api.builder.MessageBuildSendableWithReply;
 import org.jboss.errai.bus.client.api.messaging.Message;
@@ -28,6 +29,7 @@ import org.jboss.errai.common.client.api.ErrorCallback;
 import org.jboss.errai.common.client.protocols.MessageParts;
 
 import com.google.gwt.user.client.Timer;
+import org.junit.Assert;
 
 /**
  * Test that annotated services (types or methods) are properly scanned and subscribed by
@@ -192,7 +194,9 @@ public class CDIServiceAnnotationTests extends AbstractErraiTest {
             .errorsHandledBy(new ErrorCallback<Message>() {
               @Override
               public boolean error(Message message, Throwable throwable) {
-                throw new RuntimeException("error occurred with message: " + throwable.getMessage(), throwable);
+                assertTrue(throwable instanceof NoSubscribersToDeliverTo);
+                finishTest();
+                return false;
               }
             }).sendNowWith(bus);
 
@@ -202,7 +206,7 @@ public class CDIServiceAnnotationTests extends AbstractErraiTest {
       public void run() {
         if (System.currentTimeMillis() - start > TIMEOUT && !received) {
           cancel();
-          finishTest();
+          fail("No response received after " + (System.currentTimeMillis() - start) + " ms");
         }
         else if (received) {
           cancel();

@@ -79,7 +79,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.google.common.collect.HashMultimap;
 
@@ -123,8 +123,6 @@ public class IOCProcessorErrorTest {
     when(injContext.getAnnotationsForElementType(Provider)).thenReturn(Arrays.asList(IOCProvider.class));
     when(injContext.isWhitelisted(any())).thenReturn(true);
     when(injContext.isBlacklisted(any())).thenReturn(false);
-    when(injContext.isElementType(any(), (Class<? extends Annotation>) any()))
-      .then(inv -> injContext.getAnnotationsForElementType((WiringElementType) inv.getArguments()[0]).contains(inv.getArguments()[1]));
 
     final ClassStructureBuilder<?> classBuilder = ClassBuilder
             .define("org.jboss.errai.ioc.FakeBootstrapperImpl")

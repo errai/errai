@@ -16,17 +16,18 @@
 
 package org.jboss.errai.ioc.rebind.ioc.bootstrapper;
 
-import org.jboss.errai.config.propertiesfile.ErraiAppPropertiesConfiguration;
 import org.jboss.errai.config.ErraiConfiguration;
+import org.jboss.errai.config.propertiesfile.ErraiAppPropertiesConfiguration;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PropertyValueTest {

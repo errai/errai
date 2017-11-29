@@ -3,7 +3,7 @@
   <parent>
     <groupId>org.jboss.errai</groupId>
     <artifactId>errai-demos</artifactId>
-    <version>4.1.1-SNAPSHOT</version>
+    <version>4.1.2-SNAPSHOT</version>
   </parent>
   <artifactId>errai-jsinterop-demo</artifactId>
   <packaging>pom</packaging>

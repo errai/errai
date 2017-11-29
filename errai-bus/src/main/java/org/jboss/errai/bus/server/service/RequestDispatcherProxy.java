@@ -26,14 +26,14 @@ import java.util.List;
  * @author Mike Brock
  */
 public class RequestDispatcherProxy implements RequestDispatcher {
+
   private List<Message> heldGlobalMessages = new ArrayList<Message>();
   private List<Message> heldMessages = new ArrayList<Message>();
   private RequestDispatcher proxied;
-  private boolean proxyClosed;
 
   @Override
   public void dispatchGlobal(Message message) throws Exception {
-    if (proxyClosed) {
+    if (proxied != null) {
       proxied.dispatch(message);
     }
     else {
@@ -43,7 +43,7 @@ public class RequestDispatcherProxy implements RequestDispatcher {
 
   @Override
   public void dispatch(Message message) throws Exception {
-    if (proxyClosed) {
+    if (proxied != null) {
       proxied.dispatch(message);
     }
     else {
@@ -53,9 +53,6 @@ public class RequestDispatcherProxy implements RequestDispatcher {
 
   void closeProxy(RequestDispatcher dispatcher) {
     try {
-      this.proxied = dispatcher;
-      this.proxyClosed = true;
-
       for (Message message : heldMessages) {
         dispatcher.dispatch(message);
       }
@@ -63,13 +60,17 @@ public class RequestDispatcherProxy implements RequestDispatcher {
       for (Message message : heldGlobalMessages) {
         dispatcher.dispatchGlobal(message);
       }
-
-      heldMessages = null;
-      heldGlobalMessages = null;
-
+      reset();
+      this.proxied = dispatcher;
     }
     catch (Exception e) {
       throw new RuntimeException("failed to close proxy", e);
     }
+  }
+
+  public void reset() {
+    this.proxied = null;
+    heldMessages.clear();
+    heldGlobalMessages.clear();
   }
 }

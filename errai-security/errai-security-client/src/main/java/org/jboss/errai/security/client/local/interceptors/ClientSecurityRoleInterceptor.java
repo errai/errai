@@ -16,12 +16,6 @@
 
 package org.jboss.errai.security.client.local.interceptors;
 
-import java.lang.annotation.Annotation;
-import java.util.Set;
-
-import javax.enterprise.context.Dependent;
-import javax.inject.Inject;
-
 import org.jboss.errai.common.client.api.ErrorCallback;
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.common.client.api.interceptor.FeatureInterceptor;
@@ -35,6 +29,11 @@ import org.jboss.errai.security.shared.exception.UnauthorizedException;
 import org.jboss.errai.security.shared.spi.RequiredRolesExtractor;
 import org.jboss.errai.security.shared.util.AnnotationUtils;
 
+import javax.enterprise.context.Dependent;
+import javax.inject.Inject;
+import java.lang.annotation.Annotation;
+import java.util.Set;
+
 /**
  * Intercepts RPC calls to resources marked with {@link RestrictedAccess}. This
  * interceptor throws an {@link UnauthenticatedException} if the user is not
@@ -44,10 +43,9 @@ import org.jboss.errai.security.shared.util.AnnotationUtils;
  * @author edewit@redhat.com
  * @author Max Barkley <mbarkley@redhat.com>
  */
-@FeatureInterceptor(RestrictedAccess.class)
 @Dependent
-public class ClientSecurityRoleInterceptor implements
-RemoteCallInterceptor<RemoteCallContext> {
+@FeatureInterceptor(RestrictedAccess.class)
+public class ClientSecurityRoleInterceptor implements RemoteCallInterceptor<RemoteCallContext> {
 
   private final SecurityContext securityContext;
   private final RequiredRolesExtractor roleExtractor;
@@ -67,11 +65,11 @@ RemoteCallInterceptor<RemoteCallContext> {
   @Override
   public void aroundInvoke(final RemoteCallContext callContext) {
     securityCheck(
-            AnnotationUtils.mergeRoles(
-                    roleExtractor,
-                    getRestrictedAccessAnnotation(callContext.getTypeAnnotations()),
-                    getRestrictedAccessAnnotation(callContext.getAnnotations())),
-                    callContext);
+        AnnotationUtils.mergeRoles(
+            roleExtractor,
+            getRestrictedAccessAnnotation(callContext.getTypeAnnotations()),
+            getRestrictedAccessAnnotation(callContext.getAnnotations())),
+        callContext);
   }
 
   private void securityCheck(final Set<Role> requiredRoleNames, final RemoteCallContext callContext) {
@@ -95,16 +93,13 @@ RemoteCallInterceptor<RemoteCallContext> {
               return true;
             }
           });
-        }
-        else {
+        } else {
           throw new UnauthorizedException();
         }
-      }
-      else {
+      } else {
         throw new UnauthenticatedException();
       }
-    }
-    else {
+    } else {
       callContext.proceed();
     }
   }
@@ -117,5 +112,4 @@ RemoteCallInterceptor<RemoteCallContext> {
     }
     return null;
   }
-
 }

@@ -89,7 +89,7 @@ public class InstanceProvider implements ContextualTypeProvider<Instance> {
     @Override
     public Iterator<T> iterator() {
       final Collection<SyncBeanDef<T>> beanDefs = IOC.getBeanManager().lookupBeans( type, qualifiers );
-      if(beanDefs==null){
+      if (beanDefs==null){
         return Collections.<T>emptyList().iterator();
       }
       return new InstanceImplIterator(beanDefs);

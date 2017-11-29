@@ -764,7 +764,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
   private boolean containsInnerClass(ClassStructureBuilder<?> classStructureBuilder, BuildMetaClass inner) {
     MetaClass[] innerClasses = classStructureBuilder.getClassDefinition().getDeclaredClasses();
     for (MetaClass innerClass : innerClasses) {
-      if(innerClass.getFullyQualifiedName().equals(inner.getFullyQualifiedName())) {
+      if (innerClass.getFullyQualifiedName().equals(inner.getFullyQualifiedName())) {
         return true;
       }
     }

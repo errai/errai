@@ -7,7 +7,7 @@
   <parent>
     <artifactId>errai-jpa-parent</artifactId>
     <groupId>org.jboss.errai</groupId>
-    <version>4.1.1-SNAPSHOT</version>
+    <version>4.1.2-SNAPSHOT</version>
   </parent>
 
   <artifactId>errai-jpa-client</artifactId>

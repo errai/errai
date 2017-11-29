@@ -949,25 +949,42 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     final List<Message> highPriority = new ArrayList<>();
     for (final Message message : new ArrayList<>(deferredMessages)) {
       if (message.hasPart(MessageParts.PriorityProcessing)) {
-        if (remotes.containsKey(message.getSubject()))
+        if (remotes.containsKey(message.getSubject())) {
           highPriority.add(message);
-        deferredMessages.remove(message);
+          deferredMessages.remove(message);
+        }
       }
     }
 
     final List<Message> lowPriority = new ArrayList<>();
-    do {
-      for (final Message message : new ArrayList<>(deferredMessages)) {
-        if (remotes.containsKey(message.getSubject()))
-          lowPriority.add(message);
+    for (final Message message : new ArrayList<>(deferredMessages)) {
+      if (remotes.containsKey(message.getSubject())) {
+        lowPriority.add(message);
         deferredMessages.remove(message);
       }
     }
-    while (!deferredMessages.isEmpty());
 
-    transportHandler.transmit(highPriority);
-    transportHandler.transmit(lowPriority);
-    deferredMessages.clear();
+    try {
+      transportHandler.transmit(highPriority);
+      transportHandler.transmit(lowPriority);
+
+      for (final Message message : deferredMessages) {
+        String subject = message.getSubject();
+        if (!(localSubscriptions.containsKey(subject) ||
+             subscriptions.containsKey(subject) ||
+             shadowSubscriptions.containsKey(subject))) {
+          try {
+            throw new NoSubscribersToDeliverTo(subject);
+          } catch (NoSubscribersToDeliverTo ex) {
+            if (message.getErrorCallback() != null) {
+              message.getErrorCallback().error(message, ex);
+            }
+          }
+        }
+      }
+    } finally {
+      deferredMessages.clear();
+    }
   }
 
   public boolean handleTransportError(final BusTransportError transportError) {

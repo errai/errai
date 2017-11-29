@@ -16,10 +16,9 @@
 
 package org.jboss.errai.security.client.local.context;
 
-import javax.annotation.PostConstruct;
-import javax.enterprise.event.Event;
-import javax.inject.Inject;
-
+import com.google.common.collect.ImmutableListMultimap;
+import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.Multimap;
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.ClientMessageBus;
 import org.jboss.errai.bus.client.framework.BusState;
@@ -49,9 +48,9 @@ import org.jboss.errai.ui.nav.rebind.NavigationGraphGenerator;
 import org.jboss.errai.ui.shared.api.style.StyleBindingsRegistry;
 import org.slf4j.Logger;
 
-import com.google.common.collect.ImmutableListMultimap;
-import com.google.common.collect.ImmutableMultimap;
-import com.google.common.collect.Multimap;
+import javax.annotation.PostConstruct;
+import javax.enterprise.event.Event;
+import javax.inject.Inject;
 
 /**
  * @author Max Barkley <mbarkley@redhat.com>
@@ -266,5 +265,4 @@ public class SecurityContextImpl implements SecurityContext {
   public boolean isUserCacheValid() {
     return userCache.isValid();
   }
-
 }
