@@ -62,14 +62,32 @@ public class GWTMetaClassTest extends AbstractMetaClassTest {
     f.addTestClass("org.jboss.errai.codegen.test.model.SingleValue");
     f.addTestClass("org.jboss.errai.codegen.test.model.MultipleValues");
     f.addTestClass("org.jboss.errai.codegen.test.model.Nested");
+    f.addTestClass("org.jboss.errai.codegen.test.model.ClassImplementingAnnotatedInterface");
+    f.addTestClass("org.jboss.errai.codegen.test.model.ClassExtendingAnnotatedSuperClass");
+    f.addTestClass("org.jboss.errai.codegen.test.model.ClassImplementingInheritedAnnotatedInterface");
+    f.addTestClass("org.jboss.errai.codegen.test.model.ClassExtendingInheritedAnnotatedSuperClass");
+    f.addTestClass("org.jboss.errai.codegen.test.model.ClassExtendingClassExtendingInheritedAnnotatedSuperClass");
+    f.addTestClass("org.jboss.errai.codegen.test.model.AnnotatedInterface");
+    f.addTestClass("org.jboss.errai.codegen.test.model.AnnotatedSuperClass");
+    f.addTestClass("org.jboss.errai.codegen.test.model.InheritedAnnotatedInterface");
+    f.addTestClass("org.jboss.errai.codegen.test.model.InheritedAnnotatedSuperClass");
+    f.addTestClass("org.jboss.errai.codegen.test.model.InheritedAnnotation");
+    f.addTestClass("org.jboss.errai.codegen.test.model.NormalAnnotation");
+    f.addTestClass("org.jboss.errai.codegen.test.meta.method.TestGenericInterface");
+    f.addTestClass("org.jboss.errai.codegen.test.meta.method.TestConcreteInterface");
+    f.addTestClass("org.jboss.errai.codegen.test.meta.method.TestConcreteClass");
+    f.addTestClass("org.jboss.errai.codegen.test.meta.method.TestAbstractClass");
     f.addTestClass(PrimitiveFieldContainer.class.getName());
 
     mockacle = f.generateMockacle();
   }
 
   @Override
-  protected MetaClass getMetaClassImpl(Class<?> javaClass) {
+  protected MetaClass getMetaClassImpl(final Class<?> javaClass) {
+    return getMetaClass(javaClass);
+  }
 
+  static MetaClass getMetaClass(Class<?> javaClass) {
     int dims = 0;
     while (javaClass.isArray()) {
       javaClass = javaClass.getComponentType();

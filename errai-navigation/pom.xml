@@ -121,9 +121,32 @@
       <artifactId>errai-navigation-export-apt</artifactId>
       <scope>compile</scope>
     </dependency>
+
+    <dependency>
+      <!-- Needs provided scope for use in annotation processors -->
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-log4j12</artifactId>
+      <scope>provided</scope>
+    </dependency>
   </dependencies>
   
   <profiles>
+    <profile>
+      <id>apt-generators</id>
+      <activation>
+        <property>
+          <name>apt-generators</name>
+        </property>
+      </activation>
+      <dependencies>
+        <dependency>
+          <groupId>org.jboss.errai</groupId>
+          <artifactId>errai-generators-apt</artifactId>
+          <scope>test</scope>
+        </dependency>
+      </dependencies>
+    </profile>
+
     <profile>
       <id>integration-test</id>
       <build>

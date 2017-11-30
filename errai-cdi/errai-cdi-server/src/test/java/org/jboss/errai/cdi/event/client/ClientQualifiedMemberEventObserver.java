@@ -27,12 +27,12 @@ import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.jboss.errai.cdi.client.qualifier.Value;
-import org.jboss.errai.cdi.client.qualifier.WithClazz;
-import org.jboss.errai.cdi.client.qualifier.WithClazzArray;
-import org.jboss.errai.cdi.client.qualifier.WithEnum;
-import org.jboss.errai.cdi.client.qualifier.WithInt;
-import org.jboss.errai.cdi.client.qualifier.WithMultiple;
+import org.jboss.errai.cdi.common.client.qualifier.Value;
+import org.jboss.errai.cdi.common.client.qualifier.WithClazz;
+import org.jboss.errai.cdi.common.client.qualifier.WithClazzArray;
+import org.jboss.errai.cdi.common.client.qualifier.WithEnum;
+import org.jboss.errai.cdi.common.client.qualifier.WithInt;
+import org.jboss.errai.cdi.common.client.qualifier.WithMultiple;
 import org.jboss.errai.cdi.event.client.shared.FiredQualifier;
 import org.jboss.errai.cdi.event.client.shared.PortableEvent;
 

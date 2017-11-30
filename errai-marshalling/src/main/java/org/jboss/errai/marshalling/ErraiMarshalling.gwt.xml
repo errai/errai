@@ -6,11 +6,6 @@
 
   <entry-point class="org.jboss.errai.marshalling.client.api.MarshallerFramework" />
 
-  <replace-with class="org.jboss.errai.marshalling.client.api.MarshallerFactoryImpl">
-    <when-type-assignable class="org.jboss.errai.marshalling.client.api.MarshallerFactory" />
-    <when-property-is name="errai.useAptGenerators" value="true" />
-  </replace-with>
-
   <generate-with class="org.jboss.errai.marshalling.rebind.MarshallersGenerator">
     <when-type-assignable class="org.jboss.errai.marshalling.client.api.MarshallerFactory" />
     <when-property-is name="errai.useAptGenerators" value="false" />

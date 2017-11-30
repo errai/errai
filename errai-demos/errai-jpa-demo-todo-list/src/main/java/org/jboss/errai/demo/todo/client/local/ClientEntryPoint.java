@@ -27,7 +27,6 @@ import com.google.gwt.user.client.ui.DockPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 
 @EntryPoint
-@ErraiApp(userOnHostPageEnabled = true)
 public class ClientEntryPoint {
 
   @Inject private Navigation navigation;

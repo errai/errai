@@ -23,7 +23,6 @@ import com.google.common.collect.Multimap;
 import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.UnableToCompleteException;
-import com.google.gwt.core.ext.typeinfo.NotFoundException;
 import com.google.gwt.user.client.ui.IsWidget;
 import org.apache.commons.lang3.StringUtils;
 import org.jboss.errai.codegen.Modifier;
@@ -126,12 +125,13 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
   @Override
   protected String generate(TreeLogger logger, GeneratorContext context) {
     final MetaClassFinder metaClassFinder = ann -> new HashSet<>(ClassScanner.getTypesAnnotatedWith(ann, context));
-    return generate(metaClassFinder);
+    final String fqcn = PACKAGE_NAME + "." + CLASS_NAME;
+
+    return generateSource(metaClassFinder, fqcn);
   }
 
-  public String generate(final MetaClassFinder metaClassFinder) {
-    final ClassStructureBuilder<?> classBuilder =
-        Implementations.extend(NavigationGraph.class, CLASS_NAME);
+  public String generateSource(final MetaClassFinder metaClassFinder, final String fqcn) {
+    final ClassStructureBuilder<?> classBuilder = Implementations.extend(NavigationGraph.class, fqcn);
 
     // accumulation of (name, pageclass) mappings for dupe detection and dot file generation
     final BiMap<String, MetaClass> pageNames = HashBiMap.create();
@@ -443,7 +443,7 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
   private MetaMethod checkMethodAndAddPrivateAccessors(AnonymousClassStructureBuilder pageImplBuilder,
       BlockBuilder<?> methodToAppendTo, MetaClass pageClass, Class<? extends Annotation> annotation,
       Parameter... optionalParams) {
-    List<MetaMethod> annotatedMethods = pageClass.getMethodsAnnotatedWith(annotation);
+    List<MetaMethod> annotatedMethods = pageClass.getMethodsAnnotatedWith(MetaClassFactory.get(annotation));
     if (annotatedMethods.size() > 1) {
       throw new UnsupportedOperationException(
           "A @Page can have at most 1 " + createAnnotionName(annotation) + " method, but " + pageClass + " has "
@@ -547,7 +547,7 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
     int idx = 0;
 
     method.append(Stmt.declareFinalVariable("pageState", Map.class, new HashMap<String, Object>()));
-    for (MetaField field : pageClass.getFieldsAnnotatedWith(PageState.class)) {
+    for (MetaField field : pageClass.getFieldsAnnotatedWith(MetaClassFactory.get(PageState.class))) {
       MetaAnnotation psAnno = field.getAnnotation(PageState.class).get();
       String fieldName = field.getName();
       String queryParamName = psAnno.value();
@@ -771,11 +771,7 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
 
   @Override
   public boolean alreadyGeneratedSourcesViaAptGenerators(final GeneratorContext context) {
-    try {
-      final String classFullyQualifiedName = PACKAGE_NAME + "." + CLASS_NAME;
-      return context.getTypeOracle().getType(classFullyQualifiedName) != null;
-    } catch (final NotFoundException e) {
-      return false;
-    }
+    return RebindUtils.isErraiUseAptGeneratorsPropertyEnabled(context);
   }
+
 }

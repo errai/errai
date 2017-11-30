@@ -19,9 +19,12 @@ package org.jboss.errai.ioc.async.test.scopes.dependent.client.res;
 
 import org.jboss.errai.ioc.client.api.LoadAsync;
 
+import javax.enterprise.context.Dependent;
+
 /**
  * @author Mike Brock
  */
 @LoadAsync
+@Dependent
 public class DependentScopedBeanB implements InterfaceContainerClass.SomeInterface {
 }

@@ -39,4 +39,9 @@ public class ErraiJaxrsExportFileGenerator extends AbstractErraiModuleExportFile
   protected String getCamelCaseErraiModuleName() {
     return "jaxrs";
   }
+
+  @Override
+  protected Class<?> getExportingStrategiesClass() {
+    return ErraiJaxrsExportingStrategies.class;
+  }
 }

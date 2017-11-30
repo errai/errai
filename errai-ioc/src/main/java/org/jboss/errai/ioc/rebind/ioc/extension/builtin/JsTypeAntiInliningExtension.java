@@ -24,7 +24,6 @@ import jsinterop.annotations.JsType;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.client.api.IOCExtension;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
-import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessor;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCExtensionConfigurator;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.ExtensionTypeCallback;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
@@ -71,7 +70,7 @@ public class JsTypeAntiInliningExtension implements IOCExtensionConfigurator {
 
   @Override
   public void afterInitialization(final IOCProcessingContext context, final InjectionContext injectionContext) {
-    if (IOCProcessor.isJsInteropSupportEnabled()) {
+    if (injectionContext.getProcessingContext().erraiConfiguration().app().jsInteropSupportEnabled()) {
       injectionContext.registerExtensionTypeCallback(new ExtensionTypeCallback() {
         final Multimap<MetaClass, MetaClass> jsTypeIfaceImpls = HashMultimap.create();
         final Set<MetaClass> jsTypeIfaces = new HashSet<>();

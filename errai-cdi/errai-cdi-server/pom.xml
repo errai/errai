@@ -48,6 +48,14 @@
       </properties>
 
       <dependencies>
+
+        <dependency>
+          <!-- Needs provided scope for use in annotation processors -->
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-log4j12</artifactId>
+          <scope>provided</scope>
+        </dependency>
+
         <!-- Must come before gwt-user to override servlet api -->
         <dependency>
           <groupId>org.jboss.spec.javax.servlet</groupId>
@@ -216,6 +224,37 @@
     </profile>
 
     <profile>
+      <id>apt-generators</id>
+      <activation>
+        <property>
+          <name>apt-generators</name>
+        </property>
+      </activation>
+      <dependencies>
+        <dependency>
+          <groupId>org.jboss.errai</groupId>
+          <artifactId>errai-generators-apt</artifactId>
+          <scope>test</scope>
+        </dependency>
+      </dependencies>
+
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-failsafe-plugin</artifactId>
+            <configuration>
+              <excludes>
+                <!-- Ignoring in the APT environment because these features are not yet supported -->
+                <exclude>**/org/jboss/errai/cdi/event/client/test/ClientEventSuperTypeTest.java</exclude>
+                <exclude>**/org/jboss/errai/cdi/stereotypes/client/test/StereotypesIntegrationTest.java</exclude>
+              </excludes>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <profile>
       <id>integration-test</id>
       <properties>
         <profile.testOutputDirectory>war/WEB-INF/classes</profile.testOutputDirectory>
@@ -237,6 +276,7 @@
               <additionalClasspathElements>
                 <additionalClasspathElement>${basedir}/${profile.testOutputDirectory}/</additionalClasspathElement>
                 <additionalClasspathElement>${basedir}/src/test/java/</additionalClasspathElement>
+                <additionalClasspathElement>${basedir}/target/generated-test-sources/test-annotations</additionalClasspathElement>
               </additionalClasspathElements>
               <forkMode>pertest</forkMode>
               <!-- DO NOT REMOVE THE errai.ioc.experimental.infer_dependent_by_reachability 
@@ -408,11 +448,6 @@
         <dependency>
           <groupId>org.slf4j</groupId>
           <artifactId>slf4j-api</artifactId>
-        </dependency>
-        <dependency>
-          <groupId>org.slf4j</groupId>
-          <artifactId>slf4j-log4j12</artifactId>
-          <scope>test</scope>
         </dependency>
 
         <dependency>

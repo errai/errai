@@ -99,7 +99,8 @@ public class QualifierEqualityFactoryGenerator extends Generator {
 
     final long start = System.currentTimeMillis();
     log.info("Generating QualifierEqualityFactory...");
-    final String csq = generate(TranslatableAnnotationUtils.getTranslatableQualifiers(oracle));
+    final String csq = generate(TranslatableAnnotationUtils.getTranslatableQualifiers(oracle),
+            PACKAGE_NAME + "." + CLASS_NAME);
     log.info("Generated QualifierEqualityFactory in " + (System.currentTimeMillis() - start) + "ms");
 
     RebindUtils.writeStringToJavaSourceFileInErraiCacheDir(PACKAGE_NAME, CLASS_NAME, csq);
@@ -108,11 +109,10 @@ public class QualifierEqualityFactoryGenerator extends Generator {
     generatorContext.commit(logger, printWriter);
   }
 
-  public String generate(final Iterable<MetaClass> translatableQualifiers) {
-
+  public String generate(final Iterable<MetaClass> translatableQualifiers, final String fqcn) {
 
     final ClassStructureBuilder<? extends ClassStructureBuilder<?>> builder
-        = ClassBuilder.define(PACKAGE_NAME + "." + CLASS_NAME).publicScope()
+        = ClassBuilder.define(fqcn).publicScope()
         .implementsInterface(QualifierEqualityFactory.class)
         .body();
 

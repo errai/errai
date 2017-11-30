@@ -43,6 +43,10 @@ public class DefinitionsFactorySingleton {
     return factory;
   }
 
+  public static void reset() {
+    factory = null;
+  }
+
   public static DefinitionsFactory newInstance(final ErraiConfiguration erraiConfiguration,
           final MetaClassFinder metaClassFinder) {
     return new DefinitionsFactoryImpl(erraiConfiguration, metaClassFinder);

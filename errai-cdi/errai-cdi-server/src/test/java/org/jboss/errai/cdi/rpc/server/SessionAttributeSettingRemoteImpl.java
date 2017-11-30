@@ -20,7 +20,7 @@ import javax.enterprise.context.RequestScoped;
 
 import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.bus.server.api.RpcContext;
-import org.jboss.errai.cdi.client.remote.MySessionAttributeSettingRemote;
+import org.jboss.errai.cdi.common.client.remote.MySessionAttributeSettingRemote;
 
 /**
  * @author Christian Sadilek <csadilek@redhat.com>

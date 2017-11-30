@@ -188,11 +188,11 @@ public class ProxyMaker {
 
       renderedMethods.add(methodString);
 
-      if ((!method.isPublic() && !method.isProtected()) ||
-          method.isSynthetic() ||
-          method.isFinal() ||
-          method.isStatic() ||
-          method.getDeclaringClass().getFullyQualifiedName().equals(Object.class.getName()))
+      if (!method.getName().equals("toString") && ((!method.isPublic() && !method.isProtected())
+              || method.isSynthetic()
+              || method.isFinal()
+              || method.isStatic()
+              || method.getDeclaringClass().getFullyQualifiedName().equals(Object.class.getName())))
         continue;
 
       final List<Parameter> methodParms = new ArrayList<Parameter>();

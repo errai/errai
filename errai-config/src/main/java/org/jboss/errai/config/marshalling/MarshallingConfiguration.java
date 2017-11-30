@@ -103,9 +103,10 @@ public class MarshallingConfiguration {
   private static Set<MetaClass> allPortableTypes(final ErraiConfiguration erraiConfiguration,
           final MetaClassFinder metaClassFinder) {
 
-    return metaClassFinder.extend(Portable.class, () -> allExposedPortableTypes(erraiConfiguration, metaClassFinder))
-            .extend(Portable.class, () -> allNonExposedPortableTypes(erraiConfiguration, metaClassFinder))
-            .findAnnotatedWith(Portable.class);
+    final HashSet<MetaClass> allPortableTypes = new HashSet<>();
+    allPortableTypes.addAll(allExposedPortableTypes(erraiConfiguration, metaClassFinder));
+    allPortableTypes.addAll(allNonExposedPortableTypes(erraiConfiguration, metaClassFinder));
+    return allPortableTypes;
   }
 
   public static Set<MetaClass> allExposedPortableTypes(final ErraiConfiguration erraiConfiguration,
@@ -127,7 +128,7 @@ public class MarshallingConfiguration {
     // must do this before filling in interfaces and supertypes!
     exposedTypes.removeAll(nonPortableTypes);
 
-    return exposedTypes;
+    return exposedTypes.stream().map(MetaClass::getErased).collect(toSet());
   }
 
   private static Set<MetaClass> allNonExposedPortableTypes(final ErraiConfiguration erraiConfiguration,

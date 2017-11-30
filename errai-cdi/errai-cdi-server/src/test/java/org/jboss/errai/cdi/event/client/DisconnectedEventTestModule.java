@@ -26,10 +26,10 @@ import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Any;
 import javax.inject.Inject;
 
-import org.jboss.errai.cdi.client.event.DataBoundEvent;
-import org.jboss.errai.cdi.client.event.LocalEventA;
-import org.jboss.errai.cdi.client.qualifier.A;
-import org.jboss.errai.cdi.client.qualifier.B;
+import org.jboss.errai.cdi.common.client.event.DataBoundEvent;
+import org.jboss.errai.cdi.common.client.event.LocalEventA;
+import org.jboss.errai.cdi.common.client.qualifier.A;
+import org.jboss.errai.cdi.common.client.qualifier.B;
 
 /**
  * @author Mike Brock

@@ -38,4 +38,8 @@ public final class ExportFileName {
   private static int getAnnotationNameBeginIndex(final String exportFileName) {
     return exportFileName.indexOf(PREFIX) + PREFIX.length();
   }
+
+  public static String decodeModuleClassCanonicalNameFromExportFileSimpleName(final String exportFileClassSimpleName) {
+    return exportFileClassSimpleName.split("__")[0].replace("_", ".");
+  }
 }

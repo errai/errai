@@ -39,10 +39,23 @@ interface ErraiSeparateAppConfiguration {
 
     boolean isWebSocketServerEnabled();
 
+  }
+
+  interface Jaxrs {
+
     String getApplicationContext();
+
+  }
+
+  interface Validation {
+
+    boolean dynamicValidationEnabled();
+
   }
 
   interface Ioc {
+
+    boolean jsInteropSupportEnabled();
 
     boolean isAutoDiscoverServicesEnabled();
 

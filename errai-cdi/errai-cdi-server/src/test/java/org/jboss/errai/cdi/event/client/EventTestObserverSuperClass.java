@@ -21,10 +21,10 @@ import java.util.List;
 
 import javax.enterprise.event.Observes;
 
-import org.jboss.errai.cdi.client.event.MyAbstractEvent;
-import org.jboss.errai.cdi.client.event.MyAbstractEventInterface;
-import org.jboss.errai.cdi.client.event.MyEventImpl;
-import org.jboss.errai.cdi.client.event.MyEventInterface;
+import org.jboss.errai.cdi.common.client.event.MyAbstractEvent;
+import org.jboss.errai.cdi.common.client.event.MyAbstractEventInterface;
+import org.jboss.errai.cdi.common.client.event.MyEventImpl;
+import org.jboss.errai.cdi.common.client.event.MyEventInterface;
 
 /**
  * This class serves a dual-purpose for now: to test whether @Observes works in abstract super classes 

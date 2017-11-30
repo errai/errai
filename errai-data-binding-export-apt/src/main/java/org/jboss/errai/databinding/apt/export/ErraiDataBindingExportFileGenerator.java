@@ -36,4 +36,9 @@ public class ErraiDataBindingExportFileGenerator extends AbstractErraiModuleExpo
   protected String getCamelCaseErraiModuleName() {
     return "dataBinding";
   }
+
+  @Override
+  protected Class<?> getExportingStrategiesClass() {
+    return ErraiDataBindingExportingStrategies.class;
+  }
 }

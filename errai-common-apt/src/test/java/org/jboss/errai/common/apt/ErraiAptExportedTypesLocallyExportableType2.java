@@ -20,5 +20,5 @@ package org.jboss.errai.common.apt;
  * @author Tiago Bento <tfernand@redhat.com>
  */
 @ErraiAptExportedTypesTestAnnotation
-class ErraiAptExportedTypesLocallyExportableType2 {
+public class ErraiAptExportedTypesLocallyExportableType2 {
 }

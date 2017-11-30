@@ -35,4 +35,9 @@ public class ErraiCdiExportFileGenerator extends AbstractErraiModuleExportFileGe
   protected String getCamelCaseErraiModuleName() {
     return "cdi";
   }
+
+  @Override
+  protected Class<?> getExportingStrategiesClass() {
+    return ErraiCdiExportingStrategies.class;
+  }
 }

@@ -23,11 +23,17 @@ public class ErraiAptGeneratedSourceFile {
   private final String packageName;
   private final String classSimpleName;
   private final String sourceCode;
+  private final Type type;
 
-  public ErraiAptGeneratedSourceFile(final String packageName, final String classSimpleName, final String sourceCode) {
+  public ErraiAptGeneratedSourceFile(final String packageName,
+          final String classSimpleName,
+          final String sourceCode,
+          final Type type) {
+
     this.packageName = packageName;
     this.classSimpleName = classSimpleName;
     this.sourceCode = sourceCode;
+    this.type = type;
   }
 
   public String getPackageName() {
@@ -40,5 +46,13 @@ public class ErraiAptGeneratedSourceFile {
 
   public String getSourceCode() {
     return sourceCode;
+  }
+
+  public Type getType() {
+    return type;
+  }
+
+  public enum Type {
+    CLIENT, SHARED
   }
 }

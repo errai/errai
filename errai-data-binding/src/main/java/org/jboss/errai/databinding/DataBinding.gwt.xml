@@ -27,9 +27,4 @@
         <when-property-is name="errai.useAptGenerators" value="false"/>
     </generate-with>
 
-    <replace-with class="org.jboss.errai.databinding.client.local.BindableProxyLoaderImpl">
-        <when-type-assignable class="org.jboss.errai.databinding.client.local.BindableProxyLoader"/>
-        <when-property-is name="errai.useAptGenerators" value="true"/>
-    </replace-with>
-
 </module>

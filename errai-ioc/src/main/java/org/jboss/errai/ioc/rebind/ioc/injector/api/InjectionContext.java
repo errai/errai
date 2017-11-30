@@ -19,9 +19,10 @@ package org.jboss.errai.ioc.rebind.ioc.injector.api;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
-import org.jboss.errai.codegen.meta.HasAnnotations;
 import org.jboss.errai.codegen.meta.MetaAnnotation;
 import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaClassFactory;
+import org.jboss.errai.codegen.meta.MetaEnum;
 import org.jboss.errai.common.client.api.Assert;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.FactoryBodyGenerator;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.FactoryGenerator;
@@ -29,6 +30,7 @@ import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessor;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCDecoratorExtension;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCExtensionConfigurator;
+import org.jboss.errai.ioc.rebind.ioc.graph.api.InjectionSite;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.QualifierFactory;
 import org.jboss.errai.ioc.rebind.ioc.graph.impl.DefaultQualifierFactory;
 import org.jboss.errai.ioc.rebind.ioc.graph.impl.FactoryNameGenerator;
@@ -37,10 +39,6 @@ import org.jboss.errai.reflections.util.SimplePackageFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.enterprise.context.NormalScope;
-import javax.enterprise.inject.Stereotype;
-import javax.inject.Qualifier;
-import javax.inject.Scope;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Target;
@@ -50,7 +48,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -87,9 +84,9 @@ public class InjectionContext {
 
   private static final String[] implicitWhitelist = { "org.jboss.errai.*", "com.google.gwt.*" };
 
-  private final Multimap<Class<? extends Annotation>, IOCDecoratorExtension<? extends Annotation>> decorators = HashMultimap.create();
-  private final Multimap<ElementType, Class<? extends Annotation>> decoratorsByElementType = HashMultimap.create();
-  private final Multimap<Class<? extends Annotation>, Class<? extends Annotation>> metaAnnotationAliases
+  private final Multimap<MetaClass, IOCDecoratorExtension<? extends Annotation>> decorators = HashMultimap.create();
+  private final Multimap<ElementType, MetaClass> decoratorsByElementType = HashMultimap.create();
+  private final Multimap<MetaClass, Class<? extends Annotation>> metaAnnotationAliases
       = HashMultimap.create();
 
   private final Map<String, Object> attributeMap = new HashMap<String, Object>();
@@ -154,7 +151,7 @@ public class InjectionContext {
    *          Contains the type and qualifier that the given provider satisfies.
    * @param provider
    *          The
-   *          {@link InjectableProvider#getInjectable(org.jboss.errai.ioc.rebind.ioc.graph.api.ProvidedInjectable.InjectionSite, FactoryNameGenerator)}
+   *          {@link InjectableProvider#getInjectable(InjectionSite, FactoryNameGenerator)}
    *          will be called for every injection site satisified by the given
    *          handle. The returned {@link FactoryBodyGenerator} will be used to
    *          generate factories specific to the given injection sites.
@@ -174,8 +171,8 @@ public class InjectionContext {
    *          satisfies.
    * @param provider
    *          The
-   *          {@link InjectableProvider#getInjectable(org.jboss.errai.ioc.rebind.ioc.graph.api.ProvidedInjectable.InjectionSite, FactoryNameGenerator)}
-   *          will be called for every injection site satisified by the given
+   *          {@link InjectableProvider#getInjectable(InjectionSite, FactoryNameGenerator)}
+   *          will be called for every injection site satisfied by the given
    *          handle. The returned {@link FactoryBodyGenerator} will be used to
    *          generate factories specific to the given injection sites.
    */
@@ -239,16 +236,14 @@ public class InjectionContext {
 
       for (final ElementType type : target.value()) {
         if (type == ElementType.ANNOTATION_TYPE) {
-          // type is a meta-annotation. so we need to map all annotations with this
-          // meta-annotation to the decorator extension.
+          // type is a meta-annotation. so we need to map all annotations with this meta-annotation to the decorator extension.
 
           for (final MetaClass annotationClazz : processingContext.metaClassFinder().findAnnotatedWith(annotation)) {
-            if (Annotation.class.isAssignableFrom(annotationClazz.unsafeAsClass())) {
-              final Class<? extends Annotation> javaAnnoCls = annotationClazz.unsafeAsClass().asSubclass(Annotation.class);
-              decorators.get(javaAnnoCls).add(iocExtension);
+            if (annotationClazz.isAssignableTo(Annotation.class)) {
+              decorators.get(annotationClazz).add(iocExtension);
 
               if (oneTarget) {
-                metaAnnotationAliases.put(javaAnnoCls, annotation);
+                metaAnnotationAliases.put(annotationClazz, annotation);
               }
             }
           }
@@ -258,23 +253,21 @@ public class InjectionContext {
         }
       }
     }
-    decorators.get(annotation).add(iocExtension);
+    decorators.get(MetaClassFactory.get(annotation)).add(iocExtension);
   }
 
-  public Set<Class<? extends Annotation>> getDecoratorAnnotations() {
+  private Set<MetaClass> getDecoratorAnnotations() {
     return Collections.unmodifiableSet(decorators.keySet());
   }
 
-  public <A extends Annotation> IOCDecoratorExtension<A>[] getDecorators(final Class<A> annotation) {
+  public IOCDecoratorExtension<?>[] getDecorators(final MetaClass annotation) {
     final Collection<IOCDecoratorExtension<?>> decs = decorators.get(annotation);
-    @SuppressWarnings("unchecked")
-    final IOCDecoratorExtension<A>[] da = new IOCDecoratorExtension[decs.size()];
+    final IOCDecoratorExtension<?>[] da = new IOCDecoratorExtension[decs.size()];
     decs.toArray(da);
-
     return da;
   }
 
-  public Collection<Class<? extends Annotation>> getDecoratorAnnotationsBy(final ElementType type) {
+  public Collection<MetaClass> getDecoratorAnnotationsBy(final ElementType type) {
     if (decoratorsByElementType.size() == 0) {
       sortDecorators();
     }
@@ -287,10 +280,10 @@ public class InjectionContext {
   }
 
   private void sortDecorators() {
-    for (final Class<? extends Annotation> a : getDecoratorAnnotations()) {
+    for (final MetaClass a : getDecoratorAnnotations()) {
       if (a.isAnnotationPresent(Target.class)) {
-        for (final ElementType type : a.getAnnotation(Target.class).value()) {
-          decoratorsByElementType.get(type).add(a);
+        for (final MetaEnum type : a.getAnnotation(Target.class).get().valueAsArray(MetaEnum[].class)) {
+          decoratorsByElementType.get(type.as(ElementType.class)).add(a);
         }
       }
       else {

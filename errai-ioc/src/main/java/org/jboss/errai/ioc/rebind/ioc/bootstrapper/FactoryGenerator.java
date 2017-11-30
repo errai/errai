@@ -233,4 +233,11 @@ public class FactoryGenerator extends IncrementalGenerator {
     return 1;
   }
 
+  public static void reset() {
+    graph = null;
+    injectionContext = null;
+    generatedSourceByFactoryTypeName = new HashMap<>();
+    injectablesByFactoryTypeName = new HashMap<>();
+    totalTime = 0;
+  }
 }

@@ -55,7 +55,7 @@ public abstract class MetaClass implements MetaType, MetaGenericDeclaration, Has
    * @throws NullPointerException
    *           if {@code annotation} is null.
    */
-  public abstract List<MetaMethod> getMethodsAnnotatedWith(Class<? extends Annotation> annotation);
+  public abstract List<MetaMethod> getMethodsAnnotatedWith(MetaClass annotation);
 
   public abstract List<MetaMethod> getDeclaredMethodsAnnotatedWith(Class<? extends Annotation> annotation);
 
@@ -90,9 +90,9 @@ public abstract class MetaClass implements MetaType, MetaGenericDeclaration, Has
    * @throws NullPointerException
    *           if {@code annotation} is null.
    */
-  public abstract List<MetaField> getFieldsAnnotatedWith(Class<? extends Annotation> annotation);
+  public abstract List<MetaField> getFieldsAnnotatedWith(MetaClass annotation);
 
-  public abstract List<MetaParameter> getParametersAnnotatedWith(Class<? extends Annotation> annotation);
+  public abstract List<MetaParameter> getParametersAnnotatedWith(MetaClass annotation);
 
   public abstract MetaField[] getDeclaredFields();
 

@@ -35,4 +35,9 @@ public class ErraiNavigationExportFileGenerator extends AbstractErraiModuleExpor
   protected String getCamelCaseErraiModuleName() {
     return "navigation";
   }
+
+  @Override
+  protected Class<?> getExportingStrategiesClass() {
+    return ErraiNavigationExportingStrategies.class;
+  }
 }

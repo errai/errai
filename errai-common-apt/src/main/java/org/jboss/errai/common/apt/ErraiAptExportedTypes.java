@@ -16,11 +16,23 @@
 
 package org.jboss.errai.common.apt;
 
+import org.jboss.errai.codegen.meta.MetaAnnotation;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.impl.apt.APTClass;
+import org.jboss.errai.codegen.meta.impl.apt.APTClassUtil;
+import org.jboss.errai.common.apt.configuration.AptErraiAppConfiguration;
 import org.jboss.errai.common.apt.exportfile.ExportFile;
 import org.jboss.errai.common.apt.exportfile.ExportFileName;
 import org.jboss.errai.common.apt.generator.ExportFileGenerator;
+import org.jboss.errai.common.apt.strategies.ErraiExportingStrategies;
+import org.jboss.errai.common.apt.strategies.ErraiExportingStrategiesFactory;
+import org.jboss.errai.common.apt.strategies.ErraiExportingStrategy;
+import org.jboss.errai.common.apt.strategies.ExportingStrategies;
+import org.jboss.errai.common.configuration.ErraiApp;
+import org.jboss.errai.common.configuration.ErraiGenerator;
+import org.jboss.errai.common.configuration.ErraiModule;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.PackageElement;
@@ -28,11 +40,12 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
-import javax.lang.model.util.Types;
 import java.lang.annotation.Annotation;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
@@ -41,31 +54,37 @@ import java.util.stream.Stream;
 
 import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toSet;
+import static org.jboss.errai.codegen.meta.impl.apt.APTClassUtil.getTypeElement;
 import static org.jboss.errai.common.apt.ErraiAptPackages.exportFilesPackageElement;
-import static org.jboss.errai.common.apt.ErraiAptPackages.exportedAnnotationsPackageElement;
+import static org.jboss.errai.common.apt.exportfile.ExportFileName.decodeModuleClassCanonicalNameFromExportFileSimpleName;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
 public final class ErraiAptExportedTypes {
 
+  private static final Logger log = LoggerFactory.getLogger(ErraiAptExportedTypes.class);
+
   private final Map<String, Set<TypeMirror>> exportedClassesByAnnotationClassName;
 
-  private final Types types;
   private final Elements elements;
   private final AnnotatedSourceElementsFinder annotatedSourceElementsFinder;
   private final ResourceFilesFinder resourcesFilesFinder;
+  private final AptErraiAppConfiguration aptErraiAppConfiguration;
+  private final Set<String> moduleNames;
 
-  public ErraiAptExportedTypes(final Types types,
+  public ErraiAptExportedTypes(final MetaClass erraiAppAnnotatedMetaClass,
           final Elements elements,
           final AnnotatedSourceElementsFinder annotatedSourceElementsFinder,
           final ResourceFilesFinder resourceFilesFinder) {
 
-    this.types = types;
     this.elements = elements;
-    this.annotatedSourceElementsFinder = annotatedSourceElementsFinder;
     this.resourcesFilesFinder = resourceFilesFinder;
+    this.annotatedSourceElementsFinder = annotatedSourceElementsFinder;
+    this.aptErraiAppConfiguration = new AptErraiAppConfiguration(erraiAppAnnotatedMetaClass);
+    this.moduleNames = aptErraiAppConfiguration.modules().stream().map(MetaClass::getCanonicalName).collect(toSet());
 
     // Loads all exported types from ExportFiles
     exportedClassesByAnnotationClassName = getExportedTypesFromExportFilesInExportFilesPackage();
@@ -81,8 +100,17 @@ public final class ErraiAptExportedTypes {
   private Map<String, Set<TypeMirror>> getExportedTypesFromExportFiles(final PackageElement packageElement) {
     return packageElement.getEnclosedElements()
             .stream()
+            .filter(e -> localErraiAppContainsModuleOfExportFileElement(e.getSimpleName().toString()))
             .collect(groupingBy(this::getAnnotationNameFromExportFileElement,
                     flatMapping(this::getExportedTypesFromExportFileElement, toSet())));
+  }
+
+  private boolean localErraiAppContainsModuleOfExportFileElement(final String exportFileClassSimpleName) {
+    if (aptErraiAppConfiguration.local()) {
+      final String moduleName = decodeModuleClassCanonicalNameFromExportFileSimpleName(exportFileClassSimpleName);
+      return moduleNames.contains(moduleName);
+    }
+    return true;
   }
 
   private String getAnnotationNameFromExportFileElement(final Element e) {
@@ -95,20 +123,25 @@ public final class ErraiAptExportedTypes {
   }
 
   private void addLocalExportableTypesWhichHaveNotBeenExported() {
-    final long start = System.currentTimeMillis();
-    System.out.println("Exporting local exportable types..");
-    exportedAnnotationsPackageElement(elements).map(this::getAllExportedAnnotations)
-            .ifPresent(this::addAllExportableTypes);
-    System.out.println("Exported local exportable types in " + (System.currentTimeMillis() - start) + "ms");
-  }
-
-  private Set<TypeElement> getAllExportedAnnotations(final PackageElement exportedAnnotationsPackageElement) {
-    return exportedAnnotationsPackageElement.getEnclosedElements()
-            .stream()
-            .flatMap(this::getExportedTypesFromExportFileElement)
-            .map(types::asElement)
-            .map(s -> (TypeElement) s)
+    log.info("Exporting local exportable types..");
+    final Set<TypeElement> allExportableAnnotations = findAnnotatedMetaClasses(ErraiExportingStrategies.class).stream()
+            .flatMap(c -> Arrays.stream(c.getDeclaredMethods()))
+            .map(m -> m.getAnnotation(ErraiExportingStrategy.class))
+            .filter(Optional::isPresent)
+            .map(Optional::get)
+            .map(MetaAnnotation::<String>value)
+            .map(APTClassUtil::getTypeElement)
             .collect(toSet());
+
+    // Theses annotations are exported using the default exporting strategy
+    allExportableAnnotations.add(getTypeElement(ErraiGenerator.class.getCanonicalName()));
+    allExportableAnnotations.add(getTypeElement(ErraiModule.class.getCanonicalName()));
+    allExportableAnnotations.add(getTypeElement(ErraiApp.class.getCanonicalName()));
+
+    log.debug("Exporting local exportable types using annotations:");
+    log.debug(allExportableAnnotations.stream().map(s -> s.getQualifiedName().toString()).collect(joining("\n")));
+
+    this.addAllExportableTypes(allExportableAnnotations);
   }
 
   private void addAllExportableTypes(final Set<TypeElement> allExportableAnnotations) {
@@ -121,12 +154,19 @@ public final class ErraiAptExportedTypes {
   private Map<String, Set<TypeMirror>> getLocalExportableTypesByItsAnnotationName(final Set<TypeElement> allExportableAnnotations) {
     return getLocalExportFileGenerator(allExportableAnnotations).createExportFiles()
             .stream()
-            .collect(groupingBy(this::getAnnotationNameFromExportFile,
+            .filter(s -> localErraiAppContainsModuleOfExportFileElement(s.simpleClassName()))
+            .collect(groupingBy(exportFile -> exportFile.annotation().getQualifiedName().toString(),
                     flatMapping(this::getExportedTypesFromExportFile, toSet())));
   }
 
   private ExportFileGenerator getLocalExportFileGenerator(final Set<TypeElement> allExportableAnnotations) {
-    return new ExportFileGenerator("localExportableTypes", allExportableAnnotations, annotatedSourceElementsFinder);
+    return new ExportFileGenerator("localExportableTypes", allExportableAnnotations, annotatedSourceElementsFinder,
+            buildExportingStrategies());
+  }
+
+  private ExportingStrategies buildExportingStrategies() {
+    return new ErraiExportingStrategiesFactory(elements).buildFrom(
+            findAnnotatedMetaClasses(ErraiExportingStrategies.class));
   }
 
   private void addExportableLocalTypes(final Map.Entry<String, Set<TypeMirror>> entry) {
@@ -136,12 +176,8 @@ public final class ErraiAptExportedTypes {
     exportedClassesByAnnotationClassName.get(annotationName).addAll(mappedTypes);
   }
 
-  private String getAnnotationNameFromExportFile(final ExportFile exportFile) {
-    return exportFile.annotation().getQualifiedName().toString();
-  }
-
   private Stream<TypeMirror> getExportedTypesFromExportFile(final ExportFile exportFile) {
-    return exportFile.exportedTypes().stream().map(Element::asType);
+    return exportFile.exportedTypes().stream();
   }
 
   public Set<MetaClass> findAnnotatedMetaClasses(final Class<? extends Annotation> annotation) {
@@ -154,6 +190,10 @@ public final class ErraiAptExportedTypes {
 
   public ResourceFilesFinder resourceFilesFinder() {
     return resourcesFilesFinder;
+  }
+
+  public AptErraiAppConfiguration erraiAppConfiguration() {
+    return aptErraiAppConfiguration;
   }
 
   // Java 9 will implement this method, so when it's released and we upgrade, this can be removed.

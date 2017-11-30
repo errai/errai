@@ -19,7 +19,6 @@ package org.jboss.errai.enterprise.rebind;
 import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.UnableToCompleteException;
-import com.google.gwt.core.ext.typeinfo.NotFoundException;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.util.ClassChangeUtil;
 import org.jboss.errai.common.metadata.RebindUtils;
@@ -60,7 +59,8 @@ public class EventQualifierSerializerGenerator extends AbstractAsyncGenerator {
   @Override
   protected String generate(final TreeLogger treeLogger, final GeneratorContext context) {
     logger.info("Generating {}.{}...", SERIALIZER_PACKAGE_NAME, SERIALIZER_CLASS_NAME);
-    final String source = generate(TranslatableAnnotationUtils.getTranslatableQualifiers(context.getTypeOracle()));
+    final String source = generate(TranslatableAnnotationUtils.getTranslatableQualifiers(context.getTypeOracle()),
+            SERIALIZER_PACKAGE_NAME + "." + SERIALIZER_CLASS_NAME);
 
     logger.info("Generating class file for server.");
     if (EnvUtil.isProdMode()) {
@@ -82,8 +82,8 @@ public class EventQualifierSerializerGenerator extends AbstractAsyncGenerator {
     return source;
   }
 
-  public String generate(final Iterable<MetaClass> translatableQualifiers) {
-    return NonGwtEventQualifierSerializerGenerator.generateSource(translatableQualifiers);
+  public String generate(final Iterable<MetaClass> translatableQualifiers, final String fqcn) {
+    return NonGwtEventQualifierSerializerGenerator.generateSource(translatableQualifiers, fqcn);
   }
 
   private void generateAndWriteToDiscoveredDirs(final GeneratorContext context, final String source) {
@@ -107,11 +107,7 @@ public class EventQualifierSerializerGenerator extends AbstractAsyncGenerator {
 
   @Override
   public boolean alreadyGeneratedSourcesViaAptGenerators(final GeneratorContext context) {
-    try {
-      final String classFullyQualifiedName = SERIALIZER_PACKAGE_NAME + "." + SERIALIZER_CLASS_NAME;
-      return context.getTypeOracle().getType(classFullyQualifiedName) != null || Class.forName(classFullyQualifiedName) != null;
-    } catch (final NotFoundException | ClassNotFoundException e) {
-      return false;
-    }
+    return RebindUtils.isErraiUseAptGeneratorsPropertyEnabled(context);
   }
+
 }

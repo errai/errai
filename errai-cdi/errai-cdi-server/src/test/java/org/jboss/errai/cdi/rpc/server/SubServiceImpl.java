@@ -17,7 +17,7 @@
 package org.jboss.errai.cdi.rpc.server;
 
 import org.jboss.errai.bus.server.annotations.Service;
-import org.jboss.errai.cdi.client.remote.SubService;
+import org.jboss.errai.cdi.common.client.remote.SubService;
 
 @Service
 public class SubServiceImpl extends BaseServiceImpl implements SubService {

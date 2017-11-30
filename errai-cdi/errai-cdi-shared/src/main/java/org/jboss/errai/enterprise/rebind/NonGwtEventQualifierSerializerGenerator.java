@@ -57,7 +57,8 @@ public class NonGwtEventQualifierSerializerGenerator {
   @SuppressWarnings("unchecked")
   public static Class<? extends EventQualifierSerializer> generateAndLoad() {
     logger.info("Generating source for {}.{}...", SERIALIZER_PACKAGE_NAME, SERIALIZER_CLASS_NAME);
-    final String source = generateSource(CDIAnnotationUtils.getQualifiers());
+    final String source = generateSource(CDIAnnotationUtils.getQualifiers(),
+            SERIALIZER_PACKAGE_NAME + "." + SERIALIZER_CLASS_NAME);
     logger.info("Successfully generated source for {}.{}", SERIALIZER_PACKAGE_NAME, SERIALIZER_CLASS_NAME);
 
     logger.info("Attempting to compile and load {}.{}", SERIALIZER_PACKAGE_NAME, SERIALIZER_CLASS_NAME);
@@ -65,9 +66,9 @@ public class NonGwtEventQualifierSerializerGenerator {
             .compileAndLoadFromSource(SERIALIZER_PACKAGE_NAME, SERIALIZER_CLASS_NAME, source);
   }
 
-  static String generateSource(final Iterable<MetaClass> qualifiers) {
+  static String generateSource(final Iterable<MetaClass> qualifiers, final String fqcn) {
     final ClassStructureBuilder<?> body = ClassBuilder
-            .define(SERIALIZER_PACKAGE_NAME + "." + SERIALIZER_CLASS_NAME, EventQualifierSerializer.class)
+            .define(fqcn, EventQualifierSerializer.class)
             .publicScope().body();
     final ConstructorBlockBuilder<?> ctor = body.publicConstructor();
 

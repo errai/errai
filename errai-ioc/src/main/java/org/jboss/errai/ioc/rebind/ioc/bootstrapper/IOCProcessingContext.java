@@ -62,7 +62,7 @@ public class IOCProcessingContext {
   }
 
   public MetaClass buildFactoryMetaClass(final Injectable injectable) {
-    final String factoryName = injectable.getFactoryName();
+    final String factoryName = erraiConfiguration.app().namespace() + injectable.getFactoryName();
     final MetaClass typeCreatedByFactory = injectable.getInjectedType();
     final BuildMetaClass factoryMetaClass = ClassBuilder.define(factoryName,
             parameterizedAs(Factory.class, typeParametersOf(typeCreatedByFactory)))

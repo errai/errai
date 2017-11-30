@@ -16,10 +16,13 @@
 
 package org.jboss.errai.ui.test.binding.client.res;
 
+import javax.enterprise.context.Dependent;
+
 /**
  *
  * @author Max Barkley <mbarkley@redhat.com>
  */
+@Dependent
 public class NonCompositeBindingListWidget extends BindingListWidget<NonCompositeBindingItem> {
 
   @Override

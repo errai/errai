@@ -172,13 +172,13 @@ public class DataBindingUtil {
       }
     }
     else {
-      final List<MetaField> modelFields = decorable.getDecorableDeclaringType().getFieldsAnnotatedWith(Model.class);
+      final List<MetaField> modelFields = decorable.getDecorableDeclaringType().getFieldsAnnotatedWith(MetaClassFactory.get(Model.class));
       if (!modelFields.isEmpty()) {
         throw new GenerationException("Found one or more fields annotated with @Model but missing @Inject "
                 + modelFields.toString());
       }
 
-      final List<MetaParameter> modelParameters = decorable.getDecorableDeclaringType().getParametersAnnotatedWith(Model.class);
+      final List<MetaParameter> modelParameters = decorable.getDecorableDeclaringType().getParametersAnnotatedWith(MetaClassFactory.get(Model.class));
       if (!modelParameters.isEmpty()) {
         throw new GenerationException(
                 "Found one or more constructor or method parameters annotated with @Model but missing @Inject "
@@ -196,11 +196,11 @@ public class DataBindingUtil {
     final Collection<ElementType> allowedTypes = (target == null) ? null : Arrays.asList(target.value());
 
     if (allowedTypes == null || allowedTypes.contains(ElementType.FIELD)) {
-      annotated.addAll(enclosingType.getFieldsAnnotatedWith(annoType));
+      annotated.addAll(enclosingType.getFieldsAnnotatedWith(MetaClassFactory.get(annoType)));
     }
 
     if (allowedTypes == null || allowedTypes.contains(ElementType.METHOD)) {
-      annotated.addAll(enclosingType.getMethodsAnnotatedWith(annoType));
+      annotated.addAll(enclosingType.getMethodsAnnotatedWith(MetaClassFactory.get(annoType)));
     }
 
     if (allowedTypes == null || allowedTypes.contains(ElementType.CONSTRUCTOR)) {

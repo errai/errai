@@ -21,14 +21,14 @@ import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
-import org.jboss.errai.cdi.client.event.FinishEvent;
-import org.jboss.errai.cdi.client.event.MyEventImpl;
-import org.jboss.errai.cdi.client.event.MyEventInterface;
-import org.jboss.errai.cdi.client.event.StartEvent;
-import org.jboss.errai.cdi.client.event.UnobservedEvent;
-import org.jboss.errai.cdi.client.qualifier.A;
-import org.jboss.errai.cdi.client.qualifier.B;
-import org.jboss.errai.cdi.client.qualifier.C;
+import org.jboss.errai.cdi.common.client.event.FinishEvent;
+import org.jboss.errai.cdi.common.client.event.MyEventImpl;
+import org.jboss.errai.cdi.common.client.event.MyEventInterface;
+import org.jboss.errai.cdi.common.client.event.StartEvent;
+import org.jboss.errai.cdi.common.client.event.UnobservedEvent;
+import org.jboss.errai.cdi.common.client.qualifier.A;
+import org.jboss.errai.cdi.common.client.qualifier.B;
+import org.jboss.errai.cdi.common.client.qualifier.C;
 
 @ApplicationScoped
 public class CdiTestEventProducerService {

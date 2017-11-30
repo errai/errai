@@ -35,6 +35,7 @@ import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.ContextualStatementBuilder;
 import org.jboss.errai.codegen.meta.MetaAnnotation;
 import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaClassMember;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
@@ -232,7 +233,7 @@ public class ProducerFactoryBodyGenerator extends AbstractBodyGenerator {
       params[paramDep.getParamIndex()] = paramExpression;
     }
 
-    final MetaParameter disposesParam = disposer.getParametersAnnotatedWith(Disposes.class).get(0);
+    final MetaParameter disposesParam = disposer.getParametersAnnotatedWith(MetaClassFactory.get(Disposes.class)).get(0);
     params[disposesParam.getIndex()] = loadVariable("instance");
 
     return params;

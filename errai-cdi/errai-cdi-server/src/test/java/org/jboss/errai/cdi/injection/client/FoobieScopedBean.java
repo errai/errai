@@ -16,9 +16,26 @@
 
 package org.jboss.errai.cdi.injection.client;
 
+import org.jboss.errai.common.client.api.annotations.IOCProducer;
+
 /**
  * @author Mike Brock
  */
 @FoobieScope
 public class FoobieScopedBean {
+
+  /* @FoobieScope is an annotation that is not exported by any of the built-in exporters.
+  * To do so, a foobie-scope-export-apt module containing an annotation processor such as errai-ioc-export-apt should be created.
+  * To avoid the creation of an entire module just for this annotation, an unused @IOCProducer is placed inside this class,
+  * so that it gets exported as having an @IOCProducer class and is seen by the IOCProcessor.
+  * */
+
+  @IOCProducer
+  public UnusedInterface unusedInterfaceProducer() {
+    return null;
+  }
+
+  public interface UnusedInterface {
+  }
+
 }

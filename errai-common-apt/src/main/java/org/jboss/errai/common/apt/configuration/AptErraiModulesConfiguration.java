@@ -18,12 +18,9 @@ package org.jboss.errai.common.apt.configuration;
 
 import org.jboss.errai.codegen.meta.MetaAnnotation;
 import org.jboss.errai.codegen.meta.MetaClass;
-import org.jboss.errai.common.configuration.ErraiModule;
 import org.jboss.errai.config.ErraiModulesConfiguration;
-import org.jboss.errai.config.MetaClassFinder;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -45,14 +42,10 @@ import static org.jboss.errai.common.configuration.ErraiModule.Property.SERIALIZ
  */
 public class AptErraiModulesConfiguration implements ErraiModulesConfiguration {
 
-  private final Set<MetaAnnotation> erraiModules;
+  private final Set<MetaAnnotation> erraiModuleMetaAnnotations;
 
-  AptErraiModulesConfiguration(final MetaClassFinder metaClassFinder) {
-    this.erraiModules = metaClassFinder.findAnnotatedWith(ErraiModule.class)
-            .stream()
-            .map(module -> module.getAnnotation(ErraiModule.class))
-            .map(Optional::get)
-            .collect(toSet());
+  AptErraiModulesConfiguration(final Set<MetaAnnotation> erraiModuleMetaAnnotations) {
+    this.erraiModuleMetaAnnotations = erraiModuleMetaAnnotations;
   }
 
   @Override
@@ -98,6 +91,6 @@ public class AptErraiModulesConfiguration implements ErraiModulesConfiguration {
   }
 
   private <V> Set<V> getConfiguredArrayProperty(final Function<MetaAnnotation, Stream<V>> getter) {
-    return erraiModules.stream().flatMap(getter).collect(toSet());
+    return erraiModuleMetaAnnotations.stream().flatMap(getter).collect(toSet());
   }
 }

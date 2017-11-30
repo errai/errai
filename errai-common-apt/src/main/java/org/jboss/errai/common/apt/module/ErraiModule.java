@@ -17,15 +17,17 @@
 package org.jboss.errai.common.apt.module;
 
 import com.sun.tools.javac.code.Symbol;
+import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.impl.apt.APTClassUtil;
 import org.jboss.errai.common.apt.AnnotatedSourceElementsFinder;
 import org.jboss.errai.common.apt.exportfile.ExportFile;
+import org.jboss.errai.common.apt.strategies.ExportedElement;
+import org.jboss.errai.common.apt.strategies.ExportingStrategies;
+import org.jboss.errai.common.apt.strategies.ExportingStrategy;
 
 import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.TypeMirror;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -33,7 +35,9 @@ import java.util.stream.Stream;
 import static java.util.stream.Collectors.toSet;
 import static javax.lang.model.element.ElementKind.CONSTRUCTOR;
 import static javax.lang.model.element.ElementKind.METHOD;
+import static javax.lang.model.element.ElementKind.PACKAGE;
 import static javax.lang.model.element.ElementKind.PARAMETER;
+import static javax.lang.model.element.Modifier.PUBLIC;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
@@ -41,27 +45,30 @@ import static javax.lang.model.element.ElementKind.PARAMETER;
 public class ErraiModule {
 
   private final String camelCaseErraiModuleName;
-  private final Element erraiModuleClassElement;
+  private final MetaClass erraiModuleMetaClass;
   private final AnnotatedSourceElementsFinder annotatedSourceElementsFinder;
   private final String packageName;
+  private final ExportingStrategies exportingStrategies;
 
   public ErraiModule(final String camelCaseErraiModuleName,
-          final Element erraiModuleClassElement,
-          final AnnotatedSourceElementsFinder annotatedSourceElementsFinder) {
+          final MetaClass erraiModuleMetaClass,
+          final AnnotatedSourceElementsFinder annotatedSourceElementsFinder,
+          final ExportingStrategies exportingStrategies) {
 
     this.camelCaseErraiModuleName = camelCaseErraiModuleName;
-    this.erraiModuleClassElement = erraiModuleClassElement;
+    this.erraiModuleMetaClass = erraiModuleMetaClass;
     this.annotatedSourceElementsFinder = annotatedSourceElementsFinder;
-    this.packageName = getPackageName();
+    this.packageName = erraiModuleMetaClass.getPackageName();
+    this.exportingStrategies = exportingStrategies;
   }
 
-  public Stream<ExportFile> exportFiles(final Set<? extends TypeElement> exportableAnnotations) {
+  public Stream<ExportFile> createExportFiles(final Set<? extends TypeElement> exportableAnnotations) {
     return exportableAnnotations.stream().map(this::newExportFile).filter(Optional::isPresent).map(Optional::get);
   }
 
   Optional<ExportFile> newExportFile(final TypeElement annotation) {
 
-    final Set<Element> exportedTypes = findAnnotatedElements(annotation);
+    final Set<TypeMirror> exportedTypes = findAnnotatedElements(annotation);
 
     if (exportedTypes.isEmpty()) {
       return Optional.empty();
@@ -70,26 +77,41 @@ public class ErraiModule {
     return Optional.of(new ExportFile(erraiModuleUniqueNamespace(), annotation, exportedTypes));
   }
 
-  Set<Element> findAnnotatedElements(final TypeElement annotationTypeElement) {
+  Set<TypeMirror> findAnnotatedElements(final TypeElement annotationTypeElement) {
+    final ExportingStrategy strategy = exportingStrategies.getStrategy(annotationTypeElement);
     return annotatedSourceElementsFinder.findSourceElementsAnnotatedWith(annotationTypeElement)
             .stream()
             .filter(this::isPartOfModule)
-            .flatMap(this::getTypeElement)
+            .flatMap(strategy::getExportedElements)
+            .map(ExportedElement::getElement)
+            .map(Element::asType)
+            .filter(this::isPublic)
             .collect(toSet());
   }
 
-  private Stream<? extends Element> getTypeElement(final Element element) {
-    if (element.getKind().isClass() || element.getKind().isInterface()) {
-      return Stream.of(element);
-    } else if (element.getKind().isField()) {
-      return Stream.of(APTClassUtil.types.asElement(element.asType()));
-    } else if (element.getKind().equals(METHOD) || element.getKind().equals(CONSTRUCTOR)) {
-      return ((ExecutableElement) element).getParameters().stream();
-    } else if (element.getKind().equals(PARAMETER)) {
-      return Stream.of(element);
-    } else {
-      return Stream.of();
+  private boolean isPublic(final TypeMirror typeMirror) {
+    if (typeMirror.getKind().isPrimitive()) {
+      return true;
     }
+
+    final Element element = APTClassUtil.types.asElement(typeMirror);
+
+    if (element.getEnclosingElement().getKind().isInterface()) {
+      // Inner classes of interfaces are public if its outer class is public
+      return element.getEnclosingElement().getModifiers().contains(PUBLIC);
+    }
+
+    if (element.getEnclosingElement().getKind().isClass()) {
+      // Inner classes of non-inner classes have to contain the public modifier to be public
+      return element.getModifiers().contains(PUBLIC) && element.getEnclosingElement().getModifiers().contains(PUBLIC);
+    }
+
+    if (element.getEnclosingElement().getKind().equals(PACKAGE)) {
+      // Non-inner classes and interfaces have to contain the public modifier to be public
+      return element.getModifiers().contains(PUBLIC);
+    }
+
+    return false;
   }
 
   private boolean isPartOfModule(final Element element) {
@@ -98,6 +120,8 @@ public class ErraiModule {
       return isUnderModulePackage((Symbol) element);
     } else if (element.getKind().isField()) {
       return isUnderModulePackage(((Symbol.VarSymbol) element).owner);
+    } else if (element.getKind().equals(METHOD) || element.getKind().equals(CONSTRUCTOR)) {
+      return isUnderModulePackage(((Symbol) element).getEnclosingElement());
     } else if (element.getKind().equals(PARAMETER)) {
       return isUnderModulePackage(((Symbol) element).getEnclosingElement().getEnclosingElement());
     } else {
@@ -111,25 +135,6 @@ public class ErraiModule {
   }
 
   String erraiModuleUniqueNamespace() {
-
-    final String moduleFullName = ((TypeElement) erraiModuleClassElement).getQualifiedName()
-            .toString()
-            .replace(".", "_");
-
-    return moduleFullName + "__" + camelCaseErraiModuleName;
-  }
-
-  private String getPackageName() {
-    return getPackage(erraiModuleClassElement).getQualifiedName().toString();
-  }
-
-  private PackageElement getPackage(final Element element) {
-    final Element enclosingElement = element.getEnclosingElement();
-
-    if (enclosingElement.getKind().equals(ElementKind.PACKAGE)) {
-      return ((PackageElement) enclosingElement);
-    } else {
-      return getPackage(enclosingElement);
-    }
+    return erraiModuleMetaClass.getCanonicalName().replace(".", "_") + "__" + camelCaseErraiModuleName;
   }
 }

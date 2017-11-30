@@ -34,6 +34,7 @@ import static org.jboss.errai.ioc.apt.export.SupportedAnnotationTypes.IOC_PRODUC
 import static org.jboss.errai.ioc.apt.export.SupportedAnnotationTypes.IOC_PROVIDER;
 import static org.jboss.errai.ioc.apt.export.SupportedAnnotationTypes.JAVAX_INJECT;
 import static org.jboss.errai.ioc.apt.export.SupportedAnnotationTypes.JS_TYPE;
+import static org.jboss.errai.ioc.apt.export.SupportedAnnotationTypes.PRODUCES;
 import static org.jboss.errai.ioc.apt.export.SupportedAnnotationTypes.QUALIFIER;
 import static org.jboss.errai.ioc.apt.export.SupportedAnnotationTypes.SCOPE_CONTEXT;
 import static org.jboss.errai.ioc.apt.export.SupportedAnnotationTypes.SHARED_SINGLETON;
@@ -43,11 +44,16 @@ import static org.jboss.errai.ioc.apt.export.SupportedAnnotationTypes.SINGLETON;
  * @author Tiago Bento <tfernand@redhat.com>
  */
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
-@SupportedAnnotationTypes({ IOC_BOOTSTRAP_TASK, IOC_EXTENSION, CODE_DECORATOR, SCOPE_CONTEXT, JAVAX_INJECT, GOOGLE_INJECT, IOC_PROVIDER, DEPENDENT, APPLICATION_SCOPED, ALTERNATIVE, SINGLETON, IOC_PRODUCER, SHARED_SINGLETON, ENTRY_POINT, QUALIFIER, JS_TYPE })
+@SupportedAnnotationTypes({ IOC_BOOTSTRAP_TASK, IOC_EXTENSION, CODE_DECORATOR, SCOPE_CONTEXT, JAVAX_INJECT, GOOGLE_INJECT, IOC_PROVIDER, DEPENDENT, APPLICATION_SCOPED, ALTERNATIVE, SINGLETON, IOC_PRODUCER, SHARED_SINGLETON, ENTRY_POINT, QUALIFIER, JS_TYPE, PRODUCES })
 public class ErraiIocExportFileGenerator extends AbstractErraiModuleExportFileGenerator {
 
   @Override
   protected String getCamelCaseErraiModuleName() {
     return "ioc";
+  }
+
+  @Override
+  protected Class<?> getExportingStrategiesClass() {
+    return ErraiIocExportingStrategies.class;
   }
 }

@@ -16,9 +16,11 @@
 
 package org.jboss.errai.ui.test.common;
 
+import org.jboss.errai.common.configuration.ErraiModule;
+
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
-@org.jboss.errai.common.configuration.ErraiModule
+@ErraiModule
 public class ErraiTestModule {
 }

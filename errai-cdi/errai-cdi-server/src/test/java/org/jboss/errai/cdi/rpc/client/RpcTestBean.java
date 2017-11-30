@@ -21,23 +21,24 @@ import javax.ejb.Startup;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import org.jboss.errai.cdi.client.payload.GenericPayload;
-import org.jboss.errai.cdi.client.payload.ParameterizedSubtypePayload;
-import org.jboss.errai.cdi.client.qualifier.A;
-import org.jboss.errai.cdi.client.qualifier.B;
-import org.jboss.errai.cdi.client.remote.GenericService;
-import org.jboss.errai.cdi.client.remote.MyInterceptedRemote;
-import org.jboss.errai.cdi.client.remote.MyRemote;
-import org.jboss.errai.cdi.client.remote.MySessionAttributeSettingRemote;
-import org.jboss.errai.cdi.client.remote.SubService;
+import org.jboss.errai.cdi.common.client.payload.GenericPayload;
+import org.jboss.errai.cdi.common.client.payload.ParameterizedSubtypePayload;
+import org.jboss.errai.cdi.common.client.qualifier.A;
+import org.jboss.errai.cdi.common.client.qualifier.B;
+import org.jboss.errai.cdi.common.client.remote.GenericService;
+import org.jboss.errai.cdi.common.client.remote.MyInterceptedRemote;
+import org.jboss.errai.cdi.common.client.remote.MyRemote;
+import org.jboss.errai.cdi.common.client.remote.MySessionAttributeSettingRemote;
+import org.jboss.errai.cdi.common.client.remote.SubService;
 import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.RemoteCallback;
+import org.jboss.errai.ioc.client.api.EntryPoint;
 
 /**
  * @author Mike Brock
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-@Startup
+@EntryPoint
 @ApplicationScoped
 public class RpcTestBean {
 

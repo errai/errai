@@ -20,9 +20,11 @@ import com.sun.tools.javac.code.Symbol;
 import com.sun.tools.javac.code.Type;
 import org.jboss.errai.codegen.meta.MetaAnnotation;
 import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaConstructor;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
+import org.jboss.errai.codegen.meta.MetaParameter;
 import org.jboss.errai.codegen.meta.MetaParameterizedType;
 import org.jboss.errai.codegen.meta.MetaTypeVariable;
 import org.jboss.errai.codegen.meta.impl.AbstractMetaClass;
@@ -42,12 +44,21 @@ import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
 import java.lang.annotation.Annotation;
+import java.lang.annotation.Inherited;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
+import static java.util.Arrays.asList;
 import static java.util.Collections.emptySet;
+import static java.util.stream.Collectors.collectingAndThen;
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 import static org.jboss.errai.codegen.meta.impl.apt.APTClassUtil.elements;
 import static org.jboss.errai.codegen.meta.impl.apt.APTClassUtil.getSimpleName;
 import static org.jboss.errai.codegen.meta.impl.apt.APTClassUtil.sameTypes;
@@ -152,6 +163,16 @@ public class APTClass extends AbstractMetaClass<TypeMirror> {
     }
   }
 
+  private PackageElement getPackage(final Element element) {
+    final Element enclosingElement = element.getEnclosingElement();
+
+    if (enclosingElement.getKind().equals(ElementKind.PACKAGE)) {
+      return ((PackageElement) enclosingElement);
+    } else {
+      return getPackage(enclosingElement);
+    }
+  }
+
   @Override
   public String getPackageName() {
     final TypeMirror mirror = getEnclosedMetaObject();
@@ -159,8 +180,7 @@ public class APTClass extends AbstractMetaClass<TypeMirror> {
     case DECLARED:
     case TYPEVAR: {
       final Element element = types.asElement(mirror);
-      final PackageElement pkg = (PackageElement) element.getEnclosingElement();
-      return pkg.getQualifiedName().toString();
+      return getPackage(element).getQualifiedName().toString();
     }
     case ARRAY: {
       final Type.ArrayType arrayType = (Type.ArrayType) mirror;
@@ -197,6 +217,11 @@ public class APTClass extends AbstractMetaClass<TypeMirror> {
       return methods.stream()
               .filter(method -> !method.getModifiers().contains(Modifier.PRIVATE))
               .map(method -> new APTMethod(method, this))
+              .collect(groupingBy(APTMember::getName, groupingBy(this::methodParameterList,
+                      collectingAndThen(toList(), this::filterOutInterfaceMethodsThatHaveBeenOverriden))))
+              .values()
+              .stream()
+              .flatMap(m -> m.values().stream().flatMap(mm -> mm))
               .toArray(MetaMethod[]::new);
     case ARRAY:
     case BOOLEAN:
@@ -211,6 +236,14 @@ public class APTClass extends AbstractMetaClass<TypeMirror> {
     default:
       return throwUnsupportedTypeError(mirror);
     }
+  }
+
+  private List<MetaParameter> methodParameterList(final APTMethod s) {
+    return asList(s.getParameters());
+  }
+
+  private Stream<APTMethod> filterOutInterfaceMethodsThatHaveBeenOverriden(final List<APTMethod> methods) {
+    return methods.size() == 1 ? methods.stream() : methods.stream().filter(x -> !x.getDeclaringClass().isInterface());
   }
 
   @Override
@@ -339,6 +372,9 @@ public class APTClass extends AbstractMetaClass<TypeMirror> {
     case SHORT:
       return null;
     case ARRAY:
+      if ("length".equals(name)) {
+        return new MetaField.ArrayLengthMetaField(this);
+      }
     default:
       return throwUnsupportedTypeError(mirror);
     }
@@ -430,7 +466,7 @@ public class APTClass extends AbstractMetaClass<TypeMirror> {
     case DECLARED:
     case TYPEVAR:
       final Element element = types.asElement(mirror);
-      if (element instanceof  TypeElement) {
+      if (element instanceof TypeElement) {
         final TypeElement typeElement = (TypeElement) element;
         return typeElement.getInterfaces().stream().map(APTClass::new).toArray(MetaClass[]::new);
       }
@@ -753,9 +789,13 @@ public class APTClass extends AbstractMetaClass<TypeMirror> {
   }
 
   @Override
-  public MetaClass asArrayOf(final int dimensions) {
-    final ArrayType arrayType = types.getArrayType(getEnclosedMetaObject());
-    return new APTClass(arrayType);
+  public MetaClass asArrayOf(final int dimension) {
+    return IntStream.range(0, dimension)
+            .boxed()
+            .map(i -> types.getArrayType(getEnclosedMetaObject()))
+            .reduce((a, b) -> types.getArrayType(a))
+            .map(APTClass::new)
+            .orElse(this);
   }
 
   @Override
@@ -796,13 +836,30 @@ public class APTClass extends AbstractMetaClass<TypeMirror> {
     return APTClassUtil.isAnnotationPresent(types.asElement(getEnclosedMetaObject()), metaClass);
   }
 
+  private Collection<TypeMirror> getAllSuperTypes(final TypeMirror typeMirror) {
+    final List<? extends TypeMirror> directSuperTypes = types.directSupertypes(typeMirror);
+    return Stream.concat(directSuperTypes.stream(), directSuperTypes.stream().flatMap(s -> getAllSuperTypes(s).stream())).collect(toSet());
+  }
+
   @Override
   public Collection<MetaAnnotation> getAnnotations() {
     final TypeMirror mirror = getEnclosedMetaObject();
     switch (mirror.getKind()) {
     case DECLARED:
     case TYPEVAR:
-      return APTClassUtil.getAnnotations(mirror);
+      final Collection<MetaAnnotation> directAnnotations = APTClassUtil.getAnnotations(types.asElement(mirror));
+      final Collection<MetaAnnotation> inheritedAnnotations = this.getAllSuperTypes(mirror)
+              .stream()
+              .map(types::asElement)
+              .filter(s -> s.getKind().isClass())
+              .flatMap(e -> APTClassUtil.getAnnotations(e).stream())
+              .filter(a -> a.annotationType().isAnnotationPresent(Inherited.class))
+              .collect(toSet());
+
+      final Collection<MetaAnnotation> allAnnotations = new HashSet<>();
+      allAnnotations.addAll(directAnnotations);
+      allAnnotations.addAll(inheritedAnnotations);
+      return allAnnotations;
     case ARRAY:
     case BOOLEAN:
     case BYTE:
@@ -830,7 +887,10 @@ public class APTClass extends AbstractMetaClass<TypeMirror> {
 
   @Override
   public synchronized Class<?> unsafeAsClass() {
-    return APTClassUtil.unsafeAsClass();
+    if (isArray()) {
+      return MetaClassFactory.loadClass("[L" + getComponentType().getFullyQualifiedName() + ";");
+    }
+    return MetaClassFactory.loadClass(getFullyQualifiedName());
   }
 
 }

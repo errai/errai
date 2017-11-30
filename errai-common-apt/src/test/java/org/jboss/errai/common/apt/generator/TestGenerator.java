@@ -17,9 +17,10 @@
 package org.jboss.errai.common.apt.generator;
 
 import org.jboss.errai.common.apt.AnnotatedSourceElementsFinder;
+import org.jboss.errai.common.apt.strategies.ErraiExportingStrategiesFactory;
 
-import javax.annotation.processing.Filer;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.util.Elements;
 import java.util.Set;
 
 /**
@@ -27,10 +28,12 @@ import java.util.Set;
  */
 class TestGenerator extends ExportFileGenerator {
 
-  TestGenerator(final Filer filer,
-          final Set<? extends TypeElement> exportableAnnotations,
-          final AnnotatedSourceElementsFinder annotatedSourceElementsFinder) {
-    super("test", exportableAnnotations, annotatedSourceElementsFinder);
+  TestGenerator(final Set<? extends TypeElement> exportableAnnotations,
+          final AnnotatedSourceElementsFinder annotatedSourceElementsFinder,
+          final Elements elements) {
+
+    super("test", exportableAnnotations, annotatedSourceElementsFinder,
+            new ErraiExportingStrategiesFactory(elements).buildFrom());
   }
 
 }

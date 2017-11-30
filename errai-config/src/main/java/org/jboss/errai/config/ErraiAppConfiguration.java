@@ -17,7 +17,9 @@
 package org.jboss.errai.config;
 
 import org.jboss.errai.config.ErraiSeparateAppConfiguration.Ioc;
+import org.jboss.errai.config.ErraiSeparateAppConfiguration.Jaxrs;
 import org.jboss.errai.config.ErraiSeparateAppConfiguration.Marshalling;
+import org.jboss.errai.config.ErraiSeparateAppConfiguration.Validation;
 
 import java.util.Optional;
 
@@ -26,9 +28,13 @@ import static org.jboss.errai.config.ErraiSeparateAppConfiguration.Others;
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
-public interface ErraiAppConfiguration extends Ioc, Marshalling, Others {
+public interface ErraiAppConfiguration extends Ioc, Marshalling, Jaxrs, Validation, Others {
 
   boolean isAptEnvironment();
 
   Optional<String> custom(final String propertyName);
+
+  default String namespace() {
+    return "";
+  }
 }

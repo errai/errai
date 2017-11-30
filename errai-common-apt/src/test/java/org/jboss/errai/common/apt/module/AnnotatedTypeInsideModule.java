@@ -22,5 +22,5 @@ import org.jboss.errai.common.apt.configuration.TestAnnotation;
  * @author Tiago Bento <tfernand@redhat.com>
  */
 @TestAnnotation
-class AnnotatedTypeInsideModule {
+public class AnnotatedTypeInsideModule {
 }

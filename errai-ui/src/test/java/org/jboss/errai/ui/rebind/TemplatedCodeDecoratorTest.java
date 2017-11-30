@@ -22,8 +22,8 @@ import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
-import org.jboss.errai.codegen.meta.impl.java.JavaReflectionAnnotation;
 import org.jboss.errai.codegen.meta.impl.build.BuildMetaClass;
+import org.jboss.errai.codegen.meta.impl.java.JavaReflectionAnnotation;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.Decorable;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.FactoryController;
@@ -37,7 +37,9 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import java.io.File;
 import java.lang.annotation.Annotation;
+import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.Optional;
 
@@ -123,10 +125,9 @@ public class TemplatedCodeDecoratorTest {
     when(templatedClass.getFullyQualifiedName()).thenReturn("org.foo.TestTemplated");
     when(templatedClass.getPackageName()).thenReturn("org.foo");
     when(templatedClass.getName()).thenReturn("TestTemplated");
-    when(templatedClass.getMethodsAnnotatedWith(EventHandler.class)).thenReturn(Collections.emptyList());
+    when(templatedClass.getMethodsAnnotatedWith(MetaClassFactory.get(EventHandler.class))).thenReturn(Collections.emptyList());
 
-    when(iocProcessingContext.resourceFilesFinder()).thenReturn(
-            Thread.currentThread().getContextClassLoader()::getResource);
+    when(iocProcessingContext.resourceFilesFinder()).thenReturn(this::getFile);
 
     when(context.getProcessingContext()).thenReturn(iocProcessingContext);
 
@@ -144,7 +145,7 @@ public class TemplatedCodeDecoratorTest {
     final MetaMethod handlerMethod = mock(MetaMethod.class);
     final MetaParameter eventParam = mock(MetaParameter.class);
 
-    when(templatedClass.getMethodsAnnotatedWith(EventHandler.class)).thenReturn(singletonList(handlerMethod));
+    when(templatedClass.getMethodsAnnotatedWith(MetaClassFactory.get(EventHandler.class))).thenReturn(singletonList(handlerMethod));
     when(handlerMethod.getAnnotation(EventHandler.class)).thenReturn(
             Optional.of(new JavaReflectionAnnotation(defaultHandlerAnno)));
     when(handlerMethod.getParameters()).thenReturn(new MetaParameter[] { eventParam });
@@ -169,6 +170,16 @@ public class TemplatedCodeDecoratorTest {
     } catch (final Throwable t) {
       throw new AssertionError("Unexpected error: " + t.getMessage(), t);
     }
+  }
+
+  private Optional<File> getFile(final String name) {
+    return Optional.ofNullable(Thread.currentThread().getContextClassLoader().getResource(name)).map(s -> {
+      try {
+        return s.toURI();
+      } catch (URISyntaxException e) {
+        throw new RuntimeException(e);
+      }
+    }).map(File::new);
   }
 
 }

@@ -8,11 +8,6 @@
    <inherits name="org.jboss.errai.ioc.Container" />
    <inherits name="org.jboss.errai.ui.UI"/>
 
-    <replace-with class="org.jboss.errai.ui.nav.client.local.spi.GeneratedNavigationGraph">
-        <when-type-is class="org.jboss.errai.ui.nav.client.local.spi.NavigationGraph"/>
-        <when-property-is name="errai.useAptGenerators" value="true"/>
-    </replace-with>
-
    <generate-with class="org.jboss.errai.ui.nav.rebind.NavigationGraphGenerator">
      <when-type-is class="org.jboss.errai.ui.nav.client.local.spi.NavigationGraph"/>
      <when-property-is name="errai.useAptGenerators" value="false"/>

@@ -48,7 +48,6 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
-@ErraiApp
 @EntryPoint
 public class StressTestClient extends Composite {
 

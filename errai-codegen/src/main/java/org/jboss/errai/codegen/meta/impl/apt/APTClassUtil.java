@@ -28,6 +28,7 @@ import org.jboss.errai.codegen.meta.impl.AbstractMetaClass;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Parameterizable;
+import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.TypeParameterElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.ArrayType;
@@ -55,6 +56,10 @@ public final class APTClassUtil {
   public static Elements elements;
 
   private APTClassUtil() {
+  }
+
+  public static TypeElement getTypeElement(final String annotationFqcn) {
+    return elements.getTypeElement(annotationFqcn);
   }
 
   public static void init(final Types types, final Elements elements) {
@@ -182,10 +187,6 @@ public final class APTClassUtil {
     return element.getAnnotationMirrors().stream().map(APTAnnotation::new).collect(toSet());
   }
 
-  public static Collection<MetaAnnotation> getAnnotations(final TypeMirror mirror) {
-    return getAnnotations(types.asElement(mirror));
-  }
-
   public static Optional<MetaAnnotation> getAnnotation(final Element element,
           final Class<? extends Annotation> annotationClass) {
 
@@ -209,8 +210,4 @@ public final class APTClassUtil {
                     type -> type.equals(((AbstractMetaClass) annotationMetaClass).getEnclosedMetaObject().toString()));
   }
 
-  @Deprecated
-  public static Class<?> unsafeAsClass() {
-    throw new RuntimeException("Unsafe methods should not be called in APT environment");
-  }
 }

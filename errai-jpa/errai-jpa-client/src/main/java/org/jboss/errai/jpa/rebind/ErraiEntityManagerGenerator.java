@@ -414,7 +414,7 @@ public class ErraiEntityManagerGenerator extends AbstractAsyncGenerator {
               .ifPresent(listenerClasses::addAll);
 
       for (MetaClass listenerMetaClass : listenerClasses) {
-        for (MetaMethod callback : listenerMetaClass.getMethodsAnnotatedWith(eventType)) {
+        for (MetaMethod callback : listenerMetaClass.getMethodsAnnotatedWith(MetaClassFactory.get(eventType))) {
           if (callback.getParameters().length != 1) {
             throw new GenerationException("JPA lifecycle listener method " + listenerMetaClass.getName() +
                     "." + callback.getName() + " has " + callback.getParameters().length + " parameters (expected 1)");
@@ -438,7 +438,7 @@ public class ErraiEntityManagerGenerator extends AbstractAsyncGenerator {
       }
 
       // listener methods on the entity class itself
-      for (MetaMethod callback : entityType.getMethodsAnnotatedWith(eventType)) {
+      for (MetaMethod callback : entityType.getMethodsAnnotatedWith(MetaClassFactory.get(eventType))) {
         if (!callback.isPublic()) {
           PrivateAccessUtil.addPrivateAccessStubs("jsni", classBuilder, callback, new Modifier[]{});
           methodBuilder.append(

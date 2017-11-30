@@ -18,8 +18,8 @@ package org.jboss.errai.cdi.event.client.test;
 
 import java.util.List;
 
-import org.jboss.errai.cdi.client.event.DataBoundEvent;
-import org.jboss.errai.cdi.client.event.LocalEventA;
+import org.jboss.errai.cdi.common.client.event.DataBoundEvent;
+import org.jboss.errai.cdi.common.client.event.LocalEventA;
 import org.jboss.errai.cdi.event.client.DisconnectedEventTestModule;
 import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.databinding.client.BindableProxy;

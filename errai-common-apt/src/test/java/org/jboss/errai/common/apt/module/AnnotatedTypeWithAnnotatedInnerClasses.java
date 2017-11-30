@@ -22,9 +22,44 @@ import org.jboss.errai.common.apt.configuration.TestAnnotation;
  * @author Tiago Bento <tfernand@redhat.com>
  */
 @TestAnnotation
-class AnnotatedTypeWithAnnotatedInnerClasses {
+public class AnnotatedTypeWithAnnotatedInnerClasses {
 
   @TestAnnotation
-  static class InnerAnnotatedType {
+  public static class InnerAnnotatedStaticType {
   }
+
+  @TestAnnotation
+  public class InnerAnnotatedType {
+  }
+
+  // Should not be exported
+  @TestAnnotation
+  protected static class InnerNonVisibleType1 {
+  }
+
+  // Should not be exported
+  @TestAnnotation
+  static class InnerNonVisibleType2 {
+  }
+
+  // Should not be exported
+  @TestAnnotation
+  private static class InnerNonVisibleType3 {
+  }
+
+  // Should not be exported
+  @TestAnnotation
+  private class InnerNonVisibleType4 {
+  }
+
+  // Should not be exported
+  @TestAnnotation
+  protected class InnerNonVisibleType5 {
+  }
+
+  // Should not be exported
+  @TestAnnotation
+  class InnerNonVisibleType6 {
+  }
+
 }

@@ -18,7 +18,6 @@ package org.jboss.errai.codegen.meta;
 
 import org.jboss.errai.codegen.util.GenUtil;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
@@ -77,7 +76,7 @@ public abstract class MetaMethod implements MetaClassMember, MetaGenericDeclarat
     return o instanceof MetaMethod && ((MetaMethod)o).hashString().equals(hashString());
   }
 
-  public List<MetaParameter> getParametersAnnotatedWith(final Class<? extends Annotation> annotation) {
+  public List<MetaParameter> getParametersAnnotatedWith(final MetaClass annotation) {
     return Arrays.stream(getParameters())
             .filter(p -> p.isAnnotationPresent(annotation))
             .collect(Collectors.collectingAndThen(Collectors.toList(), Collections::unmodifiableList));

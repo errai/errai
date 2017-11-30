@@ -17,7 +17,6 @@
 package org.jboss.errai.common.apt.configuration;
 
 import org.jboss.errai.codegen.apt.test.ErraiAptTest;
-import org.jboss.errai.common.apt.TestMetaClassFinder;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -27,9 +26,18 @@ import org.junit.Test;
 public class AptErraiConfigurationTest extends ErraiAptTest {
 
   @Test
+  public void testNewWithUnannotatedMetaClass() {
+    try {
+      new AptErraiAppConfiguration(aptClass(String.class));
+      Assert.fail("An exception should've been raised because String.class is not annotated with @ErraiApp");
+    } catch (final Exception e) {
+      Assert.assertTrue(e instanceof RuntimeException);
+    }
+  }
+
+  @Test
   public void testGetAllPropertiesWithDefaultValues() {
-    final TestMetaClassFinder metaClassFinder = new TestMetaClassFinder(aptClass(ErraiTestAppWithDefaultValues.class));
-    final AptErraiAppConfiguration config = new AptErraiAppConfiguration(metaClassFinder);
+    final AptErraiAppConfiguration config = new AptErraiAppConfiguration(aptClass(ErraiTestAppWithDefaultValues.class));
 
     Assert.assertEquals("", config.getApplicationContext());
     Assert.assertEquals(false, config.isUserEnabledOnHostPage());
@@ -40,27 +48,14 @@ public class AptErraiConfigurationTest extends ErraiAptTest {
     Assert.assertEquals(false, config.useStaticMarshallers());
     Assert.assertEquals(false, config.makeDefaultArrayMarshallers());
     Assert.assertEquals(false, config.lazyLoadBuiltinMarshallers());
+    Assert.assertEquals(false, config.jsInteropSupportEnabled());
+    Assert.assertEquals(false, config.dynamicValidationEnabled());
     Assert.assertFalse(config.custom("nonexistent").isPresent());
   }
 
   @Test
-  public void testMoreThanOneErraiAppAnnotatedClasses() {
-    final TestMetaClassFinder metaClassFinder = new TestMetaClassFinder(aptClass(ErraiTestApp.class),
-            aptClass(ErraiTestAppWithDefaultValues.class));
-
-    try {
-      new AptErraiAppConfiguration(metaClassFinder);
-    } catch (final RuntimeException e) {
-      return;
-    }
-
-    Assert.fail();
-  }
-
-  @Test
   public void testGetAllPropertiesWithCustomValues() {
-    final TestMetaClassFinder metaClassFinder = new TestMetaClassFinder(aptClass(ErraiTestApp.class));
-    final AptErraiAppConfiguration config = new AptErraiAppConfiguration(metaClassFinder);
+    final AptErraiAppConfiguration config = new AptErraiAppConfiguration(aptClass(ErraiTestApp.class));
 
     Assert.assertEquals(true, config.isUserEnabledOnHostPage());
     Assert.assertEquals(true, config.asyncBeanManager());
@@ -70,7 +65,8 @@ public class AptErraiConfigurationTest extends ErraiAptTest {
     Assert.assertEquals(true, config.useStaticMarshallers());
     Assert.assertEquals(true, config.makeDefaultArrayMarshallers());
     Assert.assertEquals(true, config.lazyLoadBuiltinMarshallers());
+    Assert.assertEquals(true, config.jsInteropSupportEnabled());
+    Assert.assertEquals(true, config.dynamicValidationEnabled());
     Assert.assertEquals("test", config.custom("existent").get());
   }
-
 }

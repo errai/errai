@@ -26,41 +26,20 @@
 
   <entry-point class='org.jboss.errai.ioc.client.Container'/>
 
-  <replace-with class="org.jboss.errai.ioc.client.BootstrapperImpl">
-    <when-type-assignable class="org.jboss.errai.ioc.client.Bootstrapper"/>
-    <when-property-is name="errai.useAptGenerators" value="true"/>
-  </replace-with>
-
   <generate-with class="org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCGenerator">
     <when-type-assignable class="org.jboss.errai.ioc.client.Bootstrapper"/>
     <when-property-is name="errai.useAptGenerators" value="false"/>
   </generate-with>
-
-
-
-  <replace-with class="org.jboss.errai.ioc.client.QualifierEqualityFactoryImpl">
-    <when-type-assignable class="org.jboss.errai.ioc.client.QualifierEqualityFactory"/>
-    <when-property-is name="errai.useAptGenerators" value="true" />
-  </replace-with>
 
   <generate-with class="org.jboss.errai.ioc.rebind.ioc.bootstrapper.QualifierEqualityFactoryGenerator">
     <when-type-assignable class="org.jboss.errai.ioc.client.QualifierEqualityFactory"/>
     <when-property-is name="errai.useAptGenerators" value="false" />
   </generate-with>
 
-
-
-  <replace-with class="org.jboss.errai.ioc.client.container.IOCEnvironmentImpl">
-    <when-type-assignable class="org.jboss.errai.ioc.client.container.IOCEnvironment"/>
-    <when-property-is name="errai.useAptGenerators" value="true" />
-  </replace-with>
-
   <generate-with class="org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCEnvironmentGenerator">
     <when-type-assignable class="org.jboss.errai.ioc.client.container.IOCEnvironment"/>
     <when-property-is name="errai.useAptGenerators" value="false" />
   </generate-with>
-
-
 
   <generate-with class="org.jboss.errai.ioc.rebind.ioc.bootstrapper.FactoryGenerator">
     <when-type-assignable class="org.jboss.errai.ioc.client.container.Factory"/>

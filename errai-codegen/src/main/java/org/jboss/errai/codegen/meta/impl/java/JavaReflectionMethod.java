@@ -82,7 +82,7 @@ public class JavaReflectionMethod extends MetaMethod {
   @Override
   public MetaClass getReturnType() {
     if (returnType == null) {
-      returnType = MetaClassFactory.get(method.getReturnType());
+      returnType = MetaClassFactory.get(method.getReturnType(), method.getGenericReturnType());
     }
     return returnType;
   }

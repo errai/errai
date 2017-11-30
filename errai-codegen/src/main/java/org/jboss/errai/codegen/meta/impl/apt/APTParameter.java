@@ -54,6 +54,7 @@ public class APTParameter extends MetaParameter {
     switch (actualParameterType.getKind()) {
     case TYPEVAR:
     case WILDCARD:
+    case ARRAY:
       return aptClass.getErased();
     default:
       return aptClass;

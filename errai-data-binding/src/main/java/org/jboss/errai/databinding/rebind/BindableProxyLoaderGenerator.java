@@ -19,7 +19,6 @@ package org.jboss.errai.databinding.rebind;
 import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.UnableToCompleteException;
-import com.google.gwt.core.ext.typeinfo.NotFoundException;
 import org.jboss.errai.codegen.Cast;
 import org.jboss.errai.codegen.InnerClass;
 import org.jboss.errai.codegen.Parameter;
@@ -77,14 +76,16 @@ public class BindableProxyLoaderGenerator extends AbstractAsyncGenerator {
 
   @Override
   protected String generate(final TreeLogger logger, final GeneratorContext context) {
+    final String fqcn = packageName + "." + classSimpleName;
     final Set<String> translatablePackages = RebindUtils.findTranslatablePackages(context);
     final ErraiConfiguration erraiAppPropertiesConfiguration = new ErraiAppPropertiesConfiguration();
+    final MetaClassFinder metaClassFinder = (annotation) -> findAnnotatedElements(annotation, context, translatablePackages,
+        erraiAppPropertiesConfiguration);
 
-    return generate((annotation) -> findAnnotatedElements(annotation, context, translatablePackages,
-            erraiAppPropertiesConfiguration));
+    return generate(metaClassFinder, fqcn);
   }
 
-  public String generate(final MetaClassFinder metaClassFinder) {
+  public String generate(final MetaClassFinder metaClassFinder, final String fqcn) {
 
     final Collection<MetaClass> defaultConverters = metaClassFinder.findAnnotatedWith(DefaultConverter.class);
     addCacheRelevantClasses(defaultConverters);
@@ -92,7 +93,7 @@ public class BindableProxyLoaderGenerator extends AbstractAsyncGenerator {
     final Collection<MetaClass> bindableTypes = metaClassFinder.findAnnotatedWith(Bindable.class);
     addCacheRelevantClasses(bindableTypes);
 
-    ClassStructureBuilder<?> classBuilder = ClassBuilder.implement(BindableProxyLoader.class);
+    ClassStructureBuilder<?> classBuilder = ClassBuilder.implement(BindableProxyLoader.class, fqcn);
     final MethodBlockBuilder<?> loadProxies = classBuilder.publicMethod(void.class, "loadBindableProxies");
 
     for (final MetaClass bindable : bindableTypes) {
@@ -192,11 +193,7 @@ public class BindableProxyLoaderGenerator extends AbstractAsyncGenerator {
 
   @Override
   public boolean alreadyGeneratedSourcesViaAptGenerators(final GeneratorContext context) {
-    try {
-      return context.getTypeOracle().getType(getPackageName() + "." + getClassSimpleName()) != null;
-    } catch (final NotFoundException e) {
-      return false;
-    }
+    return RebindUtils.isErraiUseAptGeneratorsPropertyEnabled(context);
   }
 
 }

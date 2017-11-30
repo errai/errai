@@ -150,9 +150,10 @@
     </dependency>
 
     <dependency>
+      <!-- Needs provided scope for use in annotation processors -->
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-log4j12</artifactId>
-      <scope>test</scope>
+      <scope>provided</scope>
     </dependency>
 
     <dependency>
@@ -222,8 +223,12 @@
 
   <profiles>
     <profile>
-      <id>integration-test</id>
-
+      <id>apt-generators</id>
+      <activation>
+        <property>
+          <name>apt-generators</name>
+        </property>
+      </activation>
       <dependencies>
         <dependency>
           <groupId>org.jboss.errai</groupId>
@@ -231,12 +236,18 @@
           <scope>test</scope>
         </dependency>
       </dependencies>
+    </profile>
 
+    <profile>
+      <id>integration-test</id>
       <build>
         <plugins>
           <plugin>
             <artifactId>maven-failsafe-plugin</artifactId>
             <configuration>
+              <additionalClasspathElements>
+                <additionalClasspathElement>${basedir}/target/generated-test-sources/test-annotations</additionalClasspathElement>
+              </additionalClasspathElements>
               <forkMode>always</forkMode>
               <argLine>${argLine} -Xmx2500m -Dgwt.args='-testBeginTimeout 5 ${gwtArgs}'</argLine>
               <useManifestOnlyJar>true</useManifestOnlyJar>

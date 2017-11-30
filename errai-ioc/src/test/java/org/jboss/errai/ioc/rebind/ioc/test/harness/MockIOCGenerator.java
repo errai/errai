@@ -29,7 +29,9 @@ import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IocRelevantClassesUtil;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.net.URISyntaxException;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -54,8 +56,10 @@ public class MockIOCGenerator {
 
     final IOCBootstrapGenerator bootstrapGenerator = new IOCBootstrapGenerator(
             ann -> new HashSet<>(ClassScanner.getTypesAnnotatedWith(ann, packages, context)),
-            Thread.currentThread().getContextClassLoader()::getResource, context, ERRAI_CONFIGURATION,
-            (a) -> IocRelevantClassesUtil.findRelevantClasses());
+            this::getFile,
+            context,
+            ERRAI_CONFIGURATION,
+            a -> IocRelevantClassesUtil.findRelevantClasses());
 
     final String classStr = bootstrapGenerator.generate(packageName, className);
 
@@ -96,5 +100,15 @@ public class MockIOCGenerator {
     finally {
       ClassScanner.setReflectionsScanning(false);
     }
+  }
+
+  private Optional<File> getFile(final String name) {
+    return Optional.ofNullable(Thread.currentThread().getContextClassLoader().getResource(name)).map(s -> {
+      try {
+        return s.toURI();
+      } catch (URISyntaxException e) {
+        throw new RuntimeException(e);
+      }
+    }).map(File::new);
   }
 }

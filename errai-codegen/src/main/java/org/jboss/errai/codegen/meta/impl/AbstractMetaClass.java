@@ -337,7 +337,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
   }
 
   @Override
-  public final List<MetaMethod> getMethodsAnnotatedWith(final Class<? extends Annotation> annotation) {
+  public final List<MetaMethod> getMethodsAnnotatedWith(final MetaClass annotation) {
     final Map<String, List<MetaMethod>> methodsByName = new HashMap<>();
     MetaClass scanTarget = this;
     while (scanTarget != null) {
@@ -388,7 +388,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
   }
 
   @Override
-  public final List<MetaField> getFieldsAnnotatedWith(final Class<? extends Annotation> annotation) {
+  public final List<MetaField> getFieldsAnnotatedWith(final MetaClass annotation) {
     final List<MetaField> fields = new ArrayList<>();
     MetaClass scanTarget = this;
     while (scanTarget != null) {
@@ -403,7 +403,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
   }
 
   @Override
-  public List<MetaParameter> getParametersAnnotatedWith(final Class<? extends Annotation> annotation) {
+  public List<MetaParameter> getParametersAnnotatedWith(final MetaClass annotation) {
     final List<MetaParameter> methods = new ArrayList<>();
     MetaClass scanTarget = this;
     while (scanTarget != null) {
@@ -781,7 +781,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
 
   public String hashString() {
     if (_hashString == null) {
-      _hashString = MetaClassName + ":" + getFullyQualifiedName();
+      _hashString = MetaClassName + ":" + getCanonicalName();
       if (getParameterizedType() != null) {
         _hashString += getParameterizedType().toString();
       }

@@ -16,15 +16,15 @@
 
 package org.jboss.errai.ioc.client;
 
-import java.util.List;
-
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.SetMultimap;
 import org.jboss.errai.ioc.client.container.IOCResolutionException;
 import org.jboss.errai.ioc.client.container.JsTypeProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.ListMultimap;
+import java.util.ArrayList;
+import java.util.Set;
 
 /**
  * @author Christian Sadilek <csadilek@redhat.com>
@@ -32,7 +32,7 @@ import com.google.common.collect.ListMultimap;
  * @see WindowInjectionContext
  */
 public class WindowInjectionContextImpl implements WindowInjectionContext {
-  private final ListMultimap<String, JsTypeProvider<?>> beanProviders = ArrayListMultimap.create();
+  private final SetMultimap<String, JsTypeProvider<?>> beanProviders = HashMultimap.create();
   private final Logger logger = LoggerFactory.getLogger(WindowInjectionContextImpl.class);
 
   public WindowInjectionContextImpl() {
@@ -57,23 +57,21 @@ public class WindowInjectionContextImpl implements WindowInjectionContext {
   @Override
   public Object getBean(final String name) {
     logger.debug("Looking up bean {}", name);
-    final List<JsTypeProvider<?>> providers = beanProviders.get(name);
+    final Set<JsTypeProvider<?>> providers = beanProviders.get(name);
 
     if (providers.isEmpty()) {
       throw new IOCResolutionException("no matching bean instances for: " + name);
-    }
-    else if (providers.size() > 1) {
+    } else if (providers.size() > 1) {
       throw new IOCResolutionException("multiple matching bean instances for: " + name);
-    }
-    else {
-      return providers.get(0).getInstance();
+    } else {
+      return new ArrayList<>(providers).get(0).getInstance();
     }
   }
 
   @Override
   public JsArray<JsTypeProvider<?>> getProviders(final String name) {
     logger.debug("Looking up providers for {}", name);
-    final List<JsTypeProvider<?>> providers = beanProviders.get(name);
+    final Set<JsTypeProvider<?>> providers = beanProviders.get(name);
 
     logger.debug("Found {} providers: {}", providers.size(), providers);
     return new JsArray<>(providers.toArray(new JsTypeProvider<?>[providers.size()]));

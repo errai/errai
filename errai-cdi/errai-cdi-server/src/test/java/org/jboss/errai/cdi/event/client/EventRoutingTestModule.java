@@ -16,8 +16,8 @@
 
 package org.jboss.errai.cdi.event.client;
 
-import org.jboss.errai.cdi.client.event.FunFinishEvent;
-import org.jboss.errai.cdi.client.event.FunStartEvent;
+import org.jboss.errai.cdi.common.client.event.FunFinishEvent;
+import org.jboss.errai.cdi.common.client.event.FunStartEvent;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 
 import javax.enterprise.event.Event;

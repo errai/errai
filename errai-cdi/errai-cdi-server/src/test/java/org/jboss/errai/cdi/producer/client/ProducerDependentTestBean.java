@@ -19,10 +19,10 @@ package org.jboss.errai.cdi.producer.client;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import org.jboss.errai.cdi.client.qualifier.A;
-import org.jboss.errai.cdi.client.qualifier.B;
-import org.jboss.errai.cdi.client.qualifier.C;
-import org.jboss.errai.cdi.client.qualifier.D;
+import org.jboss.errai.cdi.common.client.qualifier.A;
+import org.jboss.errai.cdi.common.client.qualifier.B;
+import org.jboss.errai.cdi.common.client.qualifier.C;
+import org.jboss.errai.cdi.common.client.qualifier.D;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>

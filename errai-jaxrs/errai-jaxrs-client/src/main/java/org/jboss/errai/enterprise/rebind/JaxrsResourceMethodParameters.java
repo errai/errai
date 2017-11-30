@@ -94,7 +94,6 @@ public class JaxrsResourceMethodParameters {
     final JaxrsResourceMethodParameters params = new JaxrsResourceMethodParameters();
     int i = 0;
 
-    // All these annotations have Strings as its values, so it's ok to use unsafe methods.
     for (final MetaParameter param : method.getParameters()) {
 
       final Statement paramValue = parameterValues.get(i++);

@@ -16,12 +16,13 @@
 
 package org.jboss.errai.common.apt;
 
-import java.net.URL;
+import java.io.File;
+import java.util.Optional;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
 @FunctionalInterface
 public interface ResourceFilesFinder {
-  URL getResource(final String path);
+  Optional<File> getResource(final String path);
 }

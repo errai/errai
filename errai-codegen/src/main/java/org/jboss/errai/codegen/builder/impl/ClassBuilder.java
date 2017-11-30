@@ -72,15 +72,19 @@ public class ClassBuilder<T extends ClassStructureBuilder<T>> implements
     return define(fullQualifiedName, MetaClassFactory.get(parent));
   }
 
-  public static ClassStructureBuilder<?> implement(final MetaClass cls) {
-    return new ClassBuilder<DefaultClassStructureBuilder>(cls.getFullyQualifiedName() + "Impl", null, Context.create()
+  public static ClassStructureBuilder<?> implement(final MetaClass cls, final String fullQualifiedName) {
+    return new ClassBuilder<DefaultClassStructureBuilder>(fullQualifiedName, null, Context.create()
             .autoImport())
             .publicScope()
             .implementsInterface(cls).body();
   }
 
   public static ClassStructureBuilder<?> implement(final Class<?> cls) {
-    return implement(MetaClassFactory.get(cls));
+    return implement(cls, cls.getName() + "Impl");
+  }
+
+  public static ClassStructureBuilder<?> implement(final Class<?> cls, final String fullQualifiedName) {
+    return implement(MetaClassFactory.get(cls), fullQualifiedName);
   }
 
   @Override

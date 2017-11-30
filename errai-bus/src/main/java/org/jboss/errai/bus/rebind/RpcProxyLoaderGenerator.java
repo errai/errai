@@ -19,7 +19,6 @@ package org.jboss.errai.bus.rebind;
 import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.UnableToCompleteException;
-import com.google.gwt.core.ext.typeinfo.NotFoundException;
 import org.jboss.errai.bus.client.api.messaging.MessageBus;
 import org.jboss.errai.bus.client.local.RpcProxyLoader;
 import org.jboss.errai.bus.server.annotations.Remote;
@@ -78,17 +77,19 @@ public class RpcProxyLoaderGenerator extends AbstractAsyncGenerator {
     final Set<String> translatablePackages = RebindUtils.findTranslatablePackages(context);
     final AnnotationFilter gwtAnnotationFilter = new RuntimeAnnotationFilter(translatablePackages);
     final MetaClassFinder metaClassFinder = annotation -> getMetaClasses(context, annotation, translatablePackages);
+    final String fqcn = packageName + "." + classSimpleName;
 
-    return generate(metaClassFinder, iocEnabled, gwtAnnotationFilter);
+    return generate(metaClassFinder, iocEnabled, gwtAnnotationFilter, fqcn);
   }
 
   public String generate(final MetaClassFinder metaClassFinder,
           final boolean iocEnabled,
-          final AnnotationFilter annotationFilter) {
+          final AnnotationFilter annotationFilter,
+          final String fqcn) {
 
     log.info("generating RPC proxy loader class...");
 
-    ClassStructureBuilder<?> classBuilder = ClassBuilder.implement(RpcProxyLoader.class);
+    ClassStructureBuilder<?> classBuilder = ClassBuilder.implement(RpcProxyLoader.class, fqcn);
 
     final long time = System.currentTimeMillis();
     final MethodBlockBuilder<?> loadProxies = classBuilder.publicMethod(void.class, "loadProxies",
@@ -156,11 +157,7 @@ public class RpcProxyLoaderGenerator extends AbstractAsyncGenerator {
 
   @Override
   public boolean alreadyGeneratedSourcesViaAptGenerators(final GeneratorContext context) {
-    try {
-      return context.getTypeOracle().getType(getPackageName() + "." + getClassSimpleName()) != null;
-    } catch (final NotFoundException e) {
-      return false;
-    }
+    return RebindUtils.isErraiUseAptGeneratorsPropertyEnabled(context);
   }
 
 }

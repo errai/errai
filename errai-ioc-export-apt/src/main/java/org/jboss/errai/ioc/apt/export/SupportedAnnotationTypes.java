@@ -37,4 +37,5 @@ interface SupportedAnnotationTypes {
   String SHARED_SINGLETON = "org.jboss.errai.ioc.client.api.SharedSingleton";
   String QUALIFIER = "javax.inject.Qualifier";
   String JS_TYPE = "jsinterop.annotations.JsType";
+  String PRODUCES = "javax.enterprise.inject.Produces";
 }

@@ -22,7 +22,7 @@ import java.util.List;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.event.Observes;
 
-import org.jboss.errai.cdi.client.event.UnobservedEvent;
+import org.jboss.errai.cdi.common.client.event.UnobservedEvent;
 
 /**
  * Part of the regression test for ERRAI-591.

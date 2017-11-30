@@ -18,10 +18,10 @@ package org.jboss.errai.cdi.event.client.test;
 
 import com.google.gwt.junit.client.TimeoutException;
 import com.google.gwt.user.client.Timer;
-import org.jboss.errai.cdi.client.event.MyAbstractEvent;
-import org.jboss.errai.cdi.client.event.MyAbstractEventInterface;
-import org.jboss.errai.cdi.client.event.MyEventImpl;
-import org.jboss.errai.cdi.client.event.MyEventInterface;
+import org.jboss.errai.cdi.common.client.event.MyAbstractEvent;
+import org.jboss.errai.cdi.common.client.event.MyAbstractEventInterface;
+import org.jboss.errai.cdi.common.client.event.MyEventImpl;
+import org.jboss.errai.cdi.common.client.event.MyEventInterface;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 
 import java.util.Arrays;

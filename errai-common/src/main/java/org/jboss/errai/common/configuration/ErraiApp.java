@@ -25,6 +25,10 @@ import java.lang.annotation.RetentionPolicy;
 @Retention(RetentionPolicy.CLASS)
 public @interface ErraiApp {
 
+  String gwtModuleName();
+
+  Class<?>[] modules() default {};
+
   boolean userOnHostPageEnabled() default false;
 
   String applicationContext() default "";
@@ -43,6 +47,10 @@ public @interface ErraiApp {
 
   boolean makeDefaultArrayMarshallers() default false;
 
+  boolean jsInteropSupportEnabled() default false;
+
+  boolean dynamicValidationEnabled() default false;
+
   CustomProperty[] customProperties() default {};
 
   interface Property {
@@ -55,6 +63,10 @@ public @interface ErraiApp {
     String FORCE_STATIC_MARSHALLERS = "forceStaticMarshallers";
     String LAZY_LOAD_BUILTIN_MARSHALLERS = "lazyLoadBuiltinMarshallers";
     String MAKE_DEFAULT_ARRAY_MARSHALLERS = "makeDefaultArrayMarshallers";
+    String JS_INTEROP_SUPPORT_ENABLED = "jsInteropSupportEnabled";
+    String DYNAMIC_VALIDATION_ENABLED = "dynamicValidationEnabled";
     String CUSTOM_PROPERTIES = "customProperties";
+    String MODULES  = "modules";
+    String GWT_MODULE_NAME  = "gwtModuleName";
   }
 }

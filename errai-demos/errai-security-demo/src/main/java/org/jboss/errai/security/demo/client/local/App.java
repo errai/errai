@@ -34,7 +34,6 @@ import com.google.gwt.dom.client.Document;
  * {@link PostConstruct} annotation.
  */
 @EntryPoint
-@ErraiApp(userOnHostPageEnabled = true)
 public class App {
 
   @Inject

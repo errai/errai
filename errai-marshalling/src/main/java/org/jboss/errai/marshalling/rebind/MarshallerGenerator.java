@@ -73,9 +73,11 @@ public class MarshallerGenerator extends IncrementalGenerator {
   public RebindResult generateIncrementally(final TreeLogger logger,
           final GeneratorContext context,
           final String typeName) throws UnableToCompleteException {
+
+    final ErraiConfiguration erraiConfiguration = new ErraiAppPropertiesConfiguration();
     final String fullyQualifiedTypeName = distillTargetTypeName(typeName);
     final MetaClass type = MetaClassFactory.get(fullyQualifiedTypeName);
-    final String className = MarshallerGeneratorFactory.getMarshallerImplClassName(type, true);
+    final String className = MarshallerGeneratorFactory.getMarshallerImplClassName(type, true, erraiConfiguration);
     final MetaClass cachedType = cachedPortableTypes.get(fullyQualifiedTypeName);
 
     final PrintWriter printWriter = context.tryCreate(logger, PACKAGE_NAME, className);
@@ -86,7 +88,6 @@ public class MarshallerGenerator extends IncrementalGenerator {
         context.commit(logger, printWriter);
       } else {
         log.debug("Generating marshaller for {}", fullyQualifiedTypeName);
-        final ErraiConfiguration erraiConfiguration = new ErraiAppPropertiesConfiguration();
         final String generatedSource = generateMarshaller(context, type, erraiConfiguration);
         printWriter.append(generatedSource);
         RebindUtils.writeStringToJavaSourceFileInErraiCacheDir(PACKAGE_NAME, className, generatedSource);
@@ -110,7 +111,7 @@ public class MarshallerGenerator extends IncrementalGenerator {
           final MetaClass type,
           final ErraiConfiguration erraiConfiguration) {
 
-    final String className = MarshallerGeneratorFactory.getMarshallerImplClassName(type, true);
+    final String className = MarshallerGeneratorFactory.getMarshallerImplClassName(type, true, erraiConfiguration);
     final String marshallerTypeName = getMarshallerTypeName(className);
     final MarshallerOutputTarget target = MarshallerOutputTarget.GWT;
     final GeneratorMappingContext generatorMappingContext = GeneratorMappingContextFactory.getFor(context, target);
