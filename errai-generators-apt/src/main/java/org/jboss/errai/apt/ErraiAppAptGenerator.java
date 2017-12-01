@@ -87,13 +87,14 @@ public class ErraiAppAptGenerator extends AbstractProcessor {
     return false;
   }
 
-  private static final Map<MetaClass, ErraiAptExportedTypes> erraiAptExportedTypesByItsErraiAppMetaClass = new HashMap<>();
-  private static final List<Predicate<ErraiAptGenerators.Any>> generatorsLayerFilters;
+  private static final Map<MetaClass, ErraiAptExportedTypes> erraiAptExportedTypesByItsErraiAppMetaClass;
+  private static final List<Predicate<ErraiAptGenerators.Any>> generatorLayerFilters;
 
   static {
-    generatorsLayerFilters = new ArrayList<>();
-    generatorsLayerFilters.add(p -> p.layer() < 0);
-    generatorsLayerFilters.add(p -> p.layer() >= 0);
+    generatorLayerFilters = new ArrayList<>();
+    generatorLayerFilters.add(p -> p.layer() < 0); // User-defined generators
+    generatorLayerFilters.add(p -> p.layer() >= 0); // Errai generators
+    erraiAptExportedTypesByItsErraiAppMetaClass = new HashMap<>();
   }
 
   void generateAndSaveSourceFiles(final Set<? extends TypeElement> annotations,
@@ -110,24 +111,25 @@ public class ErraiAppAptGenerator extends AbstractProcessor {
             .peek(this::generateAptCompatibleGwtModuleFile)
             .forEach(this::saveReferenceToErraiAppMetaClassWithItsExportedTypes);
 
-    final Predicate<ErraiAptGenerators.Any> generatorFilter;
-    if (!generatorsLayerFilters.isEmpty()) {
-      generatorFilter = generatorsLayerFilters.remove(0);
-    } else {
-      generatorFilter = p -> false;
-    }
-
     erraiAptExportedTypesByItsErraiAppMetaClass.values()
             .stream()
             // Because order of annotation processors is random, we have to check if an annotation processor
             // of a higher layer generated something relevant
             .peek(e -> e.addLocalExportableTypesWhichHaveNotBeenExported(annotatedElementsFinder))
             .flatMap(this::createGenerators)
-            .filter(generatorFilter)
+            .filter(consumeNextGeneratorLayerFilter())
             .flatMap(this::generatedFiles)
             .forEach(this::saveFile);
 
     log.info("Successfully generated files using Errai APT Generators in {}ms", System.currentTimeMillis() - start);
+  }
+
+  private Predicate<ErraiAptGenerators.Any> consumeNextGeneratorLayerFilter() {
+    if (!generatorLayerFilters.isEmpty()) {
+      return generatorLayerFilters.remove(0);
+    } else {
+      return g -> false;
+    }
   }
 
   private void saveReferenceToErraiAppMetaClassWithItsExportedTypes(final ErraiAptExportedTypes e) {
@@ -161,13 +163,13 @@ public class ErraiAppAptGenerator extends AbstractProcessor {
   private Stream<ErraiAptGenerators.Any> createGenerators(final ErraiAptExportedTypes erraiAptExportedTypes) {
     return erraiAptExportedTypes.findAnnotatedMetaClasses(ErraiGenerator.class)
             .stream()
-            .map(this::loadClass)
+            .map(this::loadGeneratorClass)
             .map(generatorClass -> newGenerator(generatorClass, erraiAptExportedTypes))
             .sorted(comparing(ErraiAptGenerators.Any::layer).thenComparing(g -> g.getClass().getSimpleName()));
   }
 
   @SuppressWarnings("unchecked")
-  private Class<? extends ErraiAptGenerators.Any> loadClass(final MetaClass metaClass) {
+  private Class<? extends ErraiAptGenerators.Any> loadGeneratorClass(final MetaClass metaClass) {
     try {
       // Because we're sure generators will always be pre-compiled, it's safe to get their classes using Class.forName
       return (Class<? extends ErraiAptGenerators.Any>) Class.forName(metaClass.getFullyQualifiedName());
