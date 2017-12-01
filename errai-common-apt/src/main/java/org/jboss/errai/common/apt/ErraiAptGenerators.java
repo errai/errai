@@ -49,7 +49,7 @@ public class ErraiAptGenerators {
       return erraiConfiguration;
     }
 
-    public int priority() {
+    public int layer() {
       return 0;
     }
   }

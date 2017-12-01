@@ -94,7 +94,7 @@ public class FactoriesAptGenerator extends ErraiAptGenerators.MultipleFiles {
   }
 
   @Override
-  public int priority() {
+  public int layer() {
     //Has to run after IocAptGenerator because it builds the DependencyGraph
     return 1;
   }

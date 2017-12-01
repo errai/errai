@@ -32,26 +32,26 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.Filer;
+import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.util.Elements;
-import javax.lang.model.util.Types;
 import javax.tools.FileObject;
 import java.io.IOException;
 import java.io.Writer;
 import java.lang.reflect.Constructor;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import static java.util.Comparator.comparing;
-import static java.util.stream.Collectors.toMap;
 import static javax.tools.StandardLocation.CLASS_OUTPUT;
 import static javax.tools.StandardLocation.SOURCE_OUTPUT;
 import static org.jboss.errai.common.apt.generator.ErraiAptGeneratedSourceFile.Type.CLIENT;
@@ -69,6 +69,12 @@ public class ErraiAppAptGenerator extends AbstractProcessor {
   private static final String GWT_XML = ".gwt.xml";
 
   @Override
+  public synchronized void init(final ProcessingEnvironment processingEnv) {
+    super.init(processingEnv);
+    APTClassUtil.init(processingEnv.getTypeUtils(), processingEnv.getElementUtils());
+  }
+
+  @Override
   public boolean process(final Set<? extends TypeElement> annotations, final RoundEnvironment roundEnv) {
 
     try {
@@ -81,8 +87,14 @@ public class ErraiAppAptGenerator extends AbstractProcessor {
     return false;
   }
 
-  private static final Map<MetaClass, ErraiAptExportedTypes> erraiAptExportedTypesStream = new HashMap<>();
-  private static Predicate<ErraiAptGenerators.Any> p = s -> s.priority() < 0;
+  private static final Map<MetaClass, ErraiAptExportedTypes> erraiAptExportedTypesByItsErraiAppMetaClass = new HashMap<>();
+  private static final List<Predicate<ErraiAptGenerators.Any>> generatorsLayerFilters;
+
+  static {
+    generatorsLayerFilters = new ArrayList<>();
+    generatorsLayerFilters.add(p -> p.layer() < 0);
+    generatorsLayerFilters.add(p -> p.layer() >= 0);
+  }
 
   void generateAndSaveSourceFiles(final Set<? extends TypeElement> annotations,
           final AnnotatedSourceElementsFinder annotatedElementsFinder) {
@@ -90,30 +102,36 @@ public class ErraiAppAptGenerator extends AbstractProcessor {
     final long start = System.currentTimeMillis();
     log.info("Generating files using Errai APT Generators..");
 
-    final Types types = processingEnv.getTypeUtils();
-    final Elements elements = processingEnv.getElementUtils();
-    final Filer filer = processingEnv.getFiler();
-    APTClassUtil.init(types, elements);
-
-    erraiAptExportedTypesStream.putAll(annotatedElementsFinder.findSourceElementsAnnotatedWith(ErraiApp.class)
+    annotatedElementsFinder.findSourceElementsAnnotatedWith(ErraiApp.class)
             .stream()
             .map(Element::asType)
             .map(APTClass::new)
-            .collect(toMap(s -> s, s -> newErraiAptExportedTypes(filer, s))));
-
-    erraiAptExportedTypesStream.values()
-            .stream()
-            // Because
-            .peek(s -> s.addLocalExportableTypesWhichHaveNotBeenExported(annotatedElementsFinder))
+            .map(s -> newErraiAptExportedTypes(processingEnv.getFiler(), s))
             .peek(this::generateAptCompatibleGwtModuleFile)
-            .flatMap(this::findGenerators)
-            .filter(p)
+            .forEach(this::saveReferenceToErraiAppMetaClassWithItsExportedTypes);
+
+    final Predicate<ErraiAptGenerators.Any> generatorFilter;
+    if (!generatorsLayerFilters.isEmpty()) {
+      generatorFilter = generatorsLayerFilters.remove(0);
+    } else {
+      generatorFilter = p -> false;
+    }
+
+    erraiAptExportedTypesByItsErraiAppMetaClass.values()
+            .stream()
+            // Because order of annotation processors is random, we have to check if an annotation processor
+            // of a higher layer generated something relevant
+            .peek(e -> e.addLocalExportableTypesWhichHaveNotBeenExported(annotatedElementsFinder))
+            .flatMap(this::createGenerators)
+            .filter(generatorFilter)
             .flatMap(this::generatedFiles)
             .forEach(this::saveFile);
 
-    p = s -> s.priority() >= 0;
-
     log.info("Successfully generated files using Errai APT Generators in {}ms", System.currentTimeMillis() - start);
+  }
+
+  private void saveReferenceToErraiAppMetaClassWithItsExportedTypes(final ErraiAptExportedTypes e) {
+    erraiAptExportedTypesByItsErraiAppMetaClass.put(e.erraiAppMetaClass(), e);
   }
 
   private void generateAptCompatibleGwtModuleFile(final ErraiAptExportedTypes erraiAptExportedTypes) {
@@ -140,12 +158,12 @@ public class ErraiAppAptGenerator extends AbstractProcessor {
     return new ErraiAptExportedTypes(erraiAppAnnotatedMetaClass, new AptResourceFilesFinder(filer), processingEnv);
   }
 
-  private Stream<ErraiAptGenerators.Any> findGenerators(final ErraiAptExportedTypes erraiAptExportedTypes) {
+  private Stream<ErraiAptGenerators.Any> createGenerators(final ErraiAptExportedTypes erraiAptExportedTypes) {
     return erraiAptExportedTypes.findAnnotatedMetaClasses(ErraiGenerator.class)
             .stream()
             .map(this::loadClass)
             .map(generatorClass -> newGenerator(generatorClass, erraiAptExportedTypes))
-            .sorted(comparing(ErraiAptGenerators.Any::priority).thenComparing(g -> g.getClass().getSimpleName()));
+            .sorted(comparing(ErraiAptGenerators.Any::layer).thenComparing(g -> g.getClass().getSimpleName()));
   }
 
   @SuppressWarnings("unchecked")

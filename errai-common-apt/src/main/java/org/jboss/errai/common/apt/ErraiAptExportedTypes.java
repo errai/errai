@@ -76,13 +76,15 @@ public final class ErraiAptExportedTypes {
 
   private final Elements elements;
   private final ProcessingEnvironment processingEnv;
+  private final MetaClass erraiAppMetaClass;
 
-  public ErraiAptExportedTypes(final MetaClass erraiAppAnnotatedMetaClass,
+  public ErraiAptExportedTypes(final MetaClass erraiAppMetaClass,
           final ResourceFilesFinder resourceFilesFinder,
           final ProcessingEnvironment processingEnv) {
 
+    this.erraiAppMetaClass =erraiAppMetaClass;
     this.resourcesFilesFinder = resourceFilesFinder;
-    this.aptErraiAppConfiguration = new AptErraiAppConfiguration(erraiAppAnnotatedMetaClass);
+    this.aptErraiAppConfiguration = new AptErraiAppConfiguration(erraiAppMetaClass);
     this.moduleNames = aptErraiAppConfiguration.modules().stream().map(MetaClass::getCanonicalName).collect(toSet());
 
     this.processingEnv = processingEnv;
@@ -212,6 +214,10 @@ public final class ErraiAptExportedTypes {
     return processingEnv;
   }
 
+  public MetaClass erraiAppMetaClass() {
+    return erraiAppMetaClass;
+  }
+
   // Java 9 will implement this method, so when it's released and we upgrade, this can be removed.
   private static <T, U, A, R> Collector<T, ?, R> flatMapping(Function<? super T, ? extends Stream<? extends U>> mapper,
           Collector<? super U, A, R> downstream) {
@@ -226,5 +232,4 @@ public final class ErraiAptExportedTypes {
             }, downstream.combiner(), downstream.finisher(),
             downstream.characteristics().toArray(new Collector.Characteristics[0]));
   }
-
 }

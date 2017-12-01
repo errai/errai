@@ -60,7 +60,7 @@ public class ServerMarshallersAptGenerator extends ErraiAptGenerators.SingleFile
   }
 
   @Override
-  public int priority() {
+  public int layer() {
     //Has to run after the MarshallerAptGenerator
     return 2;
   }
