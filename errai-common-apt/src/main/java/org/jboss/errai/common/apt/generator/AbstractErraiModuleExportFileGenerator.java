@@ -16,9 +16,14 @@
 
 package org.jboss.errai.common.apt.generator;
 
+import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.impl.apt.APTClass;
 import org.jboss.errai.codegen.meta.impl.apt.APTClassUtil;
+import org.jboss.errai.common.apt.AnnotatedSourceElementsFinder;
 import org.jboss.errai.common.apt.AptAnnotatedSourceElementsFinder;
 import org.jboss.errai.common.apt.strategies.ErraiExportingStrategiesFactory;
+import org.jboss.errai.common.apt.strategies.ExportingStrategies;
+import org.jboss.errai.common.configuration.ErraiModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,6 +34,8 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 import java.util.Set;
+
+import static java.util.stream.Collectors.toSet;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
@@ -50,7 +57,7 @@ public abstract class AbstractErraiModuleExportFileGenerator extends AbstractPro
 
     try {
       APTClassUtil.init(types, elements);
-      newExportFileGenerator(annotations, roundEnv, elements).generateAndSaveExportFiles(filer);
+      newExportFileGenerator(roundEnv, elements).generateAndSaveExportFiles(filer, annotations);
     } catch (final Exception e) {
       log.error("Error generating export files");
       e.printStackTrace();
@@ -59,12 +66,19 @@ public abstract class AbstractErraiModuleExportFileGenerator extends AbstractPro
     return false;
   }
 
-  private ExportFileGenerator newExportFileGenerator(final Set<? extends TypeElement> annotations,
-          final RoundEnvironment roundEnv,
-          final Elements elements) {
+  private ExportFileGenerator newExportFileGenerator(final RoundEnvironment roundEnv, final Elements elements) {
 
-    return new ExportFileGenerator(getCamelCaseErraiModuleName(), annotations,
-            new AptAnnotatedSourceElementsFinder(roundEnv),
-            new ErraiExportingStrategiesFactory(elements).buildFrom(getExportingStrategiesClass()));
+    final Set<MetaClass> erraiModules = roundEnv.getElementsAnnotatedWith(ErraiModule.class)
+            .stream()
+            .map(s -> new APTClass(s.asType()))
+            .collect(toSet());
+
+    final AnnotatedSourceElementsFinder annotatedSourceElementsFinder = new AptAnnotatedSourceElementsFinder(roundEnv);
+
+    final ExportingStrategies exportingStrategies = new ErraiExportingStrategiesFactory(elements).buildFrom(
+            getExportingStrategiesClass());
+
+    return new ExportFileGenerator(getCamelCaseErraiModuleName(), annotatedSourceElementsFinder, exportingStrategies,
+            erraiModules);
   }
 }

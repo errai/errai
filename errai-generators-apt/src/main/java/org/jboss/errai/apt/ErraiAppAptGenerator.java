@@ -44,10 +44,14 @@ import javax.tools.FileObject;
 import java.io.IOException;
 import java.io.Writer;
 import java.lang.reflect.Constructor;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import static java.util.Comparator.comparing;
+import static java.util.stream.Collectors.toMap;
 import static javax.tools.StandardLocation.CLASS_OUTPUT;
 import static javax.tools.StandardLocation.SOURCE_OUTPUT;
 import static org.jboss.errai.common.apt.generator.ErraiAptGeneratedSourceFile.Type.CLIENT;
@@ -77,30 +81,39 @@ public class ErraiAppAptGenerator extends AbstractProcessor {
     return false;
   }
 
+  private static final Map<MetaClass, ErraiAptExportedTypes> erraiAptExportedTypesStream = new HashMap<>();
+  private static Predicate<ErraiAptGenerators.Any> p = s -> s.priority() < 0;
+
   void generateAndSaveSourceFiles(final Set<? extends TypeElement> annotations,
           final AnnotatedSourceElementsFinder annotatedElementsFinder) {
 
-    for (final TypeElement erraiAppAnnotation : annotations) {
-      final long start = System.currentTimeMillis();
-      log.info("Generating files using Errai APT Generators..");
+    final long start = System.currentTimeMillis();
+    log.info("Generating files using Errai APT Generators..");
 
-      final Types types = processingEnv.getTypeUtils();
-      final Elements elements = processingEnv.getElementUtils();
-      final Filer filer = processingEnv.getFiler();
-      APTClassUtil.init(types, elements);
+    final Types types = processingEnv.getTypeUtils();
+    final Elements elements = processingEnv.getElementUtils();
+    final Filer filer = processingEnv.getFiler();
+    APTClassUtil.init(types, elements);
 
-      annotatedElementsFinder.findSourceElementsAnnotatedWith(ErraiApp.class)
-              .stream()
-              .map(Element::asType)
-              .map(APTClass::new)
-              .map(app -> newErraiAptExportedTypes(annotatedElementsFinder, elements, filer, app))
-              .peek(this::generateAptCompatibleGwtModuleFile)
-              .flatMap(this::findGenerators)
-              .flatMap(this::generatedFiles)
-              .forEach(this::saveFile);
+    erraiAptExportedTypesStream.putAll(annotatedElementsFinder.findSourceElementsAnnotatedWith(ErraiApp.class)
+            .stream()
+            .map(Element::asType)
+            .map(APTClass::new)
+            .collect(toMap(s -> s, s -> newErraiAptExportedTypes(filer, s))));
 
-      log.info("Successfully generated files using Errai APT Generators in {}ms", System.currentTimeMillis() - start);
-    }
+    erraiAptExportedTypesStream.values()
+            .stream()
+            // Because
+            .peek(s -> s.addLocalExportableTypesWhichHaveNotBeenExported(annotatedElementsFinder))
+            .peek(this::generateAptCompatibleGwtModuleFile)
+            .flatMap(this::findGenerators)
+            .filter(p)
+            .flatMap(this::generatedFiles)
+            .forEach(this::saveFile);
+
+    p = s -> s.priority() >= 0;
+
+    log.info("Successfully generated files using Errai APT Generators in {}ms", System.currentTimeMillis() - start);
   }
 
   private void generateAptCompatibleGwtModuleFile(final ErraiAptExportedTypes erraiAptExportedTypes) {
@@ -120,14 +133,11 @@ public class ErraiAppAptGenerator extends AbstractProcessor {
     }
   }
 
-  private ErraiAptExportedTypes newErraiAptExportedTypes(final AnnotatedSourceElementsFinder annotatedElementsFinder,
-          final Elements elements,
-          final Filer filer,
+  private ErraiAptExportedTypes newErraiAptExportedTypes(final Filer filer,
           final MetaClass erraiAppAnnotatedMetaClass) {
 
     log.info("Processing {}", erraiAppAnnotatedMetaClass.getFullyQualifiedName());
-    return new ErraiAptExportedTypes(erraiAppAnnotatedMetaClass, annotatedElementsFinder,
-                                     new AptResourceFilesFinder(filer), processingEnv);
+    return new ErraiAptExportedTypes(erraiAppAnnotatedMetaClass, new AptResourceFilesFinder(filer), processingEnv);
   }
 
   private Stream<ErraiAptGenerators.Any> findGenerators(final ErraiAptExportedTypes erraiAptExportedTypes) {

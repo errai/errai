@@ -70,7 +70,6 @@ public final class ErraiAptExportedTypes {
 
   private final Map<String, Set<TypeMirror>> exportedClassesByAnnotationClassName;
 
-  private final AnnotatedSourceElementsFinder annotatedSourceElementsFinder;
   private final ResourceFilesFinder resourcesFilesFinder;
   private final AptErraiAppConfiguration aptErraiAppConfiguration;
   private final Set<String> moduleNames;
@@ -79,23 +78,17 @@ public final class ErraiAptExportedTypes {
   private final ProcessingEnvironment processingEnv;
 
   public ErraiAptExportedTypes(final MetaClass erraiAppAnnotatedMetaClass,
-                               final AnnotatedSourceElementsFinder annotatedSourceElementsFinder,
-                               final ResourceFilesFinder resourceFilesFinder,
-                               final ProcessingEnvironment processingEnv) {
+          final ResourceFilesFinder resourceFilesFinder,
+          final ProcessingEnvironment processingEnv) {
 
     this.resourcesFilesFinder = resourceFilesFinder;
-    this.annotatedSourceElementsFinder = annotatedSourceElementsFinder;
     this.aptErraiAppConfiguration = new AptErraiAppConfiguration(erraiAppAnnotatedMetaClass);
     this.moduleNames = aptErraiAppConfiguration.modules().stream().map(MetaClass::getCanonicalName).collect(toSet());
 
     this.processingEnv = processingEnv;
     this.elements = processingEnv.getElementUtils();
 
-    // Loads all exported types from ExportFiles
-    exportedClassesByAnnotationClassName = getExportedTypesFromExportFilesInExportFilesPackage();
-
-    // Because annotation processors execution order is random we have to look for local exportable types one more time
-    addLocalExportableTypesWhichHaveNotBeenExported();
+    this.exportedClassesByAnnotationClassName = this.getExportedTypesFromExportFilesInExportFilesPackage();
   }
 
   private Map<String, Set<TypeMirror>> getExportedTypesFromExportFilesInExportFilesPackage() {
@@ -127,7 +120,7 @@ public final class ErraiAptExportedTypes {
     return exportFile.getEnclosedElements().stream().filter(e -> e.getKind().isField()).map(Element::asType);
   }
 
-  private void addLocalExportableTypesWhichHaveNotBeenExported() {
+  public void addLocalExportableTypesWhichHaveNotBeenExported(final AnnotatedSourceElementsFinder annotatedSourceElementsFinder) {
     log.info("Exporting local exportable types..");
     final Set<TypeElement> allExportableAnnotations = findAnnotatedMetaClasses(ErraiExportingStrategies.class).stream()
             .flatMap(c -> Arrays.stream(c.getDeclaredMethods()))
@@ -146,27 +139,41 @@ public final class ErraiAptExportedTypes {
     log.debug("Exporting local exportable types using annotations:");
     log.debug(allExportableAnnotations.stream().map(s -> s.getQualifiedName().toString()).collect(joining("\n")));
 
-    this.addAllExportableTypes(allExportableAnnotations);
+    this.addAllExportableTypes(allExportableAnnotations, annotatedSourceElementsFinder);
   }
 
-  private void addAllExportableTypes(final Set<TypeElement> allExportableAnnotations) {
-    getLocalExportableTypesByItsAnnotationName(allExportableAnnotations).entrySet()
+  private void addAllExportableTypes(final Set<TypeElement> allExportableAnnotations,
+          final AnnotatedSourceElementsFinder annotatedSourceElementsFinder) {
+
+    getLocalExportableTypesByItsAnnotationName(allExportableAnnotations, annotatedSourceElementsFinder).entrySet()
             .stream()
             .filter(e -> !e.getValue().isEmpty())
             .forEach(this::addExportableLocalTypes);
   }
 
-  private Map<String, Set<TypeMirror>> getLocalExportableTypesByItsAnnotationName(final Set<TypeElement> allExportableAnnotations) {
-    return getLocalExportFileGenerator(allExportableAnnotations).createExportFiles()
+  private Map<String, Set<TypeMirror>> getLocalExportableTypesByItsAnnotationName(final Set<TypeElement> allExportableAnnotations,
+          final AnnotatedSourceElementsFinder annotatedSourceElementsFinder) {
+
+    return buildExportFileGenerator(annotatedSourceElementsFinder).createExportFiles(allExportableAnnotations)
             .stream()
             .filter(s -> localErraiAppContainsModuleOfExportFileElement(s.simpleClassName()))
             .collect(groupingBy(exportFile -> exportFile.annotation().getQualifiedName().toString(),
                     flatMapping(this::getExportedTypesFromExportFile, toSet())));
   }
 
-  private ExportFileGenerator getLocalExportFileGenerator(final Set<TypeElement> allExportableAnnotations) {
-    return new ExportFileGenerator("localExportableTypes", allExportableAnnotations, annotatedSourceElementsFinder,
-            buildExportingStrategies());
+  private ExportFileGenerator buildExportFileGenerator(AnnotatedSourceElementsFinder annotatedSourceElementsFinder) {
+    final Set<MetaClass> erraiModules = annotatedSourceElementsFinder.findSourceElementsAnnotatedWith(ErraiModule.class)
+            .stream()
+            .map(s -> new APTClass(s.asType()))
+            .collect(toSet());
+
+    erraiModules.addAll(this.findAnnotatedMetaClasses(ErraiModule.class)
+            .stream()
+            .filter(s -> s.isAnnotationPresent(ErraiApp.class))
+            .collect(toSet()));
+
+    return new ExportFileGenerator("exportFileGenerator", annotatedSourceElementsFinder, buildExportingStrategies(),
+            erraiModules);
   }
 
   private ExportingStrategies buildExportingStrategies() {
@@ -219,4 +226,5 @@ public final class ErraiAptExportedTypes {
             }, downstream.combiner(), downstream.finisher(),
             downstream.characteristics().toArray(new Collector.Characteristics[0]));
   }
+
 }
