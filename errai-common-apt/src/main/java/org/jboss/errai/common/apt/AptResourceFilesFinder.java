@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
 /**
@@ -48,13 +49,14 @@ public class AptResourceFilesFinder implements ResourceFilesFinder {
     final String packageName = path.substring(0, lastSlashIndex).replace("/", ".");
     final String fileName = path.substring(lastSlashIndex + 1);
 
-    final Set<URI> possibleUris = LOCATIONS_TO_SEARCH.stream()
+    final List<URI> possibleUris = LOCATIONS_TO_SEARCH.stream()
             .map(location -> getUri(location, packageName, fileName))
             .filter(Optional::isPresent)
             .map(Optional::get)
-            .collect(toSet());
+            .collect(toList());
 
     return possibleUris.stream()
+            .filter(uri -> !uri.isOpaque())
             .map(File::new)
             .filter(File::exists)
             .findFirst();

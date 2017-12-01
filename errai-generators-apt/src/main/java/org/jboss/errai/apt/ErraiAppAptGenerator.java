@@ -44,7 +44,6 @@ import javax.tools.FileObject;
 import java.io.IOException;
 import java.io.Writer;
 import java.lang.reflect.Constructor;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -127,8 +126,8 @@ public class ErraiAppAptGenerator extends AbstractProcessor {
           final MetaClass erraiAppAnnotatedMetaClass) {
 
     log.info("Processing {}", erraiAppAnnotatedMetaClass.getFullyQualifiedName());
-    return new ErraiAptExportedTypes(erraiAppAnnotatedMetaClass, elements, annotatedElementsFinder,
-            new AptResourceFilesFinder(filer));
+    return new ErraiAptExportedTypes(erraiAppAnnotatedMetaClass, annotatedElementsFinder,
+                                     new AptResourceFilesFinder(filer), processingEnv);
   }
 
   private Stream<ErraiAptGenerators.Any> findGenerators(final ErraiAptExportedTypes erraiAptExportedTypes) {

@@ -34,6 +34,7 @@ import org.jboss.errai.common.configuration.ErraiModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
@@ -69,22 +70,26 @@ public final class ErraiAptExportedTypes {
 
   private final Map<String, Set<TypeMirror>> exportedClassesByAnnotationClassName;
 
-  private final Elements elements;
   private final AnnotatedSourceElementsFinder annotatedSourceElementsFinder;
   private final ResourceFilesFinder resourcesFilesFinder;
   private final AptErraiAppConfiguration aptErraiAppConfiguration;
   private final Set<String> moduleNames;
 
-  public ErraiAptExportedTypes(final MetaClass erraiAppAnnotatedMetaClass,
-          final Elements elements,
-          final AnnotatedSourceElementsFinder annotatedSourceElementsFinder,
-          final ResourceFilesFinder resourceFilesFinder) {
+  private final Elements elements;
+  private final ProcessingEnvironment processingEnv;
 
-    this.elements = elements;
+  public ErraiAptExportedTypes(final MetaClass erraiAppAnnotatedMetaClass,
+                               final AnnotatedSourceElementsFinder annotatedSourceElementsFinder,
+                               final ResourceFilesFinder resourceFilesFinder,
+                               final ProcessingEnvironment processingEnv) {
+
     this.resourcesFilesFinder = resourceFilesFinder;
     this.annotatedSourceElementsFinder = annotatedSourceElementsFinder;
     this.aptErraiAppConfiguration = new AptErraiAppConfiguration(erraiAppAnnotatedMetaClass);
     this.moduleNames = aptErraiAppConfiguration.modules().stream().map(MetaClass::getCanonicalName).collect(toSet());
+
+    this.processingEnv = processingEnv;
+    this.elements = processingEnv.getElementUtils();
 
     // Loads all exported types from ExportFiles
     exportedClassesByAnnotationClassName = getExportedTypesFromExportFilesInExportFilesPackage();
@@ -194,6 +199,10 @@ public final class ErraiAptExportedTypes {
 
   public AptErraiAppConfiguration erraiAppConfiguration() {
     return aptErraiAppConfiguration;
+  }
+
+  public ProcessingEnvironment processingEnvironment() {
+    return processingEnv;
   }
 
   // Java 9 will implement this method, so when it's released and we upgrade, this can be removed.
