@@ -149,11 +149,12 @@ public class ErraiModule {
   }
 
   private boolean isPublic(final ExportedElement exportedElement) {
-    final Element element = APTClassUtil.types.asElement(exportedElement.getTypeMirror());
 
-    if (element.asType().getKind().isPrimitive()) {
+    if (exportedElement.getTypeMirror().getKind().isPrimitive()) {
       return true;
     }
+
+    final Element element = APTClassUtil.types.asElement(exportedElement.getTypeMirror());
 
     if (element.getEnclosingElement().getKind().isInterface()) {
       // Inner classes of interfaces are public if its outer class is public
