@@ -16,6 +16,8 @@
 
 package org.jboss.errai.ui.rebind.ioc.element;
 
+import elemental2.dom.DomGlobal;
+import elemental2.dom.Element;
 import jsinterop.base.Js;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
@@ -45,18 +47,19 @@ import static org.jboss.errai.codegen.Parameter.finalOf;
 import static org.jboss.errai.codegen.util.Stmt.castTo;
 import static org.jboss.errai.codegen.util.Stmt.declareFinalVariable;
 import static org.jboss.errai.codegen.util.Stmt.invokeStatic;
+import static org.jboss.errai.codegen.util.Stmt.loadLiteral;
+import static org.jboss.errai.codegen.util.Stmt.loadStatic;
 import static org.jboss.errai.codegen.util.Stmt.loadVariable;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
-abstract class ElementInjectionBodyGenerator extends AbstractBodyGenerator {
+class ElementInjectionBodyGenerator extends AbstractBodyGenerator {
 
   private final MetaClass type;
-
-  final String spaceSeparatedClassNames;
-  final Set<Property> properties;
-  final String tagName;
+  private final String tagName;
+  private final Set<Property> properties;
+  private final List<String> classNames;
 
   ElementInjectionBodyGenerator(final MetaClass type,
           final String tagName,
@@ -66,10 +69,8 @@ abstract class ElementInjectionBodyGenerator extends AbstractBodyGenerator {
     this.type = type;
     this.tagName = tagName;
     this.properties = properties;
-    this.spaceSeparatedClassNames = classNames.stream().collect(joining(" "));
+    this.classNames = classNames;
   }
-
-  protected abstract String createInstanceAndConfigure(final List<Statement> statements);
 
   @Override
   protected List<Statement> generateCreateInstanceStatements(final ClassStructureBuilder<?> bodyBlockBuilder,
@@ -79,7 +80,20 @@ abstract class ElementInjectionBodyGenerator extends AbstractBodyGenerator {
 
     final List<Statement> stmts = new ArrayList<>();
 
-    final String elementVar = createInstanceAndConfigure(stmts);
+    final String elementVar = "element";
+
+    stmts.add(declareFinalVariable(elementVar, Element.class,
+            loadStatic(DomGlobal.class, "document").invoke("createElement", tagName)));
+
+    for (final Property property : properties) {
+      stmts.add(loadVariable(elementVar).invoke("setAttribute", loadLiteral(property.name()),
+              loadLiteral(property.value())));
+    }
+
+    if (!classNames.isEmpty()) {
+      stmts.add(loadVariable(elementVar).loadField("className")
+              .assignValue(loadLiteral(classNames.stream().collect(joining(" ")))));
+    }
 
     final String retValVar = "retVal";
 

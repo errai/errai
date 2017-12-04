@@ -88,7 +88,7 @@ public class ElementProviderExtension implements IOCExtensionConfigurator {
 
   private static void processJsTypeElement(final InjectionContext injectionContext, final MetaClass type) {
     getCustomElementTags(type).stream()
-            .map(tagName -> gwtExactTypeInjectableProvider(injectionContext, type, tagName))
+            .map(tagName -> elemental2ExactTypeInjectableProvider(injectionContext, type, tagName))
             .forEach(e -> registerExactTypeInjectableProvider(injectionContext, e));
   }
 
@@ -96,7 +96,7 @@ public class ElementProviderExtension implements IOCExtensionConfigurator {
     final TagName gwtTagNameAnnotation = type.getAnnotation(TagName.class);
     if (gwtTagNameAnnotation != null) {
       Arrays.stream(gwtTagNameAnnotation.value())
-              .map(tagName -> gwtExactTypeInjectableProvider(injectionContext, type, tagName))
+              .map(tagName -> elemental2ExactTypeInjectableProvider(injectionContext, type, tagName))
               .forEach(e -> registerExactTypeInjectableProvider(injectionContext, e));
     }
   }
@@ -105,27 +105,14 @@ public class ElementProviderExtension implements IOCExtensionConfigurator {
           final MetaClass type,
           final String tag) {
 
-    return exactTypeInjectableProvider(injectionContext, type, tag,
-            new Elemental2ElementInjectionBodyGenerator(type, tag, getProperties(type), getClassNames(type)));
-  }
-
-  private static ExactTypeInjectableProvider gwtExactTypeInjectableProvider(final InjectionContext injectionContext,
-          final MetaClass type,
-          final String tagName) {
-
-    return exactTypeInjectableProvider(injectionContext, type, tagName,
-            new GwtElementInjectionBodyGenerator(type, tagName, getProperties(type), getClassNames(type)));
-  }
-
-  private static ExactTypeInjectableProvider exactTypeInjectableProvider(final InjectionContext injectionContext,
-          final MetaClass type,
-          final String tagName,
-          final ElementInjectionBodyGenerator injectionBodyGenerator) {
-
-    final Qualifier qualifier = injectionContext.getQualifierFactory().forSource(new HasNamedAnnotation(tagName));
+    final Qualifier qualifier = injectionContext.getQualifierFactory().forSource(new HasNamedAnnotation(tag));
     final InjectableHandle handle = new InjectableHandle(type, qualifier);
 
+    final ElementInjectionBodyGenerator injectionBodyGenerator = new ElementInjectionBodyGenerator(type, tag,
+            getProperties(type), getClassNames(type));
+
     final ElementProvider elementProvider = new ElementProvider(handle, injectionBodyGenerator);
+
     return new ExactTypeInjectableProvider(handle, elementProvider);
   }
 
