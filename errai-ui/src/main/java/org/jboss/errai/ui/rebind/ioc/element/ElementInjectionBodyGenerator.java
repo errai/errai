@@ -16,14 +16,9 @@
 
 package org.jboss.errai.ui.rebind.ioc.element;
 
-import com.google.common.base.Strings;
-import com.google.gwt.util.tools.shared.StringUtils;
-import elemental2.dom.DomGlobal;
-import elemental2.dom.Element;
 import jsinterop.base.Js;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
-import org.jboss.errai.codegen.builder.ContextualStatementBuilder;
 import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
@@ -36,63 +31,56 @@ import org.jboss.errai.ioc.rebind.ioc.bootstrapper.AbstractBodyGenerator;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraph;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.Injectable;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
-import org.jboss.errai.ui.shared.TemplateUtil;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+import static java.util.stream.Collectors.joining;
 import static org.jboss.errai.codegen.Parameter.finalOf;
 import static org.jboss.errai.codegen.util.Stmt.castTo;
 import static org.jboss.errai.codegen.util.Stmt.declareFinalVariable;
 import static org.jboss.errai.codegen.util.Stmt.invokeStatic;
-import static org.jboss.errai.codegen.util.Stmt.loadLiteral;
-import static org.jboss.errai.codegen.util.Stmt.loadStatic;
 import static org.jboss.errai.codegen.util.Stmt.loadVariable;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
-class ElementInjectionBodyGenerator extends AbstractBodyGenerator {
+abstract class ElementInjectionBodyGenerator extends AbstractBodyGenerator {
 
   private final MetaClass type;
-  private final String tagName;
-  private final String classNames;
-  private final Set<Property> properties;
 
-  ElementInjectionBodyGenerator(final MetaClass type, String tagName) {
-    this(type, tagName, Collections.emptySet(), "");
-  }
+  final String spaceSeparatedClassNames;
+  final Set<Property> properties;
+  final String tagName;
 
-  ElementInjectionBodyGenerator(final MetaClass type, String tagName, final Set<Property> properties, final String classNames) {
+  ElementInjectionBodyGenerator(final MetaClass type,
+          final String tagName,
+          final Set<Property> properties,
+          final List<String> classNames) {
+
     this.type = type;
     this.tagName = tagName;
     this.properties = properties;
-    this.classNames = classNames;
+    this.spaceSeparatedClassNames = classNames.stream().collect(joining(" "));
   }
+
+  protected abstract String createInstanceAndConfigure(final List<Statement> statements);
 
   @Override
   protected List<Statement> generateCreateInstanceStatements(final ClassStructureBuilder<?> bodyBlockBuilder,
-          final Injectable injectable, final DependencyGraph graph, final InjectionContext injectionContext) {
+          final Injectable injectable,
+          final DependencyGraph graph,
+          final InjectionContext injectionContext) {
 
     final List<Statement> stmts = new ArrayList<>();
-    final String elementVar = "element";
 
-    stmts.add(declareFinalVariable(elementVar, elementClass(), elementInitialization()));
+    final String elementVar = createInstanceAndConfigure(stmts);
 
-    for (final Property property : properties) {
-      stmts.add(loadVariable(elementVar).invoke("setPropertyString", loadLiteral(property.name()),
-              loadLiteral(property.value())));
-    }
-
-    if (!Strings.isNullOrEmpty(classNames)) {
-      stmts.add(loadVariable(elementVar).invoke("addClassName", loadLiteral(classNames)));
-    }
     final String retValVar = "retVal";
 
     stmts.add(declareFinalVariable(retValVar, type, invokeStatic(Js.class, "cast", loadVariable(elementVar))));
@@ -104,14 +92,6 @@ class ElementInjectionBodyGenerator extends AbstractBodyGenerator {
 
     stmts.add(loadVariable(retValVar).returnValue());
     return stmts;
-  }
-
-  protected ContextualStatementBuilder elementInitialization() {
-    return loadStatic(DomGlobal.class, "document").invoke("createElement", tagName);
-  }
-
-  protected Class<?> elementClass() {
-    return Element.class;
   }
 
   /**

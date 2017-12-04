@@ -16,19 +16,15 @@
 
 package org.jboss.errai.ui.rebind.ioc.element;
 
-import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.TagName;
 import jsinterop.annotations.JsType;
-import org.jboss.errai.codegen.builder.ContextualStatementBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
-import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.client.api.annotations.ClassNames;
 import org.jboss.errai.common.client.api.annotations.Element;
 import org.jboss.errai.common.client.api.annotations.Properties;
 import org.jboss.errai.common.client.api.annotations.Property;
 import org.jboss.errai.ioc.client.api.IOCExtension;
-import org.jboss.errai.ioc.rebind.ioc.bootstrapper.AbstractBodyGenerator;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCExtensionConfigurator;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.Qualifier;
@@ -39,7 +35,11 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
 import java.util.Set;
+
+import static java.util.Collections.emptyList;
 
 /**
  * Satisfies injection points for DOM elements.
@@ -82,29 +82,50 @@ public class ElementProviderExtension implements IOCExtensionConfigurator {
 
   private static void processElemental2Element(final InjectionContext injectionContext, final MetaClass type) {
     elemental2ElementTags(type).stream()
-            .map(tag -> exactTypeInjectableProvider(injectionContext, type, tag))
+            .map(tag -> elemental2ExactTypeInjectableProvider(injectionContext, type, tag))
             .forEach(e -> registerExactTypeInjectableProvider(injectionContext, e));
   }
 
-  static Collection<String> elemental2ElementTags(final MetaClass type) {
-    final Collection<String> customElementTags = getCustomElementTags(type);
+  private static void processJsTypeElement(final InjectionContext injectionContext, final MetaClass type) {
+    getCustomElementTags(type).stream()
+            .map(tagName -> gwtExactTypeInjectableProvider(injectionContext, type, tagName))
+            .forEach(e -> registerExactTypeInjectableProvider(injectionContext, e));
+  }
 
-    if (!customElementTags.isEmpty()) {
-      return customElementTags;
+  private static void processGwtUserElement(final InjectionContext injectionContext, final MetaClass type) {
+    final TagName gwtTagNameAnnotation = type.getAnnotation(TagName.class);
+    if (gwtTagNameAnnotation != null) {
+      Arrays.stream(gwtTagNameAnnotation.value())
+              .map(tagName -> gwtExactTypeInjectableProvider(injectionContext, type, tagName))
+              .forEach(e -> registerExactTypeInjectableProvider(injectionContext, e));
     }
+  }
 
-    return Elemental2TagMapping.getTags(type.asClass());
+  private static ExactTypeInjectableProvider elemental2ExactTypeInjectableProvider(final InjectionContext injectionContext,
+          final MetaClass type,
+          final String tag) {
+
+    return exactTypeInjectableProvider(injectionContext, type, tag,
+            new Elemental2ElementInjectionBodyGenerator(type, tag, getProperties(type), getClassNames(type)));
+  }
+
+  private static ExactTypeInjectableProvider gwtExactTypeInjectableProvider(final InjectionContext injectionContext,
+          final MetaClass type,
+          final String tagName) {
+
+    return exactTypeInjectableProvider(injectionContext, type, tagName,
+            new GwtElementInjectionBodyGenerator(type, tagName, getProperties(type), getClassNames(type)));
   }
 
   private static ExactTypeInjectableProvider exactTypeInjectableProvider(final InjectionContext injectionContext,
-          final MetaClass type, final String tagName) {
+          final MetaClass type,
+          final String tagName,
+          final ElementInjectionBodyGenerator injectionBodyGenerator) {
 
     final Qualifier qualifier = injectionContext.getQualifierFactory().forSource(new HasNamedAnnotation(tagName));
     final InjectableHandle handle = new InjectableHandle(type, qualifier);
 
-    final AbstractBodyGenerator injectionBodyGenerator = new ElementInjectionBodyGenerator(type, tagName);
     final ElementProvider elementProvider = new ElementProvider(handle, injectionBodyGenerator);
-
     return new ExactTypeInjectableProvider(handle, elementProvider);
   }
 
@@ -115,6 +136,16 @@ public class ElementProviderExtension implements IOCExtensionConfigurator {
     final ElementProvider elementProvider = exactTypeInjectableProvider.elementProvider;
 
     injectionContext.registerExactTypeInjectableProvider(handle, elementProvider);
+  }
+
+  static Collection<String> elemental2ElementTags(final MetaClass type) {
+    final Collection<String> customElementTags = getCustomElementTags(type);
+
+    if (!customElementTags.isEmpty()) {
+      return customElementTags;
+    }
+
+    return Elemental2TagMapping.getTags(type.asClass());
   }
 
   private static Collection<String> getCustomElementTags(final MetaClass type) {
@@ -134,56 +165,6 @@ public class ElementProviderExtension implements IOCExtensionConfigurator {
     return Arrays.asList(elementAnnotation.value());
   }
 
-  private static class ExactTypeInjectableProvider {
-
-    private final InjectableHandle handle;
-    private final ElementProvider elementProvider;
-
-    private ExactTypeInjectableProvider(InjectableHandle handle, ElementProvider elementProvider) {
-      this.handle = handle;
-      this.elementProvider = elementProvider;
-    }
-  }
-
-  private static void processJsTypeElement(final InjectionContext injectionContext, final MetaClass type) {
-    getCustomElementTags(type).stream()
-            .map(tagName -> gwtExactTypeInjectableProvider(injectionContext, type, tagName))
-            .forEach(e -> registerExactTypeInjectableProvider(injectionContext, e));
-  }
-
-  private static void processGwtUserElement(final InjectionContext injectionContext, final MetaClass type) {
-    final TagName gwtTagNameAnnotation = type.getAnnotation(TagName.class);
-    if (gwtTagNameAnnotation != null) {
-      Arrays.stream(gwtTagNameAnnotation.value())
-              .map(tagName -> gwtExactTypeInjectableProvider(injectionContext, type, tagName))
-              .forEach(e -> registerExactTypeInjectableProvider(injectionContext, e));
-    }
-  }
-
-  private static ExactTypeInjectableProvider gwtExactTypeInjectableProvider(final InjectionContext injectionContext,
-          final MetaClass type, final String tagName) {
-
-    final Qualifier qualifier = injectionContext.getQualifierFactory().forSource(new HasNamedAnnotation(tagName));
-    final InjectableHandle handle = new InjectableHandle(type, qualifier);
-
-    final ElementProvider elementProvider = new ElementProvider(handle,
-            new ElementInjectionBodyGenerator(type, tagName, getProperties(type), getClassNames(type)) {
-
-              @Override
-              protected ContextualStatementBuilder elementInitialization() {
-                return Stmt.invokeStatic(Document.class, "get").invoke("createElement", Stmt.loadLiteral(tagName));
-              }
-
-              @Override
-              protected Class<?> elementClass() {
-                return com.google.gwt.dom.client.Element.class;
-              }
-
-            });
-
-    return new ExactTypeInjectableProvider(handle, elementProvider);
-  }
-
   private static Set<Property> getProperties(final MetaClass type) {
     final Set<Property> properties = new HashSet<>();
 
@@ -201,12 +182,20 @@ public class ElementProviderExtension implements IOCExtensionConfigurator {
     return properties;
   }
 
-  private static String getClassNames(final MetaClass type){
-    String result = "";
-    final ClassNames classNames = type.getAnnotation(ClassNames.class);
-    if (classNames != null){
-      result = String.join(" ", classNames.value());
+  private static List<String> getClassNames(final MetaClass type) {
+    return Optional.ofNullable(type.getAnnotation(ClassNames.class))
+            .map(a -> Arrays.asList(a.value()))
+            .orElse(emptyList());
+  }
+
+  private static class ExactTypeInjectableProvider {
+
+    private final InjectableHandle handle;
+    private final ElementProvider elementProvider;
+
+    private ExactTypeInjectableProvider(final InjectableHandle handle, final ElementProvider elementProvider) {
+      this.handle = handle;
+      this.elementProvider = elementProvider;
     }
-    return result;
   }
 }
