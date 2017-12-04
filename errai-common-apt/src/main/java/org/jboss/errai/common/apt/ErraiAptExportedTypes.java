@@ -82,7 +82,7 @@ public final class ErraiAptExportedTypes {
           final ResourceFilesFinder resourceFilesFinder,
           final ProcessingEnvironment processingEnv) {
 
-    this.erraiAppMetaClass =erraiAppMetaClass;
+    this.erraiAppMetaClass = erraiAppMetaClass;
     this.resourcesFilesFinder = resourceFilesFinder;
     this.aptErraiAppConfiguration = new AptErraiAppConfiguration(erraiAppMetaClass);
     this.moduleNames = aptErraiAppConfiguration.modules().stream().map(MetaClass::getCanonicalName).collect(toSet());
@@ -150,7 +150,7 @@ public final class ErraiAptExportedTypes {
     getLocalExportableTypesByItsAnnotationName(allExportableAnnotations, annotatedSourceElementsFinder).entrySet()
             .stream()
             .filter(e -> !e.getValue().isEmpty())
-            .forEach(this::addExportableLocalTypes);
+            .forEach(e -> addExportableLocalTypes(e.getKey(), e.getValue()));
   }
 
   private Map<String, Set<TypeMirror>> getLocalExportableTypesByItsAnnotationName(final Set<TypeElement> allExportableAnnotations,
@@ -163,7 +163,7 @@ public final class ErraiAptExportedTypes {
                     flatMapping(this::getExportedTypesFromExportFile, toSet())));
   }
 
-  private ExportFileGenerator buildExportFileGenerator(AnnotatedSourceElementsFinder annotatedSourceElementsFinder) {
+  private ExportFileGenerator buildExportFileGenerator(final AnnotatedSourceElementsFinder annotatedSourceElementsFinder) {
     final Set<MetaClass> erraiModules = annotatedSourceElementsFinder.findSourceElementsAnnotatedWith(ErraiModule.class)
             .stream()
             .map(s -> new APTClass(s.asType()))
@@ -183,9 +183,7 @@ public final class ErraiAptExportedTypes {
             findAnnotatedMetaClasses(ErraiExportingStrategies.class));
   }
 
-  private void addExportableLocalTypes(final Map.Entry<String, Set<TypeMirror>> entry) {
-    final String annotationName = entry.getKey();
-    final Set<TypeMirror> mappedTypes = entry.getValue();
+  private void addExportableLocalTypes(final String annotationName, final Set<TypeMirror> mappedTypes) {
     exportedClassesByAnnotationClassName.putIfAbsent(annotationName, new HashSet<>());
     exportedClassesByAnnotationClassName.get(annotationName).addAll(mappedTypes);
   }
