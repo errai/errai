@@ -16,13 +16,13 @@
 
 package org.jboss.errai.apt.internal.export;
 
-import org.jboss.errai.common.apt.localapps.localapp2.module2.TestExportedType21;
-import org.jboss.errai.common.apt.localapps.localapp2.module2.TestExportedType22;
+import org.jboss.errai.common.apt.exportfile.ExportedTypesFromExportFilesTestExportedType;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
-public class org_jboss_errai_common_apt_localapps_localapp2_module2_TestModule2__test__ExportFile_org_jboss_errai_common_apt_exportfile_ExportedTypesFromExportFilesTestAnnotation {
-  TestExportedType21 testExportedType21;
-  TestExportedType22 testExportedType22;
+public class any_Module__test__ExportFile {
+  public class org_jboss_errai_common_apt_exportfile_ExportedTypesFromExportFilesTestAnnotation {
+    ExportedTypesFromExportFilesTestExportedType sa7H9hdg;
+  }
 }

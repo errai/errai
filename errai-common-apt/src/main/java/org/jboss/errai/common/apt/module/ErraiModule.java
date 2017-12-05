@@ -20,11 +20,9 @@ import com.sun.tools.javac.code.Symbol;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.impl.apt.APTClass;
 import org.jboss.errai.codegen.meta.impl.apt.APTClassUtil;
-import org.jboss.errai.common.apt.exportfile.ExportFile1;
-import org.jboss.errai.common.apt.exportfile.ExportFile2;
-import org.jboss.errai.common.apt.generator.AnnotatedSourceElementsFinder;
 import org.jboss.errai.common.apt.configuration.AptErraiModulesConfiguration;
 import org.jboss.errai.common.apt.exportfile.ExportFile;
+import org.jboss.errai.common.apt.generator.AnnotatedSourceElementsFinder;
 import org.jboss.errai.common.apt.generator.ExportedTypesFromSource;
 import org.jboss.errai.common.apt.strategies.ExportedElement;
 import org.jboss.errai.common.apt.strategies.ExportingStrategies;
@@ -32,8 +30,6 @@ import org.jboss.errai.common.apt.strategies.ExportingStrategy;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.TypeMirror;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -84,27 +80,14 @@ public class ErraiModule {
     exportableAnnotations.stream()
             .flatMap(s -> this.findExportedElements(s).stream())
             .collect(groupingBy(ExportedElement::getAnnotation, mapping(ExportedElement::getTypeMirror, toSet())))
-            .forEach((a, types) -> exportedTypesFromSource.putAll(a, types.stream().map(APTClassUtil.types::asElement).collect(toSet())));
+            .forEach((a, types) -> exportedTypesFromSource.putAll(a,
+                    types.stream().map(APTClassUtil.types::asElement).collect(toSet())));
 
-    final Stream<ExportFile2> exportFile2 = Stream.of(
-            new ExportFile2(erraiModuleUniqueNamespace(), exportedTypesFromSource));
+    if (exportedTypesFromSource.isEmpty()) {
+      return Stream.of();
+    }
 
-    final Stream<ExportFile> exportFileStream = exportableAnnotations.stream()
-            .flatMap(s -> this.findExportedElements(s).stream())
-            .collect(groupingBy(ExportedElement::getAnnotation, mapping(ExportedElement::getTypeMirror, toSet())))
-            .entrySet()
-            .stream()
-            .map(e -> this.newExportFile(e.getKey(), e.getValue()))
-            .filter(Optional::isPresent)
-            .map(Optional::get);
-
-    return Stream.concat(exportFileStream, exportFile2);
-  }
-
-  private Optional<ExportFile> newExportFile(final TypeElement annotation, final Set<TypeMirror> types) {
-    return Optional.of(types)
-            .filter(s -> !s.isEmpty())
-            .map(t -> new ExportFile1(erraiModuleUniqueNamespace(), annotation, types));
+    return Stream.of(new ExportFile(erraiModuleUniqueNamespace(), exportedTypesFromSource));
   }
 
   Set<ExportedElement> findExportedElements(final TypeElement annotationTypeElement) {

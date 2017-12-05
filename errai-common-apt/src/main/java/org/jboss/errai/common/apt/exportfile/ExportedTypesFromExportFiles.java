@@ -23,7 +23,6 @@ import org.jboss.errai.common.apt.configuration.AptErraiAppConfiguration;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.PackageElement;
-import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
@@ -41,7 +40,6 @@ import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toSet;
 import static org.jboss.errai.common.apt.exportfile.ErraiAptPackages.exportFilesPackageElement;
-import static org.jboss.errai.common.apt.exportfile.ExportFileName.decodeModuleClassCanonicalNameFromExportFileSimpleName;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
@@ -74,25 +72,24 @@ public final class ExportedTypesFromExportFiles {
     return packageElement.getEnclosedElements()
             .stream()
             .filter(e -> localErraiAppContainsModuleOfExportFileElement(e.getSimpleName().toString()))
-            .collect(groupingBy(this::getAnnotationNameFromExportFileElement,
+            .flatMap(s -> s.getEnclosedElements().stream().filter(e -> e.getKind().isClass()))
+            .collect(groupingBy(this::getAnnotationCanonicalNameFromExportFileInnerClass,
                     flatMapping(this::getExportedTypesFromExportFileElement, toSet())));
   }
 
   private boolean localErraiAppContainsModuleOfExportFileElement(final String exportFileClassSimpleName) {
     if (aptErraiAppConfiguration.local()) {
-      final String moduleName = decodeModuleClassCanonicalNameFromExportFileSimpleName(exportFileClassSimpleName);
-      return moduleNames.contains(moduleName);
+      return moduleNames.contains(exportFileClassSimpleName.split("__")[0].replace("_", "."));
     }
     return true;
   }
 
-  private String getAnnotationNameFromExportFileElement(final Element e) {
-    final TypeElement typeElement = (TypeElement) e;
-    return ExportFileName.decodeAnnotationClassNameFromExportFileName(typeElement.getQualifiedName().toString());
+  private String getAnnotationCanonicalNameFromExportFileInnerClass(final Element e) {
+    return e.getSimpleName().toString().replace("_", ".");
   }
 
-  private Stream<TypeMirror> getExportedTypesFromExportFileElement(final Element exportFile) {
-    return exportFile.getEnclosedElements().stream().filter(e -> e.getKind().isField()).map(Element::asType);
+  private Stream<TypeMirror> getExportedTypesFromExportFileElement(final Element exportFileInnerClassElement) {
+    return exportFileInnerClassElement.getEnclosedElements().stream().filter(e -> e.getKind().isField()).map(Element::asType);
   }
 
   public Set<MetaClass> findAnnotatedMetaClasses(final Class<? extends Annotation> annotation) {

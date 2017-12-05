@@ -47,4 +47,8 @@ public class ExportedTypesFromSource {
   public Set<Element> findAnnotatedSourceElements(final TypeElement typeElement) {
     return new HashSet<>(exportedTypes.get(typeElement.getQualifiedName().toString()));
   }
+
+  public boolean isEmpty() {
+    return exportedTypes.isEmpty();
+  }
 }

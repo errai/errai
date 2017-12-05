@@ -20,7 +20,6 @@ import org.jboss.errai.codegen.apt.test.ErraiAptTest;
 import org.jboss.errai.codegen.meta.impl.apt.APTClass;
 import org.jboss.errai.common.apt.TestAnnotatedSourceElementsFinder;
 import org.jboss.errai.common.apt.exportfile.ExportFile;
-import org.jboss.errai.common.apt.exportfile.ExportFile1;
 import org.jboss.errai.common.configuration.ErraiModule;
 import org.junit.Assert;
 import org.junit.Test;
@@ -53,8 +52,7 @@ public class ExportFileGeneratorTest extends ErraiAptTest {
     final Set<ExportFile> exportFiles = testGenerator.createExportFile(singleton(testAnnotation));
 
     Assert.assertEquals(1, exportFiles.size());
-    final ExportFile1 exportFile = (ExportFile1) exportFiles.stream().findFirst().get();
-    Assert.assertEquals(testAnnotation, exportFile.annotation());
+    final ExportFile exportFile = exportFiles.stream().findFirst().get();
     Assert.assertEquals(singleton(testExportedType.asType()), exportFile.exportedTypes());
   }
 
