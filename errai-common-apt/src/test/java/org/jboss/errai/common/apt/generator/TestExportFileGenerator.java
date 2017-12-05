@@ -20,7 +20,6 @@ import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.common.apt.strategies.ErraiExportingStrategiesFactory;
 
 import javax.lang.model.util.Elements;
-
 import java.util.Set;
 
 /**
@@ -32,7 +31,7 @@ class TestExportFileGenerator extends ExportFileGenerator {
           final Elements elements,
           final Set<MetaClass> erraiModules) {
     super("test", annotatedSourceElementsFinder, new ErraiExportingStrategiesFactory(elements).buildFrom(),
-            erraiModules);
+            erraiModules, null);
   }
 
 }

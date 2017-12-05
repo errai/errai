@@ -16,7 +16,6 @@
 
 package org.jboss.errai.apt.internal.export;
 
-import org.jboss.errai.common.apt.ErraiAptExportedTypesTestExportedType;
 import org.jboss.errai.common.apt.exportfile.TestExportedType;
 
 /**

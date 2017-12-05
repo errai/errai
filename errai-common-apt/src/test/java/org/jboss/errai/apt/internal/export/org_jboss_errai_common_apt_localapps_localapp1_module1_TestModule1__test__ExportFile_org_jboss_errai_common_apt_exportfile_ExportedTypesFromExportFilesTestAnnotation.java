@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.apt.export;
+package org.jboss.errai.apt.internal.export;
+
+import org.jboss.errai.common.apt.exportfile.TestExportedType;
+import org.jboss.errai.common.apt.localapps.localapp1.module1.TestExportedType1;
 
 /**
- * @author Max Barkley <mbarkley@redhat.com>
+ * @author Tiago Bento <tfernand@redhat.com>
  */
-interface SupportedAnnotationTypes {
-  String REMOTE = "org.jboss.errai.bus.server.annotations.Remote";
-  String FEATURE_INTERCEPTOR = "org.jboss.errai.common.client.api.interceptor.FeatureInterceptor";
-  String INTERCEPTED_CALL = "org.jboss.errai.common.client.api.interceptor.InterceptedCall";
-  String INTERCEPTS_REMOTE_CALL = "org.jboss.errai.common.client.api.interceptor.InterceptsRemoteCall";
+public class org_jboss_errai_common_apt_localapps_localapp1_module1_TestModule1__test__ExportFile_org_jboss_errai_common_apt_exportfile_ExportedTypesFromExportFilesTestAnnotation {
+  TestExportedType1 testExportedType1;
 }

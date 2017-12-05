@@ -22,7 +22,7 @@ import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 
-import static org.jboss.errai.cdi.apt.export.SupportedAnnotationTypes.OBSERVES;
+import static org.jboss.errai.cdi.apt.export.ErraiCdiExportFileGenerator.SupportedAnnotationTypes.OBSERVES;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
@@ -36,8 +36,9 @@ public class ErraiCdiExportFileGenerator extends AbstractExportFileGenerator {
     return "cdi";
   }
 
-  @Override
-  protected Class<?> getExportingStrategiesClass() {
-    return ErraiCdiExportingStrategies.class;
+  interface SupportedAnnotationTypes {
+
+    String OBSERVES = "javax.enterprise.event.Observes";
   }
+
 }

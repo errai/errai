@@ -17,16 +17,22 @@
 package org.jboss.errai.enterprise.apt.export;
 
 import org.jboss.errai.common.apt.generator.AbstractExportFileGenerator;
+import org.jboss.errai.common.apt.strategies.ErraiExportingStrategy;
+import org.jboss.errai.common.apt.strategies.ExportedElement;
 
 import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.TypeElement;
+import java.util.stream.Stream;
 
-import static org.jboss.errai.enterprise.apt.export.SupportedAnnotationTypes.FEATURE_INTERCEPTOR;
-import static org.jboss.errai.enterprise.apt.export.SupportedAnnotationTypes.INTERCEPTED_CALL;
-import static org.jboss.errai.enterprise.apt.export.SupportedAnnotationTypes.INTERCEPTS_REMOTE_CALL;
-import static org.jboss.errai.enterprise.apt.export.SupportedAnnotationTypes.PATH;
-import static org.jboss.errai.enterprise.apt.export.SupportedAnnotationTypes.PROVIDER;
+import static org.jboss.errai.codegen.meta.impl.apt.APTClassUtil.getTypeElement;
+import static org.jboss.errai.enterprise.apt.export.ErraiJaxrsExportFileGenerator.SupportedAnnotationTypes.FEATURE_INTERCEPTOR;
+import static org.jboss.errai.enterprise.apt.export.ErraiJaxrsExportFileGenerator.SupportedAnnotationTypes.INTERCEPTED_CALL;
+import static org.jboss.errai.enterprise.apt.export.ErraiJaxrsExportFileGenerator.SupportedAnnotationTypes.INTERCEPTS_REMOTE_CALL;
+import static org.jboss.errai.enterprise.apt.export.ErraiJaxrsExportFileGenerator.SupportedAnnotationTypes.PATH;
+import static org.jboss.errai.enterprise.apt.export.ErraiJaxrsExportFileGenerator.SupportedAnnotationTypes.PROVIDER;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
@@ -43,5 +49,25 @@ public class ErraiJaxrsExportFileGenerator extends AbstractExportFileGenerator {
   @Override
   protected Class<?> getExportingStrategiesClass() {
     return ErraiJaxrsExportingStrategies.class;
+  }
+
+  public interface ErraiJaxrsExportingStrategies {
+
+    @ErraiExportingStrategy(PATH)
+    static Stream<ExportedElement> path(final Element element) {
+      final TypeElement pathAnnotation = getTypeElement(PATH);
+      if (element.getKind().isInterface() || element.getKind().isClass()) {
+        return Stream.of(new ExportedElement(pathAnnotation, element));
+      }
+      return Stream.of(new ExportedElement(pathAnnotation, element.getEnclosingElement()));
+    }
+  }
+
+  interface SupportedAnnotationTypes {
+    String PATH = "javax.ws.rs.Path";
+    String FEATURE_INTERCEPTOR = "org.jboss.errai.common.client.api.interceptor.FeatureInterceptor";
+    String INTERCEPTED_CALL = "org.jboss.errai.common.client.api.interceptor.InterceptedCall";
+    String INTERCEPTS_REMOTE_CALL = "org.jboss.errai.common.client.api.interceptor.InterceptsRemoteCall";
+    String PROVIDER = "javax.ws.rs.ext.Provider";
   }
 }

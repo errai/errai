@@ -22,18 +22,23 @@ import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 
-import static org.jboss.errai.marshalling.apt.export.SupportedAnnotationTypes.CLIENT_MARSHALLER;
-import static org.jboss.errai.marshalling.apt.export.SupportedAnnotationTypes.CUSTOM_MAPPING;
-import static org.jboss.errai.marshalling.apt.export.SupportedAnnotationTypes.ENVIRONMENT_CONFIG_EXTENSION;
-import static org.jboss.errai.marshalling.apt.export.SupportedAnnotationTypes.NON_PORTABLE;
-import static org.jboss.errai.marshalling.apt.export.SupportedAnnotationTypes.PORTABLE;
-import static org.jboss.errai.marshalling.apt.export.SupportedAnnotationTypes.SERVER_MARSHALLER;
+import static org.jboss.errai.marshalling.apt.export.ErraiMarshallingExportFileGenerator.SupportedAnnotationTypes.CLIENT_MARSHALLER;
+import static org.jboss.errai.marshalling.apt.export.ErraiMarshallingExportFileGenerator.SupportedAnnotationTypes.CUSTOM_MAPPING;
+import static org.jboss.errai.marshalling.apt.export.ErraiMarshallingExportFileGenerator.SupportedAnnotationTypes.ENVIRONMENT_CONFIG_EXTENSION;
+import static org.jboss.errai.marshalling.apt.export.ErraiMarshallingExportFileGenerator.SupportedAnnotationTypes.NON_PORTABLE;
+import static org.jboss.errai.marshalling.apt.export.ErraiMarshallingExportFileGenerator.SupportedAnnotationTypes.PORTABLE;
+import static org.jboss.errai.marshalling.apt.export.ErraiMarshallingExportFileGenerator.SupportedAnnotationTypes.SERVER_MARSHALLER;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
-@SupportedAnnotationTypes({ PORTABLE, NON_PORTABLE, CLIENT_MARSHALLER, SERVER_MARSHALLER, ENVIRONMENT_CONFIG_EXTENSION, CUSTOM_MAPPING })
+@SupportedAnnotationTypes({ PORTABLE,
+                            NON_PORTABLE,
+                            CLIENT_MARSHALLER,
+                            SERVER_MARSHALLER,
+                            ENVIRONMENT_CONFIG_EXTENSION,
+                            CUSTOM_MAPPING })
 public class ErraiMarshallingExportFileGenerator extends AbstractExportFileGenerator {
 
   @Override
@@ -41,8 +46,14 @@ public class ErraiMarshallingExportFileGenerator extends AbstractExportFileGener
     return "marshalling";
   }
 
-  @Override
-  protected Class<?> getExportingStrategiesClass() {
-    return ErraiMarshallingExportingStrategies.class;
+  interface SupportedAnnotationTypes {
+
+    String PORTABLE = "org.jboss.errai.common.client.api.annotations.Portable";
+    String NON_PORTABLE = "org.jboss.errai.common.client.api.annotations.NonPortable";
+    String CLIENT_MARSHALLER = "org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller";
+    String SERVER_MARSHALLER = "org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller";
+    String CUSTOM_MAPPING = "org.jboss.errai.marshalling.rebind.api.CustomMapping";
+
+    String ENVIRONMENT_CONFIG_EXTENSION = "org.jboss.errai.config.rebind.EnvironmentConfigExtension";
   }
 }

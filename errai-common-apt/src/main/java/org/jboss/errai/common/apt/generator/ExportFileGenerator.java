@@ -29,7 +29,6 @@ import javax.tools.JavaFileObject;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Set;
-import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toSet;
 
@@ -42,26 +41,29 @@ class ExportFileGenerator {
   private final AnnotatedSourceElementsFinder annotatedSourceElementsFinder;
   private final ExportingStrategies exportingStrategies;
   private final Set<MetaClass> erraiModuleMetaClasses;
+  private final Filer filer;
 
   ExportFileGenerator(final String camelCaseErraiModuleName,
           final AnnotatedSourceElementsFinder annotatedSourceElementsFinder,
           final ExportingStrategies exportingStrategies,
-          final Set<MetaClass> erraiModuleMetaClasses) {
+          final Set<MetaClass> erraiModuleMetaClasses,
+          final Filer filer) {
 
     this.camelCaseErraiModuleName = camelCaseErraiModuleName;
     this.annotatedSourceElementsFinder = annotatedSourceElementsFinder;
     this.exportingStrategies = exportingStrategies;
     this.erraiModuleMetaClasses = erraiModuleMetaClasses;
+    this.filer = filer;
   }
 
-  void generateAndSaveExportFiles(final Filer filer, final Set<TypeElement> exportableAnnotations) {
-    createExportFiles(exportableAnnotations).forEach(exportFile -> generateSourceAndSave(exportFile, filer));
+  void generateAndSaveExportFiles(final Set<TypeElement> exportableAnnotations) {
+    createExportFiles(exportableAnnotations).forEach(this::generateSourceAndSave);
   }
 
   Set<ExportFile> createExportFiles(final Set<? extends TypeElement> exportableAnnotations) {
     return erraiModuleMetaClasses.stream()
             .map(this::newModule)
-            .flatMap(erraiModule -> createExportFiles(erraiModule, exportableAnnotations))
+            .flatMap(erraiModule -> erraiModule.createExportFiles(exportableAnnotations))
             .collect(toSet());
   }
 
@@ -69,12 +71,7 @@ class ExportFileGenerator {
     return new ErraiModule(camelCaseErraiModuleName, metaClass, annotatedSourceElementsFinder, exportingStrategies);
   }
 
-  private Stream<ExportFile> createExportFiles(final ErraiModule erraiModule,
-          final Set<? extends TypeElement> exportableAnnotations) {
-    return erraiModule.createExportFiles(exportableAnnotations);
-  }
-
-  private void generateSourceAndSave(final ExportFile exportFile, final Filer filer) {
+  private void generateSourceAndSave(final ExportFile exportFile) {
     try {
 
       final Element[] originatingElements = exportFile.exportedTypes()

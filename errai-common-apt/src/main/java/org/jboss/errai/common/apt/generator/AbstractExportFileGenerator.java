@@ -28,10 +28,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.processing.AbstractProcessor;
+import javax.annotation.processing.Filer;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.util.Elements;
 import java.lang.annotation.Annotation;
 import java.util.HashSet;
 import java.util.Set;
@@ -50,7 +52,12 @@ public abstract class AbstractExportFileGenerator extends AbstractProcessor {
 
   protected abstract String getCamelCaseErraiModuleName();
 
-  protected abstract Class<?> getExportingStrategiesClass();
+  protected Class<?> getExportingStrategiesClass() {
+    return DefaultExportingStrategies.class;
+  }
+
+  interface DefaultExportingStrategies {
+  }
 
   @Override
   public synchronized void init(final ProcessingEnvironment processingEnv) {
@@ -94,13 +101,15 @@ public abstract class AbstractExportFileGenerator extends AbstractProcessor {
   }
 
   private void generateFiles() {
-    newExportFileGenerator().generateAndSaveExportFiles(processingEnv.getFiler(),
-            exportedTypes.exportableAnnotations());
+    final Elements elements = processingEnv.getElementUtils();
+    final Filer filer = processingEnv.getFiler();
+
+    newExportFileGenerator(elements, filer).generateAndSaveExportFiles(exportedTypes.exportableAnnotations());
 
     signalReady(this);
 
     if (exportersAreAllFinished() && aptCodeGenerationIsEnabled()) {
-      new ErraiAppAptGenerator(processingEnv).generateAndSaveSourceFiles(erraiApps);
+      new ErraiAppAptGenerator(elements, filer).generateAndSaveSourceFiles(erraiApps);
     }
   }
 
@@ -108,13 +117,13 @@ public abstract class AbstractExportFileGenerator extends AbstractProcessor {
     return Boolean.getBoolean("apt-generators");
   }
 
-  private ExportFileGenerator newExportFileGenerator() {
+  private ExportFileGenerator newExportFileGenerator(final Elements elements, final Filer filer) {
 
-    final ExportingStrategies exportingStrategies = new ErraiExportingStrategiesFactory(processingEnv.getElementUtils())
-            .buildFrom(getExportingStrategiesClass());
+    final ErraiExportingStrategiesFactory exportingStrategiesFactory = new ErraiExportingStrategiesFactory(elements);
+    final ExportingStrategies exportingStrategies = exportingStrategiesFactory.buildFrom(getExportingStrategiesClass());
 
     return new ExportFileGenerator(getCamelCaseErraiModuleName(), exportedTypes::findAnnotatedSourceElements,
-            exportingStrategies, erraiModules);
+            exportingStrategies, erraiModules, filer);
   }
 
   private Set<MetaClass> findAnnotatedMetaClasses(final RoundEnvironment roundEnv,

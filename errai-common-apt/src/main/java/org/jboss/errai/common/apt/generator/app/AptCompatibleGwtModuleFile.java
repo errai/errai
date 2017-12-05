@@ -34,13 +34,13 @@ import static java.util.stream.Collectors.toList;
 class AptCompatibleGwtModuleFile {
 
   private final File file;
-  private final ExportedTypesFromExportFiles erraiAptExportedTypes;
+  private final ExportedTypesFromExportFiles exportedTypesFromExportFiles;
   private final String gwtModuleName;
 
-  AptCompatibleGwtModuleFile(final File file, final ExportedTypesFromExportFiles erraiAptExportedTypes) {
+  AptCompatibleGwtModuleFile(final File file, final ExportedTypesFromExportFiles exportedTypesFromExportFiles) {
     this.file = file;
-    this.erraiAptExportedTypes = erraiAptExportedTypes;
-    this.gwtModuleName = erraiAptExportedTypes.erraiAppConfiguration().gwtModuleName();
+    this.exportedTypesFromExportFiles = exportedTypesFromExportFiles;
+    this.gwtModuleName = exportedTypesFromExportFiles.erraiAppConfiguration().gwtModuleName();
   }
 
   public String generate() {
@@ -49,7 +49,7 @@ class AptCompatibleGwtModuleFile {
 
     fileLines.remove(fileLines.size() - 1);
 
-    fileLines.addAll(erraiAptExportedTypes.findAnnotatedMetaClasses(ErraiModule.class)
+    fileLines.addAll(exportedTypesFromExportFiles.findAnnotatedMetaClasses(ErraiModule.class)
             .stream()
             .map(this::getOverridingBindingRules)
             .filter(s -> !s.isEmpty())
@@ -131,7 +131,7 @@ class AptCompatibleGwtModuleFile {
     final int lastDotIndex = newClass.lastIndexOf(".");
     final String newClassFqcn = newClass.substring(0, lastDotIndex)
             + "."
-            + erraiAptExportedTypes.erraiAppConfiguration().namespace()
+            + exportedTypesFromExportFiles.erraiAppConfiguration().namespace()
             + newClass.substring(lastDotIndex + 1);
 
     return "<replace-with class=\""

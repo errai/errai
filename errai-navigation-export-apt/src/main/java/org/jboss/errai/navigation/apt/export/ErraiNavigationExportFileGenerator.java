@@ -22,7 +22,7 @@ import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 
-import static org.jboss.errai.navigation.apt.export.SupportedAnnotationTypes.PAGE;
+import static org.jboss.errai.navigation.apt.export.ErraiNavigationExportFileGenerator.SupportedAnnotationTypes.PAGE;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
@@ -36,8 +36,9 @@ public class ErraiNavigationExportFileGenerator extends AbstractExportFileGenera
     return "navigation";
   }
 
-  @Override
-  protected Class<?> getExportingStrategiesClass() {
-    return ErraiNavigationExportingStrategies.class;
+  interface SupportedAnnotationTypes {
+
+    String PAGE = "org.jboss.errai.ui.nav.client.local.Page";
   }
+
 }

@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.common.apt.export;
+package org.jboss.errai.common.apt.exportfile;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
-public interface ErraiCommonAptExportingStrategies {
+public @interface ExportedTypesFromExportFilesTestAnnotation {
 }

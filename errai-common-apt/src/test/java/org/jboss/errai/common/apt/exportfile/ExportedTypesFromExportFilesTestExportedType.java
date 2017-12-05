@@ -14,18 +14,10 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.marshalling.apt.export;
+package org.jboss.errai.common.apt.exportfile;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
-interface SupportedAnnotationTypes {
-
-  String PORTABLE = "org.jboss.errai.common.client.api.annotations.Portable";
-  String NON_PORTABLE = "org.jboss.errai.common.client.api.annotations.NonPortable";
-  String CLIENT_MARSHALLER = "org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller";
-  String SERVER_MARSHALLER = "org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller";
-  String CUSTOM_MAPPING = "org.jboss.errai.marshalling.rebind.api.CustomMapping";
-
-  String ENVIRONMENT_CONFIG_EXTENSION = "org.jboss.errai.config.rebind.EnvironmentConfigExtension";
+public class ExportedTypesFromExportFilesTestExportedType {
 }

@@ -22,8 +22,8 @@ import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 
-import static org.jboss.errai.databinding.apt.export.SupportedAnnotationTypes.BINDABLE;
-import static org.jboss.errai.databinding.apt.export.SupportedAnnotationTypes.DEFAULT_CONVERTER;
+import static org.jboss.errai.databinding.apt.export.ErraiDataBindingExportFileGenerator.SupportedAnnotationTypes.BINDABLE;
+import static org.jboss.errai.databinding.apt.export.ErraiDataBindingExportFileGenerator.SupportedAnnotationTypes.DEFAULT_CONVERTER;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
@@ -37,8 +37,9 @@ public class ErraiDataBindingExportFileGenerator extends AbstractExportFileGener
     return "dataBinding";
   }
 
-  @Override
-  protected Class<?> getExportingStrategiesClass() {
-    return ErraiDataBindingExportingStrategies.class;
+  interface SupportedAnnotationTypes {
+    String DEFAULT_CONVERTER = "org.jboss.errai.databinding.client.api.DefaultConverter";
+    String BINDABLE = "org.jboss.errai.databinding.client.api.Bindable";
   }
+
 }

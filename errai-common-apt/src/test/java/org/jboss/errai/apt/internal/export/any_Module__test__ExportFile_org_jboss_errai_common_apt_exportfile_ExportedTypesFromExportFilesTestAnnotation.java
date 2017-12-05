@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.databinding.apt.export;
+package org.jboss.errai.apt.internal.export;
+
+import org.jboss.errai.common.apt.exportfile.ExportedTypesFromExportFilesTestExportedType;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
-interface SupportedAnnotationTypes {
-  String DEFAULT_CONVERTER = "org.jboss.errai.databinding.client.api.DefaultConverter";
-  String BINDABLE = "org.jboss.errai.databinding.client.api.Bindable";
+public class any_Module__test__ExportFile_org_jboss_errai_common_apt_exportfile_ExportedTypesFromExportFilesTestAnnotation {
+  ExportedTypesFromExportFilesTestExportedType sa7H9hdg;
 }
