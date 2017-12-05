@@ -41,9 +41,4 @@ public class TestAnnotatedSourceElementsFinder implements AnnotatedSourceElement
   public Set<? extends Element> findSourceElementsAnnotatedWith(final TypeElement typeElement) {
     return elements;
   }
-
-  @Override
-  public Set<? extends Element> findSourceElementsAnnotatedWith(final Class<? extends Annotation> annotationClass) {
-    return elements;
-  }
 }

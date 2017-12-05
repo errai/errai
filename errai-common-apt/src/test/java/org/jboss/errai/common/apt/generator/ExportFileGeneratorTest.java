@@ -18,6 +18,7 @@ package org.jboss.errai.common.apt.generator;
 
 import org.jboss.errai.codegen.apt.test.ErraiAptTest;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
+import org.jboss.errai.codegen.meta.impl.apt.APTClass;
 import org.jboss.errai.common.apt.TestAnnotatedSourceElementsFinder;
 import org.jboss.errai.common.apt.exportfile.ExportFile;
 import org.jboss.errai.common.configuration.ErraiModule;
@@ -78,6 +79,6 @@ public class ExportFileGeneratorTest extends ErraiAptTest {
 
   private TestExportFileGenerator getTestGenerator(final AnnotatedSourceElementsFinder annotatedElementsFinder) {
     return new TestExportFileGenerator(annotatedElementsFinder, elements,
-            singleton(MetaClassFactory.get(TestModule.class)));
+            singleton(new APTClass(getTypeElement(TestModule.class).asType())));
   }
 }
