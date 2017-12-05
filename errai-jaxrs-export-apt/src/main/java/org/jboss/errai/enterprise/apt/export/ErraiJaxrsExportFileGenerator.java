@@ -16,7 +16,7 @@
 
 package org.jboss.errai.enterprise.apt.export;
 
-import org.jboss.errai.common.apt.generator.AbstractErraiModuleExportFileGenerator;
+import org.jboss.errai.common.apt.generator.AbstractExportFileGenerator;
 
 import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.annotation.processing.SupportedSourceVersion;
@@ -33,7 +33,7 @@ import static org.jboss.errai.enterprise.apt.export.SupportedAnnotationTypes.PRO
  */
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 @SupportedAnnotationTypes({ PATH, INTERCEPTED_CALL, FEATURE_INTERCEPTOR, INTERCEPTS_REMOTE_CALL, PROVIDER })
-public class ErraiJaxrsExportFileGenerator extends AbstractErraiModuleExportFileGenerator {
+public class ErraiJaxrsExportFileGenerator extends AbstractExportFileGenerator {
 
   @Override
   protected String getCamelCaseErraiModuleName() {

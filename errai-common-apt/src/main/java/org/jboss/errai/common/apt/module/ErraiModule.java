@@ -78,7 +78,7 @@ public class ErraiModule {
   public Stream<ExportFile> createExportFiles(final Set<? extends TypeElement> exportableAnnotations) {
     return exportableAnnotations.stream()
             .flatMap(s -> this.findExportedElements(s).stream())
-            .collect(groupingBy(ExportedElement::getAnnotation, mapping(s -> s.getTypeMirror(), toSet())))
+            .collect(groupingBy(ExportedElement::getAnnotation, mapping(ExportedElement::getTypeMirror, toSet())))
             .entrySet()
             .stream()
             .map(e -> this.newExportFile(e.getKey(), e.getValue()))

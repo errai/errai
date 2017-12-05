@@ -16,7 +16,7 @@
 
 package org.jboss.errai.databinding.apt.export;
 
-import org.jboss.errai.common.apt.generator.AbstractErraiModuleExportFileGenerator;
+import org.jboss.errai.common.apt.generator.AbstractExportFileGenerator;
 
 import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.annotation.processing.SupportedSourceVersion;
@@ -30,7 +30,7 @@ import static org.jboss.errai.databinding.apt.export.SupportedAnnotationTypes.DE
  */
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 @SupportedAnnotationTypes({ BINDABLE, DEFAULT_CONVERTER })
-public class ErraiDataBindingExportFileGenerator extends AbstractErraiModuleExportFileGenerator {
+public class ErraiDataBindingExportFileGenerator extends AbstractExportFileGenerator {
 
   @Override
   protected String getCamelCaseErraiModuleName() {

@@ -16,7 +16,7 @@
 
 package org.jboss.errai.ui.apt.export;
 
-import org.jboss.errai.common.apt.generator.AbstractErraiModuleExportFileGenerator;
+import org.jboss.errai.common.apt.generator.AbstractExportFileGenerator;
 
 import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.annotation.processing.SupportedSourceVersion;
@@ -30,7 +30,7 @@ import static org.jboss.errai.ui.apt.export.SupportedAnnotationTypes.TEMPLATED;
  */
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 @SupportedAnnotationTypes({ TEMPLATED, STYLE_BINDING })
-public class ErraiUiExportFileGenerator extends AbstractErraiModuleExportFileGenerator {
+public class ErraiUiExportFileGenerator extends AbstractExportFileGenerator {
 
   @Override
   protected String getCamelCaseErraiModuleName() {

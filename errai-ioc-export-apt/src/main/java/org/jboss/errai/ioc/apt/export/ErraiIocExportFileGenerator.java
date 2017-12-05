@@ -16,7 +16,7 @@
 
 package org.jboss.errai.ioc.apt.export;
 
-import org.jboss.errai.common.apt.generator.AbstractErraiModuleExportFileGenerator;
+import org.jboss.errai.common.apt.generator.AbstractExportFileGenerator;
 
 import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.annotation.processing.SupportedSourceVersion;
@@ -45,7 +45,7 @@ import static org.jboss.errai.ioc.apt.export.SupportedAnnotationTypes.SINGLETON;
  */
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 @SupportedAnnotationTypes({ IOC_BOOTSTRAP_TASK, IOC_EXTENSION, CODE_DECORATOR, SCOPE_CONTEXT, JAVAX_INJECT, GOOGLE_INJECT, IOC_PROVIDER, DEPENDENT, APPLICATION_SCOPED, ALTERNATIVE, SINGLETON, IOC_PRODUCER, SHARED_SINGLETON, ENTRY_POINT, QUALIFIER, JS_TYPE, PRODUCES })
-public class ErraiIocExportFileGenerator extends AbstractErraiModuleExportFileGenerator {
+public class ErraiIocExportFileGenerator extends AbstractExportFileGenerator {
 
   @Override
   protected String getCamelCaseErraiModuleName() {

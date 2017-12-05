@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.apt;
+package org.jboss.errai.common.apt.generator.app;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jboss.errai.codegen.meta.MetaClass;

@@ -107,7 +107,6 @@
     <module>errai-forge-addon</module>
     <module>errai-api</module>
     <module>errai-bus-export-apt</module>
-    <module>errai-generators-apt</module>
     <module>errai-common-apt</module>
     <module>errai-jaxrs-export-apt</module>
     <module>errai-data-binding-export-apt</module>

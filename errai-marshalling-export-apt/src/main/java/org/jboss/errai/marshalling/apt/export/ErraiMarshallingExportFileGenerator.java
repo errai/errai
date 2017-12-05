@@ -16,7 +16,7 @@
 
 package org.jboss.errai.marshalling.apt.export;
 
-import org.jboss.errai.common.apt.generator.AbstractErraiModuleExportFileGenerator;
+import org.jboss.errai.common.apt.generator.AbstractExportFileGenerator;
 
 import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.annotation.processing.SupportedSourceVersion;
@@ -34,7 +34,7 @@ import static org.jboss.errai.marshalling.apt.export.SupportedAnnotationTypes.SE
  */
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 @SupportedAnnotationTypes({ PORTABLE, NON_PORTABLE, CLIENT_MARSHALLER, SERVER_MARSHALLER, ENVIRONMENT_CONFIG_EXTENSION, CUSTOM_MAPPING })
-public class ErraiMarshallingExportFileGenerator extends AbstractErraiModuleExportFileGenerator {
+public class ErraiMarshallingExportFileGenerator extends AbstractExportFileGenerator {
 
   @Override
   protected String getCamelCaseErraiModuleName() {

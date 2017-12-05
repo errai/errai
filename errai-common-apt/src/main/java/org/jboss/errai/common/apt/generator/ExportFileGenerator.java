@@ -55,7 +55,7 @@ public class ExportFileGenerator {
     this.erraiModuleMetaClasses = erraiModuleMetaClasses;
   }
 
-  void generateAndSaveExportFiles(final Filer filer, final Set<? extends TypeElement> exportableAnnotations) {
+  void generateAndSaveExportFiles(final Filer filer, final Set<TypeElement> exportableAnnotations) {
     createExportFiles(exportableAnnotations).forEach(exportFile -> generateSourceAndSave(exportFile, filer));
   }
 
