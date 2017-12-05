@@ -83,7 +83,7 @@ public class MarshallerAptGenerator extends ErraiAptGenerators.MultipleFiles {
   }
 
   @Override
-  public int layer() {
+  public int priority() {
     //Has to run after MarshallersGenerator because it sets part of the exposedClasses
     return 1;
   }

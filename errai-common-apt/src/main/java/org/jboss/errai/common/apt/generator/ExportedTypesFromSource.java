@@ -30,19 +30,19 @@ import static org.jboss.errai.codegen.meta.impl.apt.APTClassUtil.elements;
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
-public class ExportedTypesFromSource {
+class ExportedTypesFromSource {
 
   private final Multimap<String, Element> exportedTypes = HashMultimap.create();
 
-  public void putAll(final TypeElement annotationName, final Set<? extends Element> elementsAnnotatedWith) {
+  void putAll(final TypeElement annotationName, final Set<? extends Element> elementsAnnotatedWith) {
     exportedTypes.putAll(annotationName.getQualifiedName().toString(), elementsAnnotatedWith);
   }
 
-  public Set<TypeElement> exportableAnnotations() {
+  Set<TypeElement> exportableAnnotations() {
     return exportedTypes.keys().stream().map(elements::getTypeElement).collect(toSet());
   }
 
-  public Set<Element> findAnnotatedSourceElements(final TypeElement typeElement) {
+  Set<Element> findAnnotatedSourceElements(final TypeElement typeElement) {
     return new HashSet<>(exportedTypes.get(typeElement.getQualifiedName().toString()));
   }
 }

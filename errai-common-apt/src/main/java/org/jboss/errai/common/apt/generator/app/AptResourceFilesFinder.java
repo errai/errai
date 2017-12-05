@@ -30,13 +30,13 @@ import static java.util.stream.Collectors.toList;
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
-public class AptResourceFilesFinder implements ResourceFilesFinder {
+class AptResourceFilesFinder implements ResourceFilesFinder {
 
   private static final List<JavaFileManager.Location> LOCATIONS_TO_SEARCH = Arrays.asList(StandardLocation.values());
 
   private final Filer filer;
 
-  public AptResourceFilesFinder(final Filer filer) {
+  AptResourceFilesFinder(final Filer filer) {
     this.filer = filer;
   }
 
@@ -53,11 +53,7 @@ public class AptResourceFilesFinder implements ResourceFilesFinder {
             .map(Optional::get)
             .collect(toList());
 
-    return possibleUris.stream()
-            .filter(uri -> !uri.isOpaque())
-            .map(File::new)
-            .filter(File::exists)
-            .findFirst();
+    return possibleUris.stream().filter(uri -> !uri.isOpaque()).map(File::new).filter(File::exists).findFirst();
   }
 
   private Optional<URI> getUri(final JavaFileManager.Location location,

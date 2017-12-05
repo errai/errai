@@ -37,7 +37,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import static java.util.stream.Collectors.toSet;
-import static org.jboss.errai.common.apt.generator.ExportFileGeneratorsControl.isReadyToGenerateActualCode;
+import static org.jboss.errai.common.apt.generator.ExportFileGeneratorsControl.exportersAreAllFinished;
 import static org.jboss.errai.common.apt.generator.ExportFileGeneratorsControl.signalExistence;
 import static org.jboss.errai.common.apt.generator.ExportFileGeneratorsControl.signalReady;
 
@@ -99,13 +99,9 @@ public abstract class AbstractExportFileGenerator extends AbstractProcessor {
 
     signalReady(this);
 
-    if (isReadyToGenerateActualCode()) {
-      newErraiAppAptGenerator().generateAndSaveSourceFiles(erraiApps);
+    if (exportersAreAllFinished()) {
+      new ErraiAppAptGenerator(processingEnv).generateAndSaveSourceFiles(erraiApps);
     }
-  }
-
-  private ErraiAppAptGenerator newErraiAppAptGenerator() {
-    return new ErraiAppAptGenerator(processingEnv);
   }
 
   private ExportFileGenerator newExportFileGenerator() {

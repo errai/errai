@@ -37,7 +37,7 @@ class AptCompatibleGwtModuleFile {
   private final ExportedTypesFromExportFiles erraiAptExportedTypes;
   private final String gwtModuleName;
 
-  public AptCompatibleGwtModuleFile(final File file, final ExportedTypesFromExportFiles erraiAptExportedTypes) {
+  AptCompatibleGwtModuleFile(final File file, final ExportedTypesFromExportFiles erraiAptExportedTypes) {
     this.file = file;
     this.erraiAptExportedTypes = erraiAptExportedTypes;
     this.gwtModuleName = erraiAptExportedTypes.erraiAppConfiguration().gwtModuleName();

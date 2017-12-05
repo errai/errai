@@ -17,8 +17,8 @@
 package org.jboss.errai.common.apt.generator.app;
 
 import org.jboss.errai.codegen.meta.MetaClass;
-import org.jboss.errai.common.apt.exportfile.ExportedTypesFromExportFiles;
 import org.jboss.errai.common.apt.ErraiAptGenerators;
+import org.jboss.errai.common.apt.exportfile.ExportedTypesFromExportFiles;
 import org.jboss.errai.common.apt.generator.ErraiAptGeneratedSourceFile;
 import org.jboss.errai.common.configuration.ErraiGenerator;
 import org.slf4j.Logger;
@@ -55,7 +55,7 @@ public class ErraiAppAptGenerator {
     this.processingEnv = processingEnv;
   }
 
-  public void generateAndSaveSourceFiles(Set<MetaClass> erraiApps) {
+  public void generateAndSaveSourceFiles(final Set<MetaClass> erraiApps) {
 
     final long start = System.currentTimeMillis();
     log.info("Generating files using Errai APT Generators..");
@@ -100,7 +100,7 @@ public class ErraiAppAptGenerator {
             .stream()
             .map(this::loadGeneratorClass)
             .map(generatorClass -> newGenerator(generatorClass, erraiAptExportedTypes))
-            .sorted(comparing(ErraiAptGenerators.Any::layer).thenComparing(g -> g.getClass().getSimpleName()));
+            .sorted(comparing(ErraiAptGenerators.Any::priority).thenComparing(g -> g.getClass().getSimpleName()));
   }
 
   @SuppressWarnings("unchecked")
