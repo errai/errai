@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.common.apt;
+package org.jboss.errai.common.apt.generator;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
@@ -24,7 +24,7 @@ import java.util.Set;
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
+@FunctionalInterface
 public interface AnnotatedSourceElementsFinder {
   Set<? extends Element> findSourceElementsAnnotatedWith(final TypeElement typeElement);
-  Set<? extends Element> findSourceElementsAnnotatedWith(final Class<? extends Annotation> annotationClass);
 }

@@ -18,7 +18,7 @@ package org.jboss.errai.common.apt.generator.app;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jboss.errai.codegen.meta.MetaClass;
-import org.jboss.errai.common.apt.ErraiAptExportedTypes;
+import org.jboss.errai.common.apt.exportfile.ExportedTypesFromExportFiles;
 import org.jboss.errai.common.configuration.ErraiModule;
 
 import java.io.File;
@@ -34,10 +34,10 @@ import static java.util.stream.Collectors.toList;
 class AptCompatibleGwtModuleFile {
 
   private final File file;
-  private final ErraiAptExportedTypes erraiAptExportedTypes;
+  private final ExportedTypesFromExportFiles erraiAptExportedTypes;
   private final String gwtModuleName;
 
-  public AptCompatibleGwtModuleFile(final File file, final ErraiAptExportedTypes erraiAptExportedTypes) {
+  public AptCompatibleGwtModuleFile(final File file, final ExportedTypesFromExportFiles erraiAptExportedTypes) {
     this.file = file;
     this.erraiAptExportedTypes = erraiAptExportedTypes;
     this.gwtModuleName = erraiAptExportedTypes.erraiAppConfiguration().gwtModuleName();

@@ -16,7 +16,7 @@
 
 package org.jboss.errai.databinding.apt;
 
-import org.jboss.errai.common.apt.ErraiAptExportedTypes;
+import org.jboss.errai.common.apt.exportfile.ExportedTypesFromExportFiles;
 import org.jboss.errai.common.apt.ErraiAptGenerators;
 import org.jboss.errai.common.apt.generator.ErraiAptGeneratedSourceFile;
 import org.jboss.errai.common.configuration.ErraiGenerator;
@@ -39,7 +39,7 @@ public class BindableProxyLoaderAptGenerator extends ErraiAptGenerators.SingleFi
   private final BindableProxyLoaderGenerator bindableProxyLoaderGenerator;
 
   // IMPORTANT: Do not remove. ErraiAppAptGenerator depends on this constructor
-  public BindableProxyLoaderAptGenerator(final ErraiAptExportedTypes exportedTypes) {
+  public BindableProxyLoaderAptGenerator(final ExportedTypesFromExportFiles exportedTypes) {
     super(exportedTypes);
     this.bindableProxyLoaderGenerator = new BindableProxyLoaderGenerator();
   }

@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.common.apt;
+package org.jboss.errai.common.apt.exportfile;
 
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.impl.apt.APTClass;
+import org.jboss.errai.common.apt.generator.app.ResourceFilesFinder;
 import org.jboss.errai.common.apt.configuration.AptErraiAppConfiguration;
-import org.jboss.errai.common.apt.exportfile.ExportFileName;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.PackageElement;
@@ -42,13 +40,13 @@ import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toSet;
-import static org.jboss.errai.common.apt.ErraiAptPackages.exportFilesPackageElement;
+import static org.jboss.errai.common.apt.exportfile.ErraiAptPackages.exportFilesPackageElement;
 import static org.jboss.errai.common.apt.exportfile.ExportFileName.decodeModuleClassCanonicalNameFromExportFileSimpleName;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
-public final class ErraiAptExportedTypes {
+public final class ExportedTypesFromExportFiles {
 
   private final Map<String, Set<TypeMirror>> exportedClassesByAnnotationClassName;
 
@@ -57,7 +55,7 @@ public final class ErraiAptExportedTypes {
   private final Set<String> moduleNames;
   private final Elements elements;
 
-  public ErraiAptExportedTypes(final MetaClass erraiAppMetaClass,
+  public ExportedTypesFromExportFiles(final MetaClass erraiAppMetaClass,
           final ResourceFilesFinder resourceFilesFinder,
           final Elements elements) {
 

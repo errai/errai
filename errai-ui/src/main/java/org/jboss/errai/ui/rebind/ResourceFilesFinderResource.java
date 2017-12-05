@@ -17,7 +17,7 @@
 package org.jboss.errai.ui.rebind;
 
 import org.apache.http.impl.io.EmptyInputStream;
-import org.jboss.errai.common.apt.ResourceFilesFinder;
+import org.jboss.errai.common.apt.generator.app.ResourceFilesFinder;
 import org.jboss.errai.common.client.api.Assert;
 import org.lesscss.Resource;
 

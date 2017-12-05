@@ -16,6 +16,8 @@
 
 package org.jboss.errai.common.apt;
 
+import org.jboss.errai.common.apt.generator.AnnotatedSourceElementsFinder;
+
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import java.lang.annotation.Annotation;

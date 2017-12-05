@@ -18,6 +18,7 @@ package org.jboss.errai.common.apt;
 
 import org.jboss.errai.apt.internal.export.any_other_Module__test__ExportFile_org_jboss_errai_common_apt_exportfile_TestAnnotation;
 import org.jboss.errai.codegen.apt.test.ErraiAptTest;
+import org.jboss.errai.common.apt.exportfile.ErraiAptPackages;
 import org.junit.Test;
 
 import static org.junit.Assert.assertTrue;

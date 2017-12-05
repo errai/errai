@@ -16,26 +16,23 @@
 
 package org.jboss.errai.common.apt.generator;
 
-import org.jboss.errai.codegen.meta.impl.apt.APTClass;
-import org.jboss.errai.common.apt.AnnotatedSourceElementsFinder;
+import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.common.apt.strategies.ErraiExportingStrategiesFactory;
 
 import javax.lang.model.util.Elements;
 
-import static java.util.stream.Collectors.toSet;
+import java.util.Set;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
 class TestExportFileGenerator extends ExportFileGenerator {
 
-  TestExportFileGenerator(final AnnotatedSourceElementsFinder annotatedSourceElementsFinder, final Elements elements) {
+  TestExportFileGenerator(final AnnotatedSourceElementsFinder annotatedSourceElementsFinder,
+          final Elements elements,
+          final Set<MetaClass> erraiModules) {
     super("test", annotatedSourceElementsFinder, new ErraiExportingStrategiesFactory(elements).buildFrom(),
-            annotatedSourceElementsFinder.findSourceElementsAnnotatedWith(
-                    org.jboss.errai.common.configuration.ErraiModule.class)
-                    .stream()
-                    .map(s -> new APTClass(s.asType()))
-                    .collect(toSet()));
+            erraiModules);
   }
 
 }

@@ -17,8 +17,7 @@
 package org.jboss.errai.common.apt.generator.app;
 
 import org.jboss.errai.codegen.meta.MetaClass;
-import org.jboss.errai.common.apt.AptResourceFilesFinder;
-import org.jboss.errai.common.apt.ErraiAptExportedTypes;
+import org.jboss.errai.common.apt.exportfile.ExportedTypesFromExportFiles;
 import org.jboss.errai.common.apt.ErraiAptGenerators;
 import org.jboss.errai.common.apt.generator.ErraiAptGeneratedSourceFile;
 import org.jboss.errai.common.configuration.ErraiGenerator;
@@ -71,7 +70,7 @@ public class ErraiAppAptGenerator {
     log.info("Successfully generated files using Errai APT Generators in {}ms", System.currentTimeMillis() - start);
   }
 
-  private void generateAptCompatibleGwtModuleFile(final ErraiAptExportedTypes erraiAptExportedTypes) {
+  private void generateAptCompatibleGwtModuleFile(final ExportedTypesFromExportFiles erraiAptExportedTypes) {
     erraiAptExportedTypes.resourceFilesFinder()
             .getResource(erraiAptExportedTypes.erraiAppConfiguration().gwtModuleName().replace(".", "/") + GWT_XML)
             .map(file -> new AptCompatibleGwtModuleFile(file, erraiAptExportedTypes))
@@ -88,15 +87,15 @@ public class ErraiAppAptGenerator {
     }
   }
 
-  private ErraiAptExportedTypes newErraiAptExportedTypes(final MetaClass erraiAppAnnotatedMetaClass,
+  private ExportedTypesFromExportFiles newErraiAptExportedTypes(final MetaClass erraiAppAnnotatedMetaClass,
           final Filer filer,
           final Elements elements) {
 
     log.info("Processing {}", erraiAppAnnotatedMetaClass.getFullyQualifiedName());
-    return new ErraiAptExportedTypes(erraiAppAnnotatedMetaClass, new AptResourceFilesFinder(filer), elements);
+    return new ExportedTypesFromExportFiles(erraiAppAnnotatedMetaClass, new AptResourceFilesFinder(filer), elements);
   }
 
-  private Stream<ErraiAptGenerators.Any> createGenerators(final ErraiAptExportedTypes erraiAptExportedTypes) {
+  private Stream<ErraiAptGenerators.Any> createGenerators(final ExportedTypesFromExportFiles erraiAptExportedTypes) {
     return erraiAptExportedTypes.findAnnotatedMetaClasses(ErraiGenerator.class)
             .stream()
             .map(this::loadGeneratorClass)
@@ -115,10 +114,10 @@ public class ErraiAppAptGenerator {
   }
 
   private ErraiAptGenerators.Any newGenerator(final Class<? extends ErraiAptGenerators.Any> generatorClass,
-          final ErraiAptExportedTypes erraiAptExportedTypes) {
+          final ExportedTypesFromExportFiles erraiAptExportedTypes) {
     try {
       final Constructor<? extends ErraiAptGenerators.Any> constructor = generatorClass.getConstructor(
-              ErraiAptExportedTypes.class);
+              ExportedTypesFromExportFiles.class);
       constructor.setAccessible(true);
       return constructor.newInstance(erraiAptExportedTypes);
     } catch (final Exception e) {

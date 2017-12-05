@@ -16,7 +16,7 @@
 
 package org.jboss.errai.marshalling.apt;
 
-import org.jboss.errai.common.apt.ErraiAptExportedTypes;
+import org.jboss.errai.common.apt.exportfile.ExportedTypesFromExportFiles;
 import org.jboss.errai.common.apt.ErraiAptGenerators;
 import org.jboss.errai.common.apt.generator.ErraiAptGeneratedSourceFile;
 import org.jboss.errai.common.configuration.ErraiGenerator;
@@ -34,7 +34,7 @@ import static org.jboss.errai.marshalling.rebind.MarshallersGenerator.SERVER_PAC
 public class ServerMarshallersAptGenerator extends ErraiAptGenerators.SingleFile {
 
   // IMPORTANT: Do not remove. ErraiAppAptGenerator depends on this constructor
-  public ServerMarshallersAptGenerator(final ErraiAptExportedTypes exportedTypes) {
+  public ServerMarshallersAptGenerator(final ExportedTypesFromExportFiles exportedTypes) {
     super(exportedTypes);
   }
 

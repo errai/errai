@@ -41,10 +41,6 @@ public class ErraiExportingStrategiesFactory {
     this.elements = elements;
   }
 
-  public ExportingStrategies buildFrom(final Set<MetaClass> classes) {
-    return buildFrom(classes.stream().map(m -> loadClass(m.getFullyQualifiedName())).toArray(Class[]::new));
-  }
-
   public ExportingStrategies buildFrom(final Class<?>... classes) {
     return new ExportingStrategies(stream(classes).flatMap(c -> stream(c.getDeclaredMethods()))
             .filter(m -> m.isAnnotationPresent(ErraiExportingStrategy.class))

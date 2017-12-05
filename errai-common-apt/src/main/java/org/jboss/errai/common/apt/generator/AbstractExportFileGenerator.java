@@ -16,12 +16,9 @@
 
 package org.jboss.errai.common.apt.generator;
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.impl.apt.APTClass;
 import org.jboss.errai.codegen.meta.impl.apt.APTClassUtil;
-import org.jboss.errai.common.apt.AnnotatedSourceElementsFinder;
 import org.jboss.errai.common.apt.generator.app.ErraiAppAptGenerator;
 import org.jboss.errai.common.apt.strategies.ErraiExportingStrategiesFactory;
 import org.jboss.errai.common.apt.strategies.ExportingStrategies;
@@ -40,7 +37,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 import static java.util.stream.Collectors.toSet;
-import static org.jboss.errai.codegen.meta.impl.apt.APTClassUtil.elements;
+import static org.jboss.errai.common.apt.generator.ExportFileGeneratorsControl.isReadyToGenerateActualCode;
+import static org.jboss.errai.common.apt.generator.ExportFileGeneratorsControl.signalExistence;
+import static org.jboss.errai.common.apt.generator.ExportFileGeneratorsControl.signalReady;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
@@ -53,8 +52,6 @@ public abstract class AbstractExportFileGenerator extends AbstractProcessor {
 
   protected abstract Class<?> getExportingStrategiesClass();
 
-  private ExportFileGenerator exportFileGenerator;
-
   @Override
   public synchronized void init(final ProcessingEnvironment processingEnv) {
     super.init(processingEnv);
@@ -63,7 +60,7 @@ public abstract class AbstractExportFileGenerator extends AbstractProcessor {
 
   private final Set<MetaClass> erraiModules = new HashSet<>();
   private final Set<MetaClass> erraiApps = new HashSet<>();
-  private final Multimap<String, Element> exportedTypes = HashMultimap.create();
+  private final ExportedTypesFromSource exportedTypes = new ExportedTypesFromSource();
 
   @Override
   public boolean process(final Set<? extends TypeElement> annotations, final RoundEnvironment roundEnv) {
@@ -81,40 +78,43 @@ public abstract class AbstractExportFileGenerator extends AbstractProcessor {
   private void generate(final Set<? extends TypeElement> annotations, final RoundEnvironment roundEnv) {
 
     if (!annotations.isEmpty()) {
-      ExportFileGeneratorsControl.signalExistence(this);
+      signalExistence(this);
     }
 
     erraiApps.addAll(findAnnotatedMetaClasses(roundEnv, ErraiApp.class));
     erraiModules.addAll(findAnnotatedMetaClasses(roundEnv, ErraiModule.class));
 
     for (final TypeElement annotation : annotations) {
-      final String annotationName = annotation.getQualifiedName().toString();
-      exportedTypes.putAll(annotationName, roundEnv.getElementsAnnotatedWith(annotation));
+      exportedTypes.putAll(annotation, roundEnv.getElementsAnnotatedWith(annotation));
     }
 
     if (roundEnv.processingOver()) {
-      ExportFileGeneratorsControl.signalReady(this);
-
-      generateExportFiles();
-
-      if (ExportFileGeneratorsControl.isReady()) {
-        new ErraiAppAptGenerator(processingEnv).generateAndSaveSourceFiles(erraiApps);
-      }
+      generateFiles();
     }
   }
 
-  private void generateExportFiles() {
-    final AnnotatedSourceElementsFinder annotatedSourceElementsFinder = new IncrementalAnnotatedSourceElementsFinder(
-            exportedTypes);
+  private void generateFiles() {
+    newExportFileGenerator().generateAndSaveExportFiles(processingEnv.getFiler(),
+            exportedTypes.exportableAnnotations());
+
+    signalReady(this);
+
+    if (isReadyToGenerateActualCode()) {
+      newErraiAppAptGenerator().generateAndSaveSourceFiles(erraiApps);
+    }
+  }
+
+  private ErraiAppAptGenerator newErraiAppAptGenerator() {
+    return new ErraiAppAptGenerator(processingEnv);
+  }
+
+  private ExportFileGenerator newExportFileGenerator() {
 
     final ExportingStrategies exportingStrategies = new ErraiExportingStrategiesFactory(processingEnv.getElementUtils())
             .buildFrom(getExportingStrategiesClass());
 
-    final ExportFileGenerator exportFileGenerator = new ExportFileGenerator(getCamelCaseErraiModuleName(),
-            annotatedSourceElementsFinder, exportingStrategies, erraiModules);
-
-    exportFileGenerator.generateAndSaveExportFiles(processingEnv.getFiler(),
-            exportedTypes.keys().stream().map(elements::getTypeElement).collect(toSet()));
+    return new ExportFileGenerator(getCamelCaseErraiModuleName(), exportedTypes::findAnnotatedSourceElements,
+            exportingStrategies, erraiModules);
   }
 
   private Set<MetaClass> findAnnotatedMetaClasses(final RoundEnvironment roundEnv,
@@ -125,24 +125,5 @@ public abstract class AbstractExportFileGenerator extends AbstractProcessor {
             .map(Element::asType)
             .map(APTClass::new)
             .collect(toSet());
-  }
-
-  private static class IncrementalAnnotatedSourceElementsFinder implements AnnotatedSourceElementsFinder {
-
-    private final Multimap<String, Element> exportedTypes;
-
-    private IncrementalAnnotatedSourceElementsFinder(final Multimap<String, Element> exportedTypes) {
-      this.exportedTypes = exportedTypes;
-    }
-
-    @Override
-    public Set<? extends Element> findSourceElementsAnnotatedWith(final TypeElement typeElement) {
-      return new HashSet<>(exportedTypes.get(typeElement.getQualifiedName().toString()));
-    }
-
-    @Override
-    public Set<? extends Element> findSourceElementsAnnotatedWith(final Class<? extends Annotation> annotationClass) {
-      return new HashSet<>(exportedTypes.get(annotationClass.getCanonicalName()));
-    }
   }
 }

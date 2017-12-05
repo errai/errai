@@ -25,7 +25,7 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import java.util.Set;
 
-import static org.jboss.errai.common.apt.ErraiAptPackages.exportFilesPackagePath;
+import static org.jboss.errai.common.apt.exportfile.ErraiAptPackages.exportFilesPackagePath;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>

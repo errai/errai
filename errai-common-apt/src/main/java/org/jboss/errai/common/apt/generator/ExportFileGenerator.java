@@ -18,7 +18,6 @@ package org.jboss.errai.common.apt.generator;
 
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.impl.apt.APTClassUtil;
-import org.jboss.errai.common.apt.AnnotatedSourceElementsFinder;
 import org.jboss.errai.common.apt.exportfile.ExportFile;
 import org.jboss.errai.common.apt.module.ErraiModule;
 import org.jboss.errai.common.apt.strategies.ExportingStrategies;
@@ -37,14 +36,14 @@ import static java.util.stream.Collectors.toSet;
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
-public class ExportFileGenerator {
+class ExportFileGenerator {
 
   private final String camelCaseErraiModuleName;
   private final AnnotatedSourceElementsFinder annotatedSourceElementsFinder;
   private final ExportingStrategies exportingStrategies;
   private final Set<MetaClass> erraiModuleMetaClasses;
 
-  public ExportFileGenerator(final String camelCaseErraiModuleName,
+  ExportFileGenerator(final String camelCaseErraiModuleName,
           final AnnotatedSourceElementsFinder annotatedSourceElementsFinder,
           final ExportingStrategies exportingStrategies,
           final Set<MetaClass> erraiModuleMetaClasses) {
@@ -59,7 +58,7 @@ public class ExportFileGenerator {
     createExportFiles(exportableAnnotations).forEach(exportFile -> generateSourceAndSave(exportFile, filer));
   }
 
-  public Set<ExportFile> createExportFiles(final Set<? extends TypeElement> exportableAnnotations) {
+  Set<ExportFile> createExportFiles(final Set<? extends TypeElement> exportableAnnotations) {
     return erraiModuleMetaClasses.stream()
             .map(this::newModule)
             .flatMap(erraiModule -> createExportFiles(erraiModule, exportableAnnotations))

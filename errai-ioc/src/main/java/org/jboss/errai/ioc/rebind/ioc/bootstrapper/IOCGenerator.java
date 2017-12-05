@@ -23,7 +23,7 @@ import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaParameter;
 import org.jboss.errai.codegen.meta.impl.java.JavaReflectionClass;
-import org.jboss.errai.common.apt.ResourceFilesFinder;
+import org.jboss.errai.common.apt.generator.app.ResourceFilesFinder;
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.common.metadata.ScannerSingleton;
 import org.jboss.errai.config.ErraiConfiguration;

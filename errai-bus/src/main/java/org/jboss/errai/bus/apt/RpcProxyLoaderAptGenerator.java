@@ -18,7 +18,7 @@ package org.jboss.errai.bus.apt;
 
 import org.jboss.errai.bus.rebind.RpcProxyLoaderGenerator;
 import org.jboss.errai.codegen.meta.MetaAnnotation;
-import org.jboss.errai.common.apt.ErraiAptExportedTypes;
+import org.jboss.errai.common.apt.exportfile.ExportedTypesFromExportFiles;
 import org.jboss.errai.common.apt.ErraiAptGenerators;
 import org.jboss.errai.common.apt.generator.ErraiAptGeneratedSourceFile;
 import org.jboss.errai.common.configuration.ErraiGenerator;
@@ -37,7 +37,7 @@ public final class RpcProxyLoaderAptGenerator extends ErraiAptGenerators.SingleF
   private final RpcProxyLoaderGenerator rpcProxyLoaderGenerator;
 
   // IMPORTANT: Do not remove. ErraiAppAptGenerator depends on this constructor
-  public RpcProxyLoaderAptGenerator(final ErraiAptExportedTypes exportedTypes) {
+  public RpcProxyLoaderAptGenerator(final ExportedTypesFromExportFiles exportedTypes) {
     super(exportedTypes);
     this.rpcProxyLoaderGenerator = new RpcProxyLoaderGenerator();
   }

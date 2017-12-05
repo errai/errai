@@ -20,7 +20,7 @@ import com.sun.tools.javac.code.Symbol;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.impl.apt.APTClass;
 import org.jboss.errai.codegen.meta.impl.apt.APTClassUtil;
-import org.jboss.errai.common.apt.AnnotatedSourceElementsFinder;
+import org.jboss.errai.common.apt.generator.AnnotatedSourceElementsFinder;
 import org.jboss.errai.common.apt.configuration.AptErraiModulesConfiguration;
 import org.jboss.errai.common.apt.exportfile.ExportFile;
 import org.jboss.errai.common.apt.strategies.ExportedElement;

@@ -19,6 +19,8 @@ package org.jboss.errai.common.apt;
 import com.google.common.collect.ImmutableSet;
 import org.jboss.errai.codegen.apt.test.ErraiAptTest;
 import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.common.apt.exportfile.ExportedTypesFromExportFiles;
+import org.jboss.errai.common.apt.generator.app.ResourceFilesFinder;
 import org.jboss.errai.common.apt.localapps.TestLocalAppWithTwoSubErraiApps;
 import org.jboss.errai.common.apt.localapps.localapp1.TestLocalErraiApp1;
 import org.jboss.errai.common.apt.localapps.localapp1.module1.TestExportedType1;
@@ -56,7 +58,7 @@ public class ErraiAptExportedTypesTest extends ErraiAptTest {
 
   @Test
   public void testFindAnnotatedMetaClassesWithNoExportedOrLocallyExportableTypes() {
-    final ErraiAptExportedTypes erraiAptExportedTypes = new ErraiAptExportedTypes(erraiAppAnnotatedMetaClass,
+    final ExportedTypesFromExportFiles erraiAptExportedTypes = new ExportedTypesFromExportFiles(erraiAppAnnotatedMetaClass,
             resourceFilesFinder(), elements);
 
     Assert.assertTrue(
@@ -65,7 +67,7 @@ public class ErraiAptExportedTypesTest extends ErraiAptTest {
 
   @Test
   public void testFindAnnotatedMetaClassesWithNoLocallyExportableTypes() {
-    final ErraiAptExportedTypes erraiAptExportedTypes = new ErraiAptExportedTypes(erraiAppAnnotatedMetaClass,
+    final ExportedTypesFromExportFiles erraiAptExportedTypes = new ExportedTypesFromExportFiles(erraiAppAnnotatedMetaClass,
             resourceFilesFinder(), elements);
 
     Assert.assertEquals(ImmutableSet.of(aptClass(ErraiAptExportedTypesTestExportedType.class)),
@@ -74,7 +76,7 @@ public class ErraiAptExportedTypesTest extends ErraiAptTest {
 
   @Test
   public void testFindAnnotatedMetaClassesWithSameTypeAsExportedAndLocallyExportable() {
-    final ErraiAptExportedTypes erraiAptExportedTypes = new ErraiAptExportedTypes(erraiAppAnnotatedMetaClass,
+    final ExportedTypesFromExportFiles erraiAptExportedTypes = new ExportedTypesFromExportFiles(erraiAppAnnotatedMetaClass,
             resourceFilesFinder(), elements);
 
     Assert.assertEquals(ImmutableSet.of(aptClass(ErraiAptExportedTypesTestExportedType.class)),
@@ -83,7 +85,7 @@ public class ErraiAptExportedTypesTest extends ErraiAptTest {
 
   @Test
   public void testFindAnnotatedMetaClassesWithOneTypeAsExportedAndOneAsLocallyExportable() {
-    final ErraiAptExportedTypes erraiAptExportedTypes = new ErraiAptExportedTypes(erraiAppAnnotatedMetaClass,
+    final ExportedTypesFromExportFiles erraiAptExportedTypes = new ExportedTypesFromExportFiles(erraiAppAnnotatedMetaClass,
             resourceFilesFinder(), elements);
 
     Assert.assertEquals(ImmutableSet.of(aptClass(ErraiAptExportedTypesTestExportedType.class),
@@ -93,7 +95,7 @@ public class ErraiAptExportedTypesTest extends ErraiAptTest {
 
   @Test
   public void testFindAnnotatedMetaClassesForLocalErraiAppWithThreeExportedTypes() {
-    final ErraiAptExportedTypes erraiAptExportedTypes = new ErraiAptExportedTypes(
+    final ExportedTypesFromExportFiles erraiAptExportedTypes = new ExportedTypesFromExportFiles(
             aptClass(TestLocalAppWithTwoSubErraiApps.class), resourceFilesFinder(), elements);
 
     Assert.assertEquals(ImmutableSet.of(aptClass(TestExportedType1.class), aptClass(TestExportedType21.class),
@@ -103,7 +105,7 @@ public class ErraiAptExportedTypesTest extends ErraiAptTest {
 
   @Test
   public void testFindAnnotatedMetaClassesForLocalErraiAppWithOneExportedType() {
-    final ErraiAptExportedTypes erraiAptExportedTypes = new ErraiAptExportedTypes(aptClass(TestLocalErraiApp1.class),
+    final ExportedTypesFromExportFiles erraiAptExportedTypes = new ExportedTypesFromExportFiles(aptClass(TestLocalErraiApp1.class),
             resourceFilesFinder(), elements);
 
     Assert.assertEquals(ImmutableSet.of(aptClass(TestExportedType1.class)),
@@ -112,7 +114,7 @@ public class ErraiAptExportedTypesTest extends ErraiAptTest {
 
   @Test
   public void testFindAnnotatedMetaClassesForLocalErraiAppWithTwoExportedTypes() {
-    final ErraiAptExportedTypes erraiAptExportedTypes = new ErraiAptExportedTypes(aptClass(TestLocalErraiApp2.class),
+    final ExportedTypesFromExportFiles erraiAptExportedTypes = new ExportedTypesFromExportFiles(aptClass(TestLocalErraiApp2.class),
             resourceFilesFinder(), elements);
 
     Assert.assertEquals(ImmutableSet.of(aptClass(TestExportedType21.class), aptClass(TestExportedType22.class)),

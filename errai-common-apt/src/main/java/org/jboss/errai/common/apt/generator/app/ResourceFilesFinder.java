@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.common.apt;
+package org.jboss.errai.common.apt.generator.app;
 
 import java.io.File;
 import java.util.Optional;

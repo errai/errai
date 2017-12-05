@@ -17,6 +17,7 @@
 package org.jboss.errai.common.apt;
 
 import org.jboss.errai.common.apt.configuration.AptErraiConfiguration;
+import org.jboss.errai.common.apt.exportfile.ExportedTypesFromExportFiles;
 import org.jboss.errai.common.apt.generator.ErraiAptGeneratedSourceFile;
 import org.jboss.errai.config.ErraiConfiguration;
 import org.jboss.errai.config.MetaClassFinder;
@@ -31,10 +32,10 @@ public class ErraiAptGenerators {
 
   public static abstract class Any {
 
-    private final ErraiAptExportedTypes exportedTypes;
+    private final ExportedTypesFromExportFiles exportedTypes;
     private final ErraiConfiguration erraiConfiguration;
 
-    public Any(final ErraiAptExportedTypes exportedTypes) {
+    public Any(final ExportedTypesFromExportFiles exportedTypes) {
       this.exportedTypes = exportedTypes;
       this.erraiConfiguration = new AptErraiConfiguration(exportedTypes.erraiAppConfiguration(), metaClassFinder());
     }
@@ -56,7 +57,7 @@ public class ErraiAptGenerators {
 
   public static abstract class SingleFile extends Any {
 
-    public SingleFile(final ErraiAptExportedTypes exportedTypes) {
+    public SingleFile(final ExportedTypesFromExportFiles exportedTypes) {
       super(exportedTypes);
     }
 
@@ -85,7 +86,7 @@ public class ErraiAptGenerators {
   }
 
   public static abstract class MultipleFiles extends Any {
-    public MultipleFiles(final ErraiAptExportedTypes exportedTypes) {
+    public MultipleFiles(final ExportedTypesFromExportFiles exportedTypes) {
       super(exportedTypes);
     }
   }

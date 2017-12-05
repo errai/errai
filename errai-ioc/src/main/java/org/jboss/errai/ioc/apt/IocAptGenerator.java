@@ -16,9 +16,9 @@
 
 package org.jboss.errai.ioc.apt;
 
-import org.jboss.errai.common.apt.ErraiAptExportedTypes;
+import org.jboss.errai.common.apt.exportfile.ExportedTypesFromExportFiles;
 import org.jboss.errai.common.apt.ErraiAptGenerators;
-import org.jboss.errai.common.apt.ResourceFilesFinder;
+import org.jboss.errai.common.apt.generator.app.ResourceFilesFinder;
 import org.jboss.errai.common.apt.generator.ErraiAptGeneratedSourceFile;
 import org.jboss.errai.common.configuration.ErraiGenerator;
 import org.jboss.errai.ioc.apt.util.AptIocRelevantClassesFinder;
@@ -37,7 +37,7 @@ public class IocAptGenerator extends ErraiAptGenerators.SingleFile {
   private final ResourceFilesFinder resourceFilesFinder;
 
   // IMPORTANT: Do not remove. ErraiAppAptGenerator depends on this constructor
-  public IocAptGenerator(final ErraiAptExportedTypes exportedTypes) {
+  public IocAptGenerator(final ExportedTypesFromExportFiles exportedTypes) {
     super(exportedTypes);
     this.resourceFilesFinder = exportedTypes.resourceFilesFinder();
     this.iocGenerator = new IOCGenerator();

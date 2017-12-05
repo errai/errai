@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.common.apt;
+package org.jboss.errai.common.apt.generator.app;
 
 import javax.annotation.processing.Filer;
 import javax.tools.JavaFileManager;
@@ -24,10 +24,8 @@ import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toSet;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>

@@ -35,7 +35,7 @@ class ExportFileGeneratorsControl {
     finishedGeneratorsCount.add(exportFileGenerator.getCamelCaseErraiModuleName());
   }
 
-  static boolean isReady() {
+  static boolean isReadyToGenerateActualCode() {
     return finishedGeneratorsCount.equals(existentGeneratorsCount);
   }
 }

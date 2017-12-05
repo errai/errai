@@ -17,7 +17,7 @@
 package org.jboss.errai.enterprise.apt;
 
 import org.jboss.errai.codegen.meta.MetaAnnotation;
-import org.jboss.errai.common.apt.ErraiAptExportedTypes;
+import org.jboss.errai.common.apt.exportfile.ExportedTypesFromExportFiles;
 import org.jboss.errai.common.apt.ErraiAptGenerators;
 import org.jboss.errai.common.apt.generator.ErraiAptGeneratedSourceFile;
 import org.jboss.errai.common.configuration.ErraiGenerator;
@@ -37,7 +37,7 @@ public final class JaxrsProxyLoaderAptGenerator extends ErraiAptGenerators.Singl
   private final JaxrsProxyLoaderGenerator jaxrsProxyLoaderGenerator;
 
   // IMPORTANT: Do not remove. ErraiAppAptGenerator depends on this constructor
-  public JaxrsProxyLoaderAptGenerator(final ErraiAptExportedTypes exportedTypes) {
+  public JaxrsProxyLoaderAptGenerator(final ExportedTypesFromExportFiles exportedTypes) {
     super(exportedTypes);
     this.jaxrsProxyLoaderGenerator = new JaxrsProxyLoaderGenerator();
   }

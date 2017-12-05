@@ -1,7 +1,7 @@
 package org.jboss.errai.common.apt.module;
 
 import org.jboss.errai.codegen.apt.test.ErraiAptTest;
-import org.jboss.errai.common.apt.AnnotatedSourceElementsFinder;
+import org.jboss.errai.common.apt.generator.AnnotatedSourceElementsFinder;
 import org.jboss.errai.common.apt.TestAnnotatedSourceElementsFinder;
 import org.jboss.errai.common.apt.configuration.TestAnnotation;
 import org.jboss.errai.common.apt.exportfile.ExportFile;

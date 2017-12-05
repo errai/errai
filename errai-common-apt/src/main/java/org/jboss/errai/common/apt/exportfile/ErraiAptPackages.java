@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.common.apt;
+package org.jboss.errai.common.apt.exportfile;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +26,7 @@ import java.util.Optional;
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
-public final class ErraiAptPackages {
+final class ErraiAptPackages {
 
   private static final Logger log = LoggerFactory.getLogger(ErraiAptPackages.class);
 
