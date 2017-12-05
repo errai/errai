@@ -26,7 +26,7 @@ public final class ExportFileName {
   private ExportFileName() {
   }
 
-  public static String encodeAnnotationNameAsExportFileName(final ExportFile exportFile) {
+  public static String encodeAnnotationNameAsExportFileName(final ExportFile1 exportFile) {
     final String annotationName = exportFile.annotation().getQualifiedName().toString().replace(".", "_");
     return exportFile.erraiModuleNamespace() + "__" + PREFIX + annotationName;
   }

@@ -31,7 +31,7 @@ class TestExportFileGenerator extends ExportFileGenerator {
           final Elements elements,
           final Set<MetaClass> erraiModules) {
     super("test", annotatedSourceElementsFinder, new ErraiExportingStrategiesFactory(elements).buildFrom(),
-            erraiModules, null);
+            erraiModules, null, null);
   }
 
 }

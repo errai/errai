@@ -18,6 +18,8 @@ package org.jboss.errai.common.apt.generator;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.common.apt.strategies.ExportedElement;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
@@ -30,19 +32,19 @@ import static org.jboss.errai.codegen.meta.impl.apt.APTClassUtil.elements;
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
-class ExportedTypesFromSource {
+public class ExportedTypesFromSource {
 
   private final Multimap<String, Element> exportedTypes = HashMultimap.create();
 
-  void putAll(final TypeElement annotationName, final Set<? extends Element> elementsAnnotatedWith) {
+  public void putAll(final TypeElement annotationName, final Set<? extends Element> elementsAnnotatedWith) {
     exportedTypes.putAll(annotationName.getQualifiedName().toString(), elementsAnnotatedWith);
   }
 
-  Set<TypeElement> exportableAnnotations() {
+  public Set<TypeElement> exportableAnnotations() {
     return exportedTypes.keys().stream().map(elements::getTypeElement).collect(toSet());
   }
 
-  Set<Element> findAnnotatedSourceElements(final TypeElement typeElement) {
+  public Set<Element> findAnnotatedSourceElements(final TypeElement typeElement) {
     return new HashSet<>(exportedTypes.get(typeElement.getQualifiedName().toString()));
   }
 }

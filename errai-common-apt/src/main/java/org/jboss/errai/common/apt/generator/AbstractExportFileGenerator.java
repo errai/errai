@@ -126,7 +126,7 @@ public abstract class AbstractExportFileGenerator extends AbstractProcessor {
     final ExportingStrategies exportingStrategies = exportingStrategiesFactory.buildFrom(getExportingStrategiesClass());
 
     return new ExportFileGenerator(getCamelCaseErraiModuleName(), exportedTypes::findAnnotatedSourceElements,
-            exportingStrategies, erraiModules, filer);
+            exportingStrategies, erraiModules, filer, exportedTypes);
   }
 
   private Set<MetaClass> findAnnotatedMetaClasses(final RoundEnvironment roundEnv,

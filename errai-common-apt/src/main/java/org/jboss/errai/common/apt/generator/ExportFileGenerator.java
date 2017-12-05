@@ -42,25 +42,28 @@ class ExportFileGenerator {
   private final ExportingStrategies exportingStrategies;
   private final Set<MetaClass> erraiModuleMetaClasses;
   private final Filer filer;
+  private final ExportedTypesFromSource exportedTypes;
 
   ExportFileGenerator(final String camelCaseErraiModuleName,
           final AnnotatedSourceElementsFinder annotatedSourceElementsFinder,
           final ExportingStrategies exportingStrategies,
           final Set<MetaClass> erraiModuleMetaClasses,
-          final Filer filer) {
+          final Filer filer,
+          final ExportedTypesFromSource exportedTypes) {
 
     this.camelCaseErraiModuleName = camelCaseErraiModuleName;
     this.annotatedSourceElementsFinder = annotatedSourceElementsFinder;
     this.exportingStrategies = exportingStrategies;
     this.erraiModuleMetaClasses = erraiModuleMetaClasses;
     this.filer = filer;
+    this.exportedTypes = exportedTypes;
   }
 
   void generateAndSaveExportFiles(final Set<TypeElement> exportableAnnotations) {
-    createExportFiles(exportableAnnotations).forEach(this::generateSourceAndSave);
+    createExportFile(exportableAnnotations).forEach(this::generateSourceAndSave);
   }
 
-  Set<ExportFile> createExportFiles(final Set<? extends TypeElement> exportableAnnotations) {
+  Set<ExportFile> createExportFile(final Set<? extends TypeElement> exportableAnnotations) {
     return erraiModuleMetaClasses.stream()
             .map(this::newModule)
             .flatMap(erraiModule -> erraiModule.createExportFiles(exportableAnnotations))

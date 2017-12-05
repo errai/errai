@@ -45,7 +45,7 @@ public class ExportFileNameTest extends ErraiAptTest {
   }
 
   private void testEncodeDecode(final Class<? extends Annotation> testAnnotationClass) {
-    final ExportFile exportFile = new ExportFile("test", getTypeElement(testAnnotationClass), emptySet());
+    final ExportFile1 exportFile = new ExportFile1("test", getTypeElement(testAnnotationClass), emptySet());
     final String encodedName = encodeAnnotationNameAsExportFileName(exportFile);
     assertEquals(testAnnotationClass.getCanonicalName(), decodeAnnotationClassNameFromExportFileName(encodedName));
   }
