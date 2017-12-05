@@ -16,6 +16,7 @@
 
 package org.jboss.errai.ui.test.integration.client;
 
+import com.google.gwt.user.client.ui.RootPanel;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.ioc.client.QualifierUtil;
 import org.jboss.errai.ioc.client.container.IOC;
@@ -27,8 +28,6 @@ import org.jboss.errai.ui.test.integration.client.res.LazyTestHelper;
 import org.jboss.errai.ui.test.integration.client.res.NestedAppScopedTemplatedBean;
 import org.jboss.errai.ui.test.integration.client.res.QualifiedTemplatedBean;
 import org.jboss.errai.ui.test.integration.client.res.TestAppBean;
-
-import com.google.gwt.user.client.ui.RootPanel;
 
 /**
  * @author Mike Brock
@@ -112,5 +111,24 @@ public class ErraiUICDIIntegrationTest extends AbstractErraiCDITest {
 
     assertEquals("input does not have class value.", "my_class my_class1", bean.inputWithClassAnnotation.getClassName());
     assertEquals("input does not have class value.", "my_class", bean.inputWithClassAnnotationAndProperty.getClassName());
+  }
+
+  public void testElemental2TypeElementQualifiedClassInjection() throws Exception {
+    final BeanWithElementInjectionSites bean = IOC.getBeanManager()
+            .lookupBean(BeanWithElementInjectionSites.class)
+            .getInstance();
+
+    assertNotNull("Input with class annotation was not injected.",
+            bean.elemental2InputWithClassAndPropertiesAnnotations);
+
+    assertEquals("Input does not have class value.", "foo bar",
+            bean.elemental2InputWithClassAndPropertiesAnnotations.className);
+
+    assertEquals("Input does not have proper placeholder.", "bar",
+            bean.elemental2InputWithClassAndPropertiesAnnotations.placeholder);
+
+    assertEquals("Input does not have proper id.", "foo",
+            bean.elemental2InputWithClassAndPropertiesAnnotations.id);
+
   }
 }
