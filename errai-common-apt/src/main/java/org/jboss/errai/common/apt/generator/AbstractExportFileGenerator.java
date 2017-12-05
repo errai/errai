@@ -99,9 +99,13 @@ public abstract class AbstractExportFileGenerator extends AbstractProcessor {
 
     signalReady(this);
 
-    if (exportersAreAllFinished()) {
+    if (exportersAreAllFinished() && aptCodeGenerationIsEnabled()) {
       new ErraiAppAptGenerator(processingEnv).generateAndSaveSourceFiles(erraiApps);
     }
+  }
+
+  private boolean aptCodeGenerationIsEnabled() {
+    return Boolean.getBoolean("apt-generators");
   }
 
   private ExportFileGenerator newExportFileGenerator() {
