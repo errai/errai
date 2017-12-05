@@ -67,8 +67,9 @@ public abstract class AbstractExportFileGenerator extends AbstractProcessor {
     APTClassUtil.init(processingEnv.getTypeUtils(), processingEnv.getElementUtils());
   }
 
-  private final Set<MetaClass> erraiModules = new HashSet<>();
-  private final Set<MetaClass> erraiApps = new HashSet<>();
+  private final static Set<MetaClass> erraiModules = new HashSet<>();
+  private final static Set<MetaClass> erraiApps = new HashSet<>();
+
   private final ExportedTypesFromSource exportedTypes = new ExportedTypesFromSource();
 
   @Override
@@ -111,7 +112,6 @@ public abstract class AbstractExportFileGenerator extends AbstractProcessor {
     signalReady(this);
 
     if (exportersAreAllFinished() && aptCodeGenerationIsEnabled()) {
-      processingEnv.getMessager().printMessage(NOTE, "Errai's APT code generation is enabled. Generating files..");
       new ErraiAppAptGenerator(elements, filer).generateAndSaveSourceFiles(erraiApps);
     }
   }
