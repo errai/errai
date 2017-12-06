@@ -88,8 +88,8 @@ public class ErraiIocExportFileGenerator extends AbstractExportFileGenerator {
     static Stream<ExportedElement> produces(final Element element) {
       final TypeElement annotation = getTypeElement(PRODUCES);
 
-      // Type
-      if (element.getKind().isInterface() || element.getKind().isClass()) {
+      // Field
+      if (element.getKind().isField()) {
         return Stream.of(new ExportedElement(annotation, element));
       }
 

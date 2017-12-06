@@ -36,7 +36,7 @@ public class ExportedElement {
     return annotation;
   }
 
-  public TypeMirror getTypeMirror() {
-    return element.asType();
+  public Element getElement() {
+    return element;
   }
 }

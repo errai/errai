@@ -30,6 +30,7 @@ import org.jboss.errai.common.apt.strategies.ExportingStrategy;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
+import java.util.Collection;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -78,10 +79,10 @@ public class ErraiModule {
     final ExportedTypesFromSource exportedTypesFromSource = new ExportedTypesFromSource();
 
     exportableAnnotations.stream()
-            .flatMap(s -> this.findExportedElements(s).stream())
-            .collect(groupingBy(ExportedElement::getAnnotation, mapping(ExportedElement::getTypeMirror, toSet())))
-            .forEach((a, types) -> exportedTypesFromSource.putAll(a,
-                    types.stream().map(APTClassUtil.types::asElement).collect(toSet())));
+            .map(this::findExportedElements)
+            .flatMap(Collection::stream)
+            .collect(groupingBy(ExportedElement::getAnnotation, mapping(ExportedElement::getElement, toSet())))
+            .forEach(exportedTypesFromSource::putAll);
 
     if (exportedTypesFromSource.isEmpty()) {
       return Stream.of();
@@ -147,12 +148,11 @@ public class ErraiModule {
   }
 
   private boolean isPublic(final ExportedElement exportedElement) {
+    final Element element = getTypeElementOf(exportedElement.getElement());
 
-    if (exportedElement.getTypeMirror().getKind().isPrimitive()) {
+    if (element.asType().getKind().isPrimitive()) {
       return true;
     }
-
-    final Element element = APTClassUtil.types.asElement(exportedElement.getTypeMirror());
 
     if (element.getEnclosingElement().getKind().isInterface()) {
       // Inner classes of interfaces are public if its outer class is public

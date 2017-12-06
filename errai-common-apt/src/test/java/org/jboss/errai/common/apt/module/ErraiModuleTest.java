@@ -37,7 +37,7 @@ public class ErraiModuleTest extends ErraiAptTest {
     final List<ExportedElement> elements = new ArrayList<>(
             erraiModule.findExportedElements(testEnclosedElementAnnotation));
     Assert.assertEquals(1, elements.size());
-    Assert.assertEquals(getTypeElement(String.class).asType(), elements.get(0).getTypeMirror());
+    Assert.assertEquals(getTypeElement(String.class), elements.get(0).getElement());
   }
 
   @Test
@@ -49,7 +49,7 @@ public class ErraiModuleTest extends ErraiAptTest {
 
     final List<ExportedElement> elements = new ArrayList<>(erraiModule.findExportedElements(testAnnotation));
     Assert.assertEquals(1, elements.size());
-    Assert.assertEquals(testExportedType.asType(), elements.get(0).getTypeMirror());
+    Assert.assertEquals(testExportedType, elements.get(0).getElement());
   }
 
   @Test
@@ -65,8 +65,8 @@ public class ErraiModuleTest extends ErraiAptTest {
     final Set<ExportedElement> exportedElements = erraiModule.findExportedElements(testAnnotation);
     Assert.assertEquals(3, exportedElements.size());
 
-    final Set<TypeMirror> exportedTypes = exportedElements.stream().map(ExportedElement::getTypeMirror).collect(toSet());
-    assertContainsOnly(exportedTypes, type.asType(), innerStaticType.asType(), innerType.asType());
+    final Set<Element> exportedTypes = exportedElements.stream().map(ExportedElement::getElement).collect(toSet());
+    assertContainsOnly(exportedTypes, type, innerStaticType, innerType);
   }
 
   @Test
@@ -78,9 +78,9 @@ public class ErraiModuleTest extends ErraiAptTest {
             getTestAnnotatedElementsFinder(annotatedTypeInsideModule, getTypeElement(AnnotatedTypeOutOfModule.class)));
 
     final Set<ExportedElement> exportedElements = erraiModule.findExportedElements(testAnnotation);
-    final Set<TypeMirror> exportedTypes = exportedElements.stream().map(ExportedElement::getTypeMirror).collect(toSet());
+    final Set<Element> exportedTypes = exportedElements.stream().map(ExportedElement::getElement).collect(toSet());
     Assert.assertEquals(1, exportedElements.size());
-    assertContainsOnly(exportedTypes, annotatedTypeInsideModule.asType());
+    assertContainsOnly(exportedTypes, annotatedTypeInsideModule);
   }
 
   @Test
