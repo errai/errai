@@ -66,7 +66,7 @@ public @interface ErraiApp {
     String JS_INTEROP_SUPPORT_ENABLED = "jsInteropSupportEnabled";
     String DYNAMIC_VALIDATION_ENABLED = "dynamicValidationEnabled";
     String CUSTOM_PROPERTIES = "customProperties";
-    String MODULES  = "modules";
-    String GWT_MODULE_NAME  = "gwtModuleName";
+    String MODULES = "modules";
+    String GWT_MODULE_NAME = "gwtModuleName";
   }
 }

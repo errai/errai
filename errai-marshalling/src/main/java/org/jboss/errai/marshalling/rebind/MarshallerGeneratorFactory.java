@@ -36,26 +36,21 @@ import org.jboss.errai.codegen.util.Bool;
 import org.jboss.errai.codegen.util.GenUtil;
 import org.jboss.errai.codegen.util.If;
 import org.jboss.errai.codegen.util.Stmt;
-import org.jboss.errai.common.metadata.ScannerSingleton;
 import org.jboss.errai.common.rebind.NameUtil;
 import org.jboss.errai.common.rebind.UniqueNameGenerator;
 import org.jboss.errai.config.ErraiConfiguration;
 import org.jboss.errai.config.MetaClassFinder;
-import org.jboss.errai.config.rebind.EnvironmentConfigExtension;
-import org.jboss.errai.config.util.ClassScanner;
-import org.jboss.errai.marshalling.apt.MarshallerAptGenerator;
+import org.jboss.errai.marshalling.apt.ClientMarshallerAptGenerator;
 import org.jboss.errai.marshalling.client.api.DeferredMarshallerCreationCallback;
 import org.jboss.errai.marshalling.client.api.GeneratedMarshaller;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallerFactory;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.annotations.AlwaysQualify;
-import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
 import org.jboss.errai.marshalling.client.api.json.EJArray;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
 import org.jboss.errai.marshalling.client.marshallers.QualifyingMarshallerWrapper;
 import org.jboss.errai.marshalling.rebind.api.ArrayMarshallerCallback;
-import org.jboss.errai.marshalling.rebind.api.CustomMapping;
 import org.jboss.errai.marshalling.rebind.api.GeneratorMappingContext;
 import org.jboss.errai.marshalling.rebind.api.GeneratorMappingContextFactory;
 import org.jboss.errai.marshalling.rebind.api.MappingStrategy;
@@ -75,7 +70,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static java.util.stream.Collectors.toSet;
 import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
 import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
 import static org.jboss.errai.codegen.util.Implementations.autoForLoop;
@@ -132,7 +126,7 @@ public class MarshallerGeneratorFactory {
     if (!erraiConfiguration.app().isAptEnvironment()) {
       return marshaller;
     } else {
-      MarshallerAptGenerator.addExposedClass(type);
+      ClientMarshallerAptGenerator.addExposedClass(type);
     }
 
     return ClassBuilder.define(getMarshallerImplClassName(type, true, erraiConfiguration))
@@ -184,45 +178,6 @@ public class MarshallerGeneratorFactory {
     this.target = target;
     this.erraiConfiguration = erraiConfiguration;
     this.metaClassFinder = metaClassFinder;
-  }
-
-  public static MarshallerGeneratorFactory getFor(final GeneratorContext context,
-          final MarshallerOutputTarget target,
-          final ErraiConfiguration erraiConfiguration) {
-
-    return getFor(context, target, erraiConfiguration, getMetaClassFinder(context));
-  }
-
-  private static MetaClassFinder getMetaClassFinder(final GeneratorContext context) {
-    return a -> {
-
-      if (ServerMarshaller.class.equals(a)) {
-        final Set<Class<?>> serverMarshallers = ScannerSingleton.getOrCreateInstance().getTypesAnnotatedWith(a, true);
-        if (!serverMarshallers.isEmpty()) {
-          return serverMarshallers.stream().map(MetaClassFactory::getUncached).collect(toSet());
-        } else {
-          return MarshallingOsgiEnvironmentHelper.getOsgiEnvironmentServerMarshallers();
-        }
-      }
-
-      if (CustomMapping.class.equals(a)) {
-        final Set<Class<?>> customMappings = ScannerSingleton.getOrCreateInstance().getTypesAnnotatedWith(a, true);
-        if (!customMappings.isEmpty()) {
-          return customMappings.stream().map(MetaClassFactory::getUncached).collect(toSet());
-        } else {
-          return MarshallingOsgiEnvironmentHelper.getOsgiEnvironmentCustomMappings();
-        }
-      }
-
-      if (EnvironmentConfigExtension.class.equals(a)) {
-        return new HashSet<>(ClassScanner.getTypesAnnotatedWith(a, true));
-      }
-
-      //Portable.class
-      //NonPortable.class
-      //ClientMarshaller.class
-      return new HashSet<>(ClassScanner.getTypesAnnotatedWith(a));
-    };
   }
 
   public static MarshallerGeneratorFactory getFor(final GeneratorContext context,

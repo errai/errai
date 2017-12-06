@@ -21,6 +21,7 @@ import javax.enterprise.event.Observes;
 import javax.enterprise.inject.spi.EventMetadata;
 
 import org.jboss.errai.config.marshalling.MarshallingConfiguration;
+import org.jboss.errai.marshalling.server.MappingContextSingleton;
 
 /**
  * Managed bean that observes all server-side events and dispatches them to the
@@ -45,7 +46,7 @@ public class AnyEventObserver {
 
     // Check if the event is a portable Errai CDI event and should be forwarded
     // to all listening clients
-    if (MarshallingConfiguration.isPortableType(event.getClass())) {
+    if (MappingContextSingleton.get().hasMarshaller(event.getClass().getName())) {
       eventDispatcher.sendEventToClients(event, emd);
     }
 

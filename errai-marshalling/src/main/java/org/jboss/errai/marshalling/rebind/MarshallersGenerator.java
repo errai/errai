@@ -21,21 +21,32 @@ import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.UnableToCompleteException;
 import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.util.ClassChangeUtil;
 import org.jboss.errai.common.metadata.RebindUtils;
-import org.jboss.errai.config.propertiesfile.ErraiAppPropertiesConfiguration;
+import org.jboss.errai.common.metadata.ScannerSingleton;
 import org.jboss.errai.config.ErraiConfiguration;
+import org.jboss.errai.config.MetaClassFinder;
 import org.jboss.errai.config.marshalling.MarshallingConfiguration;
+import org.jboss.errai.config.propertiesfile.ErraiAppPropertiesConfiguration;
 import org.jboss.errai.config.rebind.AbstractAsyncGenerator;
 import org.jboss.errai.config.rebind.EnvUtil;
+import org.jboss.errai.config.rebind.EnvironmentConfigExtension;
 import org.jboss.errai.config.rebind.GenerateAsync;
+import org.jboss.errai.config.util.ClassScanner;
 import org.jboss.errai.marshalling.client.api.MarshallerFactory;
+import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
+import org.jboss.errai.marshalling.rebind.api.CustomMapping;
 import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
 import org.jboss.errai.marshalling.rebind.util.OutputDirectoryUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.util.HashSet;
+import java.util.Set;
+
+import static java.util.stream.Collectors.toSet;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -57,6 +68,8 @@ public class MarshallersGenerator extends AbstractAsyncGenerator {
   public static final String SERVER_CLASS_NAME = "ServerMarshallingFactoryImpl";
   public static final String CLIENT_PACKAGE_NAME = "org.jboss.errai.marshalling.client.api";
   public static final String CLIENT_CLASS_NAME = "MarshallerFactoryImpl";
+  private final ErraiConfiguration erraiConfiguration = new ErraiAppPropertiesConfiguration();
+  private final MetaClassFinder metaClassFinder = getMetaClassFinder();
 
   @Override
   public String generate(final TreeLogger logger, final GeneratorContext context, final String typeName)
@@ -76,7 +89,6 @@ public class MarshallersGenerator extends AbstractAsyncGenerator {
   protected String generate(final TreeLogger treeLogger, final GeneratorContext context) {
     synchronized (generatorLock) {
       final boolean junitOrDevMode = !EnvUtil.isProdMode();
-      final ErraiConfiguration erraiConfiguration = new ErraiAppPropertiesConfiguration();
 
       if (SERVER_MARSHALLER_OUTPUT_ENABLED && MarshallingGenUtil.isUseStaticMarshallers(erraiConfiguration)) {
 
@@ -85,8 +97,8 @@ public class MarshallersGenerator extends AbstractAsyncGenerator {
           serverSource = _serverMarshallerCache;
         }
         else {
-          serverSource = MarshallerGeneratorFactory.getFor(context, MarshallerOutputTarget.Java, erraiConfiguration)
-              .generate(SERVER_PACKAGE_NAME, SERVER_CLASS_NAME);
+          serverSource = MarshallerGeneratorFactory.getFor(context, MarshallerOutputTarget.Java, erraiConfiguration,
+                  metaClassFinder).generate(SERVER_PACKAGE_NAME, SERVER_CLASS_NAME);
           _serverMarshallerCache = serverSource;
         }
 
@@ -121,8 +133,41 @@ public class MarshallersGenerator extends AbstractAsyncGenerator {
       }
 
       return _clientMarshallerCache = MarshallerGeneratorFactory.getFor(context, MarshallerOutputTarget.GWT,
-              erraiConfiguration).generate(CLIENT_PACKAGE_NAME, CLIENT_CLASS_NAME, this::addCacheRelevantClass);
+              erraiConfiguration, metaClassFinder)
+              .generate(CLIENT_PACKAGE_NAME, CLIENT_CLASS_NAME, this::addCacheRelevantClass);
     }
+  }
+
+  public static MetaClassFinder getMetaClassFinder() {
+    return a -> {
+
+      if (ServerMarshaller.class.equals(a)) {
+        final Set<Class<?>> serverMarshallers = ScannerSingleton.getOrCreateInstance().getTypesAnnotatedWith(a, true);
+        if (!serverMarshallers.isEmpty()) {
+          return serverMarshallers.stream().map(MetaClassFactory::getUncached).collect(toSet());
+        } else {
+          return MarshallingOsgiEnvironmentHelper.getOsgiEnvironmentServerMarshallers();
+        }
+      }
+
+      if (CustomMapping.class.equals(a)) {
+        final Set<Class<?>> customMappings = ScannerSingleton.getOrCreateInstance().getTypesAnnotatedWith(a, true);
+        if (!customMappings.isEmpty()) {
+          return customMappings.stream().map(MetaClassFactory::getUncached).collect(toSet());
+        } else {
+          return MarshallingOsgiEnvironmentHelper.getOsgiEnvironmentCustomMappings();
+        }
+      }
+
+      if (EnvironmentConfigExtension.class.equals(a)) {
+        return new HashSet<>(ClassScanner.getTypesAnnotatedWith(a, true));
+      }
+
+      //Portable.class
+      //NonPortable.class
+      //ClientMarshaller.class
+      return new HashSet<>(ClassScanner.getTypesAnnotatedWith(a));
+    };
   }
 
   private static void writeServerSideMarshallerToDiscoveredOutputDirs(final GeneratorContext context, final String source) {
@@ -131,7 +176,7 @@ public class MarshallersGenerator extends AbstractAsyncGenerator {
 
   @Override
   protected boolean isRelevantClass(final MetaClass clazz) {
-    return MarshallingConfiguration.isPortableType(clazz.unsafeAsClass());
+    return MarshallingConfiguration.isPortableType(metaClassFinder, erraiConfiguration, clazz);
   }
 
   @Override

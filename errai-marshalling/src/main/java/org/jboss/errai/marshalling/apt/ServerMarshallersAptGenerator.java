@@ -16,13 +16,18 @@
 
 package org.jboss.errai.marshalling.apt;
 
-import org.jboss.errai.common.apt.exportfile.ExportedTypesFromExportFiles;
+import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.common.apt.ErraiAptGenerators;
+import org.jboss.errai.common.apt.exportfile.ExportedTypesFromExportFiles;
 import org.jboss.errai.common.apt.generator.ErraiAptGeneratedSourceFile;
 import org.jboss.errai.common.configuration.ErraiGenerator;
+import org.jboss.errai.config.MetaClassFinder;
+import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
+import org.jboss.errai.marshalling.rebind.DefinitionsFactorySingleton;
 import org.jboss.errai.marshalling.rebind.MarshallerGeneratorFactory;
+import org.jboss.errai.marshalling.server.marshallers.ServerClassMarshaller;
 
-import static org.jboss.errai.common.apt.generator.ErraiAptGeneratedSourceFile.Type.CLIENT;
+import static java.util.Collections.singleton;
 import static org.jboss.errai.common.apt.generator.ErraiAptGeneratedSourceFile.Type.SHARED;
 import static org.jboss.errai.marshalling.rebind.MarshallerOutputTarget.Java;
 import static org.jboss.errai.marshalling.rebind.MarshallersGenerator.SERVER_CLASS_NAME;
@@ -41,7 +46,13 @@ public class ServerMarshallersAptGenerator extends ErraiAptGenerators.SingleFile
 
   @Override
   public String generate() {
-    return MarshallerGeneratorFactory.getFor(null, Java, erraiConfiguration(), metaClassFinder())
+
+    DefinitionsFactorySingleton.reset();
+
+    final MetaClassFinder metaClassFinder = metaClassFinder().extend(ServerMarshaller.class,
+            () -> singleton(MetaClassFactory.get(ServerClassMarshaller.class)));
+
+    return MarshallerGeneratorFactory.getFor(null, Java, erraiConfiguration(), metaClassFinder)
             .generate(getPackageName(), getResolvedClassSimpleName());
   }
 

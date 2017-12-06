@@ -19,8 +19,8 @@ package org.jboss.errai.marshalling.apt;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.util.GWTPrivateMemberAccessor;
 import org.jboss.errai.codegen.util.PrivateAccessUtil;
-import org.jboss.errai.common.apt.exportfile.ExportedTypesFromExportFiles;
 import org.jboss.errai.common.apt.ErraiAptGenerators;
+import org.jboss.errai.common.apt.exportfile.ExportedTypesFromExportFiles;
 import org.jboss.errai.common.apt.generator.ErraiAptGeneratedSourceFile;
 import org.jboss.errai.common.configuration.ErraiGenerator;
 import org.jboss.errai.config.ErraiConfiguration;
@@ -33,6 +33,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static org.jboss.errai.common.apt.generator.ErraiAptGeneratedSourceFile.Type.CLIENT;
 import static org.jboss.errai.common.apt.generator.ErraiAptGeneratedSourceFile.Type.SHARED;
 import static org.jboss.errai.marshalling.rebind.MarshallerGenerator.PACKAGE_NAME;
 
@@ -40,12 +41,12 @@ import static org.jboss.errai.marshalling.rebind.MarshallerGenerator.PACKAGE_NAM
  * @author Tiago Bento <tfernand@redhat.com>
  */
 @ErraiGenerator
-public class MarshallerAptGenerator extends ErraiAptGenerators.MultipleFiles {
+public class ClientMarshallerAptGenerator extends ErraiAptGenerators.MultipleFiles {
 
   private static List<MetaClass> exposedClasses = new ArrayList<>();
 
   // IMPORTANT: Do not remove. ErraiAppAptGenerator depends on this constructor
-  public MarshallerAptGenerator(final ExportedTypesFromExportFiles exportedTypes) {
+  public ClientMarshallerAptGenerator(final ExportedTypesFromExportFiles exportedTypes) {
     super(exportedTypes);
     PrivateAccessUtil.registerPrivateMemberAccessor("jsni", new GWTPrivateMemberAccessor());
   }
@@ -69,12 +70,12 @@ public class MarshallerAptGenerator extends ErraiAptGenerators.MultipleFiles {
     final String classSimpleName = MarshallerGeneratorFactory.getMarshallerImplClassName(type, true,
             erraiConfiguration());
     final String generatedSource = generateSource(erraiConfiguration(), type);
-    return new ErraiAptGeneratedSourceFile(PACKAGE_NAME, classSimpleName, generatedSource, SHARED);
+    return new ErraiAptGeneratedSourceFile(PACKAGE_NAME, classSimpleName, generatedSource, CLIENT);
   }
 
   private String generateSource(final ErraiConfiguration erraiConfiguration, final MetaClass type) {
     try {
-      return new MarshallerGenerator().generateMarshaller(null, type, erraiConfiguration);
+      return new MarshallerGenerator().generateMarshaller(null, type, erraiConfiguration, metaClassFinder());
     } catch (final Exception e) {
       System.out.println("Error generating " + type.toString());
       e.printStackTrace();

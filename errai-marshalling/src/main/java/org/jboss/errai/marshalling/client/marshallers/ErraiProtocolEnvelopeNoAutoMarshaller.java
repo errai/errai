@@ -94,7 +94,7 @@ public class ErraiProtocolEnvelopeNoAutoMarshaller implements Marshaller<Map<Str
           valueMarshaller = MarshallUtil.getQualifiedNumberMarshaller(val);
         }
         else {
-          if (!ctx.getMappingContext().hasMarshaller(val.getClass().getName())) {
+          if (!ctx.hasMarshaller(val.getClass().getName())) {
             val = val.toString();
             valueMarshaller = StringMarshaller.INSTANCE;
           }

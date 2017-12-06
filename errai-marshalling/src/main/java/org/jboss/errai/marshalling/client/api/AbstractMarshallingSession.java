@@ -75,8 +75,8 @@ public abstract class AbstractMarshallingSession implements MarshallingSession {
   }
 
   @Override
-  public MappingContext getMappingContext() {
-    return context;
+  public boolean hasMarshaller(final String clazzName) {
+    return context.hasMarshaller(clazzName);
   }
 
   @Override

@@ -83,15 +83,6 @@ public class MarshallingConfiguration {
     return allPortableConcreteSubtypes;
   }
 
-  @Deprecated
-  //FIXME: tiago: make it work with annotation configuration too
-  public static boolean isPortableType(final Class<?> cls) {
-    final MetaClassFinder metaClassFinder = a -> new HashSet<>(ClassScanner.getTypesAnnotatedWith(a));
-    final ErraiConfiguration erraiConfiguration = getErraiAppPropertiesConfiguration();
-
-    return isPortableType(metaClassFinder, erraiConfiguration, MetaClassFactory.get(cls));
-  }
-
   public static boolean isPortableType(final MetaClassFinder metaClassFinder,
           final ErraiConfiguration erraiConfiguration,
           final MetaClass metaClass) {
