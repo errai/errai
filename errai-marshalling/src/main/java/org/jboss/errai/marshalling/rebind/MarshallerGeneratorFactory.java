@@ -493,9 +493,7 @@ public class MarshallerGeneratorFactory {
         final ClassStructureBuilder<?> marshaller = strategy.getMapper().getMarshaller(marshallerClassName);
         customMarshaller = marshaller.getClassDefinition();
       }
-      if (!erraiConfiguration.app().isAptEnvironment()) {
-        classStructureBuilder.declaresInnerClass(new InnerClass(customMarshaller));
-      }
+      classStructureBuilder.declaresInnerClass(new InnerClass(customMarshaller));
       addMarshaller(customMarshaller, type);
     }
   }
@@ -545,7 +543,7 @@ public class MarshallerGeneratorFactory {
       final String marshallerClassName = getMarshallerImplClassName(type, gwtTarget, erraiConfiguration);
       final BuildMetaClass arrayMarshallerType = generateArrayMarshaller(type, marshallerClassName, gwtTarget);
 
-      if (!erraiConfiguration.app().isAptEnvironment()) {
+      if (!erraiConfiguration.app().isAptEnvironment() || !gwtTarget) {
         final InnerClass arrayMarshallerInner = new InnerClass(arrayMarshallerType);
         classStructureBuilder.declaresInnerClass(arrayMarshallerInner);
         addConditionalAssignment(type,
