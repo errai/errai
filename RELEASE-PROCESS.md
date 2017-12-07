@@ -47,14 +47,10 @@ Release Steps
         
         % mvn clean deploy -Dgwt.compiler.skip=true -DaltDeploymentRepository=jboss-snapshots-repository::default::https://repository.jboss.org/nexus/service/local/staging/deploy/maven2/
 
-1. Create the a-la-carte binary Errai distribution and docs
-
-        % mvn install -Pdistro,javadoc -Dmaven.test.skip=true -Dgwt.compiler.skip=true
-        
-1. Upload the docs and the distro zipfile
+1. Upload the docs
 
         % cd dist
-        % scripts/upload_binaries.sh ${version}
+        % scripts/upload_docs.sh ${version}
 
 1. Tag and push the release to github
 
