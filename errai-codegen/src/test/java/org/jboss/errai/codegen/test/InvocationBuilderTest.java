@@ -16,9 +16,6 @@
 
 package org.jboss.errai.codegen.test;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import org.jboss.errai.codegen.Context;
 import org.jboss.errai.codegen.Variable;
 import org.jboss.errai.codegen.builder.impl.ContextBuilder;
@@ -34,10 +31,15 @@ import org.jboss.errai.codegen.util.Refs;
 import org.junit.Test;
 
 import javax.enterprise.util.TypeLiteral;
+import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Stream;
+
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Tests the generation of method invocations using the {@link StatementBuilder} API.
@@ -358,6 +360,6 @@ public class InvocationBuilderTest extends AbstractCodegenTest {
   public void testLookupOfMethodWithArrayParameters() {
     final MetaClass metaClass = MetaClassFactory.get(Arrays.class);
     final MetaMethod equals = metaClass.getBestMatchingMethod("equals", Class[].class, Class[].class);
-    assertEquals("public boolean equals([java.lang.Object[], java.lang.Object[]])", equals.toString());
+    assertEquals("public boolean equals([[Ljava.lang.Object;, [Ljava.lang.Object;])", equals.toString());
   }
 }

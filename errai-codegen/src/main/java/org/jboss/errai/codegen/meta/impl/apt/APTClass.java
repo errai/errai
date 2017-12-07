@@ -46,6 +46,7 @@ import javax.lang.model.util.ElementFilter;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Inherited;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -127,17 +128,41 @@ public class APTClass extends AbstractMetaClass<TypeMirror> {
   @Override
   public String getFullyQualifiedName() {
     final TypeMirror mirror = getEnclosedMetaObject();
-
-    if (mirror.getKind().equals(TypeKind.DECLARED)) {
+    switch (mirror.getKind()) {
+    case DECLARED:
       return ((Symbol) ((DeclaredType) mirror).asElement()).flatName().toString();
+    case ARRAY:
+      final String dimensionsPart = String.join("", Collections.nCopies(getDimensions(), "["));
+      final String typePrefix = getArrayCoreType().isPrimitive() ? "" : "L";
+      final String typeSuffix = getArrayCoreType().isPrimitive() ? "" : ";";
+      final String fullyQualifiedName = getArrayCoreType().isPrimitive() ?
+              getInternalPrimitiveNameFrom(getArrayCoreType().getCanonicalName()) :
+              getArrayCoreType().getErased().getFullyQualifiedName();
+      return dimensionsPart + typePrefix + fullyQualifiedName + typeSuffix;
+    default:
+      return getCanonicalName();
     }
+  }
 
-    return getCanonicalName();
+  private MetaClass getArrayCoreType() {
+    if (getComponentType() == null) {
+      return this;
+    } else {
+      return ((APTClass) getComponentType()).getArrayCoreType();
+    }
+  }
+
+  private int getDimensions() {
+    if (getComponentType() == null) {
+      return 0;
+    } else {
+      return 1 + ((APTClass) getComponentType()).getDimensions();
+    }
   }
 
   @Override
   public String getCanonicalName() {
-    final TypeMirror mirror = getEnclosedMetaObject();
+    final TypeMirror mirror = ((APTClass) getErased()).getEnclosedMetaObject();
     switch (mirror.getKind()) {
     case DECLARED:
       final Element element = types.asElement(mirror);
@@ -838,7 +863,8 @@ public class APTClass extends AbstractMetaClass<TypeMirror> {
 
   private Collection<TypeMirror> getAllSuperTypes(final TypeMirror typeMirror) {
     final List<? extends TypeMirror> directSuperTypes = types.directSupertypes(typeMirror);
-    return Stream.concat(directSuperTypes.stream(), directSuperTypes.stream().flatMap(s -> getAllSuperTypes(s).stream())).collect(toSet());
+    return Stream.concat(directSuperTypes.stream(),
+            directSuperTypes.stream().flatMap(s -> getAllSuperTypes(s).stream())).collect(toSet());
   }
 
   @Override

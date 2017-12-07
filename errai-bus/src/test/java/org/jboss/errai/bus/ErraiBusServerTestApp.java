@@ -14,19 +14,15 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.common.configuration;
+package org.jboss.errai.bus;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
+import org.jboss.errai.common.configuration.ErraiApp;
 
-import static org.jboss.errai.common.configuration.Target.GWT;
+import static org.jboss.errai.common.configuration.Target.JAVA;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
-@Retention(RetentionPolicy.RUNTIME)
-public @interface ErraiGenerator {
-
-  Target[] targets() default { GWT };
-
+@ErraiApp(gwtModuleName = "", targets = { JAVA })
+public class ErraiBusServerTestApp {
 }

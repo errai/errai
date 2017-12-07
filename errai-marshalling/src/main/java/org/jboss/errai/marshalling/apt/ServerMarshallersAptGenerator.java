@@ -29,6 +29,7 @@ import org.jboss.errai.marshalling.server.marshallers.ServerClassMarshaller;
 
 import static java.util.Collections.singleton;
 import static org.jboss.errai.common.apt.generator.ErraiAptGeneratedSourceFile.Type.SHARED;
+import static org.jboss.errai.common.configuration.Target.JAVA;
 import static org.jboss.errai.marshalling.rebind.MarshallerOutputTarget.Java;
 import static org.jboss.errai.marshalling.rebind.MarshallersGenerator.SERVER_CLASS_NAME;
 import static org.jboss.errai.marshalling.rebind.MarshallersGenerator.SERVER_PACKAGE_NAME;
@@ -36,7 +37,7 @@ import static org.jboss.errai.marshalling.rebind.MarshallersGenerator.SERVER_PAC
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
-@ErraiGenerator
+@ErraiGenerator(targets = { JAVA })
 public class ServerMarshallersAptGenerator extends ErraiAptGenerators.SingleFile {
 
   // IMPORTANT: Do not remove. ErraiAppAptGenerator depends on this constructor

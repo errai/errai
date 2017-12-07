@@ -33,11 +33,13 @@ import java.util.Set;
 
 import static java.util.Collections.singleton;
 import static org.jboss.errai.common.apt.generator.ErraiAptGeneratedSourceFile.Type.SHARED;
+import static org.jboss.errai.common.configuration.Target.GWT;
+import static org.jboss.errai.common.configuration.Target.JAVA;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
-@ErraiGenerator
+@ErraiGenerator(targets = { GWT, JAVA})
 public class EventQualifierSerializerAptGenerator extends ErraiAptGenerators.SingleFile {
 
   public static final Logger logger = LoggerFactory.getLogger(EventQualifierSerializerAptGenerator.class);

@@ -18,9 +18,11 @@ package org.jboss.errai.common.apt.generator.app;
 
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.common.apt.ErraiAptGenerators;
+import org.jboss.errai.common.apt.configuration.AptErraiAppConfiguration;
 import org.jboss.errai.common.apt.exportfile.ExportedTypesFromExportFiles;
 import org.jboss.errai.common.apt.generator.ErraiAptGeneratedSourceFile;
 import org.jboss.errai.common.configuration.ErraiGenerator;
+import org.jboss.errai.common.configuration.Target;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,6 +32,7 @@ import javax.tools.FileObject;
 import java.io.IOException;
 import java.io.Writer;
 import java.lang.reflect.Constructor;
+import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -68,10 +71,16 @@ public class ErraiAppAptGenerator {
             .map(this::newExportedTypesFromExportFiles)
             .peek(this::generateAptCompatibleGwtModuleFile)
             .flatMap(this::createGenerators)
+            .filter(this::generatorsOfErraiAppTarget)
             .flatMap(this::generateFiles)
             .forEach(this::saveFile);
 
     log.info("Successfully generated files using Errai APT Generators in {}ms", System.currentTimeMillis() - start);
+  }
+
+  private boolean generatorsOfErraiAppTarget(final ErraiAptGenerators.Any generator) {
+    final AptErraiAppConfiguration appConfiguration = (AptErraiAppConfiguration) generator.erraiConfiguration().app();
+    return Arrays.stream(generator.getClass().getAnnotation(ErraiGenerator.class).targets()).anyMatch(appConfiguration.targets()::contains);
   }
 
   private ExportedTypesFromExportFiles newExportedTypesFromExportFiles(final MetaClass erraiApp) {
@@ -79,11 +88,13 @@ public class ErraiAppAptGenerator {
   }
 
   private void generateAptCompatibleGwtModuleFile(final ExportedTypesFromExportFiles exportedTypesFromExportFiles) {
-    exportedTypesFromExportFiles.resourceFilesFinder()
-            .getResource(
-                    exportedTypesFromExportFiles.erraiAppConfiguration().gwtModuleName().replace(".", "/") + GWT_XML)
-            .map(file -> new AptCompatibleGwtModuleFile(file, exportedTypesFromExportFiles))
-            .ifPresent(this::saveFile);
+    final AptErraiAppConfiguration appConfiguration = exportedTypesFromExportFiles.erraiAppConfiguration();
+    if (appConfiguration.targets().contains(Target.GWT)) {
+      exportedTypesFromExportFiles.resourceFilesFinder()
+              .getResource(appConfiguration.gwtModuleName().replace(".", "/") + GWT_XML)
+              .map(file -> new AptCompatibleGwtModuleFile(file, exportedTypesFromExportFiles))
+              .ifPresent(this::saveFile);
+    }
   }
 
   private Stream<ErraiAptGeneratedSourceFile> generateFiles(final ErraiAptGenerators.Any generator) {
