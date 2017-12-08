@@ -92,6 +92,7 @@ public class ErraiAppAptGenerator {
     if (appConfiguration.targets().contains(Target.GWT)) {
       exportedTypesFromExportFiles.resourceFilesFinder()
               .getResource(appConfiguration.gwtModuleName().replace(".", "/") + GWT_XML)
+              .map(resource -> ((AptCodeGenResource) resource).getFile())
               .map(file -> new AptCompatibleGwtModuleFile(file, exportedTypesFromExportFiles))
               .ifPresent(this::saveFile);
     }

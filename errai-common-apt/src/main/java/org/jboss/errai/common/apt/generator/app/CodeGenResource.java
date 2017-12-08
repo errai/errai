@@ -16,12 +16,14 @@
 
 package org.jboss.errai.common.apt.generator.app;
 
+import java.io.InputStream;
 import java.util.Optional;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
-@FunctionalInterface
-public interface ResourceFilesFinder {
-  Optional<CodeGenResource> getResource(final String path);
+public interface CodeGenResource {
+  Optional<Long> lastModified();
+
+  Optional<InputStream> getInputStream();
 }

@@ -17,13 +17,11 @@
 package org.jboss.errai.ui.rebind;
 
 import org.apache.http.impl.io.EmptyInputStream;
+import org.jboss.errai.common.apt.generator.app.CodeGenResource;
 import org.jboss.errai.common.apt.generator.app.ResourceFilesFinder;
 import org.jboss.errai.common.client.api.Assert;
 import org.lesscss.Resource;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -47,20 +45,12 @@ public class ResourceFilesFinderResource implements Resource {
 
   @Override
   public long lastModified() {
-    return resourcesFilesFinder.getResource(path).map(File::lastModified).orElse(0L);
+    return resourcesFilesFinder.getResource(path).flatMap(CodeGenResource::lastModified).orElse(0L);
   }
 
   @Override
   public InputStream getInputStream() throws IOException {
-    return resourcesFilesFinder.getResource(path).map(this::newFileInputStream).orElse(EmptyInputStream.INSTANCE);
-  }
-
-  private InputStream newFileInputStream(final File file) {
-    try {
-      return new FileInputStream(file);
-    } catch (final FileNotFoundException e) {
-      throw new RuntimeException(e);
-    }
+    return resourcesFilesFinder.getResource(path).flatMap(CodeGenResource::getInputStream).orElse(EmptyInputStream.INSTANCE);
   }
 
   @Override

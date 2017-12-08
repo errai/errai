@@ -41,7 +41,7 @@ class AptResourceFilesFinder implements ResourceFilesFinder {
   }
 
   @Override
-  public Optional<File> getResource(final String path) {
+  public Optional<CodeGenResource> getResource(final String path) {
 
     final int lastSlashIndex = path.lastIndexOf("/");
     final String packageName = path.substring(0, lastSlashIndex).replace("/", ".");
@@ -53,7 +53,12 @@ class AptResourceFilesFinder implements ResourceFilesFinder {
             .map(Optional::get)
             .collect(toList());
 
-    return possibleUris.stream().filter(uri -> !uri.isOpaque()).map(File::new).filter(File::exists).findFirst();
+    return possibleUris.stream()
+            .filter(uri -> !uri.isOpaque())
+            .map(File::new)
+            .filter(File::exists)
+            .findFirst()
+            .map(AptCodeGenResource::new);
   }
 
   private Optional<URI> getUri(final JavaFileManager.Location location,
