@@ -57,4 +57,7 @@ public class BeanWithElementInjectionSites {
   @Inject
   public InputElementWithClassAndPropertyAnnotations inputWithClassAnnotationAndProperty;
 
+  @Inject
+  public Elemental2InputWithClassAndPropertiesAnnotations elemental2InputWithClassAndPropertiesAnnotations;
+
 }
