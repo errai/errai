@@ -39,7 +39,7 @@ import org.slf4j.Logger;
  * An implementation of {@link AbstractErraiServlet} leveraging asynchronous support of Servlet 3.0.
  *
  * @author Christian Sadilek <csadilek@redhat.com>
- * @author Mike Brock
+ * @author Mike BrockReflectionTests
  */
 public class StandardAsyncServlet extends AbstractErraiServlet {
   private static final Logger log = getLogger(StandardAsyncServlet.class);
