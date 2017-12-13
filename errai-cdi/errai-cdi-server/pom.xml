@@ -235,10 +235,12 @@
           <plugin>
             <artifactId>maven-failsafe-plugin</artifactId>
             <configuration>
-              <excludes>
+              <excludes combine.children="append">
                 <!-- Ignoring in the APT environment because these features are not yet supported -->
-                <exclude>**/org/jboss/errai/cdi/event/client/test/ClientEventSuperTypeTest.java</exclude>
-                <exclude>**/org/jboss/errai/cdi/stereotypes/client/test/StereotypesIntegrationTest.java</exclude>
+                <exclude>**/*ClientEventSuperTypeTest.java</exclude>
+                <exclude>**/*StereotypesIntegrationTest.java</exclude>
+                <exclude>**/*AsyncCDIBeanManagerTest.java</exclude>
+                <exclude>**/*AsyncCDITests.java</exclude>
               </excludes>
             </configuration>
           </plugin>
@@ -290,10 +292,6 @@
                 <include>**/*Test.java</include>
                 <include>**/*Tests.java</include>
               </includes>
-              <excludes>
-                <exclude>**/org/jboss/errai/cdi/async/test/**/*Test.java</exclude>
-                <exclude>**/org/jboss/errai/cdi/async/test/**/*Tests.java</exclude>
-              </excludes>
             </configuration>
           </plugin>
           <plugin>
