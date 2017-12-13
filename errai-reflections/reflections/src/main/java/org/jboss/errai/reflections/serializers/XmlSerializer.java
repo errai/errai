@@ -71,17 +71,15 @@ public class XmlSerializer implements Serializer {
     try {
       DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
       Document document = dBuilder.parse(inputStream);
-      Element documentElement = document.getDocumentElement();
-      documentElement.normalize(); //optional
-      NodeList reflectionsNodeList = documentElement.getElementsByTagName(REFLECTIONS_TAG);
-      for (int i = 0; i < reflectionsNodeList.getLength(); i++) {
-        Element indexElement = (Element) reflectionsNodeList.item(i);
-        NodeList indexNodeList = indexElement.getChildNodes();
-        for (int j = 0; j < indexNodeList.getLength(); j++) {
-              Element entryElement =  (Element) reflectionsNodeList.item(j);
+      NodeList indexNodeList = document.getDocumentElement().getChildNodes();
+      for (int i = 0; i < indexNodeList.getLength(); i++) {
+        Element indexElement = (Element) indexNodeList.item(i);
+        NodeList entryNodeList = indexElement.getElementsByTagName(ENTRY_TAG);
+        for (int j = 0; j < entryNodeList.getLength(); j++) {
+              Element entryElement = (Element) entryNodeList.item(j);
               Element keyElement = (Element) entryElement.getElementsByTagName(KEY_TAG).item(0);
               Element valuesElement = (Element) entryElement.getElementsByTagName(VALUES_TAG).item(0);
-              NodeList valuesNodeList = valuesElement.getChildNodes();
+              NodeList valuesNodeList = valuesElement.getElementsByTagName(VALUE_TAG);
               for(int k=0;k<valuesNodeList.getLength();k++){
                 Element valueElement = (Element) valuesNodeList.item(k);
                 String indexName = indexElement.getTagName();
