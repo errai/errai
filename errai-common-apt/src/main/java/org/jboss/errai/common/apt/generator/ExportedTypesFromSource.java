@@ -16,14 +16,11 @@
 
 package org.jboss.errai.common.apt.generator;
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
-import org.jboss.errai.codegen.meta.MetaClass;
-import org.jboss.errai.common.apt.strategies.ExportedElement;
-
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import static java.util.stream.Collectors.toSet;
@@ -34,14 +31,19 @@ import static org.jboss.errai.codegen.meta.impl.apt.APTClassUtil.elements;
  */
 public class ExportedTypesFromSource {
 
-  private final Multimap<String, Element> exportedTypes = HashMultimap.create();
+  private final Map<String, Set<Element>> exportedTypes = new HashMap<>();
 
-  public void putAll(final TypeElement annotationName, final Set<? extends Element> elementsAnnotatedWith) {
-    exportedTypes.putAll(annotationName.getQualifiedName().toString(), elementsAnnotatedWith);
+  public void putAll(final TypeElement annotation, final Set<? extends Element> elementsAnnotatedWith) {
+    final String annotationFqcn = annotation.getQualifiedName().toString();
+    if (exportedTypes.containsKey(annotationFqcn)) {
+      exportedTypes.get(annotationFqcn).addAll(elementsAnnotatedWith);
+    } else {
+      exportedTypes.put(annotationFqcn, new HashSet<>(elementsAnnotatedWith));
+    }
   }
 
   public Set<TypeElement> exportableAnnotations() {
-    return exportedTypes.keys().stream().map(elements::getTypeElement).collect(toSet());
+    return exportedTypes.keySet().stream().map(elements::getTypeElement).collect(toSet());
   }
 
   public Set<Element> findAnnotatedSourceElements(final TypeElement typeElement) {
