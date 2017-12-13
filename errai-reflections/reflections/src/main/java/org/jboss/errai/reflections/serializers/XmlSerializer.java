@@ -18,7 +18,6 @@ package org.jboss.errai.reflections.serializers;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import jdk.nashorn.internal.runtime.ParserException;
 import org.jboss.errai.reflections.Reflections;
 import org.jboss.errai.reflections.ReflectionsException;
 import org.jboss.errai.reflections.util.ConfigurationBuilder;
@@ -31,6 +30,7 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
@@ -73,7 +73,7 @@ public class XmlSerializer implements Serializer {
       Document document = dBuilder.parse(inputStream);
       Element documentElement = document.getDocumentElement();
       documentElement.normalize(); //optional
-      NodeList reflectionsNodeList = documentElement.getChildNodes();
+      NodeList reflectionsNodeList = documentElement.getElementsByTagName(REFLECTIONS_TAG);
       for (int i = 0; i < reflectionsNodeList.getLength(); i++) {
         Element indexElement = (Element) reflectionsNodeList.item(i);
         NodeList indexNodeList = indexElement.getChildNodes();
@@ -126,10 +126,11 @@ public class XmlSerializer implements Serializer {
   }
 
 
-  private static void write(final Reflections reflections, Writer outputWriter) throws ParserException, TransformerException, ParserConfigurationException {
+  private static void write(final Reflections reflections, Writer outputWriter) throws ParserConfigurationException, TransformerException {
       Document document = createDocument(reflections);
       TransformerFactory transformerFactory = TransformerFactory.newInstance();
       Transformer transformer = transformerFactory.newTransformer();
+      transformer.setOutputProperty(OutputKeys.INDENT, "yes");
       DOMSource source = new DOMSource(document);
       StreamResult result = new StreamResult(outputWriter);
       transformer.transform(source, result);
@@ -140,6 +141,7 @@ public class XmlSerializer implements Serializer {
     DocumentBuilder documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
     Document document = documentBuilder.newDocument();
     Element reflectionsElement = document.createElement(REFLECTIONS_TAG);
+    document.appendChild(reflectionsElement);
 
     for (String indexName : map.keySet()) {
       Element indexElement = document.createElement(indexName);
