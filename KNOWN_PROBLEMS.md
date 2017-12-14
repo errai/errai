@@ -4,7 +4,7 @@ Known problems
 - Support CDI events of (un)annotated subtypes
 - Support Stereotypes
 - Un-ignore the following tests:
-	- `tereotypesIntegrationTest`
+	- `StereotypesIntegrationTest`
 	- `ClientEventSuperTypeTest`
 	- `DynamicValidationIntegrationTest`
 	- All async tests in `errai-ioc` and `errai-cdi`
