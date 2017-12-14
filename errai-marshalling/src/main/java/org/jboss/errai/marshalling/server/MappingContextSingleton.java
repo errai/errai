@@ -18,8 +18,10 @@ package org.jboss.errai.marshalling.server;
 
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
-import org.jboss.errai.config.propertiesfile.ErraiAppPropertiesConfiguration;
+import org.jboss.errai.codegen.util.ClassChangeUtil;
+import org.jboss.errai.config.ErraiConfiguration;
 import org.jboss.errai.config.MetaClassFinder;
+import org.jboss.errai.config.propertiesfile.ErraiAppPropertiesConfiguration;
 import org.jboss.errai.config.util.ClassScanner;
 import org.jboss.errai.marshalling.client.MarshallingSessionProviderFactory;
 import org.jboss.errai.marshalling.client.api.Marshaller;
@@ -35,15 +37,18 @@ import org.jboss.errai.marshalling.client.protocols.MarshallingSessionProvider;
 import org.jboss.errai.marshalling.client.util.EncDecUtil;
 import org.jboss.errai.marshalling.rebind.DefinitionsFactory;
 import org.jboss.errai.marshalling.rebind.DefinitionsFactorySingleton;
+import org.jboss.errai.marshalling.rebind.MarshallerGeneratorFactory;
+import org.jboss.errai.marshalling.rebind.MarshallerOutputTarget;
+import org.jboss.errai.marshalling.rebind.MarshallersGenerator;
 import org.jboss.errai.marshalling.rebind.api.model.MappingDefinition;
 import org.jboss.errai.marshalling.rebind.api.model.MemberMapping;
 import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
 import org.jboss.errai.marshalling.server.marshallers.DefaultArrayMarshaller;
-import org.jboss.errai.marshalling.server.util.ServerMarshallUtil;
 import org.slf4j.Logger;
 
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.Optional;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -66,12 +71,10 @@ public class MappingContextSingleton {
     try {
       if (!MarshallingGenUtil.isUseStaticMarshallers(ERRAI_CONFIGURATION)) {
         sContext = loadDynamicMarshallers();
-      }
-      else {
+      } else {
         try {
           sContext = loadPrecompiledMarshallers();
-        }
-        catch (Throwable t) {
+        } catch (Throwable t) {
           log.debug("failed to load static marshallers", t);
           log.warn("static marshallers were not found.");
 
@@ -80,13 +83,11 @@ public class MappingContextSingleton {
           }
 
           sContext = loadDynamicMarshallers();
-        }
-        finally {
+        } finally {
           ClassScanner.setReflectionsScanning(false);
         }
       }
-    }
-    catch (Throwable t) {
+    } catch (Throwable t) {
       t.printStackTrace();
       log.error(t.getMessage());
       throw new RuntimeException("critical problem loading the marshallers", t);
@@ -96,13 +97,13 @@ public class MappingContextSingleton {
   }
 
   private static void dynamicMarshallingWarning() {
-    log.warn("using dynamic marshallers. dynamic marshallers are designed" +
-        " for development mode testing, and ideally should not be used in production. *");
+    log.warn("using dynamic marshallers. dynamic marshallers are designed"
+            + " for development mode testing, and ideally should not be used in production. *");
   }
 
   public static ServerMappingContext loadPrecompiledMarshallers() throws Exception {
 
-    final Class<? extends MarshallerFactory> cls = ServerMarshallUtil.getGeneratedMarshallerFactoryForServer(ERRAI_CONFIGURATION);
+    final Class<? extends MarshallerFactory> cls = getGeneratedMarshallerFactoryForServer(ERRAI_CONFIGURATION);
 
     if (cls == null) {
       return loadDynamicMarshallers();
@@ -144,7 +145,7 @@ public class MappingContextSingleton {
 
       @Override
       public DefinitionsFactory getDefinitionsFactory() {
-        return DefinitionsFactorySingleton.get(ERRAI_CONFIGURATION, META_CLASS_FINDER);
+        throw new RuntimeException("Definitions factory is not available in server-side environment");
       }
 
       @Override
@@ -258,30 +259,29 @@ public class MappingContextSingleton {
       private void addArrayMarshaller(final MetaClass type) {
         MetaClass compType = type.getOuterComponentType().asBoxed();
 
-        if (!factory.hasDefinition(type.getFullyQualifiedName())
-            && !factory.hasDefinition(type.getInternalName())) {
+        if (!factory.hasDefinition(type.getFullyQualifiedName()) && !factory.hasDefinition(type.getInternalName())) {
 
           MappingDefinition outerDef = factory.getDefinition(compType);
           Marshaller<Object> marshaller;
 
           if (outerDef != null && !factory.shouldUseObjectMarshaller(compType)) {
             marshaller = outerDef.getMarshallerInstance();
-          }
-          else {
+          } else {
             compType = MetaClassFactory.get(Object.class);
             marshaller = factory.getDefinition(Object.class).getMarshallerInstance();
           }
 
           if (marshaller == null) {
-            throw new MarshallingException("Failed to generate array marshaller for " + type.getCanonicalName() +
-                " because marshaller for " + compType + " could not be found.");
+            throw new MarshallingException("Failed to generate array marshaller for "
+                    + type.getCanonicalName()
+                    + " because marshaller for "
+                    + compType
+                    + " could not be found.");
           }
 
           MappingDefinition newDef = new MappingDefinition(
-              EncDecUtil.qualifyMarshaller(
-                  new DefaultArrayMarshaller(type, marshaller),
-                  (Class<Object>) type.unsafeAsClass()
-                  ), type, true);
+                  EncDecUtil.qualifyMarshaller(new DefaultArrayMarshaller(type, marshaller),
+                          (Class<Object>) type.unsafeAsClass()), type, true);
 
           if (outerDef != null) {
             newDef.setClientMarshallerClass(outerDef.getClientMarshallerClass());
@@ -325,5 +325,26 @@ public class MappingContextSingleton {
 
   public static ServerMappingContext get() {
     return context;
+  }
+
+  @SuppressWarnings("unchecked")
+  public static Class<? extends MarshallerFactory> getGeneratedMarshallerFactoryForServer(final ErraiConfiguration erraiConfiguration) {
+    final String packageName = MarshallersGenerator.SERVER_PACKAGE_NAME;
+    final String simpleClassName = MarshallersGenerator.SERVER_CLASS_NAME;
+    final String fullyQualifiedClassName = packageName + "." + simpleClassName;
+
+    final Optional<Class<?>> generatedMarshaller = ClassChangeUtil.loadClassIfPresent(packageName, simpleClassName);
+
+    if (generatedMarshaller.isPresent()) {
+      return (Class<? extends MarshallerFactory>) generatedMarshaller.get();
+    } else if (!MarshallingGenUtil.isForceStaticMarshallers(erraiConfiguration)) {
+      return null;
+    } else {
+      log.info("couldn't find {} class, attempting to generate ...", fullyQualifiedClassName);
+      final String classStr = MarshallerGeneratorFactory.getFor(null, MarshallerOutputTarget.Java, erraiConfiguration,
+              META_CLASS_FINDER).generate(packageName, simpleClassName);
+      return (Class<? extends MarshallerFactory>) ClassChangeUtil.compileAndLoadFromSource(packageName, simpleClassName,
+              classStr);
+    }
   }
 }

@@ -385,22 +385,6 @@
 
   <profiles>
     <profile>
-      <id>apt-generators</id>
-      <activation>
-        <property>
-          <name>apt-generators</name>
-        </property>
-      </activation>
-      <dependencies>
-        <dependency>
-          <groupId>org.jboss.errai</groupId>
-          <artifactId>errai-generators-apt</artifactId>
-          <scope>provided</scope>
-        </dependency>
-      </dependencies>
-    </profile>
-
-    <profile>
       <id>jetty</id>
       <properties>
         <webDescriptor>jetty</webDescriptor>
@@ -482,7 +466,6 @@
         </dependency>
       </dependencies>
     </profile>
-
   </profiles>
 
 </project>

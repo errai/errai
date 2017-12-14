@@ -18,7 +18,7 @@ package org.jboss.errai.ioc.apt;
 
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
-import org.jboss.errai.common.apt.ErraiAptExportedTypes;
+import org.jboss.errai.common.apt.exportfile.ExportedTypesFromExportFiles;
 import org.jboss.errai.common.apt.ErraiAptGenerators;
 import org.jboss.errai.common.apt.generator.ErraiAptGeneratedSourceFile;
 import org.jboss.errai.common.configuration.ErraiGenerator;
@@ -44,7 +44,7 @@ public class QualifierEqualityFactoryAptGenerator extends ErraiAptGenerators.Sin
   private final QualifierEqualityFactoryGenerator qualifierEqualityFactoryGenerator;
 
   // IMPORTANT: Do not remove. ErraiAppAptGenerator depends on this constructor
-  public QualifierEqualityFactoryAptGenerator(final ErraiAptExportedTypes exportedTypes) {
+  public QualifierEqualityFactoryAptGenerator(final ExportedTypesFromExportFiles exportedTypes) {
     super(exportedTypes);
     this.qualifierEqualityFactoryGenerator = new QualifierEqualityFactoryGenerator();
   }

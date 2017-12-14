@@ -31,9 +31,9 @@ import org.jboss.errai.codegen.meta.MetaTypeVariable;
 import org.jboss.errai.codegen.meta.MetaWildcardType;
 import org.jboss.errai.codegen.test.model.ClassExtendingAnnotatedSuperClass;
 import org.jboss.errai.codegen.test.model.ClassExtendingClassExtendingInheritedAnnotatedSuperClass;
+import org.jboss.errai.codegen.test.model.ClassExtendingInheritedAnnotatedSuperClass;
 import org.jboss.errai.codegen.test.model.ClassImplementingAnnotatedInterface;
 import org.jboss.errai.codegen.test.model.ClassImplementingInheritedAnnotatedInterface;
-import org.jboss.errai.codegen.test.model.ClassExtendingInheritedAnnotatedSuperClass;
 import org.jboss.errai.codegen.test.model.ClassWithAnnotations;
 import org.jboss.errai.codegen.test.model.ClassWithArrayGenerics;
 import org.jboss.errai.codegen.test.model.ClassWithGenericCollections;
@@ -63,11 +63,14 @@ import org.junit.Test;
 import org.mvel2.util.NullType;
 
 import java.io.Serializable;
+import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.util.Collections.singleton;
 import static java.util.Collections.sort;
@@ -486,8 +489,47 @@ public abstract class AbstractMetaClassTest {
 
     assertEquals(Child.class.getSimpleName(), child.getName());
     assertEquals(Child.class.getName(), child.getFullyQualifiedName());
-    assertEquals(Child.class.getName(), child.getCanonicalName());
+    assertEquals(Child.class.getCanonicalName(), child.getCanonicalName());
     assertEquals("L" + Child.class.getName().replace('.', '/') + ";", child.getInternalName());
+  }
+
+
+
+  @Test
+  public void testNamingMethodsOfArrayPrimitiveClasses() throws Exception {
+    final List<Class<?>> classes = Arrays.asList(String[].class, Enum[].class, Class[].class, Annotation[].class,
+            byte[].class, short[].class, int[].class, long[].class, float[].class, double[].class, char[].class,
+            boolean[].class);
+
+    for (final Class<?> c : classes) {
+      final MetaClass metaClass = getMetaClass(c);
+      assertEquals(c.getSimpleName(), metaClass.getName());
+      assertEquals(c.getName(), metaClass.getFullyQualifiedName());
+      assertEquals(c.getCanonicalName(), metaClass.getCanonicalName());
+      assertEquals(c.getName().replace('.', '/'), metaClass.getInternalName());
+    }
+  }
+
+  @Test
+  public void testNamingMethodsOfArrayMultidimensionalPrimitiveClasses() throws Exception {
+    final Class<char[][][][][][][][]> charArrayClass = char[][][][][][][][].class;
+    final MetaClass charArrayMetaClass = getMetaClass(charArrayClass);
+
+    assertEquals(charArrayClass.getSimpleName(), charArrayMetaClass.getName());
+    assertEquals(charArrayClass.getName(), charArrayMetaClass.getFullyQualifiedName());
+    assertEquals(charArrayClass.getCanonicalName(), charArrayMetaClass.getCanonicalName());
+    assertEquals(charArrayClass.getName().replace('.', '/'), charArrayMetaClass.getInternalName());
+  }
+
+  @Test
+  public void testNamingMethodsOfMultidimensionalArrayClass() throws Exception {
+    final Class<String[][][][][][][][]> clazz = String[][][][][][][][].class;
+    final MetaClass metaClass = getMetaClass(clazz);
+
+    assertEquals(clazz.getSimpleName(), metaClass.getName());
+    assertEquals(clazz.getName(), metaClass.getFullyQualifiedName());
+    assertEquals(clazz.getCanonicalName(), metaClass.getCanonicalName());
+    assertEquals(clazz.getName().replace('.', '/'), metaClass.getInternalName());
   }
 
   @Test

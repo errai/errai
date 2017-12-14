@@ -67,7 +67,7 @@ public final class APTClassUtil {
     APTClassUtil.elements = elements;
   }
 
-  static MetaType fromTypeMirror(final TypeMirror mirror) {
+  public static MetaType fromTypeMirror(final TypeMirror mirror) {
     switch (mirror.getKind()) {
     case BOOLEAN:
     case BYTE:

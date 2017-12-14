@@ -16,6 +16,8 @@
 
 package org.jboss.errai.common.apt;
 
+import org.jboss.errai.common.apt.generator.AnnotatedSourceElementsFinder;
+
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import java.lang.annotation.Annotation;
@@ -37,11 +39,6 @@ public class TestAnnotatedSourceElementsFinder implements AnnotatedSourceElement
 
   @Override
   public Set<? extends Element> findSourceElementsAnnotatedWith(final TypeElement typeElement) {
-    return elements;
-  }
-
-  @Override
-  public Set<? extends Element> findSourceElementsAnnotatedWith(final Class<? extends Annotation> annotationClass) {
     return elements;
   }
 }

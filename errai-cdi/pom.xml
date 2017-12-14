@@ -90,6 +90,12 @@
           <plugin>
             <artifactId>maven-failsafe-plugin</artifactId>
             <configuration>
+
+              <excludes>
+                <exclude>**/org/jboss/errai/cdi/async/test/**/*Test.java</exclude>
+                <exclude>**/org/jboss/errai/cdi/async/test/**/*Tests.java</exclude>
+              </excludes>
+
               <failIfNoTests>false</failIfNoTests>
               <trimStackTrace>false</trimStackTrace>
               <!-- DO NOT REMOVE THE errai.ioc.experimental.infer_dependent_by_reachability flag or the testsuite WILL fail. -->

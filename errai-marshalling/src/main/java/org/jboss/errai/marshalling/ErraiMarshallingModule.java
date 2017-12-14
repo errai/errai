@@ -22,6 +22,6 @@ import org.jboss.errai.common.configuration.ErraiModule;
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
-@ErraiModule(serializableTypes = { PageRequest.class })
-public class ErraiMarshallingModule {
+@ErraiModule(serializableTypes = { PageRequest.class }, excludes = { "apt.server.*" })
+public class ErraiMarshallingModule{
 }

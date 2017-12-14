@@ -19,6 +19,7 @@ package org.jboss.errai.common.apt.configuration;
 import com.google.common.collect.ImmutableMap;
 import org.jboss.errai.codegen.apt.test.ErraiAptTest;
 import org.jboss.errai.codegen.meta.MetaAnnotation;
+import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.common.apt.configuration.ErraiTestCustomModule1.IocWhitelisted1;
 import org.jboss.errai.common.apt.configuration.ErraiTestCustomModule1.NonBindable1;
 import org.jboss.errai.common.apt.configuration.ErraiTestCustomModule2.IocAlternative2;
@@ -33,6 +34,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import static java.util.Collections.singleton;
 import static org.jboss.errai.common.apt.configuration.ErraiTestCustomModule1.Bindable1;
 import static org.jboss.errai.common.apt.configuration.ErraiTestCustomModule1.IocAlternative1;
 import static org.jboss.errai.common.apt.configuration.ErraiTestCustomModule1.IocBlacklisted1;
@@ -51,8 +53,8 @@ public class AptErraiModulesConfigurationTest extends ErraiAptTest {
 
   @Test
   public void testGetAllPropertiesWithDefaultValues() {
-    final Set<MetaAnnotation> modules = new HashSet<>(aptClass(ErraiDefaultTestModule.class).getAnnotations());
-    final AptErraiModulesConfiguration config = new AptErraiModulesConfiguration(modules);
+    final AptErraiModulesConfiguration config = new AptErraiModulesConfiguration(
+            singleton(aptClass(ErraiDefaultTestModule.class)));
 
     assertTrue(config.getBindableTypes().isEmpty());
     assertTrue(config.getNonBindableTypes().isEmpty());
@@ -66,8 +68,8 @@ public class AptErraiModulesConfigurationTest extends ErraiAptTest {
 
   @Test
   public void testGetAllPropertiesWithCustomValues() {
-    final Set<MetaAnnotation> modules = new HashSet<>(aptClass(ErraiTestCustomModule1.class).getAnnotations());
-    final AptErraiModulesConfiguration config = new AptErraiModulesConfiguration(modules);
+    final AptErraiModulesConfiguration config = new AptErraiModulesConfiguration(
+            singleton(aptClass(ErraiTestCustomModule1.class)));
 
     assertContainsOnly(config.getBindableTypes(), aptClass(Bindable1.class));
     assertContainsOnly(config.getNonBindableTypes(), aptClass(NonBindable1.class));
@@ -83,9 +85,9 @@ public class AptErraiModulesConfigurationTest extends ErraiAptTest {
 
   @Test
   public void testGetAllPropertiesComposedCustomValues() {
-    final Set<MetaAnnotation> modules = new HashSet<>();
-    modules.addAll(aptClass(ErraiTestCustomModule1.class).getAnnotations());
-    modules.addAll(aptClass(ErraiTestCustomModule2.class).getAnnotations());
+    final Set<MetaClass> modules = new HashSet<>();
+    modules.add(aptClass(ErraiTestCustomModule1.class));
+    modules.add(aptClass(ErraiTestCustomModule2.class));
 
     final AptErraiModulesConfiguration config = new AptErraiModulesConfiguration(modules);
 

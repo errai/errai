@@ -16,29 +16,30 @@
 
 package org.jboss.errai.ui.apt.export;
 
-import org.jboss.errai.common.apt.generator.AbstractErraiModuleExportFileGenerator;
+import org.jboss.errai.common.apt.generator.AbstractExportFileGenerator;
 
 import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 
-import static org.jboss.errai.ui.apt.export.SupportedAnnotationTypes.STYLE_BINDING;
-import static org.jboss.errai.ui.apt.export.SupportedAnnotationTypes.TEMPLATED;
+import static org.jboss.errai.ui.apt.export.ErraiUiExportFileGenerator.SupportedAnnotationTypes.STYLE_BINDING;
+import static org.jboss.errai.ui.apt.export.ErraiUiExportFileGenerator.SupportedAnnotationTypes.TEMPLATED;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 @SupportedAnnotationTypes({ TEMPLATED, STYLE_BINDING })
-public class ErraiUiExportFileGenerator extends AbstractErraiModuleExportFileGenerator {
+public class ErraiUiExportFileGenerator extends AbstractExportFileGenerator {
 
   @Override
   protected String getCamelCaseErraiModuleName() {
     return "ui";
   }
 
-  @Override
-  protected Class<?> getExportingStrategiesClass() {
-    return ErraiUiExportingStrategies.class;
+  interface SupportedAnnotationTypes {
+
+    String TEMPLATED = "org.jboss.errai.ui.shared.api.annotations.Templated";
+    String STYLE_BINDING = "org.jboss.errai.ui.shared.api.annotations.style.StyleBinding";
   }
 }

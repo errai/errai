@@ -38,11 +38,7 @@ public class AptErraiConfiguration implements ErraiConfiguration {
           final MetaClassFinder metaClassFinder) {
     
     this.app = erraiAppConfiguration;
-    this.modules = new AptErraiModulesConfiguration(metaClassFinder.findAnnotatedWith(ErraiModule.class)
-            .stream()
-            .map(m -> m.getAnnotation(ErraiModule.class))
-            .map(Optional::get)
-            .collect(toSet()));
+    this.modules = new AptErraiModulesConfiguration(metaClassFinder.findAnnotatedWith(ErraiModule.class));
   }
 
   @Override

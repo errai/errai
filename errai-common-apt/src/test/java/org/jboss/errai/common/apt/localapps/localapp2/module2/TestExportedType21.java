@@ -16,11 +16,11 @@
 
 package org.jboss.errai.common.apt.localapps.localapp2.module2;
 
-import org.jboss.errai.common.apt.ErraiAptExportedTypesTestAnnotation;
+import org.jboss.errai.common.apt.exportfile.ExportedTypesFromExportFilesTestAnnotation;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
-@ErraiAptExportedTypesTestAnnotation
+@ExportedTypesFromExportFilesTestAnnotation
 public class TestExportedType21 {
 }

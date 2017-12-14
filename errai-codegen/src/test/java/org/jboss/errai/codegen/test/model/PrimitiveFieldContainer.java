@@ -34,6 +34,7 @@ public class PrimitiveFieldContainer {
   long longField;
   float floatField;
   double doubleField;
+  boolean booleanField;
 
   void voidMethod() {}
 }

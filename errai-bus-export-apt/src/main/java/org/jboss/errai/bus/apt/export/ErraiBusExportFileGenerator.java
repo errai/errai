@@ -16,31 +16,33 @@
 
 package org.jboss.errai.bus.apt.export;
 
-import org.jboss.errai.common.apt.generator.AbstractErraiModuleExportFileGenerator;
+import org.jboss.errai.common.apt.generator.AbstractExportFileGenerator;
 
 import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 
-import static org.jboss.errai.bus.apt.export.SupportedAnnotationTypes.FEATURE_INTERCEPTOR;
-import static org.jboss.errai.bus.apt.export.SupportedAnnotationTypes.INTERCEPTED_CALL;
-import static org.jboss.errai.bus.apt.export.SupportedAnnotationTypes.INTERCEPTS_REMOTE_CALL;
-import static org.jboss.errai.bus.apt.export.SupportedAnnotationTypes.REMOTE;
+import static org.jboss.errai.bus.apt.export.ErraiBusExportFileGenerator.SupportedAnnotationTypes.FEATURE_INTERCEPTOR;
+import static org.jboss.errai.bus.apt.export.ErraiBusExportFileGenerator.SupportedAnnotationTypes.INTERCEPTED_CALL;
+import static org.jboss.errai.bus.apt.export.ErraiBusExportFileGenerator.SupportedAnnotationTypes.INTERCEPTS_REMOTE_CALL;
+import static org.jboss.errai.bus.apt.export.ErraiBusExportFileGenerator.SupportedAnnotationTypes.REMOTE;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 @SupportedAnnotationTypes({ REMOTE, INTERCEPTED_CALL, FEATURE_INTERCEPTOR, INTERCEPTS_REMOTE_CALL })
-public class ErraiBusExportFileGenerator extends AbstractErraiModuleExportFileGenerator {
+public class ErraiBusExportFileGenerator extends AbstractExportFileGenerator {
 
   @Override
   protected String getCamelCaseErraiModuleName() {
     return "bus";
   }
 
-  @Override
-  protected Class<?> getExportingStrategiesClass() {
-    return ErraiBusExportingStrategies.class;
+  interface SupportedAnnotationTypes {
+    String REMOTE = "org.jboss.errai.bus.server.annotations.Remote";
+    String FEATURE_INTERCEPTOR = "org.jboss.errai.common.client.api.interceptor.FeatureInterceptor";
+    String INTERCEPTED_CALL = "org.jboss.errai.common.client.api.interceptor.InterceptedCall";
+    String INTERCEPTS_REMOTE_CALL = "org.jboss.errai.common.client.api.interceptor.InterceptsRemoteCall";
   }
 }

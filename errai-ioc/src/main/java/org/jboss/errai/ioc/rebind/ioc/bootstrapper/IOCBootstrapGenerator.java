@@ -28,7 +28,7 @@ import org.jboss.errai.codegen.meta.MetaEnum;
 import org.jboss.errai.codegen.util.Implementations;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.config.MetaClassFinder;
-import org.jboss.errai.common.apt.ResourceFilesFinder;
+import org.jboss.errai.common.apt.generator.app.ResourceFilesFinder;
 import org.jboss.errai.common.client.api.annotations.IOCProducer;
 import org.jboss.errai.common.server.api.ErraiBootstrapFailure;
 import org.jboss.errai.config.ErraiConfiguration;

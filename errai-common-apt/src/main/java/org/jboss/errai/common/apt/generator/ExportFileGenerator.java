@@ -17,9 +17,7 @@
 package org.jboss.errai.common.apt.generator;
 
 import org.jboss.errai.codegen.meta.MetaClass;
-import org.jboss.errai.codegen.meta.impl.apt.APTClass;
 import org.jboss.errai.codegen.meta.impl.apt.APTClassUtil;
-import org.jboss.errai.common.apt.AnnotatedSourceElementsFinder;
 import org.jboss.errai.common.apt.exportfile.ExportFile;
 import org.jboss.errai.common.apt.module.ErraiModule;
 import org.jboss.errai.common.apt.strategies.ExportingStrategies;
@@ -31,42 +29,44 @@ import javax.tools.JavaFileObject;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Set;
-import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toSet;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
-public class ExportFileGenerator {
+class ExportFileGenerator {
 
   private final String camelCaseErraiModuleName;
-  private final Set<? extends TypeElement> exportableAnnotations;
   private final AnnotatedSourceElementsFinder annotatedSourceElementsFinder;
   private final ExportingStrategies exportingStrategies;
+  private final Set<MetaClass> erraiModuleMetaClasses;
+  private final Filer filer;
+  private final ExportedTypesFromSource exportedTypes;
 
-  public ExportFileGenerator(final String camelCaseErraiModuleName,
-          final Set<? extends TypeElement> exportableAnnotations,
+  ExportFileGenerator(final String camelCaseErraiModuleName,
           final AnnotatedSourceElementsFinder annotatedSourceElementsFinder,
-          final ExportingStrategies exportingStrategies) {
+          final ExportingStrategies exportingStrategies,
+          final Set<MetaClass> erraiModuleMetaClasses,
+          final Filer filer,
+          final ExportedTypesFromSource exportedTypes) {
 
     this.camelCaseErraiModuleName = camelCaseErraiModuleName;
-    this.exportableAnnotations = exportableAnnotations;
     this.annotatedSourceElementsFinder = annotatedSourceElementsFinder;
     this.exportingStrategies = exportingStrategies;
+    this.erraiModuleMetaClasses = erraiModuleMetaClasses;
+    this.filer = filer;
+    this.exportedTypes = exportedTypes;
   }
 
-  void generateAndSaveExportFiles(final Filer filer) {
-    createExportFiles().forEach(exportFile -> generateSourceAndSave(exportFile, filer));
+  void generateAndSaveExportFiles(final Set<TypeElement> exportableAnnotations) {
+    createExportFile(exportableAnnotations).forEach(this::generateSourceAndSave);
   }
 
-  public Set<ExportFile> createExportFiles() {
-    return annotatedSourceElementsFinder.findSourceElementsAnnotatedWith(
-            org.jboss.errai.common.configuration.ErraiModule.class)
-            .stream()
-            .map(s -> new APTClass(s.asType()))
+  Set<ExportFile> createExportFile(final Set<? extends TypeElement> exportableAnnotations) {
+    return erraiModuleMetaClasses.stream()
             .map(this::newModule)
-            .flatMap(this::createExportFiles)
+            .flatMap(erraiModule -> erraiModule.createExportFiles(exportableAnnotations))
             .collect(toSet());
   }
 
@@ -74,11 +74,7 @@ public class ExportFileGenerator {
     return new ErraiModule(camelCaseErraiModuleName, metaClass, annotatedSourceElementsFinder, exportingStrategies);
   }
 
-  private Stream<ExportFile> createExportFiles(final ErraiModule erraiModule) {
-    return erraiModule.createExportFiles(exportableAnnotations);
-  }
-
-  private void generateSourceAndSave(final ExportFile exportFile, final Filer filer) {
+  private void generateSourceAndSave(final ExportFile exportFile) {
     try {
 
       final Element[] originatingElements = exportFile.exportedTypes()

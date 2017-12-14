@@ -101,7 +101,8 @@ public class ElementProviderExtension implements IOCExtensionConfigurator {
   }
 
   private static ExactTypeInjectableProvider exactTypeInjectableProvider(final InjectionContext injectionContext,
-          final MetaClass type, final String tagName) {
+          final MetaClass type,
+          final String tagName) {
 
     final Qualifier qualifier = injectionContext.getQualifierFactory().forSource(new HasNamedAnnotation(tagName));
     final InjectableHandle handle = new InjectableHandle(type, qualifier);
@@ -224,12 +225,7 @@ public class ElementProviderExtension implements IOCExtensionConfigurator {
     };
   }
 
-  private static String getClassNames(final MetaClass type){
-    String result = "";
-    final Optional<MetaAnnotation> classNames = type.getAnnotation(ClassNames.class);
-    if (classNames.isPresent()) {
-      result = String.join(" ", classNames.get().<String>value());
-    }
-    return result;
+  private static String getClassNames(final MetaClass type) {
+    return type.getAnnotation(ClassNames.class).map(a -> String.join(" ", a.valueAsArray(String[].class))).orElse("");
   }
 }

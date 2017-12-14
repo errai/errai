@@ -19,7 +19,7 @@ package org.jboss.errai.ioc.apt;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.util.GWTPrivateMemberAccessor;
 import org.jboss.errai.codegen.util.PrivateAccessUtil;
-import org.jboss.errai.common.apt.ErraiAptExportedTypes;
+import org.jboss.errai.common.apt.exportfile.ExportedTypesFromExportFiles;
 import org.jboss.errai.common.apt.ErraiAptGenerators;
 import org.jboss.errai.common.apt.generator.ErraiAptGeneratedSourceFile;
 import org.jboss.errai.common.configuration.ErraiGenerator;
@@ -51,7 +51,7 @@ public class FactoriesAptGenerator extends ErraiAptGenerators.MultipleFiles {
   private final FactoryGenerator factoryGenerator;
 
   // IMPORTANT: Do not remove. ErraiAppAptGenerator depends on this constructor
-  public FactoriesAptGenerator(final ErraiAptExportedTypes exportedTypes) {
+  public FactoriesAptGenerator(final ExportedTypesFromExportFiles exportedTypes) {
     super(exportedTypes);
     this.factoryGenerator = new FactoryGenerator();
     FactoryGenerator.reset(); // Needs to reset previously saved static values for next @ErraiApp that will generate code

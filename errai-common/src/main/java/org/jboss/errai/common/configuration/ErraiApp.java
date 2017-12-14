@@ -19,6 +19,8 @@ package org.jboss.errai.common.configuration;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
+import static org.jboss.errai.common.configuration.Target.GWT;
+
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
@@ -26,6 +28,8 @@ import java.lang.annotation.RetentionPolicy;
 public @interface ErraiApp {
 
   String gwtModuleName();
+
+  Target[] targets() default { GWT };
 
   Class<?>[] modules() default {};
 
@@ -66,7 +70,8 @@ public @interface ErraiApp {
     String JS_INTEROP_SUPPORT_ENABLED = "jsInteropSupportEnabled";
     String DYNAMIC_VALIDATION_ENABLED = "dynamicValidationEnabled";
     String CUSTOM_PROPERTIES = "customProperties";
-    String MODULES  = "modules";
-    String GWT_MODULE_NAME  = "gwtModuleName";
+    String MODULES = "modules";
+    String GWT_MODULE_NAME = "gwtModuleName";
+    String TARGETS = "targets";
   }
 }

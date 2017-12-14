@@ -2,6 +2,8 @@
 
 Errai is a Java/GWT web framework for building rich-client web applications. It provides declarative, annotation-driven features that greatly ease development of large-scale applications, including:
 
+> NOTE: See the `KNOWN_PROBLEMS.md` file for a list of issues that need to be fixed before Errai 5 is released.
+
 * [CDI-like dependency injection](http://docs.jboss.org/errai/latest/errai/reference/html_single/#sid-5931402)
 * [A bidirectional message bus](http://docs.jboss.org/errai/latest/errai/reference/html_single/#sid-5931263)
 * [Remote Procedure Calls (via the message bus or HTTP)](http://docs.jboss.org/errai/latest/errai/reference/html_single/#sid-5931313)

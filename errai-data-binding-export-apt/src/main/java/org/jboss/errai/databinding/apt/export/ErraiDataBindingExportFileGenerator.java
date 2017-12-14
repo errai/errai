@@ -16,29 +16,30 @@
 
 package org.jboss.errai.databinding.apt.export;
 
-import org.jboss.errai.common.apt.generator.AbstractErraiModuleExportFileGenerator;
+import org.jboss.errai.common.apt.generator.AbstractExportFileGenerator;
 
 import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 
-import static org.jboss.errai.databinding.apt.export.SupportedAnnotationTypes.BINDABLE;
-import static org.jboss.errai.databinding.apt.export.SupportedAnnotationTypes.DEFAULT_CONVERTER;
+import static org.jboss.errai.databinding.apt.export.ErraiDataBindingExportFileGenerator.SupportedAnnotationTypes.BINDABLE;
+import static org.jboss.errai.databinding.apt.export.ErraiDataBindingExportFileGenerator.SupportedAnnotationTypes.DEFAULT_CONVERTER;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 @SupportedAnnotationTypes({ BINDABLE, DEFAULT_CONVERTER })
-public class ErraiDataBindingExportFileGenerator extends AbstractErraiModuleExportFileGenerator {
+public class ErraiDataBindingExportFileGenerator extends AbstractExportFileGenerator {
 
   @Override
   protected String getCamelCaseErraiModuleName() {
     return "dataBinding";
   }
 
-  @Override
-  protected Class<?> getExportingStrategiesClass() {
-    return ErraiDataBindingExportingStrategies.class;
+  interface SupportedAnnotationTypes {
+    String DEFAULT_CONVERTER = "org.jboss.errai.databinding.client.api.DefaultConverter";
+    String BINDABLE = "org.jboss.errai.databinding.client.api.Bindable";
   }
+
 }

@@ -16,8 +16,17 @@
 
 package org.jboss.errai.common.configuration;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
+import static org.jboss.errai.common.configuration.Target.GWT;
+
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
+@Retention(RetentionPolicy.RUNTIME)
 public @interface ErraiGenerator {
+
+  Target[] targets() default { GWT };
+
 }

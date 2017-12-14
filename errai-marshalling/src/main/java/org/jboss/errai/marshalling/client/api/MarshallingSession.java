@@ -20,8 +20,6 @@ package org.jboss.errai.marshalling.client.api;
  * @author Mike Brock <cbrock@redhat.com>
  */
 public interface MarshallingSession {
-  public MappingContext getMappingContext();
-
   /**
    * Returns a marshaller for the provided type.
    *
@@ -104,4 +102,6 @@ public interface MarshallingSession {
   public void setAssumedMapValueType(String assumedMapValueType);
 
   public void resetAssumedTypes();
+
+  boolean hasMarshaller(String name);
 }

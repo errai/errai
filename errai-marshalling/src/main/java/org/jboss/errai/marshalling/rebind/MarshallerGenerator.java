@@ -28,8 +28,9 @@ import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.impl.AbstractMetaClass;
 import org.jboss.errai.common.metadata.RebindUtils;
-import org.jboss.errai.config.propertiesfile.ErraiAppPropertiesConfiguration;
 import org.jboss.errai.config.ErraiConfiguration;
+import org.jboss.errai.config.MetaClassFinder;
+import org.jboss.errai.config.propertiesfile.ErraiAppPropertiesConfiguration;
 import org.jboss.errai.marshalling.client.api.MarshallerFramework;
 import org.jboss.errai.marshalling.rebind.api.GeneratorMappingContext;
 import org.jboss.errai.marshalling.rebind.api.GeneratorMappingContextFactory;
@@ -88,7 +89,8 @@ public class MarshallerGenerator extends IncrementalGenerator {
         context.commit(logger, printWriter);
       } else {
         log.debug("Generating marshaller for {}", fullyQualifiedTypeName);
-        final String generatedSource = generateMarshaller(context, type, erraiConfiguration);
+        final String generatedSource = generateMarshaller(context, type, erraiConfiguration,
+                MarshallersGenerator.getMetaClassFinder());
         printWriter.append(generatedSource);
         RebindUtils.writeStringToJavaSourceFileInErraiCacheDir(PACKAGE_NAME, className, generatedSource);
         context.commit(logger, printWriter);
@@ -109,7 +111,8 @@ public class MarshallerGenerator extends IncrementalGenerator {
 
   public String generateMarshaller(final GeneratorContext context,
           final MetaClass type,
-          final ErraiConfiguration erraiConfiguration) {
+          final ErraiConfiguration erraiConfiguration,
+          final MetaClassFinder metaClassFinder) {
 
     final String className = MarshallerGeneratorFactory.getMarshallerImplClassName(type, true, erraiConfiguration);
     final String marshallerTypeName = getMarshallerTypeName(className);
@@ -118,7 +121,7 @@ public class MarshallerGenerator extends IncrementalGenerator {
     final MappingStrategy strategy = MappingStrategyFactory.createStrategy(true, generatorMappingContext, type, erraiConfiguration);
 
     if (type.isArray()) {
-      return MarshallerGeneratorFactory.getFor(context, target, erraiConfiguration)
+      return MarshallerGeneratorFactory.getFor(context, target, erraiConfiguration, metaClassFinder)
               .generateArrayMarshaller(type, marshallerTypeName, true)
               .toJavaString();
     }

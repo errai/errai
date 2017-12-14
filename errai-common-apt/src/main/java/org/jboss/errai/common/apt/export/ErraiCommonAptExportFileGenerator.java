@@ -16,30 +16,34 @@
 
 package org.jboss.errai.common.apt.export;
 
-import org.jboss.errai.common.apt.generator.AbstractErraiModuleExportFileGenerator;
+import org.jboss.errai.common.apt.generator.AbstractExportFileGenerator;
 
 import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 
-import static org.jboss.errai.common.apt.export.SupportedAnnotationTypes.ERRAI_APP;
-import static org.jboss.errai.common.apt.export.SupportedAnnotationTypes.ERRAI_GENERATOR;
-import static org.jboss.errai.common.apt.export.SupportedAnnotationTypes.ERRAI_MODULE;
+import static org.jboss.errai.common.apt.export.ErraiCommonAptExportFileGenerator.SupportedAnnotationTypes.ERRAI_APP;
+import static org.jboss.errai.common.apt.export.ErraiCommonAptExportFileGenerator.SupportedAnnotationTypes.ERRAI_GENERATOR;
+import static org.jboss.errai.common.apt.export.ErraiCommonAptExportFileGenerator.SupportedAnnotationTypes.ERRAI_MODULE;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 @SupportedAnnotationTypes({ ERRAI_APP, ERRAI_MODULE, ERRAI_GENERATOR })
-public class ErraiCommonAptExportFileGenerator extends AbstractErraiModuleExportFileGenerator {
+public class ErraiCommonAptExportFileGenerator extends AbstractExportFileGenerator {
 
   @Override
-  public String getCamelCaseErraiModuleName() {
+  protected String getCamelCaseErraiModuleName() {
     return "errai";
   }
 
-  @Override
-  protected Class<?> getExportingStrategiesClass() {
-    return ErraiCommonAptExportingStrategies.class;
+  interface SupportedAnnotationTypes {
+
+    String ERRAI_GENERATOR = "org.jboss.errai.common.configuration.ErraiGenerator";
+    String ERRAI_MODULE = "org.jboss.errai.common.configuration.ErraiModule";
+    String ERRAI_APP = "org.jboss.errai.common.configuration.ErraiApp";
   }
+
 }
+

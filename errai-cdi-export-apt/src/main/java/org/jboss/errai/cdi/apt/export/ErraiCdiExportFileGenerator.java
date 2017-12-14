@@ -16,28 +16,29 @@
 
 package org.jboss.errai.cdi.apt.export;
 
-import org.jboss.errai.common.apt.generator.AbstractErraiModuleExportFileGenerator;
+import org.jboss.errai.common.apt.generator.AbstractExportFileGenerator;
 
 import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 
-import static org.jboss.errai.cdi.apt.export.SupportedAnnotationTypes.OBSERVES;
+import static org.jboss.errai.cdi.apt.export.ErraiCdiExportFileGenerator.SupportedAnnotationTypes.OBSERVES;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 @SupportedAnnotationTypes({ OBSERVES })
-public class ErraiCdiExportFileGenerator extends AbstractErraiModuleExportFileGenerator {
+public class ErraiCdiExportFileGenerator extends AbstractExportFileGenerator {
 
   @Override
   protected String getCamelCaseErraiModuleName() {
     return "cdi";
   }
 
-  @Override
-  protected Class<?> getExportingStrategiesClass() {
-    return ErraiCdiExportingStrategies.class;
+  interface SupportedAnnotationTypes {
+
+    String OBSERVES = "javax.enterprise.event.Observes";
   }
+
 }

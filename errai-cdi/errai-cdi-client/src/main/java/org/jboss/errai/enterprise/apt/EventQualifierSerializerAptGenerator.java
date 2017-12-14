@@ -18,7 +18,7 @@ package org.jboss.errai.enterprise.apt;
 
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
-import org.jboss.errai.common.apt.ErraiAptExportedTypes;
+import org.jboss.errai.common.apt.exportfile.ExportedTypesFromExportFiles;
 import org.jboss.errai.common.apt.ErraiAptGenerators;
 import org.jboss.errai.common.apt.generator.ErraiAptGeneratedSourceFile;
 import org.jboss.errai.common.configuration.ErraiGenerator;
@@ -33,11 +33,13 @@ import java.util.Set;
 
 import static java.util.Collections.singleton;
 import static org.jboss.errai.common.apt.generator.ErraiAptGeneratedSourceFile.Type.SHARED;
+import static org.jboss.errai.common.configuration.Target.GWT;
+import static org.jboss.errai.common.configuration.Target.JAVA;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>
  */
-@ErraiGenerator
+@ErraiGenerator(targets = { GWT, JAVA})
 public class EventQualifierSerializerAptGenerator extends ErraiAptGenerators.SingleFile {
 
   public static final Logger logger = LoggerFactory.getLogger(EventQualifierSerializerAptGenerator.class);
@@ -45,7 +47,7 @@ public class EventQualifierSerializerAptGenerator extends ErraiAptGenerators.Sin
   private final EventQualifierSerializerGenerator eventQualifierSerializerGenerator;
 
   // IMPORTANT: Do not remove. ErraiAppAptGenerator depends on this constructor
-  public EventQualifierSerializerAptGenerator(final ErraiAptExportedTypes exportedTypes) {
+  public EventQualifierSerializerAptGenerator(final ExportedTypesFromExportFiles exportedTypes) {
     super(exportedTypes);
     this.eventQualifierSerializerGenerator = new EventQualifierSerializerGenerator();
   }
