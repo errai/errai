@@ -24,6 +24,7 @@ import org.jboss.errai.reflections.util.ConfigurationBuilder;
 import org.jboss.errai.reflections.util.Utils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
@@ -73,25 +74,27 @@ public class XmlSerializer implements Serializer {
       Document document = dBuilder.parse(inputStream);
       NodeList indexNodeList = document.getDocumentElement().getChildNodes();
       for (int i = 0; i < indexNodeList.getLength(); i++) {
-        Element indexElement = (Element) indexNodeList.item(i);
-        NodeList entryNodeList = indexElement.getElementsByTagName(ENTRY_TAG);
-        for (int j = 0; j < entryNodeList.getLength(); j++) {
-              Element entryElement = (Element) entryNodeList.item(j);
-              Element keyElement = (Element) entryElement.getElementsByTagName(KEY_TAG).item(0);
-              Element valuesElement = (Element) entryElement.getElementsByTagName(VALUES_TAG).item(0);
-              NodeList valuesNodeList = valuesElement.getElementsByTagName(VALUE_TAG);
-              for(int k=0;k<valuesNodeList.getLength();k++){
-                Element valueElement = (Element) valuesNodeList.item(k);
-                String indexName = indexElement.getTagName();
-                Multimap<String, String> map = reflections.getStore().getStoreMap().get(indexName);
-                if(map==null){
-                  reflections.getStore().getStoreMap().put(indexName,  map = HashMultimap.create());
-                }
-                map.put(keyElement.getTextContent(), valueElement.getTextContent());
+        Node item = indexNodeList.item(i);
+        if (item instanceof Element) {
+          Element indexElement = (Element) item;
+          NodeList entryNodeList = indexElement.getElementsByTagName(ENTRY_TAG);
+          for (int j = 0; j < entryNodeList.getLength(); j++) {
+            Element entryElement = (Element) entryNodeList.item(j);
+            Element keyElement = (Element) entryElement.getElementsByTagName(KEY_TAG).item(0);
+            Element valuesElement = (Element) entryElement.getElementsByTagName(VALUES_TAG).item(0);
+            NodeList valuesNodeList = valuesElement.getElementsByTagName(VALUE_TAG);
+            for (int k = 0; k < valuesNodeList.getLength(); k++) {
+              Element valueElement = (Element) valuesNodeList.item(k);
+              String indexName = indexElement.getTagName();
+              Multimap<String, String> map = reflections.getStore().getStoreMap().get(indexName);
+              if (map == null) {
+                reflections.getStore().getStoreMap().put(indexName, map = HashMultimap.create());
               }
+              map.put(keyElement.getTextContent(), valueElement.getTextContent());
+            }
+          }
         }
       }
-
       return reflections;
     }catch(ParserConfigurationException|IOException|SAXException e){
       throw new ReflectionsException(e);
