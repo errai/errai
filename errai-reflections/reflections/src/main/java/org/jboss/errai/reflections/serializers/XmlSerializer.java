@@ -18,18 +18,25 @@ package org.jboss.errai.reflections.serializers;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import org.dom4j.Document;
-import org.dom4j.DocumentException;
-import org.dom4j.DocumentFactory;
-import org.dom4j.Element;
-import org.dom4j.io.OutputFormat;
-import org.dom4j.io.SAXReader;
-import org.dom4j.io.XMLWriter;
 import org.jboss.errai.reflections.Reflections;
 import org.jboss.errai.reflections.ReflectionsException;
 import org.jboss.errai.reflections.util.ConfigurationBuilder;
 import org.jboss.errai.reflections.util.Utils;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 import java.io.*;
 import java.util.Map;
 
@@ -52,87 +59,112 @@ import java.util.Map;
  */
 public class XmlSerializer implements Serializer {
 
+    private static final String  REFLECTIONS_TAG = "Reflections";
+    private static final String  ENTRY_TAG = "entry";
+    private static final String  KEY_TAG = "key";
+    private static final String  VALUES_TAG = "values";
+    private static final String  VALUE_TAG = "value";
+
+  @Override
   public Reflections read(InputStream inputStream) {
-    Reflections reflections = new Reflections(new ConfigurationBuilder()) {
-    };
-
-    Document document;
+    Reflections reflections = new Reflections(new ConfigurationBuilder());
+    DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
     try {
-      document = new SAXReader().read(inputStream);
-    }
-    catch (DocumentException e) {
-      throw new RuntimeException(e);
-    }
-    for (Object e1 : document.getRootElement().elements()) {
-      Element index = (Element) e1;
-      for (Object e2 : index.elements()) {
-        Element entry = (Element) e2;
-        Element key = entry.element("key");
-        Element values = entry.element("values");
-        for (Object o3 : values.elements()) {
-          Element value = (Element) o3;
-          Multimap<String, String> stringStringMultimap = reflections.getStore().getStoreMap().get(index.getName());
-          if (stringStringMultimap == null) {
-            reflections.getStore().getStoreMap().put(index.getName(),
-                stringStringMultimap = HashMultimap.<String, String>create());
+      DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+      Document document = dBuilder.parse(inputStream);
+      NodeList indexNodeList = document.getDocumentElement().getChildNodes();
+      for (int i = 0; i < indexNodeList.getLength(); i++) {
+        Node item = indexNodeList.item(i);
+        if (item instanceof Element) {
+          Element indexElement = (Element) item;
+          NodeList entryNodeList = indexElement.getElementsByTagName(ENTRY_TAG);
+          for (int j = 0; j < entryNodeList.getLength(); j++) {
+            Element entryElement = (Element) entryNodeList.item(j);
+            Element keyElement = (Element) entryElement.getElementsByTagName(KEY_TAG).item(0);
+            Element valuesElement = (Element) entryElement.getElementsByTagName(VALUES_TAG).item(0);
+            NodeList valuesNodeList = valuesElement.getElementsByTagName(VALUE_TAG);
+            for (int k = 0; k < valuesNodeList.getLength(); k++) {
+              Element valueElement = (Element) valuesNodeList.item(k);
+              String indexName = indexElement.getTagName();
+              Multimap<String, String> map = reflections.getStore().getStoreMap().get(indexName);
+              if (map == null) {
+                reflections.getStore().getStoreMap().put(indexName, map = HashMultimap.create());
+              }
+              map.put(keyElement.getTextContent(), valueElement.getTextContent());
+            }
           }
-
-          stringStringMultimap.put(key.getText(), value.getText());
         }
       }
+      return reflections;
+    }catch(ParserConfigurationException|IOException|SAXException e){
+      throw new ReflectionsException(e);
     }
 
-    return reflections;
   }
 
+  @Override
   public File save(final Reflections reflections, final String filename) {
     File file = Utils.prepareFile(filename);
-
-    Document document = createDocument(reflections);
-
-    try {
-      XMLWriter xmlWriter = new XMLWriter(new FileOutputStream(file), OutputFormat.createPrettyPrint());
-      xmlWriter.write(document);
-      xmlWriter.close();
+    try(Writer writer = new FileWriter(filename)) {
+      write(reflections,writer);
     }
-    catch (IOException e) {
+    catch (ParserConfigurationException|TransformerException|IOException e) {
       throw new ReflectionsException("could not save to file " + filename, e);
     }
 
     return file;
   }
 
+  @Override
   public String toString(final Reflections reflections) {
-    Document document = createDocument(reflections);
-
-    try {
-      StringWriter writer = new StringWriter();
-      XMLWriter xmlWriter = new XMLWriter(writer, OutputFormat.createPrettyPrint());
-      xmlWriter.write(document);
-      xmlWriter.close();
+    try (StringWriter writer = new StringWriter()){
+      write(reflections,writer);
       return writer.toString();
     }
-    catch (IOException e) {
-      throw new RuntimeException();
+    catch (ParserConfigurationException|TransformerException|IOException e) {
+      throw new ReflectionsException(e);
     }
   }
 
-  private Document createDocument(final Reflections reflections) {
-    final Map<String, Multimap<String, String>> map = reflections.getStore().getStoreMap();
 
-    Document document = DocumentFactory.getInstance().createDocument();
-    Element root = document.addElement("Reflections");
+  private static void write(final Reflections reflections, Writer outputWriter) throws ParserConfigurationException, TransformerException {
+      Document document = createDocument(reflections);
+      TransformerFactory transformerFactory = TransformerFactory.newInstance();
+      Transformer transformer = transformerFactory.newTransformer();
+      transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+      DOMSource source = new DOMSource(document);
+      StreamResult result = new StreamResult(outputWriter);
+      transformer.transform(source, result);
+  }
+
+  private static Document createDocument(final Reflections reflections) throws ParserConfigurationException {
+    final Map<String, Multimap<String, String>> map = reflections.getStore().getStoreMap();
+    DocumentBuilder documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+    Document document = documentBuilder.newDocument();
+    Element reflectionsElement = document.createElement(REFLECTIONS_TAG);
+    document.appendChild(reflectionsElement);
+
     for (String indexName : map.keySet()) {
-      Element indexElement = root.addElement(indexName);
+      Element indexElement = document.createElement(indexName);
+      reflectionsElement.appendChild(indexElement);
+
       for (String key : map.get(indexName).keySet()) {
-        Element entryElement = indexElement.addElement("entry");
-        entryElement.addElement("key").setText(key);
-        Element valuesElement = entryElement.addElement("values");
+        Element entryElement = document.createElement(ENTRY_TAG);
+        indexElement.appendChild(entryElement);
+        Element keyElement = document.createElement(KEY_TAG);
+        keyElement.appendChild(document.createTextNode(key));
+        entryElement.appendChild(keyElement);
+
+        Element valuesElement = document.createElement(VALUES_TAG);
         for (String value : map.get(indexName).get(key)) {
-          valuesElement.addElement("value").setText(value);
+          Element valueElement = document.createElement(VALUE_TAG);
+          valueElement.appendChild(document.createTextNode(value));
+          valuesElement.appendChild(valueElement);
         }
+        entryElement.appendChild(valuesElement);
       }
     }
     return document;
   }
+
 }

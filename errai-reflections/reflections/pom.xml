@@ -33,12 +33,6 @@
       <artifactId>slf4j-api</artifactId>
     </dependency>
 
-    <!-- effectively needed when XmlSerializer is used -->
-    <dependency>
-      <groupId>dom4j</groupId>
-      <artifactId>dom4j</artifactId>
-    </dependency>
-
     <!-- effectively needed when JsonSerializer is used -->
     <dependency>
       <groupId>com.google.code.gson</groupId>
