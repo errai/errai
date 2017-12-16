@@ -17,7 +17,6 @@
 package org.jboss.errai.ui.rebind.chain;
 
 import org.jboss.errai.ui.shared.DomVisit;
-import org.jboss.errai.ui.shared.DomVisitor;
 import org.jboss.errai.ui.shared.chain.Chain;
 import org.jboss.errai.ui.shared.chain.Command;
 import org.jsoup.Jsoup;
@@ -52,12 +51,9 @@ public class TemplateCatalog {
     for (int i = 0; i < document.getChildNodes().getLength(); i++) {
       final Node node = document.getChildNodes().item(i);
       if (node instanceof Element) {
-        DomVisit.visit((Element) node, new DomVisitor() {
-          @Override
-          public boolean visit(Element element) {
-            chain.execute(element);
-            return true;
-          }
+        DomVisit.visit((Element) node, element -> {
+          chain.execute(element);
+          return true;
         });
       }
     }
@@ -86,6 +82,13 @@ public class TemplateCatalog {
     return chain;
   }
 
+    /**
+     * JSoup to Dom converter. Adopted from <a href="https://github.com/apache/stanbol">Apache Stanbol</a>.
+     * @see <a href="https://github.com/apache/stanbol/blob/d1500ffba507dce0e43f228342aad97cae7cb0e3/enhancement-engines/htmlextractor/src/main/java/org/apache/stanbol/enhancer/engines/htmlextractor/impl/DOMBuilder.java">DOMBuilder</a>
+     *
+     * @param jsoupDocument JSoup dom tree
+     * @return xml dom tree
+     */
   private static Document jsoup2DOM(org.jsoup.nodes.Document jsoupDocument) {
 
     try {
@@ -107,6 +110,9 @@ public class TemplateCatalog {
 
   /**
    * The internal helper that copies content from the specified Jsoup <tt>Node</tt> into a W3C {@link Node}.
+   * Adopted from <a href="https://github.com/apache/stanbol">Apache Stanbol</a>.
+   *
+   * @see <a href="https://github.com/apache/stanbol/blob/d1500ffba507dce0e43f228342aad97cae7cb0e3/enhancement-engines/htmlextractor/src/main/java/org/apache/stanbol/enhancer/engines/htmlextractor/impl/DOMBuilder.java">DOMBuilder</a>
    * @param node The Jsoup node containing the content to copy to the specified W3C {@link Node}.
    * @param out The W3C {@link Node} that receives the DOM content.
    */
