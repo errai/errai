@@ -16,7 +16,7 @@
 
 package org.jboss.errai.bus.server.websocket.jsr356.configuration;
 
-import org.apache.commons.lang3.StringUtils;
+
 import org.jboss.errai.bus.server.websocket.jsr356.filter.FilterLookup;
 
 import javax.servlet.http.HttpSession;
@@ -60,7 +60,7 @@ public class ErraiEndpointConfigurator extends ServerEndpointConfig.Configurator
     if (!filterLookuped) {
       HttpSession httpSession = ((HttpSession) handshakeRequest.getHttpSession());
       final String filterNames = httpSession.getServletContext().getInitParameter(FILTER_PARAM_NAME);
-      if (!StringUtils.isEmpty(filterNames)) {
+      if (filterNames!=null && !filterNames.isEmpty() ) {
         final StringTokenizer filterTokenizer = new StringTokenizer(filterNames, ",");
         FilterLookup.getInstance().initFilters(filterTokenizer);
       }
