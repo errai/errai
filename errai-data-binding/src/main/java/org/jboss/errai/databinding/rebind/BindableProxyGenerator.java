@@ -16,6 +16,7 @@
 
 package org.jboss.errai.databinding.rebind;
 
+import static com.google.gwt.core.ext.TreeLogger.Type.*;
 import static org.jboss.errai.codegen.Parameter.finalOf;
 import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
 import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
@@ -35,7 +36,6 @@ import javax.enterprise.util.TypeLiteral;
 
 import org.jboss.errai.codegen.BlockStatement;
 import org.jboss.errai.codegen.Cast;
-import org.jboss.errai.codegen.Context;
 import org.jboss.errai.codegen.DefParameters;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
@@ -47,13 +47,7 @@ import org.jboss.errai.codegen.builder.ContextualStatementBuilder;
 import org.jboss.errai.codegen.builder.ElseBlockBuilder;
 import org.jboss.errai.codegen.builder.impl.ClassBuilder;
 import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
-import org.jboss.errai.codegen.meta.MetaClass;
-import org.jboss.errai.codegen.meta.MetaClassFactory;
-import org.jboss.errai.codegen.meta.MetaMethod;
-import org.jboss.errai.codegen.meta.MetaParameter;
-import org.jboss.errai.codegen.meta.MetaParameterizedType;
-import org.jboss.errai.codegen.meta.MetaType;
-import org.jboss.errai.codegen.meta.MetaTypeVariable;
+import org.jboss.errai.codegen.meta.*;
 import org.jboss.errai.codegen.util.Bool;
 import org.jboss.errai.codegen.util.EmptyStatement;
 import org.jboss.errai.codegen.util.If;
@@ -217,11 +211,11 @@ public class BindableProxyGenerator {
     }
     getSwitchBlock.case_("this").append(target().returnValue()).finish();
     setSwitchBlock.case_("this")
-        .append(Stmt.loadClassMember(targetField).assignValue(Stmt.castTo(bindable, Stmt.loadVariable("value"))))    
+        .append(Stmt.loadClassMember(targetField).assignValue(Stmt.castTo(bindable, Stmt.loadVariable("value"))))
         .append(agent().loadField("target").assignValue(Stmt.loadClassMember(targetField)))
         .append(Stmt.break_())
         .finish();
-    
+
     final Statement nonExistingPropertyException = Stmt.throw_(NonExistingPropertyException.class,
             Stmt.loadLiteral(bindable.getName()), Variable.get("property"));
     getSwitchBlock.default_().append(nonExistingPropertyException).finish();
@@ -257,7 +251,7 @@ public class BindableProxyGenerator {
                               final CaseBlockBuilder switchBlock) {
 
     final MetaMethod getterMethod = bindable.getBeanDescriptor().getReadMethodForProperty(property);
-    if (getterMethod != null && !getterMethod.isFinal()) {
+    if (getterMethod != null && !getterMethod.isFinal() && getterMethod.isPublic()) {
       BlockBuilder<CaseBlockBuilder> caseBlock = switchBlock.case_(property);
       caseBlock.append(Stmt.loadVariable("this").invoke(getterMethod.getName()).returnValue()).finish();
       classBuilder.publicMethod(getterMethod.getReturnType(), getterMethod.getName())
@@ -272,15 +266,16 @@ public class BindableProxyGenerator {
    * Generates a setter method for the provided property plus the corresponding code for the
    * implementation of {@link HasProperties#set(String, Object)}.
    */
-  private void generateSetter(final ClassStructureBuilder<?> classBuilder, final String property, 
+  private void generateSetter(final ClassStructureBuilder<?> classBuilder, final String property,
                               final CaseBlockBuilder switchBlock) {
     final MetaMethod getterMethod = bindable.getBeanDescriptor().getReadMethodForProperty(property);
     final MetaMethod setterMethod = bindable.getBeanDescriptor().getWriteMethodForProperty(property);
-    if (getterMethod != null && setterMethod != null && !setterMethod.isFinal()) {
+    if (getterMethod != null && !getterMethod.isFinal() && getterMethod.isPublic() &&
+        setterMethod != null && !setterMethod.isFinal() && setterMethod.isPublic()) {
       BlockBuilder<CaseBlockBuilder> caseBlock = switchBlock.case_(property);
       caseBlock
           .append(target().invoke(setterMethod.getName(),
-                  Cast.to(setterMethod.getParameters()[0].getType().asBoxed(), Variable.get("value"))))
+              Cast.to(setterMethod.getParameters()[0].getType().asBoxed(), Variable.get("value"))))
           .append(Stmt.break_())
           .finish();
 
@@ -293,7 +288,7 @@ public class BindableProxyGenerator {
       Statement wrappedListProperty = EmptyStatement.INSTANCE;
       if (paramType.isAssignableTo(List.class)) {
         wrappedListProperty = Stmt.loadVariable(property).assignValue(
-            Cast.to(paramType ,agent().invoke("ensureBoundListIsProxied", property, Stmt.loadVariable(property))));
+            Cast.to(paramType, agent().invoke("ensureBoundListIsProxied", property, Stmt.loadVariable(property))));
       }
 
       Statement callSetterOnTarget =
@@ -302,8 +297,7 @@ public class BindableProxyGenerator {
         callSetterOnTarget =
             Stmt.declareFinalVariable(returnValName, setterMethod.getReturnType(), callSetterOnTarget);
         returnValueOfSetter = Stmt.nestedCall(Refs.get(returnValName)).returnValue();
-      }
-      else {
+      } else {
         returnValueOfSetter = EmptyStatement.INSTANCE;
       }
 
@@ -316,8 +310,7 @@ public class BindableProxyGenerator {
                         Stmt.loadStatic(StateSync.class, "FROM_MODEL"),
                         Stmt.loadLiteral(true)))))
                 .finish();
-      }
-      else {
+      } else {
         updateNestedProxy = EmptyStatement.INSTANCE;
       }
 
@@ -408,7 +401,8 @@ public class BindableProxyGenerator {
     
     for (final String property : bindable.getBeanDescriptor().getProperties()) {
       final MetaMethod readMethod = bindable.getBeanDescriptor().getReadMethodForProperty(property);
-      if (readMethod != null && !readMethod.isFinal()) {
+      final MetaMethod writeMethod = bindable.getBeanDescriptor().getWriteMethodForProperty(property);
+      if (isProxiable(readMethod) && isProxiable(writeMethod)) {
         final MetaClass propertyType = readMethod.getReturnType();
         block.addStatement(loadVariable("p").invoke(
             "put",
@@ -444,7 +438,7 @@ public class BindableProxyGenerator {
     for (final String property : bindable.getBeanDescriptor().getProperties()) {
       final MetaMethod readMethod = bindable.getBeanDescriptor().getReadMethodForProperty(property);
       final MetaMethod writeMethod = bindable.getBeanDescriptor().getWriteMethodForProperty(property);
-      if (readMethod != null && writeMethod != null) {
+      if (readMethod != null && writeMethod != null && readMethod.isPublic() && writeMethod.isPublic()) {
         final MetaClass type = readMethod.getReturnType();
         if (!DataBindingUtil.isBindableType(type)) {
           // If we find a collection we copy its elements and unwrap them if necessary
@@ -559,9 +553,9 @@ public class BindableProxyGenerator {
   private ContextualStatementBuilder agent() {
     return Stmt.loadClassMember(agentField);
   }
-  
+
   private ContextualStatementBuilder target() {
-      return Stmt.loadClassMember(targetField);
+    return Stmt.loadClassMember(targetField);
   }
 
   private MetaClass getTypeOrFirstUpperBound(MetaType clazz, final MetaMethod method) {
@@ -587,5 +581,17 @@ public class BindableProxyGenerator {
 
     logger.log(TreeLogger.WARN, "Ignoring method: " + method + " in class " + bindable + ". Method cannot be proxied!");
     return null;
+  }
+
+  protected boolean isProxiable(MetaClassMember member) {
+    if(member != null) {
+      if (!member.isFinal() && member.isPublic()) {
+        return true;
+      } else {
+        logger.log(WARN, "Member " + member.getName() + " in " + bindable.getName() +
+            " is " + (member.isFinal() ? "final" : "not public") + ", cannot be proxied.");
+      }
+    }
+    return false;
   }
 }
