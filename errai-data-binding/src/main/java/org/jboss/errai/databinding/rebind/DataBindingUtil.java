@@ -514,7 +514,11 @@ public class DataBindingUtil {
   }
 
   private static boolean validateWildcard(MetaClass bindable) {
-    if (bindable.isFinal()) {
+    if (bindable.isInterface()) {
+      log.debug("@Bindable types cannot be an interface, ignoring: {}", bindable.getFullyQualifiedName());
+      return false;
+    }
+    else if (bindable.isFinal()) {
       log.debug("@Bindable types cannot be final, ignoring: {}", bindable.getFullyQualifiedName());
       return false;
     }
