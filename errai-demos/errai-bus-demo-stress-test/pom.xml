@@ -339,7 +339,7 @@
         <dependency><groupId>io.netty</groupId><artifactId>netty-codec-http</artifactId><scope>provided</scope></dependency>
         <dependency><groupId>io.netty</groupId><artifactId>netty-handler</artifactId><scope>provided</scope></dependency>
 
-        <!-- And finally, add this -->
+        <!-- And finally, add this  -->
         <dependency>
           <groupId>org.jboss.errai</groupId>
           <artifactId>errai-jboss-as-support</artifactId>
