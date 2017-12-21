@@ -138,8 +138,8 @@
     <dependency>
       <groupId>org.jboss.errai</groupId>
       <artifactId>errai-bus</artifactId>
-      <!--<type>test-jar</type>-->
-      <!--<scope>test</scope>-->
+      <type>test-jar</type>
+      <scope>test</scope>
     </dependency>
 
     <dependency>
