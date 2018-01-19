@@ -25,6 +25,7 @@ import org.jboss.errai.databinding.client.HasProperties;
 import org.jboss.errai.databinding.client.NonExistingPropertyException;
 import org.jboss.errai.databinding.client.PropertyType;
 import org.jboss.errai.databinding.client.TestModel;
+import org.jboss.errai.databinding.client.TestModelBindableProxyMethods;
 import org.jboss.errai.databinding.client.api.Convert;
 import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.ioc.client.test.AbstractErraiIOCTest;
@@ -112,5 +113,13 @@ public class HasPropertiesIntegrationTest extends AbstractErraiIOCTest {
       assertTrue("Entity type was not mentioned in error message: " + ex.getMessage(), ex.getMessage().contains("TestModel"));
     }
   }
-
+  
+  @Test
+  public void testSkippingBindableProxyMethods() {
+    final TestModelBindableProxyMethods model = DataBinder.forType(TestModelBindableProxyMethods.class).getModel();
+    
+    model.set("prop", "someValue");
+    
+    assertEquals("someValue", model.get("prop"));
+  }
 }
