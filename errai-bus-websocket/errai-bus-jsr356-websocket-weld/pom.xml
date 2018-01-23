@@ -14,7 +14,7 @@
   <description>JEE 7 / CDI (Weld) extension to the JSR-356 compliant Errai Bus endpoint.</description>
 
   <properties>
-    <wildfly.version>10.0.0.Final</wildfly.version>
+    <wildfly.version>11.0.0.Final</wildfly.version>
     <unpack-as-folder>${project.build.directory}/as-test</unpack-as-folder>
     <test-as-folder>${unpack-as-folder}/wildfly-${wildfly.version}</test-as-folder>
   </properties>
