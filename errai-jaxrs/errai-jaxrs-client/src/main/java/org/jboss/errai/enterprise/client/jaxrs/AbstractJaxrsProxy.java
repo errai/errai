@@ -28,6 +28,8 @@ import org.jboss.errai.common.client.framework.RpcStub;
 import org.jboss.errai.enterprise.client.jaxrs.api.ResponseException;
 import org.jboss.errai.enterprise.client.jaxrs.api.RestClient;
 import org.jboss.errai.enterprise.client.jaxrs.api.RestErrorCallback;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.http.client.Request;
@@ -44,6 +46,7 @@ import com.google.gwt.http.client.Response;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public abstract class AbstractJaxrsProxy implements RpcStub {
+  private final Logger logger = LoggerFactory.getLogger(getClass());
   private String baseUrl;
   private List<Integer> successCodes;
   private ClientExceptionMapper exceptionMapper;
@@ -152,7 +155,7 @@ public abstract class AbstractJaxrsProxy implements RpcStub {
           else {
             Throwable throwable = null;
             final ErrorCallback<?> errorCallback = getErrorCallback();
-            if (errorCallback instanceof RestErrorCallback && hasExceptionMapper()) {
+            if (hasExceptionMapper()) {
               throwable = unmarshallException(response);
             }
             else if (response.getText() != null && !response.getStatusText().equals("")) {
@@ -190,7 +193,21 @@ public abstract class AbstractJaxrsProxy implements RpcStub {
         ((RestErrorCallback) errorCallback).error(request, throwable);
       }
       else {
-        errorCallback.error(null, throwable);
+        /*
+         * Because of type erasure, there's no way to know if an ErrorCallback that doesn't implement RestErrorCallback takes
+         * a request as an argument. But in some cases we want to wrap callbacks (such as in Caller<T>) to further control when
+         * they are executed, and this is done in code upstream of RestErrorCallback.
+         *
+         * Thus, here we simply try to invoke with a request, and fallback to passing null if we get a casting exception.
+         */
+        try {
+          ((ErrorCallback<? super Request>) errorCallback).error(request, throwable);
+        }
+        catch (final ClassCastException e) {
+          logger.debug("Class cast exception when invoking error callback with request object: {}", request);
+          logger.debug("Invoking error callback again with null.");
+          errorCallback.error(null, throwable);
+        }
       }
     }
     else {
