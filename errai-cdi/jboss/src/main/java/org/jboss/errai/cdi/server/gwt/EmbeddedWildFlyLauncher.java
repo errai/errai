@@ -16,11 +16,14 @@
 
 package org.jboss.errai.cdi.server.gwt;
 
+import static com.google.gwt.core.ext.TreeLogger.Type.INFO;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.BindException;
 import java.util.List;
+import java.util.ServiceLoader;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.FileUtils;
@@ -28,7 +31,9 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.IOFileFilter;
 import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.apache.commons.lang3.StringUtils;
+import org.jboss.as.controller.client.ModelControllerClient;
 import org.jboss.errai.cdi.server.as.JBossServletContainerAdaptor;
+import org.jboss.errai.cdi.server.gwt.spi.ContainerConfigExtension;
 import org.jboss.errai.cdi.server.gwt.util.JBossUtil;
 import org.jboss.errai.cdi.server.gwt.util.StackTreeLogger;
 import org.wildfly.core.embedded.EmbeddedProcessFactory;
@@ -90,7 +95,7 @@ public class EmbeddedWildFlyLauncher extends ServletContainerLauncher {
 
     System.setProperty("jboss.http.port", "" + port);
 
-    File cliConfigFile = new File(jbossHome, JBossUtil.CLI_CONFIGURATION_FILE);
+    final File cliConfigFile = new File(jbossHome, JBossUtil.CLI_CONFIGURATION_FILE);
     if (cliConfigFile.exists()) {
       System.setProperty("jboss.cli.config", cliConfigFile.getAbsolutePath());
     }
@@ -99,12 +104,21 @@ public class EmbeddedWildFlyLauncher extends ServletContainerLauncher {
             new String[0], cmdArgs);
     embeddedWildFly.start();
 
+    runContainerConfigurationExtensions(embeddedWildFly.getModelControllerClient());
     prepareBeansXml(appRootDir);
     prepareUsersAndRoles(jbossHome);
-    JBossServletContainerAdaptor controller = new JBossServletContainerAdaptor(port, appRootDir,
+    final JBossServletContainerAdaptor controller = new JBossServletContainerAdaptor(port, appRootDir,
             JBossUtil.getDeploymentContext(), logger.peek(), null);
 
     return controller;
+  }
+
+  private void runContainerConfigurationExtensions(final ModelControllerClient modelControllerClient) {
+    final ServiceLoader<ContainerConfigExtension> loader = ServiceLoader.load(ContainerConfigExtension.class);
+    for (final ContainerConfigExtension extension : loader) {
+      logger.log(INFO, "Running container configuration extension: " + extension.getClass().getName());
+      extension.configure(modelControllerClient);
+    }
   }
 
   /**
@@ -114,28 +128,28 @@ public class EmbeddedWildFlyLauncher extends ServletContainerLauncher {
    * roles for development mode.
    */
   private void prepareUsersAndRoles(final String jbossHome) {
-    InputStream appUsersStream =
+    final InputStream appUsersStream =
             Thread.currentThread().getContextClassLoader().getResourceAsStream(JBossUtil.APP_USERS_PROPERTY_FILE);
 
     if (appUsersStream != null) {
       processPropertiesFile(JBossUtil.APP_USERS_PROPERTY_FILE, jbossHome, appUsersStream, true);
     }
 
-    InputStream appRolesStream =
+    final InputStream appRolesStream =
             Thread.currentThread().getContextClassLoader().getResourceAsStream(JBossUtil.APP_ROLES_PROPERTY_FILE);
 
     if (appRolesStream != null) {
       processPropertiesFile(JBossUtil.APP_ROLES_PROPERTY_FILE, jbossHome, appRolesStream, false);
     }
-    
-    InputStream mgmtUsersStream =
+
+    final InputStream mgmtUsersStream =
             Thread.currentThread().getContextClassLoader().getResourceAsStream(JBossUtil.MGMT_USERS_PROPERTY_FILE);
 
     if (mgmtUsersStream != null) {
       processPropertiesFile(JBossUtil.MGMT_USERS_PROPERTY_FILE, jbossHome, mgmtUsersStream, true);
     }
 
-    InputStream mgmtGroupsStream =
+    final InputStream mgmtGroupsStream =
             Thread.currentThread().getContextClassLoader().getResourceAsStream(JBossUtil.MGMT_GROUPS_PROPERTY_FILE);
 
     if (mgmtGroupsStream != null) {
@@ -153,11 +167,11 @@ public class EmbeddedWildFlyLauncher extends ServletContainerLauncher {
       String realmToken = ERRAI_PROPERTIES_REALM_TOKEN;
       boolean isErraiContent = false;
       final StringBuilder result = new StringBuilder();
-      List<String> lines = FileUtils.readLines(propertyFile);
+      final List<String> lines = FileUtils.readLines(propertyFile);
       if (lines != null) {
 
         for (final String currentLine : lines) {
-          String trimmed = currentLine.trim();
+          final String trimmed = currentLine.trim();
           if (trimmed.startsWith(ERRAI_PROPERTIES_HINT_START.trim())) {
             isErraiContent = true;
           } else if (trimmed.startsWith(ERRAI_PROPERTIES_HINT_END.trim())) {
@@ -180,13 +194,13 @@ public class EmbeddedWildFlyLauncher extends ServletContainerLauncher {
 
         try {
           FileUtils.write(propertyFile, result.toString());
-        } catch (IOException e) {
+        } catch (final IOException e) {
           throw new RuntimeException("Failed to write content for " +
                   propertyFileName + " in " + propertyFile.getAbsolutePath(), e);
         }
       }
 
-    } catch (IOException e) {
+    } catch (final IOException e) {
       throw new RuntimeException("Failed to parse content for " +
               propertyFileName + " in " + propertyFile.getAbsolutePath(), e);
     }
@@ -205,13 +219,13 @@ public class EmbeddedWildFlyLauncher extends ServletContainerLauncher {
    *          using the gwt-maven-plugin).
    * @throws IOException
    */
-  private void prepareBeansXml(File appRootDir) throws IOException {
-    File webInfDir = new File(appRootDir, "WEB-INF");
-    File classesDir = new File(webInfDir, "classes");
+  private void prepareBeansXml(final File appRootDir) throws IOException {
+    final File webInfDir = new File(appRootDir, "WEB-INF");
+    final File classesDir = new File(webInfDir, "classes");
 
-    StringBuilder exclusions = new StringBuilder();
+    final StringBuilder exclusions = new StringBuilder();
     exclusions.append(ERRAI_SCANNER_HINT_START);
-    for (File clientLocalClass : FileUtils.listFiles(appRootDir, new ClientLocalFileFilter(), TrueFileFilter.INSTANCE)) {
+    for (final File clientLocalClass : FileUtils.listFiles(appRootDir, new ClientLocalFileFilter(), TrueFileFilter.INSTANCE)) {
       final String className = clientLocalClass.getAbsolutePath();
       // Adding package-info exclusion makes beans.xml invalid.
       if (className.endsWith(".class") && !className.endsWith("package-info.class")) {
@@ -225,7 +239,7 @@ public class EmbeddedWildFlyLauncher extends ServletContainerLauncher {
     }
     exclusions.append(ERRAI_SCANNER_HINT_END);
 
-    File beansXml = new File(webInfDir, "beans.xml");
+    final File beansXml = new File(webInfDir, "beans.xml");
     String beansXmlContent;
     if (!beansXml.exists()) {
       beansXmlContent = DEVMODE_BEANS_XML_TEMPLATE.replace("$EXCLUSIONS", exclusions.toString());
@@ -247,7 +261,7 @@ public class EmbeddedWildFlyLauncher extends ServletContainerLauncher {
     FileUtils.write(beansXml, beansXmlContent);
   }
 
-  private void validateBeansXml(String beansXmlContent) {
+  private void validateBeansXml(final String beansXmlContent) {
     if (beansXmlContent.contains("beans_1_0.xsd")) {
       logger.log(Type.WARN, "Your beans.xml file doesn't not allow for CDI 1.1! "
               + "Please remove the CDI 1.0 XML Schema.");
@@ -255,7 +269,7 @@ public class EmbeddedWildFlyLauncher extends ServletContainerLauncher {
   }
 
   private String removeExistingErraiExclusions(String beansXmlContent) {
-    String oldExclusions = StringUtils.substringBetween(beansXmlContent,
+    final String oldExclusions = StringUtils.substringBetween(beansXmlContent,
             ERRAI_SCANNER_HINT_START, ERRAI_SCANNER_HINT_END);
 
     beansXmlContent = beansXmlContent.replace(ERRAI_SCANNER_HINT_START, "");
@@ -274,17 +288,17 @@ public class EmbeddedWildFlyLauncher extends ServletContainerLauncher {
     final Pattern clientLocalClassPattern = Pattern.compile(clientLocalClassPatternString);
 
     @Override
-    public boolean accept(File pathName) {
+    public boolean accept(final File pathName) {
       return accept(pathName.getAbsolutePath());
     }
 
     @Override
-    public boolean accept(File dir, String file) {
-      String fullName = dir.getAbsolutePath() + File.separator + file;
+    public boolean accept(final File dir, final String file) {
+      final String fullName = dir.getAbsolutePath() + File.separator + file;
       return accept(fullName);
     }
 
-    private boolean accept(String fileName) {
+    private boolean accept(final String fileName) {
       return clientLocalClassPattern.matcher(fileName).matches();
     }
   }
