@@ -424,8 +424,7 @@ public class BindableProxyGenerator {
     
     for (final String property : bindable.getBeanDescriptor().getProperties()) {
       final MetaMethod readMethod = bindable.getBeanDescriptor().getReadMethodForProperty(property);
-      final MetaMethod writeMethod = bindable.getBeanDescriptor().getWriteMethodForProperty(property);
-      if (isProxiable(readMethod) && isProxiable(writeMethod)) {
+      if (isProxiable(readMethod)) {
         final MetaClass propertyType = readMethod.getReturnType();
         block.addStatement(loadVariable("p").invoke(
             "put",
@@ -611,7 +610,7 @@ public class BindableProxyGenerator {
       if (!member.isFinal() && member.isPublic()) {
         return true;
       } else {
-        logger.log(WARN, "Member " + member.getName() + " in " + bindable.getName() +
+        logger.log(DEBUG, "Member " + member.getName() + " in " + bindable.getName() +
             " is " + (member.isFinal() ? "final" : "not public") + ", cannot be proxied.");
       }
     }
