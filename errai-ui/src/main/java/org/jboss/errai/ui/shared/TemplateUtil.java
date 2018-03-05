@@ -229,6 +229,8 @@ public final class TemplateUtil {
   }
 
   public static void initTemplated(final Object templated, final Element wrapped, final Collection<Widget> dataFields) {
+    // All template fragments are contained in a single element, during initialization.
+    wrapped.removeFromParent();
     final TemplateWidget widget = new TemplateWidget(wrapped, dataFields);
     TemplateWidgetMapper.put(templated, widget);
     StyleBindingsRegistry.get().updateStyles(templated);
@@ -247,6 +249,8 @@ public final class TemplateUtil {
   }
 
   public static void initWidget(final Composite component, final Element wrapped, final Collection<Widget> dataFields) {
+    // All template fragments are contained in a single element, during initialization.
+    wrapped.removeFromParent();
     if (!(component instanceof ListWidget)) {
       initWidgetNative(component, new TemplateWidget(wrapped, dataFields));
     }
