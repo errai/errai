@@ -172,6 +172,28 @@ public class PageLifecycleTest extends AbstractErraiCDITest {
     assertEquals("foo", page.getState());
   }
 
+  public void testPageUpdateMethodCalled() throws Exception {
+    PageWithLifecycleMethods page = Factory.maybeUnwrapProxy(beanManager.lookupBean(PageWithLifecycleMethods.class).getInstance());
+    page.afterUpdateCallCount = 0;
+
+    navigation.goTo(PageWithLifecycleMethods.class, ImmutableMultimap.of("state", "foo"));
+    navigation.updateState(ImmutableMultimap.of("state", "bar"));
+
+    assertEquals(1, page.afterUpdateCallCount);
+    assertEquals("bar", page.stateAfterUpdateWasCalled);
+  }
+
+  public void testPageUpdateMethodCalledForNonCompositeTemplated() throws Exception {
+    NonCompositePageWithLifecycleMethods page = Factory.maybeUnwrapProxy(beanManager.lookupBean(NonCompositePageWithLifecycleMethods.class).getInstance());
+    assertEquals(0, page.getUpdate());
+
+    navigation.goTo(NonCompositePageWithLifecycleMethods.class, ImmutableMultimap.of("state", "foo"));
+    navigation.updateState(ImmutableMultimap.of("state", "bar"));
+
+    assertEquals(1, page.getUpdate());
+    assertEquals("bar", page.getState());
+  }
+
   public void testPageHidingMethodCalled() throws Exception {
     PageWithLifecycleMethods page = Factory.maybeUnwrapProxy(beanManager.lookupBean(PageWithLifecycleMethods.class).getInstance());
 
