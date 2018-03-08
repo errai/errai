@@ -18,12 +18,7 @@ package org.jboss.errai.ui.nav.client.local.testpages;
 
 import javax.enterprise.context.ApplicationScoped;
 
-import org.jboss.errai.ui.nav.client.local.Page;
-import org.jboss.errai.ui.nav.client.local.PageHidden;
-import org.jboss.errai.ui.nav.client.local.PageHiding;
-import org.jboss.errai.ui.nav.client.local.PageShowing;
-import org.jboss.errai.ui.nav.client.local.PageShown;
-import org.jboss.errai.ui.nav.client.local.PageState;
+import org.jboss.errai.ui.nav.client.local.*;
 
 import com.google.gwt.user.client.ui.VerticalPanel;
 
@@ -36,8 +31,10 @@ public class PageWithLifecycleMethods extends VerticalPanel {
   public int afterShowCallCount = 0;
   public int beforeHideCallCount = 0;
   public int afterHideCallCount = 0;
+  public int afterUpdateCallCount = 0;
 
   public String stateWhenBeforeShowWasCalled;
+  public String stateAfterUpdateWasCalled;
 
   @PageShowing
   private void beforeShow() {
@@ -59,5 +56,11 @@ public class PageWithLifecycleMethods extends VerticalPanel {
   @PageHidden
   private void afterHide() {
 	  afterHideCallCount++;
+  }
+
+  @PageUpdate
+  private void afterUpdate() {
+    afterUpdateCallCount++;
+    stateAfterUpdateWasCalled = state;
   }
 }

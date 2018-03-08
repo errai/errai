@@ -648,6 +648,21 @@ public class Navigation {
   }-*/;
 
   /**
+   * Update the state of your existing page without performing a full navigation.
+   * <br/>
+   * This will perform a pseudo navigation updating the history token with the new states.
+   */
+  public void updateState(Multimap<String, String> state) {
+    if(currentPage != null) {
+      currentPageToken = historyTokenFactory.createHistoryToken(currentPage.name(), state);
+      HistoryWrapper.newItem(currentPageToken.toString(), false);
+      currentPage.pageUpdate(currentComponent, currentPageToken);
+    } else {
+      logger.error("Cannot update the state before a page has loaded.");
+    }
+  }
+
+  /**
    * Are we in the navigation process right now.
    */
   public boolean isNavigating() {

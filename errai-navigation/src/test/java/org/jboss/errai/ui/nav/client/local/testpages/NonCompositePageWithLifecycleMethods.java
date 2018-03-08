@@ -18,12 +18,7 @@ package org.jboss.errai.ui.nav.client.local.testpages;
 
 import javax.enterprise.context.ApplicationScoped;
 
-import org.jboss.errai.ui.nav.client.local.Page;
-import org.jboss.errai.ui.nav.client.local.PageHidden;
-import org.jboss.errai.ui.nav.client.local.PageHiding;
-import org.jboss.errai.ui.nav.client.local.PageShowing;
-import org.jboss.errai.ui.nav.client.local.PageShown;
-import org.jboss.errai.ui.nav.client.local.PageState;
+import org.jboss.errai.ui.nav.client.local.*;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 
 /**
@@ -34,7 +29,7 @@ import org.jboss.errai.ui.shared.api.annotations.Templated;
 @ApplicationScoped
 public class NonCompositePageWithLifecycleMethods {
 
-  private int showing = 0, shown = 0, hiding = 0, hidden = 0;
+  private int showing = 0, shown = 0, hiding = 0, hidden = 0, update = 0;
 
   @PageState
   private String state;
@@ -59,6 +54,11 @@ public class NonCompositePageWithLifecycleMethods {
     hidden++;
   }
 
+  @PageUpdate
+  private void update() {
+    update++;
+  }
+
   public String getState() {
     return state;
   }
@@ -79,4 +79,7 @@ public class NonCompositePageWithLifecycleMethods {
     return hidden;
   }
 
+  public int getUpdate() {
+    return update;
+  }
 }
