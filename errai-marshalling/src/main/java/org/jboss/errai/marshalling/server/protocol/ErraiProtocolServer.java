@@ -18,6 +18,8 @@ package org.jboss.errai.marshalling.server.protocol;
 
 import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.jboss.errai.marshalling.client.protocols.ErraiProtocol;
@@ -25,12 +27,30 @@ import org.jboss.errai.marshalling.client.protocols.ErraiProtocol;
 /**
  * @author Mike Brock
  */
-public class ErraiProtocolServer extends ErraiProtocol{
+public class ErraiProtocolServer extends ErraiProtocol {
+
+  private static List<PayloadPreprocessor> preprocessors = new ArrayList<>();
+
   public static ByteArrayInputStream encodePayloadToByteArrayInputStream(final Map<String, Object> payload) {
     try {
+      // Process the payload before the encoding process.
+      preprocessors.forEach(preprocessor -> preprocessor.process(payload));
+
       return new ByteArrayInputStream(encodePayload(payload).getBytes("UTF-8"));
     } catch (UnsupportedEncodingException e) {
       throw new AssertionError("UTF-8 appears not to be supported by this JRE, but that's impossible");
     }
+  }
+
+  public static void addPreprocessor(PayloadPreprocessor preprocessor) {
+    preprocessors.add(preprocessor);
+  }
+
+  public static void removePreprocessor(PayloadPreprocessor preprocessor) {
+    preprocessors.remove(preprocessor);
+  }
+
+  public static void clearPreprocessors() {
+    preprocessors.clear();
   }
 }
