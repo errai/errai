@@ -48,9 +48,7 @@ import java.lang.annotation.*;
  * @see Page
  * @see PageState
  * @see Navigation
- * @see PageShowing
- * @author Daniel Sachse <mail@w0mb.at>
- * @author Jonathan Fuerth <jfuerth@redhat.com>
+ * @see PageShown
  * @author Ben Dol
  */
 @Target(ElementType.METHOD)
