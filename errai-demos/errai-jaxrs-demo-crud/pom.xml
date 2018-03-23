@@ -4,7 +4,7 @@
   <name>Errai::JAX-RS::RestDemo</name>
   <groupId>org.jboss.errai.demos</groupId>
   <artifactId>errai-jaxrs-demo-crud</artifactId>
-  <version>4.2.0.Final</version>
+  <version>4.2.1-SNAPSHOT</version>
   <packaging>war</packaging>
 
   <url>http://jboss.org/errai/errai</url>
