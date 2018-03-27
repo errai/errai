@@ -183,8 +183,6 @@ public class RestClient {
 
     Assert.notNull(remoteService);
     Assert.notNull(callback);
-    if (baseUrl != null && !baseUrl.endsWith("/"))
-      baseUrl += "/";
 
     T proxy = proxyProvider.getRemoteProxy(remoteService);
 
@@ -210,9 +208,6 @@ public class RestClient {
       return ""; 
     } 
     else {
-      if ($wnd.erraiJaxRsApplicationRoot.substr(-1) !== "/") {
-        return $wnd.erraiJaxRsApplicationRoot + "/";
-      }
       return $wnd.erraiJaxRsApplicationRoot;
     }
   }-*/;
