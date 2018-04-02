@@ -19,11 +19,13 @@ package org.jboss.errai.ui.nav.client.local.spi;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Dependent;
 
+import com.google.common.collect.Multimap;
 import org.jboss.errai.common.client.util.CreationalCallback;
 import org.jboss.errai.ui.nav.client.local.HistoryToken;
 import org.jboss.errai.ui.nav.client.local.Page;
 import org.jboss.errai.ui.nav.client.local.TransitionTo;
 import org.jboss.errai.ui.nav.client.local.api.NavigationControl;
+import org.jboss.errai.ui.nav.client.local.Navigation;
 
 import com.google.gwt.user.client.ui.IsWidget;
 
@@ -99,7 +101,7 @@ public interface PageNode<C> {
    *
    * @param widget
    *          the widget instance (which is currently in the navigation content panel) that was previously used in the
-   *          call to {@link #pageShowing(IsWidget, HistoryToken)}. Never null.
+   *          call to {@link #pageShowing(C, HistoryToken, NavigationControl)}. Never null.
    */
   public void pageHiding(C widget, NavigationControl control);
 
@@ -110,9 +112,22 @@ public interface PageNode<C> {
    *
    * @param widget
    *          the widget instance (which was in the navigation content panel) that was previously used in the call to
-   *          {@link #pageShowing(IsWidget, HistoryToken)}. Never null.
+   *          {@link #pageShowing(C, HistoryToken, NavigationControl)}. Never null.
    */
   public void pageHidden(C widget);
+
+  /**
+   * Called by the framework when this page node state was updated {@link Navigation#updateState(Multimap)}.
+   * <p>
+   * If this method throws an exception when called, framework behaviour is undefined.
+   *
+   * @param widget
+   *          the widget instance that was just returned from a call to {@link #produceContent(CreationalCallback)}.
+   *          Never null.
+   * @param state
+   *          the state of the page, parsed from the history token on the URL. Never null.
+   */
+  public void pageUpdate(C widget, HistoryToken state);
 
   /**
    * Used by the framework to destroy {@link Dependent} scoped beans after a page is no longer needed. For

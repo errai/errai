@@ -518,6 +518,10 @@ public class DataBindingUtil {
       log.debug("@Bindable types cannot be an interface, ignoring: {}", bindable.getFullyQualifiedName());
       return false;
     }
+    else if (bindable.isAbstract()) {
+      log.debug("@Bindable types cannot be abstract, ignoring: {}", bindable.getFullyQualifiedName());
+      return false;
+    }
     else if (bindable.isFinal()) {
       log.debug("@Bindable types cannot be final, ignoring: {}", bindable.getFullyQualifiedName());
       return false;

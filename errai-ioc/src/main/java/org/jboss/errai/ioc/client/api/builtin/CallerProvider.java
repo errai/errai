@@ -17,53 +17,93 @@
 package org.jboss.errai.ioc.client.api.builtin;
 
 
+import java.lang.annotation.Annotation;
+
+import javax.inject.Singleton;
+
 import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.ErrorCallback;
-import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.common.client.api.NoOpCallback;
+import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.common.client.framework.RemoteServiceProxyFactory;
 import org.jboss.errai.common.client.framework.RpcStub;
 import org.jboss.errai.ioc.client.api.ContextualTypeProvider;
+import org.jboss.errai.ioc.client.api.Disposer;
 import org.jboss.errai.ioc.client.api.IOCProvider;
-
-import javax.inject.Singleton;
-import java.lang.annotation.Annotation;
 
 /**
  * @author Mike Brock
+ * @author Max Barkley <mbarkley@redhat.com>
  */
 @IOCProvider @Singleton
 @SuppressWarnings("rawtypes")
-public class CallerProvider implements ContextualTypeProvider<Caller> {
+public class CallerProvider implements ContextualTypeProvider<Caller>, Disposer<Caller> {
+
   private static final RemoteServiceProxyFactory factory = new RemoteServiceProxyFactory();
 
   @Override
   public Caller provide(final Class<?>[] typeargs, final Annotation[] qualifiers) {
-    return new Caller<Object>() {
-      @Override
-      public Object call() {
-        final Object proxy = factory.getRemoteProxy(typeargs[0]);
-        ((RpcStub) proxy).setRemoteCallback(new NoOpCallback());
-        ((RpcStub) proxy).setQualifiers(qualifiers);
-        return proxy;
-      }
+    return new CallerImplementation(qualifiers, typeargs);
+  }
 
-      @Override
-      public Object call(final RemoteCallback<?> callback) {
-        final Object proxy = factory.getRemoteProxy(typeargs[0]);
-        ((RpcStub) proxy).setRemoteCallback(callback);
-        ((RpcStub) proxy).setQualifiers(qualifiers);
-        return proxy;
-      }
+  @Override
+  public void dispose(final Caller beanInstance) {
+    if (beanInstance instanceof CallerImplementation) {
+      ((CallerImplementation) beanInstance).dispose();
+    }
+  }
 
-      @Override
-      public Object call(final RemoteCallback<?> callback, final ErrorCallback<?> errorCallback) {
-        final Object proxy = factory.getRemoteProxy(typeargs[0]);
-        ((RpcStub) proxy).setRemoteCallback(callback);
-        ((RpcStub) proxy).setErrorCallback(errorCallback);
-        ((RpcStub) proxy).setQualifiers(qualifiers);
-        return proxy;
-      }
-    };
+  private final class CallerImplementation implements Caller<Object> {
+    private final Annotation[] qualifiers;
+    private final Class<?>[] typeargs;
+    private boolean enabled = true;
+
+    private CallerImplementation(final Annotation[] qualifiers, final Class<?>[] typeargs) {
+      this.qualifiers = qualifiers;
+      this.typeargs = typeargs;
+    }
+
+    @Override
+    public Object call() {
+      final Object proxy = factory.getRemoteProxy(typeargs[0]);
+      ((RpcStub) proxy).setRemoteCallback(new NoOpCallback());
+      ((RpcStub) proxy).setQualifiers(qualifiers);
+      return proxy;
+    }
+
+    @Override
+    public Object call(final RemoteCallback<?> callback) {
+      final Object proxy = factory.getRemoteProxy(typeargs[0]);
+      ((RpcStub) proxy).setRemoteCallback(wrap(callback));
+      ((RpcStub) proxy).setQualifiers(qualifiers);
+      return proxy;
+    }
+
+    @Override
+    public Object call(final RemoteCallback<?> callback, final ErrorCallback<?> errorCallback) {
+      final Object proxy = factory.getRemoteProxy(typeargs[0]);
+      ((RpcStub) proxy).setRemoteCallback(wrap(callback));
+      ((RpcStub) proxy).setErrorCallback(wrap(errorCallback));
+      ((RpcStub) proxy).setQualifiers(qualifiers);
+      return proxy;
+    }
+
+    private <T> RemoteCallback<T> wrap(final RemoteCallback<T> wrapped) {
+      return retVal -> {
+        if (enabled) {
+          wrapped.callback(retVal);
+        }
+      };
+    }
+
+    private <T> ErrorCallback<T> wrap(final ErrorCallback<T> wrapped) {
+      return (msg, error) -> {
+        return !enabled || wrapped.error(msg, error);
+      };
+    }
+
+    public void dispose() {
+      enabled = false;
+    }
   }
 }

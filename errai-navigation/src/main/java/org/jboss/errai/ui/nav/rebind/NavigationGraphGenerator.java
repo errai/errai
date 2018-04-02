@@ -58,22 +58,7 @@ import org.jboss.errai.config.util.ClassScanner;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
-import org.jboss.errai.ui.nav.client.local.DefaultPage;
-import org.jboss.errai.ui.nav.client.local.HistoryToken;
-import org.jboss.errai.ui.nav.client.local.Page;
-import org.jboss.errai.ui.nav.client.local.PageHidden;
-import org.jboss.errai.ui.nav.client.local.PageHiding;
-import org.jboss.errai.ui.nav.client.local.PageRole;
-import org.jboss.errai.ui.nav.client.local.PageShowing;
-import org.jboss.errai.ui.nav.client.local.PageShown;
-import org.jboss.errai.ui.nav.client.local.PageState;
-import org.jboss.errai.ui.nav.client.local.TransitionAnchor;
-import org.jboss.errai.ui.nav.client.local.TransitionAnchorFactory;
-import org.jboss.errai.ui.nav.client.local.TransitionTo;
-import org.jboss.errai.ui.nav.client.local.TransitionToRole;
-import org.jboss.errai.ui.nav.client.local.URLPattern;
-import org.jboss.errai.ui.nav.client.local.URLPatternMatcher;
-import org.jboss.errai.ui.nav.client.local.UniquePageRole;
+import org.jboss.errai.ui.nav.client.local.*;
 import org.jboss.errai.ui.nav.client.local.api.NavigationControl;
 import org.jboss.errai.ui.nav.client.local.spi.NavigationGraph;
 import org.jboss.errai.ui.nav.client.local.spi.PageNode;
@@ -321,6 +306,7 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
 
     appendPageShowingMethod(pageImplBuilder, pageClass);
     appendPageShownMethod(pageImplBuilder, pageClass);
+    appendPageUpdateMethod(pageImplBuilder, pageClass);
 
     appendDestroyMethod(pageImplBuilder, pageClass);
 
@@ -527,6 +513,18 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
             .body();
 
     appendPageShowMethod(method, pageImplBuilder, pageClass, PageShown.class, false,
+        Parameter.of(HistoryToken.class, "state"));
+
+    method.finish();
+  }
+
+  private void appendPageUpdateMethod(AnonymousClassStructureBuilder pageImplBuilder, MetaClass pageClass) {
+    BlockBuilder<?> method = pageImplBuilder.publicMethod(void.class, createMethodNameFromAnnotation(PageUpdate.class),
+        Parameter.of(pageClass, "widget"),
+        Parameter.of(HistoryToken.class, "state"))
+        .body();
+
+    appendPageShowMethod(method, pageImplBuilder, pageClass, PageUpdate.class, false,
         Parameter.of(HistoryToken.class, "state"));
 
     method.finish();
