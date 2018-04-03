@@ -16,46 +16,21 @@
 
 package org.jboss.errai.bus.client.framework;
 
-import static org.jboss.errai.bus.client.protocols.BusCommand.RemoteSubscribe;
-import static org.jboss.errai.bus.client.protocols.BusCommand.RemoteUnsubscribe;
-import static org.jboss.errai.bus.client.util.BusToolsCli.isRemoteCommunicationEnabled;
-import static org.jboss.errai.common.client.protocols.MessageParts.PriorityProcessing;
-import static org.jboss.errai.common.client.protocols.MessageParts.Subject;
-import static org.jboss.errai.common.client.protocols.MessageParts.ToSubject;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import org.jboss.errai.bus.client.api.BusLifecycleEvent;
-import org.jboss.errai.bus.client.api.BusLifecycleListener;
-import org.jboss.errai.bus.client.api.BusMonitor;
-import org.jboss.errai.bus.client.api.ClientMessageBus;
-import org.jboss.errai.bus.client.api.RoutingFlag;
-import org.jboss.errai.bus.client.api.SubscribeListener;
-import org.jboss.errai.bus.client.api.Subscription;
-import org.jboss.errai.bus.client.api.TransportError;
-import org.jboss.errai.bus.client.api.TransportErrorHandler;
-import org.jboss.errai.bus.client.api.UnsubscribeListener;
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.logical.shared.CloseEvent;
+import com.google.gwt.event.logical.shared.CloseHandler;
+import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.Window;
+import org.jboss.errai.bus.client.api.*;
 import org.jboss.errai.bus.client.api.base.Capabilities;
 import org.jboss.errai.bus.client.api.base.CommandMessage;
 import org.jboss.errai.bus.client.api.base.DefaultErrorCallback;
 import org.jboss.errai.bus.client.api.base.NoSubscribersToDeliverTo;
+import org.jboss.errai.bus.client.api.messaging.MessageInterceptor;
 import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.bus.client.api.messaging.MessageCallback;
 import org.jboss.errai.bus.client.api.messaging.RequestDispatcher;
-import org.jboss.errai.bus.client.framework.transports.BusTransportError;
-import org.jboss.errai.bus.client.framework.transports.HttpPollingHandler;
-import org.jboss.errai.bus.client.framework.transports.SSEHandler;
-import org.jboss.errai.bus.client.framework.transports.TransportHandler;
-import org.jboss.errai.bus.client.framework.transports.WebsocketHandler;
+import org.jboss.errai.bus.client.framework.transports.*;
 import org.jboss.errai.bus.client.protocols.BusCommand;
 import org.jboss.errai.bus.client.util.BusToolsCli;
 import org.jboss.errai.bus.client.util.ManagementConsole;
@@ -66,11 +41,14 @@ import org.jboss.errai.marshalling.client.api.MarshallerFramework;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.logical.shared.CloseEvent;
-import com.google.gwt.event.logical.shared.CloseHandler;
-import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.Window;
+import java.util.*;
+
+import static org.jboss.errai.bus.client.protocols.BusCommand.RemoteSubscribe;
+import static org.jboss.errai.bus.client.protocols.BusCommand.RemoteUnsubscribe;
+import static org.jboss.errai.bus.client.util.BusToolsCli.isRemoteCommunicationEnabled;
+import static org.jboss.errai.common.client.protocols.MessageParts.*;
+
+import java.lang.Throwable;
 
 /**
  * The default client <tt>MessageBus</tt> implementation.  This bus runs in the browser and automatically federates
@@ -92,6 +70,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
   private final List<SubscribeListener> onSubscribeHooks = new ArrayList<>();
   private final List<UnsubscribeListener> onUnsubscribeHooks = new ArrayList<>();
+
+  private final List<MessageInterceptor> interceptors = new ArrayList<>();
 
   /**
    * Forwards every message received across the communication link to the remote
@@ -788,6 +768,10 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       final String subject = message.getSubject();
 
       if (message.hasPart(MessageParts.ToSubject)) {
+        if(message.hasPart(MessageParts.ReplyTo)) {
+          subscribe((String)message.getParts().get(MessageParts.ReplyTo.name()), this::signalInterceptorsAfter);
+        }
+
         if (isRemoteCommunicationEnabled() && !localOnly) {
           if (getState().isShadowDeliverable() && shadowSubscriptions.containsKey(subject)) {
             deliverToSubscriptions(shadowSubscriptions, subject, message);
@@ -830,6 +814,18 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     }
   }
 
+  public void signalInterceptorsBefore(Message message) {
+    for (MessageInterceptor interceptor : interceptors) {
+      interceptor.beforeCall(message);
+    }
+  }
+
+  public void signalInterceptorsAfter(Message message) {
+    for (MessageInterceptor interceptor : interceptors) {
+      interceptor.afterCall(message);
+    }
+  }
+
   @Override
   public void sendLocal(final Message msg) {
     final String subject = msg.getSubject();
@@ -863,7 +859,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       return;
     }
 
-    transportHandler.transmit(Collections.singletonList(message));
+    transmit(Collections.singletonList(message));
   }
 
   private void addSubscriptionEntry(final String subject, final MessageCallback reference) {
@@ -964,8 +960,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     }
 
     try {
-      transportHandler.transmit(highPriority);
-      transportHandler.transmit(lowPriority);
+      transmit(highPriority);
+      transmit(lowPriority);
 
       for (final Message message : deferredMessages) {
         String subject = message.getSubject();
@@ -984,6 +980,13 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     } finally {
       deferredMessages.clear();
     }
+  }
+
+  private void transmit(List<Message> messages) {
+    for (Message message : messages) {
+      signalInterceptorsBefore(message);
+    }
+    transportHandler.transmit(messages);
   }
 
   public boolean handleTransportError(final BusTransportError transportError) {
@@ -1046,6 +1049,16 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   @Override
   public void addUnsubscribeListener(final UnsubscribeListener listener) {
     this.onUnsubscribeHooks.add(listener);
+  }
+
+  @Override
+  public void addInterceptor(MessageInterceptor interceptor) {
+    this.interceptors.add(interceptor);
+  }
+
+  @Override
+  public void removeInterceptor(MessageInterceptor interceptor) {
+    this.interceptors.remove(interceptor);
   }
 
   /**
