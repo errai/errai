@@ -26,10 +26,7 @@ import org.jboss.errai.bus.client.api.SubscribeListener;
 import org.jboss.errai.bus.client.api.Subscription;
 import org.jboss.errai.bus.client.api.TransportErrorHandler;
 import org.jboss.errai.bus.client.api.UnsubscribeListener;
-import org.jboss.errai.bus.client.api.messaging.Message;
-import org.jboss.errai.bus.client.api.messaging.MessageBus;
-import org.jboss.errai.bus.client.api.messaging.MessageCallback;
-import org.jboss.errai.bus.client.api.messaging.RequestDispatcher;
+import org.jboss.errai.bus.client.api.messaging.*;
 import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -103,6 +100,14 @@ public class ErraiBus implements EntryPoint {
 
         @Override
         public void addUnsubscribeListener(final UnsubscribeListener listener) {
+        }
+
+        @Override
+        public void addInterceptor(MessageInterceptor interceptor) {
+        }
+
+        @Override
+        public void removeInterceptor(MessageInterceptor interceptor) {
         }
 
         @Override

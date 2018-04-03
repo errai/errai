@@ -21,6 +21,7 @@ import java.util.Set;
 import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.bus.client.api.messaging.MessageBus;
 import org.jboss.errai.bus.client.api.messaging.MessageCallback;
+import org.jboss.errai.bus.client.api.messaging.MessageInterceptor;
 
 /**
  * An extended client-specific/in-browser interface of {@link org.jboss.errai.bus.client.api.messaging.MessageBus}, which defines client-specific functionality.
@@ -115,6 +116,16 @@ public interface ClientMessageBus extends MessageBus {
    *          given handler is {@code null} or it was not already registered.
    */
   public void removeTransportErrorHandler(TransportErrorHandler errorHandler);
+
+  /**
+   * Register a global message interceptor to intercept all message bus messages.
+   */
+  public void addInterceptor(MessageInterceptor interceptor);
+
+  /**
+   * Remove a global message interceptor.
+   */
+  public void removeInterceptor(MessageInterceptor interceptor);
 
   /**
    * Sets a property on the bus.
