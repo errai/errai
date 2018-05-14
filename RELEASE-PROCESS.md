@@ -22,52 +22,68 @@ Release Steps
 -------------
 
 1. Run the test suite. Ensure all tests pass. (Can skip this if last CI build is green.)
-        
-        % mvn -Pintegration-test clean install
+
+    ```bash
+    mvn -Pintegration-test clean install    
+    ```
         
 1. Update reference guide with latest content and check in generated docbook.
         
-        % cd errai-docs
-        % mvn clean package   # this needs a profile in ~/.m2/settings.xml that references the JBoss public maven repo
-        % git add src
+    ```bash
+    cd errai-docs
+    mvn clean package #this needs a profile in ~/.m2/settings.xml that references the JBoss public maven repo
+    git add src
+    ```
+       
         
 1. Ask Maven to update the version number in all the pom.xml files:
-   
-        % cd $errai_root_dir
-        % ./updateVersions.sh a.b.c-SNAPSHOT x.y.z.Final
-   
+
+   ```bash
+   cd $errai_root_dir
+   ./updateVersions.sh a.b.c-SNAPSHOT x.y.z.Final
+   ```
+  
    Afterward, verify that all subprojects reference the new parent pom's version:
    
-        % find . -name pom.xml | xargs grep x.y.z | grep SNAP
+   ```bash
+   find . -name pom.xml | xargs grep x.y.z | grep SNAP
+   ```
        
    (if any are out of sync with the parent version, Maven will not have updated them)
 
 1. Build and package the release. These are the bits that will be uploaded to nexus.
    Expect this to take about 4 minutes, depending on network speed.
         
-        % mvn clean deploy -Dgwt.compiler.skip=true -DaltDeploymentRepository=jboss-snapshots-repository::default::https://repository.jboss.org/nexus/service/local/staging/deploy/maven2/
+    ```bash
+    mvn clean deploy -Dgwt.compiler.skip=true -DaltDeploymentRepository=jboss-snapshots-repository::default::https://repository.jboss.org/nexus/service/local/staging/deploy/maven2/
+    ```
 
 1. Upload the docs
 
-        % cd dist
-        % scripts/upload_docs.sh ${version}
+    ```bash
+    cd dist
+    scripts/upload_docs.sh ${version}
+    ```
         
     * **NOTE**: In the case it does not work, repeat Step 2 only before retrying
     * **NOTE2**: Upload both for ${version} and `latest`.
 
-1. Tag and push the release to github
+1. Tag and push the release to GitHub
 
-        % git commit -a -m "Updated to new version x.y.z"
-        % git tag x.y.z.Final
+    ```bash
+    git commit -a -m "Updated to new version x.y.z"
+    git tag x.y.z.Final
+    ```
     
  1. Reset all versions to `x.y.z+1-SNAPSHOT` and commit
   
  1. Change back to SNAPSHOT:
-  
-        % git push origin /branch/
-        % git push origin --tags
-        % git push upstream /branch/
-        % git push upstream --tags
+    ```bash
+    git push origin /branch/
+    git push origin --tags
+    git push upstream /branch/
+    git push upstream --tags
+    ```
 
 1. Browse to nexus (https://repository.jboss.org/nexus/index.html)
     * Find the corresponding staging repository (Sort by repository Update)
@@ -78,7 +94,7 @@ Release Steps
 
 1. Release the new version on [JIRA](https://issues.jboss.org/projects/ERRAI?selectedItem=com.atlassian.jira.jira-projects-plugin%3Arelease-page&status=unreleased).
 
-1. Update the version number of errai in the getting started demo's pom.xml:
+1. Update the version number of `errai-tutorial`'s pom.xml:
   https://github.com/errai/errai-tutorial/blob/master/pom.xml
 
 1. Update the website with links to the new version (https://github.com/errai/errai.github.com)
