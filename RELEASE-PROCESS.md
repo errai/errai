@@ -71,7 +71,7 @@ Release Steps
 1. Tag and push the release to GitHub
 
     ```bash
-    git commit -a -m "Updated to new version x.y.z"
+    git commit -a -m "Updated to new version x.y.z.Final"
     git tag x.y.z.Final
     ```
     
@@ -79,7 +79,7 @@ Release Steps
     ```bash
     cd {errai_root_dir}
     ./updateVersions.sh x.y.z.Final a.b.c+1-SNAPSHOT
-    git commit -a -m "Updated to version a.b.c+1-SNAPSHOT"
+    git commit -a -m "Updated to new development version a.b.c+1-SNAPSHOT"
     ```
   
  1. Push the changes:
@@ -92,7 +92,7 @@ Release Steps
     * Find the corresponding staging repository (Sort by repository Update)
     * Select it and click Close (takes about 1 minute)
     * Select it again and click Release
-    * After that, it will take about 1 day to the artifacts show up in Maven Central. Browse to [](https://repository.jboss.org/nexus/content/groups/public/org/jboss/errai/) and verify that the artifacts are present.
+    * After that, it will take about 1 day for the artifacts to show up in Maven Central. Browse to (https://repository.jboss.org/nexus/content/groups/public/org/jboss/errai/) and verify that the artifacts are present.
 
 1. Release the new version on [JIRA](https://issues.jboss.org/projects/ERRAI?selectedItem=com.atlassian.jira.jira-projects-plugin%3Arelease-page&status=unreleased).
 
