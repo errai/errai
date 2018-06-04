@@ -50,6 +50,7 @@ import org.jboss.errai.enterprise.client.cdi.AbstractCDIEventCallback;
 import org.jboss.errai.enterprise.client.cdi.EventQualifierSerializer;
 import org.jboss.errai.enterprise.client.cdi.JsTypeEventObserver;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
+import org.jboss.errai.enterprise.client.cdi.api.SingleOnly;
 import org.jboss.errai.ioc.client.api.CodeDecorator;
 import org.jboss.errai.ioc.client.container.Factory;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.InjectUtil;
@@ -144,7 +145,9 @@ public class ObservesExtension extends IOCDecoratorExtension<Observes> {
       callBackBlock = getSubscriptionCallback(decorable, controller);
     }
 
-    final Statement subscribeStatement = Stmt.create(ctx).invokeStatic(CDI.class, subscribeMethod, parmClassName,
+    boolean isSingleOnly = qualifierNames.contains(SingleOnly.class.getName());
+
+    final Statement subscribeStatement = Stmt.create(ctx).invokeStatic(CDI.class, subscribeMethod, parmClassName, isSingleOnly,
             callBackBlock.finish().finish());
 
     if (isEnclosingTypeDependent) {

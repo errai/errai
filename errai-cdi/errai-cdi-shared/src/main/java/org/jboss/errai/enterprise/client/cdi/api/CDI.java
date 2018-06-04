@@ -176,11 +176,10 @@ public class CDI {
   }
 
   public static Subscription subscribeJsType(final String eventType, final JsTypeEventObserver<?> callback) {
-    return subscribeJsType(eventType, callback, false);
+    return subscribeJsType(eventType, false, callback);
   }
 
-  public static Subscription subscribeJsType(final String eventType, final JsTypeEventObserver<?> callback,
-                                             boolean isSingleOnly) {
+  public static Subscription subscribeJsType(final String eventType, boolean isSingleOnly, final JsTypeEventObserver<?> callback) {
     if (isSingleOnlyEventType(eventType) && hasOneOrMoreObservers(eventType)) {
       logger.debug("Attempted to subscribeJsType '" +
           eventType + "' which is 'single only' and already has an event observer.");
@@ -204,6 +203,11 @@ public class CDI {
 
   public static Subscription subscribeLocal(final String eventType, boolean isSingleOnly, final AbstractCDIEventCallback<?> callback) {
     return subscribeLocal(eventType, isSingleOnly, callback, true);
+  }
+
+  private static Subscription subscribeLocal(final String eventType, final AbstractCDIEventCallback<?> callback,
+                                             final boolean isLocalOnly) {
+    return subscribeLocal(eventType, false, callback, isLocalOnly);
   }
 
   private static Subscription subscribeLocal(final String eventType, boolean isSingleOnly, final AbstractCDIEventCallback<?> callback,
@@ -235,11 +239,10 @@ public class CDI {
   }
 
   public static Subscription subscribe(final String eventType, final AbstractCDIEventCallback<?> callback) {
-    return subscribe(eventType, callback, false);
+    return subscribe(eventType, false, callback);
   }
 
-  public static Subscription subscribe(final String eventType, final AbstractCDIEventCallback<?> callback,
-                                       boolean singleOnly) {
+  public static Subscription subscribe(final String eventType, boolean singleOnly, final AbstractCDIEventCallback<?> callback) {
 
     if (isSingleOnlyEventType(eventType) && hasOneOrMoreObservers(eventType)) {
       logger.debug("Attempted to subscribe '" +
