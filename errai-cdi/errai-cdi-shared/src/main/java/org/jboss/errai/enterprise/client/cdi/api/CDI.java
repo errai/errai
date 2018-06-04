@@ -143,10 +143,7 @@ public class CDI {
   }
 
 
-  public static void fireEvent(final boolean local,
-                               final Object payload,
-                               final Annotation... qualifiers) {
-
+  public static void fireEvent(final boolean local, final Object payload, final Annotation... qualifiers) {
     if (payload == null) return;
 
     final Object beanRef;
@@ -299,6 +296,8 @@ public class CDI {
 
   /**
    * Mark an event type as 'single only' in order to restrict multiple event handlers from being registered.
+   * If an event type already has registered observers they will remain subscribed.
+   *
    * @param eventType the event type name used when registering an event.
    */
   public static void setSingleOnlyEventType(String eventType, boolean isSingleOnly) {
@@ -312,6 +311,18 @@ public class CDI {
   public static boolean hasOneOrMoreObservers(final String eventType) {
     List<AbstractCDIEventCallback<?>> callbacks = eventObservers.get(eventType);
     return callbacks != null && !callbacks.isEmpty();
+  }
+
+  /**
+   * Unsubscribe all handlers from a given event type.
+   * @param eventType the event type name used when registering an event.
+   */
+  public static void unsubscribeAll(String eventType) {
+    if (hasOneOrMoreObservers(eventType)) {
+      for (AbstractCDIEventCallback<?> callback : eventObservers.get(eventType)) {
+        unsubscribe(eventType, callback);
+      }
+    }
   }
 
   /**
