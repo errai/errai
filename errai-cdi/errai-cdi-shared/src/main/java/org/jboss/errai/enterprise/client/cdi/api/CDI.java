@@ -322,7 +322,7 @@ public class CDI {
    */
   public static void unsubscribeAll(String eventType) {
     if (hasOneOrMoreObservers(eventType)) {
-      for (AbstractCDIEventCallback<?> callback : eventObservers.get(eventType)) {
+      for (AbstractCDIEventCallback<?> callback : new ArrayList<>(eventObservers.get(eventType))) {
         unsubscribe(eventType, callback);
       }
     }
