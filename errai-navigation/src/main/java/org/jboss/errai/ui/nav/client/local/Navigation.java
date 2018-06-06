@@ -428,6 +428,7 @@ public class Navigation {
       }
 
       maybeAttachContentPanel();
+      HistoryToken prevState = currentPageToken;
       currentPageToken = request.state;
 
       if ((unwrappedComponent instanceof Composite) && (getCompositeWidget((Composite) unwrappedComponent) == null)) {
@@ -435,19 +436,20 @@ public class Navigation {
           @Override
           public void onAttachOrDetach(final AttachEvent event) {
             if (event.isAttached() && currentWidget != unwrappedComponent) {
-              pageHiding(unwrappedComponent, widget, request, fireEvent);
+              pageHiding(unwrappedComponent, widget, request, prevState, fireEvent);
             }
           }
         });
         attachHandlerRegistrations.put(widget, reg);
       }
       else {
-        pageHiding(unwrappedComponent, widget, request, fireEvent);
+        pageHiding(unwrappedComponent, widget, request, prevState, fireEvent);
       }
     });
   }
 
-  private <C, W extends IsWidget> void pageHiding(final C component, final W componentWidget, final Request<C> request, final boolean fireEvent) {
+  private <C, W extends IsWidget> void pageHiding(final C component, final W componentWidget, final Request<C> request,
+                                                  final HistoryToken prevState, final boolean fireEvent) {
     if (component instanceof Proxy) {
       throw new RuntimeException("Was passed in a proxy, but should always receive an unwrapped widget.");
     }
@@ -514,9 +516,10 @@ public class Navigation {
     }, new Runnable() {
       @Override
       public void run() {
-        hideCurrentPage(null, new NavigationControl(Navigation.this, () -> {
-          setCurrentPage(null);
-        }));
+        if (prevState != null) {
+          currentPageToken = historyTokenFactory.createHistoryToken(prevState.getPageName(), prevState.getState());
+          HistoryWrapper.newItem(currentPageToken.toString(), false);
+        }
       }
     });
 
