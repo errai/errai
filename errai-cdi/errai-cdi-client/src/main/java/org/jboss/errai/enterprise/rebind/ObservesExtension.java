@@ -34,15 +34,15 @@ import javax.enterprise.inject.Any;
 
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.Subscription;
-import org.jboss.errai.codegen.Context;
-import org.jboss.errai.codegen.Parameter;
-import org.jboss.errai.codegen.Statement;
+import org.jboss.errai.codegen.*;
 import org.jboss.errai.codegen.builder.AnonymousClassStructureBuilder;
 import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.builder.ContextualStatementBuilder;
+import org.jboss.errai.codegen.builder.impl.BooleanExpressionBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
+import org.jboss.errai.codegen.util.Bool;
 import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.config.rebind.EnvUtil;
@@ -152,7 +152,7 @@ public class ObservesExtension extends IOCDecoratorExtension<Observes> {
 
     if (isEnclosingTypeDependent) {
       initStatements.add(controller.setReferenceStmt(subscrVar, subscribeStatement));
-      destroyStatements.add(controller.getReferenceStmt(subscrVar, Subscription.class).invoke("remove"));
+      destroyStatements.add(Stmt.if_(Bool.notEquals(subscrVar, "null")).append(controller.getReferenceStmt(subscrVar, Subscription.class).invoke("remove")).finish());
     } else {
       initStatements.add(subscribeStatement);
     }
@@ -165,7 +165,9 @@ public class ObservesExtension extends IOCDecoratorExtension<Observes> {
           final String subscrHandle = subscrVar + "For" + cls.getSimpleName();
           initStatements.add(controller.setReferenceStmt(subscrHandle, routingSubStmt));
           destroyStatements.add(
-                  Stmt.nestedCall(controller.getReferenceStmt(subscrHandle, Subscription.class)).invoke("remove"));
+              Stmt.if_(Bool.notEquals(subscrHandle, "null")).append(
+                  Stmt.nestedCall(controller.getReferenceStmt(subscrHandle, Subscription.class)).invoke("remove"))
+                .finish());
         } else {
           initStatements.add(routingSubStmt);
         }
