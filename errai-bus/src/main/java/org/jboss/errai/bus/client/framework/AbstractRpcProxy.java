@@ -22,6 +22,7 @@ import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.base.DefaultErrorCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.api.builder.RemoteCallSendable;
+import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.bus.client.api.messaging.MessageBus;
 import org.jboss.errai.common.client.api.ErrorCallback;
 import org.jboss.errai.common.client.api.RemoteCallback;
@@ -39,16 +40,13 @@ import org.jboss.errai.common.client.protocols.MessageParts;
 @SuppressWarnings("rawtypes")
 public abstract class AbstractRpcProxy implements RpcStub {
 
-  private static final ErrorCallback defaultErrorCallback = new ErrorCallback() {
-    @Override
-    public boolean error(Object message, Throwable throwable) {
-      invokeDefaultErrorHandlers(throwable);
-      return false;
-    }
+  public static ErrorCallback<Message> DEFAULT_RPC_ERROR_CALLBACK = (message, throwable) -> {
+    invokeDefaultErrorHandlers(throwable);
+    return false;
   };
 
   protected RemoteCallback remoteCallback;
-  protected ErrorCallback errorCallback = defaultErrorCallback;
+  protected ErrorCallback errorCallback = DEFAULT_RPC_ERROR_CALLBACK;
   protected Annotation[] qualifiers;
   protected RpcBatch batch;
 
