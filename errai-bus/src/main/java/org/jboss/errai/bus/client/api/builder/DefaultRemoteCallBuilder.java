@@ -16,17 +16,11 @@
 
 package org.jboss.errai.bus.client.api.builder;
 
-import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import org.jboss.errai.bus.client.api.BusErrorCallback;
 import org.jboss.errai.bus.client.api.base.DefaultErrorCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.api.messaging.Message;
-import org.jboss.errai.bus.client.api.messaging.MessageBus;
-import org.jboss.errai.bus.client.api.messaging.MessageCallback;
+import org.jboss.errai.bus.client.framework.AbstractRpcProxy;
 import org.jboss.errai.common.client.api.Assert;
 import org.jboss.errai.common.client.api.ErrorCallback;
 import org.jboss.errai.common.client.api.RemoteCallback;
@@ -36,6 +30,11 @@ import org.jboss.errai.common.client.framework.RpcStub;
 import org.jboss.errai.common.client.protocols.MessageParts;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Facilitates the building of a remote call. Ensures that the remote call is constructed properly.
@@ -86,62 +85,49 @@ public class DefaultRemoteCallBuilder {
   public RemoteCallEndpointDef call(final String serviceName) {
     message.toSubject(serviceName + ":RPC");
 
-    final RemoteCallSendable sendable = new RemoteCallSendable() {
+    final RemoteCallSendable sendable = bus -> {
+      final Integer id;
 
-      @Override
-      public void sendNowWith(final MessageBus bus) {
-        final Integer id;
+      final String rpcMethod = message.getCommandType();
+      final String replyTo = message.getSubject() + "." + rpcMethod + ":" + (id = uniqueNumber()) + ":RespondTo:RPC";
+      final String errorTo = message.getSubject() + "." + rpcMethod + ":" + id + ":Errors:RPC";
 
-        final String rpcMethod = message.getCommandType();
-        final String replyTo =
-            message.getSubject() + "." + rpcMethod + ":" + (id = uniqueNumber()) + ":RespondTo:RPC";
-
-        final String errorTo =
-            message.getSubject() + "." + rpcMethod + ":" + id + ":Errors:RPC";
-
-        if (remoteCallback != null) {
-          bus.subscribe(replyTo,
-              new MessageCallback() {
-                @Override
-                public void callback(final Message message) {
-                  logger.debug("Received RPC response: [service={}, endpoint={}]", serviceName, rpcMethod);
-                  bus.unsubscribeAll(replyTo);
-                  if (DefaultRemoteCallBuilder.this.message.getErrorCallback() != null) {
-                    bus.unsubscribeAll(errorTo);
-                  }
-                  remoteCallback.callback(message.get(responseType, "MethodReply"));
-                }
-              }
-          );
-          message.set(MessageParts.ReplyTo, replyTo);
-        }
-
-        if (message.getErrorCallback() != null) {
-          bus.subscribe(errorTo,
-              new MessageCallback() {
-                @Override
-                public void callback(final Message m) {
-                  logger.debug("Received RPC error: [service={}, endpoint={}]", serviceName, rpcMethod);
-                  bus.unsubscribeAll(errorTo);
-                  if (remoteCallback != null) {
-                    bus.unsubscribeAll(replyTo);
-                  }
-                  message.set(MessageParts.AdditionalDetails, m.get(String.class, MessageParts.AdditionalDetails));
-                  final Throwable throwable = m.get(Throwable.class, MessageParts.Throwable);
-                  final boolean defaultErrorHandling = message.getErrorCallback().error(message,
-                      throwable);
-                  if (defaultErrorHandling) {
-                    DefaultErrorCallback.INSTANCE.error(message, throwable);
-                  }
-                }
-              }
-          );
-          message.set(MessageParts.ErrorTo, errorTo);
-        }
-
-        logger.debug("Sending RPC request: [service={}, endpoint={}]", serviceName, rpcMethod);
-        message.sendNowWith(bus);
+      if (remoteCallback != null) {
+        bus.subscribe(replyTo, m -> {
+          logger.debug("Received RPC response: [service={}, endpoint={}]", serviceName, rpcMethod);
+          bus.unsubscribeAll(replyTo);
+          if (message.getErrorCallback() != null) {
+            bus.unsubscribeAll(errorTo);
+          }
+          try {
+            //Prevent ErraiBus to handle RPC success callback exceptions.
+            remoteCallback.callback(m.get(responseType, "MethodReply"));
+          } catch (final Exception e) {
+            AbstractRpcProxy.DEFAULT_RPC_ERROR_CALLBACK.error(m, new RuntimeException("Client-side exception occurred although RPC call succeeded.", e));
+          }
+        });
+        message.set(MessageParts.ReplyTo, replyTo);
       }
+
+      if (message.getErrorCallback() != null) {
+        bus.subscribe(errorTo, m -> {
+          logger.debug("Received RPC error: [service={}, endpoint={}]", serviceName, rpcMethod);
+          bus.unsubscribeAll(errorTo);
+          if (remoteCallback != null) {
+            bus.unsubscribeAll(replyTo);
+          }
+          message.set(MessageParts.AdditionalDetails, m.get(String.class, MessageParts.AdditionalDetails));
+          final Throwable throwable = m.get(Throwable.class, MessageParts.Throwable);
+          final boolean shouldPerformDefaultErrorHandling = message.getErrorCallback().error(message, throwable);
+          if (shouldPerformDefaultErrorHandling) {
+            DefaultErrorCallback.INSTANCE.error(message, throwable);
+          }
+        });
+        message.set(MessageParts.ErrorTo, errorTo);
+      }
+
+      logger.debug("Sending RPC request: [service={}, endpoint={}]", serviceName, rpcMethod);
+      message.sendNowWith(bus);
     };
 
     final RemoteCallErrorDef errorDef = new RemoteCallErrorDef() {
