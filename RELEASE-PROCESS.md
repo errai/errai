@@ -67,7 +67,8 @@ Release Steps
         
     * **NOTE**: In the case it does not work, repeat Step 2 only before retrying.
     * **NOTE2**: Upload both for {version} and `latest`. Remember to pass the `--skip-mkdirs` param when uploading `latest`.
-
+    * **NOTE3**: If you get a "Permission denied" message, make sure that you have your keys on the `~/.ssh` directory and that you've ran `ssh-add -K ${path-to-key}` too.
+    
 1. Tag and push the release to GitHub
 
     ```bash
