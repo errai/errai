@@ -317,7 +317,10 @@ public class CDI {
         try {
           fireIfNotFired(callback, message);
         } catch (final Exception e) {
-            throw new RuntimeException("CDI Event exception: " + message + " sent to " + callbackOwnerClass(callback), e);
+          final String potentialTarget = callbackOwnerClass(callback);
+          String actualTarget = potentialTarget.equalsIgnoreCase("undefined.undefined") ? "[unavailable]" : potentialTarget;
+
+          throw new RuntimeException("CDI Event exception: " + message + " sent to " + actualTarget, e);
         }
       }
     }
