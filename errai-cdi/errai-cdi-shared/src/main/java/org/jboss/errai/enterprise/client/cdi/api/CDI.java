@@ -314,10 +314,36 @@ public class CDI {
   private static void _fireEvent(final String beanType, final Message message) {
     if (eventObservers.containsKey(beanType)) {
       for (final MessageCallback callback : new ArrayList<MessageCallback>(eventObservers.get(beanType))) {
-        fireIfNotFired(callback, message);
+        try {
+          fireIfNotFired(callback, message);
+        } catch (final Exception e) {
+          final String potentialTarget = callbackOwnerClass(callback);
+          String actualTarget = potentialTarget.equalsIgnoreCase("undefined.undefined") ? "[unavailable]" : potentialTarget;
+
+          throw new RuntimeException("CDI Event exception: " + message + " sent to " + actualTarget, e);
+        }
       }
     }
   }
+
+  private static native String callbackOwnerClass(final Object o) /*-{
+
+    var pkg, clazzName;
+
+    for (var protoKey in o.__proto__) {
+        if (protoKey.startsWith("___clazz")) {
+            for (var clazzKey in o[protoKey]) {
+                if (clazzKey.startsWith("package")) {
+                    pkg = o[protoKey][clazzKey];
+                }
+                if (clazzKey.startsWith("compound")) {
+                    clazzName = o[protoKey][clazzKey];
+                }
+            }
+        }
+    }
+    return pkg + "." + clazzName;
+  }-*/;
 
   @SuppressWarnings("unchecked")
   private static void fireIfNotFired(final MessageCallback callback, final Message message) {
