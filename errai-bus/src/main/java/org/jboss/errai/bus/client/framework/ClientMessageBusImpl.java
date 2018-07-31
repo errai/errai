@@ -196,7 +196,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
           // try to reconnect
           InitVotes.reset();
-          stop(false);
+          stop(false, new BusTransportError(transportHandler, null,
+              new SessionExpiredException(), -1, new RetryInfo(0, 0)));
           init();
 
           break;

@@ -170,6 +170,7 @@ public abstract class AbstractErraiServlet extends HttpServlet {
 
   protected void sendDisconnectDueToSessionExpiry(final HttpServletResponse response) throws IOException {
     response.setStatus(200);
+    response.setContentType("application/json");
     writeToOutputStream(response.getOutputStream(),
         "{\"" + MessageParts.ToSubject.name() + "\":\"ClientBus\", \"" + MessageParts.CommandType.name()
             + "\":\"" + BusCommand.SessionExpired.name() + "\"}");
