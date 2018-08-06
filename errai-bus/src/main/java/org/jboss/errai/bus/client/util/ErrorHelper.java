@@ -226,7 +226,7 @@ public class ErrorHelper {
             "\ndisconnect: " + disconnect;
 
     if (!(e instanceof MessageDeliveryFailure && ((MessageDeliveryFailure) e).isRpcEndpointException())) {
-      if (e != null) {
+      if (e == null) {
         logger.error(logMessage);
       }
       else {
