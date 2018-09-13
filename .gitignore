@@ -35,3 +35,4 @@ gwt-unitCache/
 class_list.txt
 *.jpage
 .factorypath
+dependency-reduced-pom.xml
