@@ -37,7 +37,7 @@ import org.jboss.errai.security.shared.service.AuthenticationService;
  *
  * @author Max Barkley <mbarkley@redhat.com>
  */
-public interface User extends Serializable {
+public interface User<R extends Role, G extends Group> extends Serializable {
 
   /**
    * Represents a user who is not logged in. This user has no properties and a
@@ -67,14 +67,14 @@ public interface User extends Serializable {
    *
    * @return The set of all {@link Role Roles} associated with this user.
    */
-  Set<Role> getRoles();
+  Set<R> getRoles();
   
   /**
    * The implementation returned must use the {@link Object#equals(Object)} method for comparison.
    *
    * @return The set of all {@link Group Groups} associated with this user.
    */
-  Set<Group> getGroups();
+  Set<G> getGroups();
   
   /**
    * Note: the contents of this map will depend on the implementations of {@link User} and
