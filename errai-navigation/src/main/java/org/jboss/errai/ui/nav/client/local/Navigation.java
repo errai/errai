@@ -491,9 +491,9 @@ public class Navigation {
 
                   handleQueuedRequests(request, fireEvent);
                 }
-              }, new Runnable() {
+              }, new NavigationControl.Interrupt() {
                 @Override
-                public void run() {
+                public void interrupt(boolean redirect) {
                   locked = false;
                 }
               });
@@ -513,10 +513,14 @@ public class Navigation {
           }
         });
       }
-    }, new Runnable() {
+    }, new NavigationControl.Interrupt() {
       @Override
-      public void run() {
-        if (prevState != null) {
+      public void interrupt(boolean redirect) {
+        if (redirect || prevState == null) {
+          hideCurrentPage(null, new NavigationControl(Navigation.this, () -> {
+            setCurrentPage(null);
+          }));
+        } else {
           currentPageToken = historyTokenFactory.createHistoryToken(prevState.getPageName(), prevState.getState());
           HistoryWrapper.newItem(currentPageToken.toString(), false);
         }
