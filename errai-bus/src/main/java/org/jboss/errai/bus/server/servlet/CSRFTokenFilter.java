@@ -17,8 +17,7 @@
 package org.jboss.errai.bus.server.servlet;
 
 import static org.jboss.errai.common.client.framework.Constants.ERRAI_CSRF_TOKEN_VAR;
-import static org.jboss.errai.common.server.FilterCacheUtil.getCharResponseWrapper;
-import static org.jboss.errai.common.server.FilterCacheUtil.noCache;
+import static org.jboss.errai.common.server.FilterCacheUtil.*;
 
 import java.io.IOException;
 
@@ -74,19 +73,23 @@ public class CSRFTokenFilter implements Filter {
       final HttpSession session = httpRequest.getSession(false);
 
       final byte[] bytes;
+      final String output;
       final String responseContentType = responseWrapper.getContentType();
       if (session != null && responseContentType != null && responseContentType.toLowerCase().startsWith("text/html")) {
+
         CSRFTokenCheck.INSTANCE.prepareSession(session, log);
         final Document document = Jsoup.parse(responseWrapper.toString());
-        document.head().prepend("<script>var " + ERRAI_CSRF_TOKEN_VAR + " = '" + CSRFTokenCheck.getToken(session) + "';</script>");
-        bytes = document.html().getBytes("UTF-8");
+        String injectedScript = "<script>var " + ERRAI_CSRF_TOKEN_VAR + " = '" + CSRFTokenCheck.getToken(session) + "';</script>";
+        document.head().prepend(injectedScript);
+        output = document.html();
       }
       else {
-        bytes = responseWrapper.toString().getBytes("UTF-8");
+        output = responseWrapper.toString();
       }
 
+      bytes = output.getBytes("UTF-8");
       response.setContentLength(bytes.length);
-      response.getOutputStream().write(bytes);
+      response.getWriter().print(output);
 
       return;
     }
@@ -100,5 +103,4 @@ public class CSRFTokenFilter implements Filter {
       CSRFTokenCheck.INSTANCE.prepareSession(session, log);
     }
   }
-
 }
