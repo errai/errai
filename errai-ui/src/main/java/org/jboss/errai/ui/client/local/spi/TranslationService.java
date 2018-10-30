@@ -72,19 +72,15 @@ public abstract class TranslationService {
 
   /**
    * Registers the bundle with the translation service.
-   *
-   * @param jsonData
    */
-  protected void registerJsonBundle(final String data, final String locale) {
+  public void registerJsonBundle(final String data, final String locale) {
     registerJSON(JSONMap.create(data), locale);
   }
 
   /**
    * Registers the bundle with the translation service.
-   *
-   * @param jsonData
    */
-  protected void registerPropertiesBundle(final String data, final String locale) {
+  public void registerPropertiesBundle(final String data, final String locale) {
     final Map<String, String> translation = Properties.load(data);
 
     for (final Entry<String, String> entry : translation.entrySet()) {
@@ -94,12 +90,8 @@ public abstract class TranslationService {
 
   /**
    * Registers a single translation.
-   *
-   * @param key
-   * @param value
-   * @param locale
    */
-  protected void registerTranslation(final String key, final String value, String locale) {
+  public void registerTranslation(final String key, final String value, String locale) {
     if (locale != null) {
       locale = locale.toLowerCase();
     }
@@ -109,11 +101,8 @@ public abstract class TranslationService {
   /**
    * Registers some i18n data with the translation service. This is called for each discovered
    * bundle file.
-   *
-   * @param data
-   * @param locale
    */
-  protected void registerJSON(final JSONMap data, final String locale) {
+  public void registerJSON(final JSONMap data, final String locale) {
     logger.fine("Registering translation data for locale: " + locale);
     final Set<String> keys = data.keys();
     for (final String key : keys) {
@@ -125,15 +114,13 @@ public abstract class TranslationService {
 
   /**
    * Gets the translation for the given i18n translation key.
-   *
-   * @param translationKey
    */
   public String getTranslation(final String translationKey) {
     final String localeName = getActiveLocale();
     return getTranslation(translationKey, localeName, null);
   }
 
-  private String getTranslation(final String translationKey, final String localeName, final String defaultValue) {
+  protected String getTranslation(final String translationKey, final String localeName, final String defaultValue) {
     logger.fine("Translating key: " + translationKey + "  into locale: " + localeName);
     final Map<String, String> translationData = dictionary.get(localeName);
     if (translationData.containsKey(translationKey)) {
@@ -161,9 +148,6 @@ public abstract class TranslationService {
   /**
    * Look up a message in the i18n resource message bundle by key, then format the message with the
    * given arguments and return the result.
-   *
-   * @param key
-   * @param args
    */
   public String format(final String key, final Object... args) {
     final String pattern = getTranslation(key, getActiveLocale(), "!!!" + key + "!!!"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -220,7 +204,7 @@ public abstract class TranslationService {
   /**
    * Gets the browser's configured locale.
    */
-  public final static native String getBrowserLocale() /*-{
+  public static native String getBrowserLocale() /*-{
     if ($wnd.navigator.language) {
       return $wnd.navigator.language;
     }
@@ -238,10 +222,8 @@ public abstract class TranslationService {
 
   /**
    * Forcibly set the current locale and re-translate all instantiated {@link Templated} beans.
-   *
-   * @param locale
    */
-  public final static void setCurrentLocale(final String locale) {
+  public static void setCurrentLocale(final String locale) {
     setCurrentLocaleWithoutUpdate(locale);
     retranslateTemplatedBeans();
   }
@@ -257,10 +239,8 @@ public abstract class TranslationService {
   /**
    * Forcibly set the current locale but do not re-translate existing templated instances. Mostly
    * useful for testing.
-   *
-   * @param locale
    */
-  public final static void setCurrentLocaleWithoutUpdate(final String locale) {
+  public static void setCurrentLocaleWithoutUpdate(final String locale) {
     currentLocale = locale;
   }
 
