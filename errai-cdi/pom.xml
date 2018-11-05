@@ -61,9 +61,6 @@
     <module>errai-cdi-client</module>
     <module>errai-cdi-shared</module>
     <module>errai-cdi-server</module>
-
-    <!-- This is temporary solution to compile needed wildfly 14 dist. Will be removed after merge -->
-    <module>errai-wildfly-dist</module>
   </modules>
 
   <build>
