@@ -107,3 +107,15 @@ Release Steps
 1. (Optional) Tweet about the release!
 
 === You're done! Congrats! You deserve beer! ===
+
+
+Relesing org.jboss.errai:wildfly-dist
+----
+
+1. `cd errai-cdi/errai-wildfly-dist`
+
+2. Make sure that you have the right permissions on Nexus then run:
+```bash
+mvn clean deploy
+```
+3. After that, execute only step 9. of the normal Release Process.
