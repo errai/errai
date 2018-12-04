@@ -5,7 +5,7 @@
   <name>Errai::JPA::Demos::GroceryList</name>
   <groupId>org.jboss.errai.demos</groupId>
   <artifactId>errai-jpa-demo-grocery-list</artifactId>
-  <version>4.4.0-SNAPSHOT</version>
+  <version>4.4.2-SNAPSHOT</version>
   <packaging>war</packaging>
 
   <url>http://jboss.org/errai/errai</url>
@@ -66,7 +66,7 @@
     <skipTests>true</skipTests>
     <errai.jboss.home>${project.build.directory}/wildfly-${wildfly.version}</errai.jboss.home>    
     <errai.dev.context>${project.artifactId}</errai.dev.context>
-    <wildfly.version>10.0.0.Final</wildfly.version>
+    <wildfly.version>14.0.1.Final</wildfly.version>
   </properties>
 
   <repositories>

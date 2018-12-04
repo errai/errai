@@ -8,7 +8,7 @@
   <parent>
     <groupId>org.jboss.errai</groupId>
     <artifactId>errai-parent</artifactId>
-    <version>4.4.0-SNAPSHOT</version>
+    <version>4.4.2-SNAPSHOT</version>
   </parent>
 
   <artifactId>errai-demos</artifactId>

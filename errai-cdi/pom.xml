@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <name>Errai::CDI</name>
   <artifactId>cdi-integration-parent</artifactId>
@@ -11,7 +11,7 @@
   <parent>
     <groupId>org.jboss.errai</groupId>
     <artifactId>errai-parent</artifactId>
-    <version>4.4.0-SNAPSHOT</version>
+    <version>4.4.2-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
@@ -24,8 +24,8 @@
   </licenses>
 
   <description>
-        CDI Integration for Errai
-    </description>
+    CDI Integration for Errai
+  </description>
 
   <developers>
     <developer>
@@ -94,7 +94,8 @@
               <trimStackTrace>false</trimStackTrace>
               <!-- DO NOT REMOVE THE errai.ioc.experimental.infer_dependent_by_reachability flag or the testsuite WILL fail. -->
               <argLine>-Xmx1500m ${argLine} -Dgwt.args='-testBeginTimeout 5 ${gwtArgs}' -Derrai.hosted_mode_testing=true
-                -Derrai.ioc.experimental.infer_dependent_by_reachability=true</argLine>
+                -Derrai.ioc.experimental.infer_dependent_by_reachability=true
+              </argLine>
               <systemProperties>
                 <property>
                   <name>log4j.output.dir</name>
