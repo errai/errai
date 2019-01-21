@@ -471,14 +471,7 @@
         <artifactId>wildfly-protocol</artifactId>
         <version>${version.org.wildfly.core}</version>
       </dependency>
-
-      <!-- ts-exporter -->
-      <dependency>
-        <groupId>org.appformer</groupId>
-        <artifactId>ts-exporter</artifactId>
-        <version>${version.ts-exporter}</version>
-      </dependency>
-
+      
     </dependencies>
   </dependencyManagement>
 </project>
