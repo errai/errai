@@ -35,8 +35,8 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.CriteriaUpdate;
 import javax.persistence.metamodel.Metamodel;
 
-import org.hibernate.jpa.internal.metamodel.MetamodelImpl;
 import org.hibernate.mapping.PersistentClass;
+import org.hibernate.metamodel.internal.MetamodelImpl;
 
 public class MockEntityManager implements EntityManager {
 
@@ -105,7 +105,7 @@ public class MockEntityManager implements EntityManager {
 
   @Override
   public void refresh(Object entity, Map<String, Object> properties) {
-    
+
   }
 
   @Override
@@ -118,12 +118,12 @@ public class MockEntityManager implements EntityManager {
 
   @Override
   public void clear() {
-    
+
   }
 
   @Override
   public void detach(Object entity) {
-    
+
   }
 
   @Override
@@ -237,7 +237,7 @@ public class MockEntityManager implements EntityManager {
 
   @Override
   public void close() {
-    
+
   }
 
   @Override
@@ -262,8 +262,7 @@ public class MockEntityManager implements EntityManager {
 
   @Override
   public Metamodel getMetamodel() {
-    return MetamodelImpl.buildMetamodel(Collections.<PersistentClass>emptyList().iterator(),
-            null, null, true);
+    return new MetamodelImpl(null, null);
   }
 
   @Override

@@ -36,7 +36,7 @@ import javax.persistence.metamodel.SingularAttribute;
 import javax.persistence.metamodel.Type;
 
 import org.apache.commons.collections.OrderedMap;
-import org.hibernate.ejb.HibernatePersistence;
+import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.jboss.errai.codegen.BlockStatement;
 import org.jboss.errai.codegen.BooleanExpression;
 import org.jboss.errai.codegen.Modifier;
@@ -292,7 +292,7 @@ public class ErraiEntityManagerGenerator extends AbstractAsyncGenerator {
     for (Class<?> entity : scanner.getTypesAnnotatedWith(Entity.class, RebindUtils.findTranslatablePackages(context))) {
       managedTypeNames.add(entity.getName());
     }
-    return new HibernatePersistence().createContainerEntityManagerFactory(
+    return new HibernatePersistenceProvider().createContainerEntityManagerFactory(
         new ErraiPersistenceUnitInfo(managedTypeNames), properties);
   }
 

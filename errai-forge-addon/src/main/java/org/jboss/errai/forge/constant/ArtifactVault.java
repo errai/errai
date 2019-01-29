@@ -51,7 +51,7 @@ public final class ArtifactVault {
     JavaxValidation("validation-api", "javax.validation"),
     JavaxValidationSources("validation-api", "javax.validation", "sources", null),
     HibernateAnnotations("hibernate-commons-annotations", "org.hibernate.common"),
-    HibernateJpa("hibernate-jpa-2.1-api", "org.hibernate.javax.persistence"),
+    HibernateJpa("javax.persistence-api", "javax.persistence"),
     HibernateCore("hibernate-core", "org.hibernate"),
     HibernateEntityManager("hibernate-entitymanager", "org.hibernate"),
     HibernateValidator("hibernate-validator", "org.hibernate"),
