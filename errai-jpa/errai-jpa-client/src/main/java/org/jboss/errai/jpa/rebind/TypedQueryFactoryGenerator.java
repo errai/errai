@@ -174,10 +174,10 @@ public class TypedQueryFactoryGenerator {
    */
   private Statement[] generateQueryParamArray() {
     if (logger.isDebugEnabled()) {
-      logger.debug("Named parameters: " + query.getParameterTranslations().getNamedParameterNames());
+      logger.debug("Named parameters: " + query.getParameterTranslations().getNamedParameterInformationMap().keySet());
     }
     @SuppressWarnings("unchecked")
-    List<ParameterSpecification> parameterSpecifications = query.getSqlAST().getWalker().getParameters();
+    List<ParameterSpecification> parameterSpecifications = query.getSqlAST().getWalker().getParameterSpecs();
     Statement generatedParamList[] = new Statement[parameterSpecifications.size()];
     for (int i = 0; i < parameterSpecifications.size(); i++) {
       NamedParameterSpecification ps = (NamedParameterSpecification) parameterSpecifications.get(i);
