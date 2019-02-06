@@ -366,7 +366,7 @@
         </dependency>
 
         <dependency><groupId>com.google.guava</groupId><artifactId>guava-gwt</artifactId><scope>provided</scope></dependency>
-        <dependency><groupId>dom4j</groupId><artifactId>dom4j</artifactId><scope>provided</scope></dependency>
+        <dependency><groupId>org.dom4j</groupId><artifactId>dom4j</artifactId><scope>provided</scope></dependency>
         <dependency><groupId>javax.enterprise</groupId><artifactId>cdi-api</artifactId><scope>provided</scope></dependency>
         <dependency><groupId>javax.inject</groupId><artifactId>javax.inject</artifactId><scope>provided</scope></dependency>
         <dependency><groupId>junit</groupId><artifactId>junit</artifactId><scope>provided</scope></dependency>
