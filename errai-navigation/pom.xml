@@ -126,10 +126,10 @@
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-surefire-plugin</artifactId>
             <!-- Override exclusions in parent -->
-            <configuration combine.self="override">
-              <excludes>
+            <configuration >
+              <excludes combine.self="override">
               </excludes>
-              <includes>
+              <includes combine.self="override">
                 <include>**/rebind/**/*Test.java</include>
                 <include>**/rebind/**/*Tests.java</include>
               </includes>
