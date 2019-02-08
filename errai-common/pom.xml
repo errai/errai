@@ -122,11 +122,11 @@
           <plugin>
             <artifactId>maven-surefire-plugin</artifactId>
             <!-- Override exclusions in parent -->
-            <configuration combine.self="override">
-              <excludes>
+            <configuration>
+              <excludes combine.self="override">
                 <exclude>**/it/**/*.java</exclude>
               </excludes>
-              <includes>
+              <includes combine.self="override">
                 <include>**/*Tests.java</include>
                 <include>**/*Test.java</include>
               </includes>
