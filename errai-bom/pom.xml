@@ -471,7 +471,6 @@
         <artifactId>wildfly-protocol</artifactId>
         <version>${version.org.wildfly.core}</version>
       </dependency>
-      
     </dependencies>
   </dependencyManagement>
 </project>
