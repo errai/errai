@@ -127,7 +127,9 @@ public class MarshallUtil {
       m = new FallbackExceptionMarshaller();
     }
     // Attempt to marshal weld/hibernate javassist created objects.
-    if (m == null && (obj.getClass().getName().contains("_$$_javassist_") || obj.getClass().getName().contains("_$$_jvst"))) {
+    if (m == null && (obj.getClass().getName().contains("$HibernateProxy") || obj.getClass().getName()
+            .contains("_$$_javassist_") || obj.getClass().getName().contains("_$$_jvst"))) {
+
       className = obj.getClass().getSuperclass().getName();
       m = session.getMarshallerInstance(className);
     }
