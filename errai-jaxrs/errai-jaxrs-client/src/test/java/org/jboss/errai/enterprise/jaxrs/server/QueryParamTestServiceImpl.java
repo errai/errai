@@ -19,6 +19,7 @@ package org.jboss.errai.enterprise.jaxrs.server;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.jboss.errai.enterprise.jaxrs.client.shared.QueryParamTestService;
 import org.jboss.errai.enterprise.jaxrs.client.shared.entity.EnumMapEntity.SomeEnum;
@@ -53,6 +54,11 @@ public class QueryParamTestServiceImpl implements QueryParamTestService {
   @Override
   public Set<String> getWithQueryParamSetOfStrings(Set<String> id) {
     return id;
+  }
+
+  @Override
+  public Set<String> getWithQueryParamSetOfStringsTreeSet(Set<String> id) {
+    return new TreeSet<>(id);
   }
 
   @Override

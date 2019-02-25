@@ -59,7 +59,11 @@ public interface QueryParamTestService {
   @GET
   @Path("/5")
   public Set<String> getWithQueryParamSetOfStrings(@QueryParam("id") Set<String> id);
-  
+
+  @GET
+  @Path("/5t")
+  public Set<String> getWithQueryParamSetOfStringsTreeSet(@QueryParam("id") Set<String> id);
+
   @GET
   @Path("/6")
   public List<String> getWithQueryParamListOfStrings(@QueryParam("id") List<String> id);
