@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.jboss.errai.enterprise.client.jaxrs.test.AbstractErraiJaxrsTest;
 import org.jboss.errai.enterprise.jaxrs.client.shared.QueryParamTestService;
@@ -94,6 +95,13 @@ public class QueryParamIntegrationTest extends AbstractErraiJaxrsTest {
     final Set<String> strings = new HashSet<>(Arrays.asList("1", "2", "3"));
     call(QueryParamTestService.class,
         new SimpleAssertionCallback<>("@GET with Set<String> as @QueryParams failed", strings)).getWithQueryParamSetOfStrings(strings);
+  }
+
+  @Test
+  public void testGetWithQueryParamSetOfStringsTreeSet() {
+    final Set<String> strings = new TreeSet<>(Arrays.asList("1", "2", "3"));
+    call(QueryParamTestService.class,
+            new SimpleAssertionCallback<>("@GET with Set<String> as @QueryParams failed", strings)).getWithQueryParamSetOfStringsTreeSet(strings);
   }
 
   @Test
