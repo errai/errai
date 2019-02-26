@@ -49,7 +49,8 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-dependency-plugin</artifactId>
         <configuration>
-          <excludes>**/core/**,**/ext/**</excludes>
+          <includes>**/ws/rs/*.java</includes>
+          <excludes>**/ws/rs/*Exception.java</excludes>
         </configuration>
         <executions>
           <execution>
@@ -62,8 +63,7 @@
               <artifactItems>
                 <artifactItem>
                   <groupId>org.jboss.spec.javax.ws.rs</groupId>
-                  <artifactId>jboss-jaxrs-api_1.1_spec</artifactId>
-                  <version>1.0.1.Final</version>
+                  <artifactId>jboss-jaxrs-api_2.1_spec</artifactId>
                   <classifier>sources</classifier>
                   <overWrite>false</overWrite>
                   <outputDirectory>target/generated-sources/javax/ws/rs/super</outputDirectory>
@@ -161,6 +161,12 @@
     <dependency>
       <groupId>org.jboss.resteasy</groupId>
       <artifactId>resteasy-jaxrs</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.jboss.errai</groupId>
+      <artifactId>errai-jaxrs-resteasy</artifactId>
       <scope>test</scope>
     </dependency>
 
