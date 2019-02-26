@@ -39,6 +39,9 @@
  *
  * Red Hat elects to include this software in this distribution under the CDDL
  * license.
+ *
+ * Portions Copyright 2019 Red Hat
+ *
  */
 
 package javax.ws.rs.core;
