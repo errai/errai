@@ -75,7 +75,6 @@
     <!-- this versions can be removed once these were migrated to jboss-ip-bom > 8.3.0.Final -->
     <version.org.wildfly>14.0.1.Final</version.org.wildfly>
     <version.org.wildfly.core>6.0.2.Final</version.org.wildfly.core>
-    <version.ts-exporter>1.0.0-SNAPSHOT</version.ts-exporter>
   </properties>
 
   <scm>
