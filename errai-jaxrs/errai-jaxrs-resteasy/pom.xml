@@ -7,16 +7,12 @@
     <groupId>org.jboss.errai</groupId>
     <version>4.6.0-SNAPSHOT</version>
   </parent>
-  <artifactId>errai-jaxrs-provider</artifactId>
+  <artifactId>errai-jaxrs-resteasy</artifactId>
 
   <dependencies>
     <dependency>
-      <groupId>org.jboss.spec.javax.ws.rs</groupId>
-      <artifactId>jboss-jaxrs-api_2.1_spec</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.jboss.errai</groupId>
-      <artifactId>errai-marshalling</artifactId>
+      <groupId>org.jboss.resteasy</groupId>
+      <artifactId>resteasy-jaxrs</artifactId>
     </dependency>
   </dependencies>
 </project>

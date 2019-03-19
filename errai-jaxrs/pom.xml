@@ -43,6 +43,7 @@
   <modules>
     <module>errai-jaxrs-client</module>
     <module>errai-jaxrs-provider</module>    
+    <module>errai-jaxrs-resteasy</module>
   </modules>
 
   <build>
