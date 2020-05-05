@@ -74,8 +74,8 @@
     <argLine>-Dgwt.args="${gwtArgs}"</argLine>
 
     <!-- this versions can be removed once these were migrated to jboss-ip-bom > 8.3.0.Final -->
-    <version.org.wildfly>14.0.1.Final</version.org.wildfly>
-    <version.org.wildfly.core>6.0.2.Final</version.org.wildfly.core>
+    <version.org.wildfly>18.0.1.Final</version.org.wildfly>
+    <version.org.wildfly.core>10.0.3.Final</version.org.wildfly.core>
   </properties>
 
   <modules>
@@ -108,7 +108,6 @@
     <module>errai-demos</module>
     <module>errai-client-local-class-hider</module>
     <module>errai-annotation-processors</module>
-    <module>errai-forge-addon</module>
     <module>errai-api</module>
   </modules>
 

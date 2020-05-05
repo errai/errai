@@ -7,7 +7,7 @@
   <artifactId>wildfly-dist</artifactId>
   <name>Errai::WildFly::Distribution</name>
   <packaging>jar</packaging>
-  <version>14.0.1.Final</version>
+  <version>18.0.1.Final</version>
   
   <description>
     A modified WildFly Dist that does not process ServletContainerInitializers.
@@ -57,7 +57,7 @@
     <dependency>
       <groupId>org.wildfly.core</groupId>
       <artifactId>wildfly-server</artifactId>
-      <version>6.0.2.Final</version>
+      <version>10.0.3.Final</version>
     </dependency>
   </dependencies>
 

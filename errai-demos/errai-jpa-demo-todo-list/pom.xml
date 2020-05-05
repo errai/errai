@@ -59,7 +59,7 @@
     <skipTests>true</skipTests>
     <maven.deploy.plugin.version>2.7</maven.deploy.plugin.version>
     <argLine></argLine>
-    <wildfly.version>14.0.1.Final</wildfly.version>
+    <wildfly.version>18.0.1.Final</wildfly.version>
     <errai.dev.context>${project.artifactId}</errai.dev.context>
     <errai.jboss.home>${project.build.directory}/wildfly-${wildfly.version}</errai.jboss.home>    
   </properties>
