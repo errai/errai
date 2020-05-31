@@ -147,7 +147,7 @@
     <!-- TODO figure out how to force all these things to provided scope without doing it explicitly in EVERY SINGLE ERRAI PROJECT!!!!111!!!!1 -->
     <!-- Don't deploy any of this -->
     <dependency><groupId>com.google.guava</groupId><artifactId>guava-gwt</artifactId><scope>provided</scope></dependency>
-    <dependency><groupId>hsqldb</groupId><artifactId>hsqldb</artifactId><scope>provided</scope></dependency>    
+    <dependency><groupId>org.hsqldb</groupId><artifactId>hsqldb</artifactId><scope>provided</scope></dependency>    
     <dependency><groupId>javax.enterprise</groupId><artifactId>cdi-api</artifactId><scope>provided</scope></dependency>
     <dependency><groupId>javax.inject</groupId><artifactId>javax.inject</artifactId><scope>provided</scope></dependency>
     <dependency><groupId>javax.validation</groupId><artifactId>validation-api</artifactId><classifier>sources</classifier><scope>provided</scope></dependency>

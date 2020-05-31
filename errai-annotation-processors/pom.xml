@@ -56,8 +56,8 @@
           <plugin>
             <artifactId>maven-surefire-plugin</artifactId>
             <!-- Override exclusions in parent -->
-            <configuration combine.self="override">
-              <excludes>
+            <configuration>
+              <excludes combine.self="override">
               </excludes>
             </configuration>
           </plugin>
