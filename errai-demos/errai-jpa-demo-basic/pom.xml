@@ -138,7 +138,7 @@
 
     <dependency>
       <groupId>org.jboss.spec.javax.servlet</groupId>
-      <artifactId>jboss-servlet-api_3.1_spec</artifactId>
+      <artifactId>jboss-servlet-api_4.0_spec</artifactId>
       <scope>provided</scope>
     </dependency>
 
@@ -293,7 +293,7 @@
       <dependencies>
         <dependency>
           <groupId>org.jboss.spec.javax.servlet</groupId>
-          <artifactId>jboss-servlet-api_3.1_spec</artifactId>
+          <artifactId>jboss-servlet-api_4.0_spec</artifactId>
           <scope>provided</scope>
         </dependency>
         <dependency>
@@ -358,14 +358,14 @@
         </dependency>
 
         <dependency>
-          <groupId>javax.validation</groupId>
-          <artifactId>validation-api</artifactId>
+          <groupId>jakarta.validation</groupId>
+          <artifactId>jakarta.validation-api</artifactId>
           <scope>compile</scope>
         </dependency>
 
         <dependency>
-          <groupId>javax.validation</groupId>
-          <artifactId>validation-api</artifactId>
+          <groupId>jakarta.validation</groupId>
+          <artifactId>jakarta.validation-api</artifactId>
           <classifier>sources</classifier>
           <scope>compile</scope>
         </dependency>

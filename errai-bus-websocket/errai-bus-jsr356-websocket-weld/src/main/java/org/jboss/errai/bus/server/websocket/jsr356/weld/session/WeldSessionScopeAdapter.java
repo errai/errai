@@ -23,7 +23,7 @@ import javax.servlet.http.HttpSession;
 import org.jboss.errai.bus.server.websocket.jsr356.weld.SyncBeanStore;
 import org.jboss.weld.context.http.HttpSessionContext;
 import org.jboss.weld.manager.BeanManagerImpl;
-import org.jboss.weld.servlet.SessionHolder;
+import org.jboss.weld.module.web.servlet.SessionHolder;
 
 /**
  * Adapter for {@link javax.enterprise.context.SessionScoped}

@@ -5110,7 +5110,7 @@ public class CustomerView {
 
 &lt;inherits name="org.hibernate.validator.HibernateValidator" /&gt;</programlisting>
 </example>
-<simpara>To use Errai&#8217;s bean validation module, you must add the module, the javax.validation API and an implementation such as hibernate validator to your classpath. If you are using Maven for your build, add these dependencies:</simpara>
+<simpara>To use Errai&#8217;s bean validation module, you must add the module, the jakarta.validation API and an implementation such as hibernate validator to your classpath. If you are using Maven for your build, add these dependencies:</simpara>
 <programlisting language="xml" linenumbering="unnumbered">    &lt;dependency&gt;
       &lt;groupId&gt;org.jboss.errai&lt;/groupId&gt;
       &lt;artifactId&gt;errai-validation&lt;/artifactId&gt;
@@ -5118,14 +5118,14 @@ public class CustomerView {
     &lt;/dependency&gt;
 
     &lt;dependency&gt;
-      &lt;groupId&gt;javax.validation&lt;/groupId&gt;
-      &lt;artifactId&gt;validation-api&lt;/artifactId&gt;
+      &lt;groupId&gt;jakarta.validation&lt;/groupId&gt;
+      &lt;artifactId&gt;jakarta.validation-api&lt;/artifactId&gt;
       &lt;scope&gt;provided&lt;/scope&gt;
     &lt;/dependency&gt;
 
     &lt;dependency&gt;
-      &lt;groupId&gt;javax.validation&lt;/groupId&gt;
-      &lt;artifactId&gt;validation-api&lt;/artifactId&gt;
+      &lt;groupId&gt;jakarta.validation&lt;/groupId&gt;
+      &lt;artifactId&gt;jakarta.validation-api&lt;/artifactId&gt;
       &lt;classifier&gt;sources&lt;/classifier&gt;
       &lt;scope&gt;provided&lt;/scope&gt;
     &lt;/dependency&gt;

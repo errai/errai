@@ -111,13 +111,13 @@ runtime dependencies on it and it breaks deployment on JBoss AS and Tomcat -->
 
        <dependencies>
          <dependency>
-           <groupId>javax.validation</groupId>
-           <artifactId>validation-api</artifactId>
+           <groupId>jakarta.validation</groupId>
+           <artifactId>jakarta.validation-api</artifactId>
          </dependency>
 
          <dependency>
-           <groupId>javax.validation</groupId>
-           <artifactId>validation-api</artifactId>
+           <groupId>jakarta.validation</groupId>
+           <artifactId>jakarta.validation-api</artifactId>
            <classifier>sources</classifier>
          </dependency>
        </dependencies>
