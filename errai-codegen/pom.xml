@@ -162,16 +162,16 @@
 
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
-        <configuration combine.self="override">
-          <excludes>
+        <configuration>
+          <excludes combine.self="override">
           </excludes>
-          <additionalClasspathElements>
+          <additionalClasspathElements combine.self="override">
             <additionalClasspathElement>${basedir}/target/test-classes</additionalClasspathElement>
             <additionalClasspathElement>${basedir}/target/classes</additionalClasspathElement>
             <additionalClasspathElement>${basedir}/src/main/java</additionalClasspathElement>
             <additionalClasspathElement>${basedir}/src/test/java</additionalClasspathElement>
           </additionalClasspathElements>
-          <systemPropertyVariables>
+          <systemPropertyVariables combine.self="override">
             <errai.codegen.details>true</errai.codegen.details>
           </systemPropertyVariables>
         </configuration>
