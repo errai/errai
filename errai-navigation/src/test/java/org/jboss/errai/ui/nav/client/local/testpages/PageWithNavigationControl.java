@@ -16,7 +16,6 @@
 
 package org.jboss.errai.ui.nav.client.local.testpages;
 
-import javax.enterprise.context.ApplicationScoped;
 
 import org.jboss.errai.ui.nav.client.local.HistoryToken;
 import org.jboss.errai.ui.nav.client.local.Page;
@@ -27,7 +26,6 @@ import org.jboss.errai.ui.nav.client.local.api.NavigationControl;
 import com.google.gwt.user.client.ui.SimplePanel;
 
 @Page
-@ApplicationScoped
 public class PageWithNavigationControl extends SimplePanel {
 
   public NavigationControl showControl;

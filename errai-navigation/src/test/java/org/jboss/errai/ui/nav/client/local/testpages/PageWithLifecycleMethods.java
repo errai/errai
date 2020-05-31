@@ -16,13 +16,11 @@
 
 package org.jboss.errai.ui.nav.client.local.testpages;
 
-import javax.enterprise.context.ApplicationScoped;
-
 import org.jboss.errai.ui.nav.client.local.*;
 
 import com.google.gwt.user.client.ui.VerticalPanel;
 
-@ApplicationScoped @Page
+@Page
 public class PageWithLifecycleMethods extends VerticalPanel {
 
   @PageState private String state;

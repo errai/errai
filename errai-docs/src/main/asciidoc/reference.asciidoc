@@ -44,7 +44,7 @@ Errai uses GWT to accomplish the translation of concepts such as CDI into the br
 
 ===== Contexts and Dependency Injection (CDI)
 
-CDI is a standard part of the Java EE 6.0 stack, and is defined in the link:$$http://jcp.org/en/jsr/detail?id=299$$[JSR-299] specification. CDI is the main programming model explored in this guide. As such, the basic concepts of CDI will be introduced in this guide, so pre-existing knowledge is not strictly necessary.
+CDI is a standard part of the Java EE 6.0 stack, and is defined in the link:$$https://jcp.org/en/jsr/detail?id=299$$[JSR-299] specification. CDI is the main programming model explored in this guide. As such, the basic concepts of CDI will be introduced in this guide, so pre-existing knowledge is not strictly necessary.
 
 Errai's support for CDI is two-fold. For the server-side, Errai has integration with Weld, which is the reference implementation (RI) of the JSR-299 specification. The client-side integration for CDI is provided by the Errai CDI extension. Errai CDI implements a subset of the JSR-299 specification to provide the CDI programming model within client code.
 
@@ -5408,7 +5408,7 @@ Java bean validation (JSR 303) provides a declarative programming model for vali
 
 ====
 
-To use Errai's bean validation module, you must add the module, the javax.validation API and an implementation such as hibernate validator to your classpath. If you are using Maven for your build, add these dependencies:
+To use Errai's bean validation module, you must add the module, the jakarta.validation API and an implementation such as hibernate validator to your classpath. If you are using Maven for your build, add these dependencies:
 
 
 [source, xml]
@@ -5420,29 +5420,29 @@ To use Errai's bean validation module, you must add the module, the javax.valida
     </dependency>
 
     <dependency>
-      <groupId>javax.validation</groupId>
-      <artifactId>validation-api</artifactId>
+      <groupId>jakarta.validation</groupId>
+      <artifactId>jakarta.validation-api</artifactId>
       <scope>provided</scope>
     </dependency>
 
     <dependency>
-      <groupId>javax.validation</groupId>
-      <artifactId>validation-api</artifactId>
+      <groupId>jakarta.validation</groupId>
+      <artifactId>jakarta.validation-api</artifactId>
       <classifier>sources</classifier>
       <scope>provided</scope>
     </dependency>
 
     <dependency>
-      <groupId>org.hibernate</groupId>
+      <groupId>org.hibernate.validator</groupId>
       <artifactId>hibernate-validator</artifactId>
-      <version>4.2.0.Final</version>
+      <version>6.0.18.Final</version>
       <scope>provided</scope>
     </dependency>
 
     <dependency>
-      <groupId>org.hibernate</groupId>
+      <groupId>org.hibernate.validator</groupId>
       <artifactId>hibernate-validator</artifactId>
-      <version>4.2.0.Final</version>
+      <version>6.0.18.Final</version>
       <scope>provided</scope>
       <classifier>sources</classifier>
     </dependency>
