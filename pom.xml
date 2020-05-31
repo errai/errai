@@ -3,9 +3,10 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.jboss.integration-platform</groupId>
-    <artifactId>jboss-integration-platform-parent</artifactId>
-    <version>8.5.0.Final</version>
+    <groupId>org.jboss</groupId>
+    <artifactId>jboss-parent</artifactId>
+    <version>31</version>
+    <relativePath/>
   </parent>
 
   <name>Errai</name>
@@ -15,6 +16,7 @@
   <packaging>pom</packaging>
 
   <url>http://erraiframework.org</url>
+  <inceptionYear>2009</inceptionYear>
 
   <licenses>
     <license>
@@ -67,15 +69,9 @@
   </issueManagement>
 
   <properties>
-    <guice.version>3.0</guice.version>
-    <appengine.version>1.7.6</appengine.version>
-    <validation.api.version>1.0.0.GA</validation.api.version>
     <gwtArgs></gwtArgs>
     <argLine>-Dgwt.args="${gwtArgs}"</argLine>
-
-    <!-- this versions can be removed once these were migrated to jboss-ip-bom > 8.3.0.Final -->
-    <version.org.wildfly>18.0.1.Final</version.org.wildfly>
-    <version.org.wildfly.core>10.0.3.Final</version.org.wildfly.core>
+    <illegaltransitivereportonly>false</illegaltransitivereportonly>
   </properties>
 
   <modules>
@@ -149,7 +145,7 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
-
+  
   <dependencyManagement>
     <dependencies>
       <!-- All Errai module and third-party versions are defined in this POM -->
@@ -160,9 +156,7 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
-
     </dependencies>
-
   </dependencyManagement>
 
   <build>
