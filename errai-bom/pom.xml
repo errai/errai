@@ -173,14 +173,6 @@
   <dependencyManagement>
 
     <dependencies>
-<!--       <dependency> -->
-<!--         <groupId>org.jboss.integration-platform</groupId> -->
-<!--         <artifactId>jboss-integration-platform-bom</artifactId> -->
-<!--         <version>${jboss-integration-platform-bom.version}</version> -->
-<!--         <type>pom</type> -->
-<!--         <scope>import</scope> -->
-<!--       </dependency> -->
-
       <!-- All Errai Modules -->
       <dependency>
         <groupId>org.jboss.errai.bom</groupId>
@@ -210,6 +202,12 @@
         <groupId>de.benediktmeurer.gwt-slf4j</groupId>
         <artifactId>gwt-slf4j</artifactId>
         <version>${version.de.benediktmeurer.gwt-slf4j}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.hsqldb</groupId>
+        <artifactId>hsqldb</artifactId>
+        <version>${hsqldb.version}</version>
       </dependency>
       <dependency>
         <groupId>io.netty</groupId>
@@ -389,12 +387,6 @@
         <artifactId>jsoup</artifactId>
         <version>${version.org.jsoup}</version>
       </dependency>
-<!--       <dependency> -->
-<!--         <groupId>org.keycloak</groupId> -->
-<!--         <artifactId>keycloak-parent</artifactId> -->
-<!--         <type>pom</type> -->
-<!--         <version>${version.org.keycloak}</version> -->
-<!--       </dependency> -->
       <dependency>
         <groupId>org.keycloak</groupId>
         <artifactId>keycloak-core</artifactId>
@@ -446,29 +438,21 @@
         <artifactId>log4j-over-slf4j</artifactId>
         <version>${version.org.slf4j}</version>
       </dependency>
-<!--       <dependency> -->
-<!--         <groupId>org.slf4j</groupId> -->
-<!--         <artifactId>slf4j-jdk14</artifactId> -->
-<!--         <version>${version.org.slf4j}</version> -->
-<!--       </dependency> -->
       <dependency>
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-log4j12</artifactId>
         <version>${version.org.slf4j}</version>
       </dependency>
-      
       <dependency>
         <groupId>org.twdata.maven</groupId>
         <artifactId>mojo-executor</artifactId>
         <version>${mojo.executor.version}</version>
       </dependency>
-
       <dependency>
         <groupId>org.quartz-scheduler</groupId>
         <artifactId>quartz</artifactId>
         <version>${version.org.quartz-scheduler}</version>
       </dependency>
-
       <dependency>
          <groupId>org.eclipse.jdt</groupId>
          <artifactId>ecj</artifactId>
@@ -491,31 +475,26 @@
           </exclusion>
         </exclusions>
       </dependency>
-
       <dependency>
         <groupId>org.ow2.asm</groupId>
         <artifactId>asm</artifactId>
         <version>${asm.version}</version>
       </dependency>
-
       <dependency>
         <groupId>io.netty</groupId>
         <artifactId>netty-codec-http</artifactId>
         <version>${netty.codec.http.version}</version>
       </dependency>
-
       <dependency>
         <groupId>io.netty</groupId>
         <artifactId>netty-handler</artifactId>
         <version>${netty.codec.http.version}</version>
       </dependency>
-
       <dependency>
         <groupId>javax</groupId>
         <artifactId>javaee-api</artifactId>
         <version>${javaee.api.version}</version>
       </dependency>
-
       <dependency>
         <groupId>org.wildfly.core</groupId>
         <artifactId>wildfly-cli</artifactId>
@@ -557,7 +536,6 @@
         <artifactId>jbossweb</artifactId>
         <version>${jboss.web.version}</version>
       </dependency>
-
       <dependency>
         <groupId>org.jboss.weld</groupId>
         <artifactId>weld-api</artifactId>
@@ -600,19 +578,16 @@
         <artifactId>weld-servlet-core</artifactId>
         <version>${version.org.jboss.weld.weld}</version>
       </dependency>
-
       <dependency>
         <groupId>org.jgroups</groupId>
         <artifactId>jgroups</artifactId>
         <version>${version.org.jgroups}</version>
       </dependency>
-
       <dependency>
         <groupId>org.hibernate</groupId>
         <artifactId>hibernate-validator</artifactId>
         <version>${version.org.hibernate.validator}</version>
       </dependency>
-
       <dependency>
         <groupId>org.hibernate</groupId>
         <artifactId>hibernate-validator</artifactId>
@@ -639,44 +614,37 @@
         <artifactId>gwt-user</artifactId>
         <version>${gwt.version}</version>
       </dependency>
-
       <dependency>
         <groupId>com.google.gwt</groupId>
         <artifactId>gwt-elemental</artifactId>
         <version>${gwt.version}</version>
       </dependency>
-
       <dependency>
         <groupId>com.google.gwt</groupId>
         <artifactId>gwt-dev</artifactId>
         <version>${gwt.version}</version>
       </dependency>
-
       <dependency>
         <groupId>com.googlecode.gwtphonegap</groupId>
         <artifactId>gwtphonegap</artifactId>
         <version>${gwt.phonegap.version}</version>
       </dependency>
-
       <dependency>
         <groupId>com.google.jsinterop</groupId>
         <artifactId>jsinterop-annotations</artifactId>
         <version>${version.com.google.jsinterop}</version>
       </dependency>
-
       <dependency>
         <groupId>javax.validation</groupId>
         <artifactId>validation-api</artifactId>
         <version>${version.javax.validation}</version>
       </dependency>
-
       <dependency>
         <groupId>javax.validation</groupId>
         <artifactId>validation-api</artifactId>
         <version>${version.javax.validation}</version>
         <classifier>sources</classifier>
       </dependency>
-
       <dependency>
         <groupId>com.google.inject</groupId>
         <artifactId>guice</artifactId>
@@ -692,19 +660,16 @@
           </exclusion>
         </exclusions>
       </dependency>
-
       <dependency>
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
         <version>${guava.version}</version>
       </dependency>
-
       <dependency>
         <groupId>com.google.guava</groupId>
         <artifactId>guava-gwt</artifactId>
         <version>${guava.version}</version>
       </dependency>
-
       <dependency>
         <groupId>org.apache.commons</groupId>
         <artifactId>commons-lang3</artifactId>
@@ -736,7 +701,11 @@
         <artifactId>jboss-vfs</artifactId>
         <version>${jboss.vfs.version}</version>
       </dependency>
-
+      <dependency>
+        <groupId>junit</groupId>
+        <artifactId>junit</artifactId>
+        <version>${version.junit}</version>
+      </dependency>
       <dependency>
         <groupId>junit</groupId>
         <artifactId>junit</artifactId>
@@ -748,19 +717,16 @@
         <artifactId>picketlink-api</artifactId>
         <version>${version.org.picketlink}</version>
       </dependency>
-
       <dependency>
         <groupId>org.picketlink</groupId>
         <artifactId>picketlink-impl</artifactId>
         <version>${version.org.picketlink}</version>
       </dependency>
-
       <dependency>
         <groupId>org.lesscss</groupId>
         <artifactId>lesscss</artifactId>
         <version>${version.org.lesscss}</version>
       </dependency>
-
       <dependency>
         <groupId>xerces</groupId>
         <artifactId>xercesImpl</artifactId>
@@ -791,7 +757,6 @@
         <artifactId>jackson-annotations</artifactId>
         <version>${version.com.fasterxml.jackson}</version>
       </dependency>
-
       <dependency>
         <groupId>org.jboss.spec.javax.annotation</groupId>
         <artifactId>jboss-annotations-api_1.3_spec</artifactId>
@@ -862,20 +827,17 @@
         <artifactId>jboss-jaxws-api_2.3_spec</artifactId>
         <version>${version.org.jboss.spec.javax.xml.ws.jboss-jaxws-api_2.3_spec}</version>
       </dependency>
-
       <dependency>
         <groupId>org.jboss.spec.javax.websocket</groupId>
         <artifactId>jboss-websocket-api_1.0_spec</artifactId>
         <version>${version.org.jboss.websocket.spec}</version>
       </dependency>
-
       <!-- This artifact is not managed in the ip-bom -->
       <dependency>
         <groupId>org.wildfly.arquillian</groupId>
         <artifactId>wildfly-arquillian-container-embedded</artifactId>
         <version>${version.org.wildfly.arquillian}</version>
       </dependency>
-
       <!-- Transitively inherited in errai-bus-jsr356-websocket-weld tests-->
       <dependency>
         <groupId>org.wildfly.core</groupId>
