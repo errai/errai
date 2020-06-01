@@ -52,7 +52,7 @@
           <artifactId>jboss-servlet-api_4.0_spec</artifactId>
           <scope>provided</scope>
         </dependency>
-      
+
         <!-- Errai Core -->
         <dependency>
           <groupId>org.jboss.errai</groupId>
@@ -362,7 +362,7 @@
         <!-- Weld Modules -->
         <dependency>
           <groupId>org.jboss.weld</groupId>
-          <artifactId>weld-core</artifactId>
+          <artifactId>weld-core-impl</artifactId>
           <scope>test</scope>
         </dependency>
         <dependency>
