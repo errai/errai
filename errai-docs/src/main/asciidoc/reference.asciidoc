@@ -5420,27 +5420,27 @@ To use Errai's bean validation module, you must add the module, the jakarta.vali
     </dependency>
 
     <dependency>
-      <groupId>jakarta.validation</groupId>
-      <artifactId>jakarta.validation-api</artifactId>
+      <groupId>javax.validation</groupId>
+      <artifactId>validation-api</artifactId>
       <scope>provided</scope>
     </dependency>
 
     <dependency>
-      <groupId>jakarta.validation</groupId>
-      <artifactId>jakarta.validation-api</artifactId>
+      <groupId>javax.validation</groupId>
+      <artifactId>validation-api</artifactId>
       <classifier>sources</classifier>
       <scope>provided</scope>
     </dependency>
 
     <dependency>
-      <groupId>org.hibernate.validator</groupId>
+      <groupId>org.hibernate</groupId>
       <artifactId>hibernate-validator</artifactId>
       <version>6.0.18.Final</version>
       <scope>provided</scope>
     </dependency>
 
     <dependency>
-      <groupId>org.hibernate.validator</groupId>
+      <groupId>org.hibernate</groupId>
       <artifactId>hibernate-validator</artifactId>
       <version>6.0.18.Final</version>
       <scope>provided</scope>
