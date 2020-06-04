@@ -150,15 +150,15 @@
     <dependency><groupId>org.hsqldb</groupId><artifactId>hsqldb</artifactId><scope>provided</scope></dependency>    
     <dependency><groupId>javax.enterprise</groupId><artifactId>cdi-api</artifactId><scope>provided</scope></dependency>
     <dependency><groupId>javax.inject</groupId><artifactId>javax.inject</artifactId><scope>provided</scope></dependency>
-    <dependency><groupId>jakarta.validation</groupId><artifactId>jakarta.validation-api</artifactId><classifier>sources</classifier><scope>provided</scope></dependency>
-    <dependency><groupId>jakarta.validation</groupId><artifactId>jakarta.validation-api</artifactId><scope>provided</scope></dependency>
+    <dependency><groupId>javax.validation</groupId><artifactId>validation-api</artifactId><classifier>sources</classifier><scope>provided</scope></dependency>
+    <dependency><groupId>javax.validation</groupId><artifactId>validation-api</artifactId><scope>provided</scope></dependency>
     <dependency><groupId>junit</groupId><artifactId>junit</artifactId><scope>provided</scope></dependency>
     <dependency><groupId>org.hibernate.common</groupId><artifactId>hibernate-commons-annotations</artifactId><scope>provided</scope></dependency>
     <dependency><groupId>javax.persistence</groupId><artifactId>javax.persistence-api</artifactId><scope>provided</scope></dependency>
     <dependency><groupId>org.hibernate</groupId><artifactId>hibernate-core</artifactId><scope>provided</scope></dependency>
     <dependency><groupId>org.hibernate</groupId><artifactId>hibernate-entitymanager</artifactId><scope>provided</scope></dependency>
-    <dependency><groupId>org.hibernate.validator</groupId><artifactId>hibernate-validator</artifactId><scope>provided</scope></dependency>
-    <dependency><groupId>org.hibernate.validator</groupId><artifactId>hibernate-validator</artifactId><classifier>sources</classifier><scope>provided</scope></dependency>
+    <dependency><groupId>org.hibernate</groupId><artifactId>hibernate-validator</artifactId><scope>provided</scope></dependency>
+    <dependency><groupId>org.hibernate</groupId><artifactId>hibernate-validator</artifactId><classifier>sources</classifier><scope>provided</scope></dependency>
     <dependency><groupId>org.jboss.errai</groupId><artifactId>errai-cdi-client</artifactId></dependency>
     <dependency><groupId>org.jboss.errai</groupId><artifactId>errai-codegen-gwt</artifactId><scope>provided</scope></dependency>
     <dependency><groupId>org.jboss.errai</groupId><artifactId>errai-data-binding</artifactId><scope>provided</scope></dependency>
