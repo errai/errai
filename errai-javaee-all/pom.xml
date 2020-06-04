@@ -91,18 +91,18 @@
 
       <!-- Required for Errai Validation -->
       <dependency>
-         <groupId>jakarta.validation</groupId>
-         <artifactId>jakarta.validation-api</artifactId>
+         <groupId>javax.validation</groupId>
+         <artifactId>validation-api</artifactId>
          <classifier>sources</classifier>
       </dependency>
 
       <dependency>
-        <groupId>org.hibernate.validator</groupId>
+        <groupId>org.hibernate</groupId>
         <artifactId>hibernate-validator</artifactId>
       </dependency>
 
       <dependency>
-        <groupId>org.hibernate.validator</groupId>
+        <groupId>org.hibernate</groupId>
         <artifactId>hibernate-validator</artifactId>
         <classifier>sources</classifier>
       </dependency>

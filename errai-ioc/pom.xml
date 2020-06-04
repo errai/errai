@@ -163,13 +163,13 @@
 
       <dependencies>
         <dependency>
-          <groupId>jakarta.validation</groupId>
-          <artifactId>jakarta.validation-api</artifactId>
+          <groupId>javax.validation</groupId>
+          <artifactId>validation-api</artifactId>
         </dependency>
 
         <dependency>
-          <groupId>jakarta.validation</groupId>
-          <artifactId>jakarta.validation-api</artifactId>
+          <groupId>javax.validation</groupId>
+          <artifactId>validation-api</artifactId>
           <classifier>sources</classifier>
         </dependency>
       </dependencies>
