@@ -13,10 +13,6 @@
   <artifactId>errai-cordova</artifactId>
   <name>Errai::Cordova</name>
 
-  <properties>
-    <junit.version>4.8.1</junit.version>
-  </properties>
-
   <dependencies>
     <dependency>
       <groupId>org.jboss.errai</groupId>
