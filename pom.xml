@@ -83,6 +83,7 @@
     <module>errai-bus</module>
     <module>errai-tools</module>
     <module>errai-codegen</module>
+    <module>errai-cordova</module>
     <module>errai-marshalling</module>
     <module>errai-cdi</module>
     <module>errai-jaxrs</module>
