@@ -7,7 +7,7 @@
   <artifactId>wildfly-dist</artifactId>
   <name>Errai::WildFly::Distribution</name>
   <packaging>jar</packaging>
-  <version>19.1.0.Final</version>
+  <version>19.1.0.SP1</version>
   
   <description>
     A modified WildFly Dist that does not process ServletContainerInitializers.
@@ -50,7 +50,7 @@
   </distributionManagement>
 
   <properties>
-    <as.version>${project.version}</as.version>
+    <as.version>19.1.0.Final</as.version>
   </properties>
 
   <dependencies>
@@ -158,7 +158,7 @@
               <descriptors>
                 <descriptor>assembly.xml</descriptor>
               </descriptors>
-              <finalName>wildfly-${as.version}</finalName>
+              <finalName>wildfly-${project.version}</finalName>
               <appendAssemblyId>false</appendAssemblyId>
               <outputDirectory>target/</outputDirectory>
               <workDirectory>target/assembly/work</workDirectory>              
@@ -174,7 +174,7 @@
               <descriptors>
                 <descriptor>assembly-src.xml</descriptor>
               </descriptors>
-              <finalName>wildfly-${as.version}</finalName>
+              <finalName>wildfly-${project.version}</finalName>
               <appendAssemblyId>true</appendAssemblyId>
               <outputDirectory>${project.build.directory}</outputDirectory>
               <workDirectory>${project.build.directory}/assembly-src/work</workDirectory>
