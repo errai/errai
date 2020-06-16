@@ -61,7 +61,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <javaee.version>3.0.1.Final</javaee.version>
     <errai.dev.context>${project.artifactId}</errai.dev.context>
-    <maven.gwt.plugin.version>2.8.2</maven.gwt.plugin.version>
+    <maven.gwt.plugin.version>2.9.0</maven.gwt.plugin.version>
     <maven.deploy.plugin.version>2.7</maven.deploy.plugin.version>
   </properties>
 

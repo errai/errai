@@ -55,7 +55,7 @@
     <picketlink.version>2.6.0.Final</picketlink.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.war.plugin.version>2.1.1</maven.war.plugin.version>
-    <maven.gwt.plugin.version>2.8.2</maven.gwt.plugin.version>
+    <maven.gwt.plugin.version>2.9.0</maven.gwt.plugin.version>
     <skipTests>true</skipTests>
     <maven.deploy.plugin.version>2.7</maven.deploy.plugin.version>
     <argLine></argLine>

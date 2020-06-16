@@ -64,7 +64,7 @@
     <version>${maven.compiler.plugin.version}</version>  
     <jetty.version>6.1.25</jetty.version>
     <jboss-as-maven-plugin.version>7.4.Final</jboss-as-maven-plugin.version>
-    <maven.gwt.plugin.version>2.8.2</maven.gwt.plugin.version>
+    <maven.gwt.plugin.version>2.9.0</maven.gwt.plugin.version>
   </properties>
 
   <repositories>

@@ -60,7 +60,7 @@
     <maven.clean.plugin.version>2.4.1</maven.clean.plugin.version>
     <maven.compiler.plugin.version>2.3.2</maven.compiler.plugin.version>
     <maven.deploy.plugin.version>2.7</maven.deploy.plugin.version>
-    <maven.gwt.plugin.version>2.8.2</maven.gwt.plugin.version>
+    <maven.gwt.plugin.version>2.9.0</maven.gwt.plugin.version>
     <jetty.version>9.2.14.v20151106</jetty.version>
     <!-- Dev Mode config properties -->
     <errai.dev.context>${project.artifactId}</errai.dev.context>
@@ -113,6 +113,22 @@
   </dependencyManagement>
 
   <dependencies>
+    <dependency>
+       <groupId>org.jboss.errai</groupId>
+       <artifactId>errai-codegen</artifactId>
+       <exclusions>
+         <exclusion>
+           <groupId>org.eclipse.jdt</groupId>
+           <artifactId>ecj</artifactId>
+         </exclusion>
+       </exclusions>
+     </dependency>
+
+     <dependency>
+       <groupId>com.google.gwt</groupId>
+       <artifactId>gwt-dev</artifactId>
+       <scope>provided</scope>
+     </dependency>
 
     <dependency>
       <groupId>javax.enterprise</groupId>

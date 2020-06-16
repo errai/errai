@@ -12,6 +12,11 @@
 
   <dependencies>
     <dependency>
+       <groupId>org.eclipse.jdt</groupId>
+       <artifactId>ecj</artifactId>
+     </dependency>
+
+    <dependency>
       <groupId>org.jboss.errai</groupId>
       <artifactId>errai-common</artifactId>
     </dependency>
@@ -20,6 +25,11 @@
       <groupId>javax.enterprise</groupId>
       <artifactId>cdi-api</artifactId>
       <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.jboss.spec.javax.annotation</groupId>
+      <artifactId>jboss-annotations-api_1.2_spec</artifactId>
     </dependency>
 
     <dependency>
@@ -128,6 +138,7 @@
               <createSourcesJar>true</createSourcesJar>
               <artifactSet>
                 <includes>
+                  <include>org.eclipse.jdt:ecj</include>
                   <include>com.google.gwt:gwt-dev</include>
                 </includes>
               </artifactSet>
@@ -136,6 +147,7 @@
                   <artifact>com.google.gwt:gwt-dev</artifact>
                   <excludes>
                       <exclude>com/google/gwt/**</exclude>
+                      <exclude>org/eclipse/jdt/**</exclude>
                   </excludes>
                 </filter>
               </filters>
