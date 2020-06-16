@@ -18,6 +18,7 @@ package org.jboss.errai.codegen.util;
 
 import org.eclipse.jdt.core.compiler.CompilationProgress;
 import org.eclipse.jdt.core.compiler.batch.BatchCompiler;
+import org.eclipse.jdt.internal.compiler.apt.dispatch.BatchAnnotationProcessorManager;
 import org.jboss.errai.common.metadata.ErraiAppPropertiesFiles;
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.slf4j.Logger;
@@ -47,6 +48,9 @@ import static org.slf4j.LoggerFactory.getLogger;
 /**
  * @author Mike Brock
  */
+/*
+ * This block prevents the Maven Shade plugin to remove the specified classes
+ */
 public class ClassChangeUtil {
   private static final String USE_NATIVE_JAVA_COMPILER = "errai.marshalling.use_native_javac";
   private static final String CLASSLOADING_MODE_PROPERTY = "errai.marshalling.classloading.mode";
@@ -56,6 +60,14 @@ public class ClassChangeUtil {
   private static Logger log = getLogger(ClassChangeUtil.class);
 
   static {
+
+    /*
+     * This block prevents the Maven Shade plugin to remove the specified classes
+     */
+    @SuppressWarnings ("unused") Class<?>[] classes = new Class<?>[] {
+            BatchAnnotationProcessorManager.class
+    };
+
     if (System.getProperty(CLASSLOADING_MODE_PROPERTY) != null) {
       classLoadingMode = System.getProperty(CLASSLOADING_MODE_PROPERTY);
     }
@@ -155,7 +167,6 @@ public class ClassChangeUtil {
                                     final String packageName,
                                     final String className,
                                     final String outputPath) {
-
     try {
 
       final ByteArrayOutputStream errorOutputStream = new ByteArrayOutputStream();
@@ -635,6 +646,8 @@ public class ClassChangeUtil {
       }
     }
     catch (final IOException e) {
+
+
       throw new RuntimeException("failed to generate class ", e);
     }
   }

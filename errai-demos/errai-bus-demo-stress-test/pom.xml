@@ -61,7 +61,7 @@
     <maven.clean.plugin.version>2.4.1</maven.clean.plugin.version>
     <maven.compiler.plugin.version>2.3.2</maven.compiler.plugin.version>
     <maven.deploy.plugin.version>2.7</maven.deploy.plugin.version>
-    <maven.gwt.plugin.version>2.8.2</maven.gwt.plugin.version>
+    <maven.gwt.plugin.version>2.9.0</maven.gwt.plugin.version>
   </properties>
 
   <repositories>
@@ -300,9 +300,10 @@
         <errai-jboss-as-support.scope>compile</errai-jboss-as-support.scope>
       </properties>
       
+<!--
       <dependencies>
-        <!-- TODO figure out how to force all these things to provided scope without doing it explicitly in EVERY SINGLE ERRAI PROJECT!!!!111!!!!1 -->
-        <!-- Don't deploy any of this -->
+        &lt;!&ndash; TODO figure out how to force all these things to provided scope without doing it explicitly in EVERY SINGLE ERRAI PROJECT!!!!111!!!!1 &ndash;&gt;
+        &lt;!&ndash; Don't deploy any of this &ndash;&gt;
         <dependency><groupId>com.google.guava</groupId><artifactId>guava-gwt</artifactId><scope>provided</scope></dependency>
         <dependency><groupId>hsqldb</groupId><artifactId>hsqldb</artifactId><scope>provided</scope></dependency>        
         <dependency><groupId>javax.enterprise</groupId><artifactId>cdi-api</artifactId><scope>provided</scope></dependency>
@@ -333,13 +334,14 @@
         <dependency><groupId>io.netty</groupId><artifactId>netty-codec-http</artifactId><scope>provided</scope></dependency>
         <dependency><groupId>io.netty</groupId><artifactId>netty-handler</artifactId><scope>provided</scope></dependency>
 
-        <!-- And finally, add this -->
+        &lt;!&ndash; And finally, add this &ndash;&gt;
         <dependency>
           <groupId>org.jboss.errai</groupId>
           <artifactId>errai-jboss-as-support</artifactId>
           <scope>compile</scope>
         </dependency>
       </dependencies>
+-->
     </profile>
 
     <profile>
