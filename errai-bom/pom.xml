@@ -64,12 +64,10 @@
     <asm.version>7.1</asm.version>
     <gmaven.mojo.version>1.5</gmaven.mojo.version>
     <guava.version>20.0</guava.version>
-<!--    <version.com.google.guava>25.0-jre</version.com.google.guava>-->
     <guice.version>3.0</guice.version>
-<!--     <version.com.google.inject.guice>4.0</version.com.google.inject.guice> -->
     <gwt.phonegap.version>3.5.0.1</gwt.phonegap.version>
     <gwt.version>2.9.0</gwt.version>
-    <javaee.api.version>8.0.1</javaee.api.version><!--     8.0.1 -->
+    <javaee.api.version>8.0.1</javaee.api.version>
 
     <!-- ip-bom uses artifact with groupId org.jboss.remoting3 -->
     <jboss.remoting.version>5.0.16.Final</jboss.remoting.version>
@@ -92,7 +90,7 @@
     <version.javax.enterprise>2.0.SP1</version.javax.enterprise>
     <version.javax.inject>1</version.javax.inject>
     <version.javax.persistence-api>2.2</version.javax.persistence-api>
-    <!-- <version.jakarta.validation>2.0.2</version.jakarta.validation> -->
+    <!-- we can't use this due GWT hard dependency on api 1.x <version.jakarta.validation>2.0.2</version.jakarta.validation> -->
     <version.javax.validation>1.0.0.GA</version.javax.validation>
     <version.junit>4.12</version.junit>
     <version.log4j>1.2.17</version.log4j>
@@ -121,7 +119,8 @@
     <version.org.jboss.spec.javax.ejb.jboss-ejb-api_3.2_spec>1.0.1.Final</version.org.jboss.spec.javax.ejb.jboss-ejb-api_3.2_spec>
     <version.org.jboss.spec.javax.el.jboss-el-api_3.0_spec>1.0.12.Final</version.org.jboss.spec.javax.el.jboss-el-api_3.0_spec>
     <version.org.jboss.spec.javax.enterprise.concurrent>1.0.2.Final</version.org.jboss.spec.javax.enterprise.concurrent>
-    <version.org.jboss.spec.javax.interceptor.jboss-interceptors-api_1.2_spec>1.0.1.Final</version.org.jboss.spec.javax.interceptor.jboss-interceptors-api_1.2_spec>    <version.org.jboss.spec.javax.jms.jboss-jms-api_2.0_spec>1.0.2.Final</version.org.jboss.spec.javax.jms.jboss-jms-api_2.0_spec>
+    <version.org.jboss.spec.javax.interceptor.jboss-interceptors-api_1.2_spec>1.0.1.Final</version.org.jboss.spec.javax.interceptor.jboss-interceptors-api_1.2_spec>
+    <version.org.jboss.spec.javax.jms.jboss-jms-api_2.0_spec>1.0.2.Final</version.org.jboss.spec.javax.jms.jboss-jms-api_2.0_spec>
     <version.org.jboss.spec.javax.resource.jboss-connector-api_1.7_spec>1.0.1.Final</version.org.jboss.spec.javax.resource.jboss-connector-api_1.7_spec>
     <version.org.jboss.spec.javax.security.jacc.jboss-jacc-api_1.5_spec>1.0.2.Final</version.org.jboss.spec.javax.security.jacc.jboss-jacc-api_1.5_spec>
     <version.org.jboss.spec.javax.servlet.jboss-servlet-api_3.1_spec>1.0.2.Final</version.org.jboss.spec.javax.servlet.jboss-servlet-api_3.1_spec>
@@ -137,7 +136,8 @@
     <version.org.jboss.weld.weld-api>3.1.SP2</version.org.jboss.weld.weld-api>
     <version.org.jgroups>3.6.14.Final</version.org.jgroups>
     <version.org.jsoup>1.8.3</version.org.jsoup>
-    <version.org.keycloak>1.9.4.Final</version.org.keycloak> <!-- 9.0.3.Final  this can't be upgraded due API/class changes-->
+    <!-- Keycloak 9.0.3.Final can't be upgraded due API/class changes-->
+    <version.org.keycloak>1.9.4.Final</version.org.keycloak>
     <version.org.lesscss>1.7.0.1.1</version.org.lesscss>
     <version.org.mockito>2.12.0</version.org.mockito>
     <version.org.mvel>2.4.8.Final</version.org.mvel>
