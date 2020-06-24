@@ -204,12 +204,6 @@
         <artifactId>gwt-slf4j</artifactId>
         <version>${version.de.benediktmeurer.gwt-slf4j}</version>
       </dependency>
-
-      <dependency>
-        <groupId>org.hsqldb</groupId>
-        <artifactId>hsqldb</artifactId>
-        <version>${hsqldb.version}</version>
-      </dependency>
       <dependency>
         <groupId>io.netty</groupId>
         <artifactId>netty</artifactId>
@@ -737,12 +731,6 @@
         <artifactId>junit</artifactId>
         <version>${version.junit}</version>
       </dependency>
-      <dependency>
-        <groupId>junit</groupId>
-        <artifactId>junit</artifactId>
-        <version>${version.junit}</version>
-      </dependency>
-
       <dependency>
         <groupId>org.picketlink</groupId>
         <artifactId>picketlink-api</artifactId>
