@@ -309,41 +309,4 @@ public class MockServletContext implements ServletContext {
   public String getVirtualServerName() {
     throw new UnsupportedOperationException("Not implemented.");
   }
-
-  @Override
-  public Dynamic addJspFile(String arg0, String arg1) {
-  	throw new UnsupportedOperationException("Not implemented.");
-  }
-  
-  @Override
-  public String getRequestCharacterEncoding() {
-  	throw new UnsupportedOperationException("Not implemented.");
-  }
-  
-  @Override
-  public String getResponseCharacterEncoding() {
-  	throw new UnsupportedOperationException("Not implemented.");
-  }
-  
-  @Override
-  public int getSessionTimeout() {
-  	throw new UnsupportedOperationException("Not implemented.");
-  }
-  
-  @Override
-  public void setRequestCharacterEncoding(String arg0) {
-  	throw new UnsupportedOperationException("Not implemented.");
-  }
-  
-  @Override
-  public void setResponseCharacterEncoding(String arg0) {
-  	throw new UnsupportedOperationException("Not implemented.");
-  }
-  
-  @Override
-  public void setSessionTimeout(int arg0) {
-  	throw new UnsupportedOperationException("Not implemented.");
-  
-  }
-
 }
