@@ -5435,14 +5435,14 @@ To use Errai's bean validation module, you must add the module, the jakarta.vali
     <dependency>
       <groupId>org.hibernate</groupId>
       <artifactId>hibernate-validator</artifactId>
-      <version>6.0.18.Final</version>
+      <version>4.2.0.Final</version>
       <scope>provided</scope>
     </dependency>
 
     <dependency>
       <groupId>org.hibernate</groupId>
       <artifactId>hibernate-validator</artifactId>
-      <version>6.0.18.Final</version>
+      <version>4.2.0.Final</version>
       <scope>provided</scope>
       <classifier>sources</classifier>
     </dependency>
