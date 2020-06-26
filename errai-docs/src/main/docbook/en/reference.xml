@@ -1722,7 +1722,7 @@ public class HelloWorldService implements MessageCallback {
 <simpara>Because one of the filter method parameters is the actual WebSocket session, you also have to add the following dependency to your  <literal><phrase role="code">pom.xml</phrase></literal>:</simpara>
 <programlisting language="xml" linenumbering="unnumbered">&lt;dependency&gt;
 	&lt;groupId&gt;org.jboss.spec.javax.websocket&lt;/groupId&gt;
-	&lt;artifactId&gt;jboss-websocket-api_1.0_spec&lt;/artifactId&gt;
+	&lt;artifactId&gt;jboss-websocket-api_1.1_spec&lt;/artifactId&gt;
 	&lt;scope&gt;provided&lt;/scope&gt;
 	&lt;version&gt;1.0.0.Final&lt;/version&gt;
 &lt;/dependency&gt;</programlisting>
