@@ -195,6 +195,18 @@
       <scope>provided</scope>
     </dependency>
 
+    <dependency>
+      <groupId>com.google.gwt</groupId>
+      <artifactId>gwt-dev</artifactId>
+      <scope>provided</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.eclipse.jetty</groupId>
+          <artifactId>apache-jsp</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
     <!-- Runtime / Container dependencies -->
     <dependency>
       <groupId>org.slf4j</groupId>
@@ -226,13 +238,6 @@
         <dependency>
           <groupId>org.jboss.errai</groupId>
           <artifactId>errai-jboss-as-support</artifactId>
-        </dependency>
-
-        <dependency>
-          <groupId>xml-apis</groupId>
-          <artifactId>xml-apis</artifactId>
-          <version>2.0.2</version>
-          <scope>provided</scope>
         </dependency>
 
         <dependency>

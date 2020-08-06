@@ -128,6 +128,7 @@
     <version.org.jboss.spec.javax.ws.rs.jboss-jaxrs-api_2.1_spec>1.0.2.Final</version.org.jboss.spec.javax.ws.rs.jboss-jaxrs-api_2.1_spec>
     <version.org.jboss.spec.javax.xml.ws.jboss-jaxws-api_2.3_spec>1.0.0.Final</version.org.jboss.spec.javax.xml.ws.jboss-jaxws-api_2.3_spec>
     <version.org.jboss.spec.javax.xml.bind.jboss-jaxb-api_2.3_spec>1.0.1.Final</version.org.jboss.spec.javax.xml.bind.jboss-jaxb-api_2.3_spec>
+    <version.org.jboss.spec.javax.xml.bind>2.0.0.Final</version.org.jboss.spec.javax.xml.bind>
     <version.org.jboss.websocket.spec>1.0.0.Final</version.org.jboss.websocket.spec>
     <version.org.jboss.weld.weld>2.4.1.Final</version.org.jboss.weld.weld>
     <version.org.jboss.weld.weld-api>3.0.SP4</version.org.jboss.weld.weld-api>
@@ -628,7 +629,11 @@
         <artifactId>weld-servlet</artifactId>
         <version>${version.org.jboss.weld.weld}</version>
       </dependency>
-
+      <dependency>
+        <groupId>org.jboss.spec.javax.xml.bind</groupId>
+        <artifactId>jboss-jaxb-api_2.3_spec</artifactId>
+        <version>${version.org.jboss.spec.javax.xml.bind}</version>
+      </dependency>
       <dependency>
         <groupId>com.google.gwt</groupId>
         <artifactId>gwt-user</artifactId>

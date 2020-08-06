@@ -127,11 +127,17 @@
        </exclusions>
      </dependency>
 
-     <dependency>
-       <groupId>com.google.gwt</groupId>
-       <artifactId>gwt-dev</artifactId>
-       <scope>provided</scope>
-     </dependency>
+    <dependency>
+      <groupId>com.google.gwt</groupId>
+      <artifactId>gwt-dev</artifactId>
+      <scope>provided</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.eclipse.jetty</groupId>
+          <artifactId>apache-jsp</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
 
     <dependency>
       <groupId>org.jboss.errai</groupId>
@@ -174,6 +180,18 @@
       <groupId>com.google.gwt</groupId>
       <artifactId>gwt-user</artifactId>
       <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>xerces</groupId>
+      <artifactId>xercesImpl</artifactId>
+      <version>2.12.0</version>
+    </dependency>
+
+    <dependency>
+      <groupId>xalan</groupId>
+      <artifactId>xalan</artifactId>
+      <version>2.7.2</version>
     </dependency>
 
     <dependency>
@@ -298,6 +316,13 @@
         <dependency>
           <groupId>org.jboss.resteasy</groupId>
           <artifactId>resteasy-jaxrs</artifactId>
+          <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+          <groupId>org.jboss.resteasy</groupId>
+          <artifactId>resteasy-jackson-provider</artifactId>
+          <version>3.0.16.Final</version>
           <scope>provided</scope>
         </dependency>
 
