@@ -53,7 +53,6 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <weld.version>2.2.9.Final</weld.version>
     <mvel.version>2.2.4.Final</mvel.version>
     <jetty.version>6.1.26</jetty.version>
     <slf4j.version>1.7.10</slf4j.version>
@@ -124,11 +123,17 @@
        </exclusions>
      </dependency>
 
-     <dependency>
-       <groupId>com.google.gwt</groupId>
-       <artifactId>gwt-dev</artifactId>
-       <scope>provided</scope>
-     </dependency>
+    <dependency>
+      <groupId>com.google.gwt</groupId>
+      <artifactId>gwt-dev</artifactId>
+      <scope>provided</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.eclipse.jetty</groupId>
+          <artifactId>apache-jsp</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
 
     <dependency>
       <groupId>org.jboss.errai</groupId>
@@ -199,12 +204,6 @@
     </dependency>
 
     <dependency>
-      <groupId>org.jboss.spec.javax.servlet</groupId>
-      <artifactId>jboss-servlet-api_3.1_spec</artifactId>
-      <scope>provided</scope>
-    </dependency>
-
-    <dependency>
       <groupId>javax.enterprise</groupId>
       <artifactId>cdi-api</artifactId>
       <scope>provided</scope>
@@ -214,16 +213,11 @@
     <dependency>
       <groupId>org.jboss.errai</groupId>
       <artifactId>errai-bus</artifactId>
-      <exclusions>
-        <exclusion>
-          <groupId>javax.inject</groupId>
-          <artifactId>javax.inject</artifactId>
-        </exclusion>        
-      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.jboss.errai</groupId>
       <artifactId>errai-ioc</artifactId>
+      <scope>provided</scope>
       <exclusions>
         <exclusion>
           <groupId>javax.inject</groupId>
@@ -234,6 +228,7 @@
     <dependency>
       <groupId>org.jboss.errai</groupId>
       <artifactId>errai-tools</artifactId>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.mvel</groupId>
@@ -251,11 +246,6 @@
       <groupId>org.jboss.errai</groupId>
       <artifactId>errai-javax-enterprise</artifactId>
       <scope>provided</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.jboss.errai</groupId>
-      <artifactId>errai-cdi-server</artifactId>
     </dependency>
 
     <!-- CDI Development Utils -->
@@ -319,6 +309,7 @@
         <dependency>
           <groupId>org.jboss.errai</groupId>
           <artifactId>errai-jboss-as-support</artifactId>
+          <scope>provided</scope>
         </dependency>
 
         <dependency>
@@ -467,7 +458,7 @@
         <configuration>
           <warName>${project.artifactId}</warName>
           <outputFileNameMapping>@{artifactId}@-@{baseVersion}@@{dashClassifier?}@.@{extension}@</outputFileNameMapping>
-          <packagingExcludes>**/javax/**/*.*,**/client/local/**/*.class,**/persistence.xml</packagingExcludes>
+          <packagingExcludes>**/javax/**/*.*,**/persistence.xml</packagingExcludes>
         </configuration>
       </plugin>
 
