@@ -23,4 +23,7 @@
     <inherits name="elemental2.dom.Dom"/>
 
     <entry-point class="org.jboss.errai.common.client.InitCoordinator" />
+
+    <super-source path="compat"/>
+    <source path="client"/>
 </module>
