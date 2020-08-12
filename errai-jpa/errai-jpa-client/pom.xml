@@ -105,6 +105,7 @@
               </additionalClasspathElements>
               <useSystemClassLoader>false</useSystemClassLoader>
               <useManifestOnlyJar>true</useManifestOnlyJar>
+              <enableAssertions>false</enableAssertions>
 
               <systemProperties>
                 <property>

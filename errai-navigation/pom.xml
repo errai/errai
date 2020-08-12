@@ -141,7 +141,7 @@
               <forkMode>always</forkMode>
               <argLine>-Xmx1500m ${argLine} -Dgwt.args='-prod'</argLine>
               <useManifestOnlyJar>true</useManifestOnlyJar>
-
+              <enableAssertions>false</enableAssertions>
               <systemProperties>
                 <property>
                   <name>java.io.tmpdir</name>
