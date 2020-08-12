@@ -108,8 +108,18 @@ runtime dependencies on it and it breaks deployment on JBoss AS and Tomcat -->
   <profiles>
      <profile>
        <id>integration-test</id>
-
        <dependencies>
+         <dependency>
+           <groupId>org.jboss.errai</groupId>
+           <artifactId>errai-codegen</artifactId>
+           <exclusions>
+             <exclusion>
+               <groupId>org.eclipse.jdt</groupId>
+               <artifactId>ecj</artifactId>
+             </exclusion>
+           </exclusions>
+         </dependency>
+
          <dependency>
            <groupId>javax.validation</groupId>
            <artifactId>validation-api</artifactId>

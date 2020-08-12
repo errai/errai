@@ -215,6 +215,18 @@
           </plugin>
         </plugins>
       </build>
+      <dependencies>
+        <dependency>
+          <groupId>org.jboss.errai</groupId>
+          <artifactId>errai-codegen</artifactId>
+          <exclusions>
+            <exclusion>
+              <groupId>org.eclipse.jdt</groupId>
+              <artifactId>ecj</artifactId>
+            </exclusion>
+          </exclusions>
+        </dependency>
+      </dependencies>
     </profile>
   </profiles>
 </project>
