@@ -41,8 +41,8 @@ import org.jboss.errai.marshalling.server.ServerMarshalling;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 @Provider
-@Produces(MediaType.APPLICATION_JSON)
-@Consumes(MediaType.APPLICATION_JSON)
+@Produces("application/*+json")
+@Consumes("application/*+json")
 public class ErraiProvider implements MessageBodyReader<Object>, MessageBodyWriter<Object> {
 
   static {
