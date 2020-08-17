@@ -194,7 +194,7 @@
               <useManifestOnlyJar>false</useManifestOnlyJar>
               <forkMode>pertest</forkMode>
               <argLine>${argLine} -Xmx1500m -Derrai.devel.nocache=true</argLine>
-
+              <enableAssertions>false</enableAssertions>
               <systemProperties>
                 <!-- Must disable long polling for automated tests to succeed -->
                 <property>
@@ -215,6 +215,24 @@
           </plugin>
         </plugins>
       </build>
+      <dependencies>
+        <dependency>
+          <groupId>com.google.gwt</groupId>
+          <artifactId>gwt-dev</artifactId>
+          <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+          <groupId>org.jboss.errai</groupId>
+          <artifactId>errai-codegen</artifactId>
+          <exclusions>
+            <exclusion>
+              <groupId>org.eclipse.jdt</groupId>
+              <artifactId>ecj</artifactId>
+            </exclusion>
+          </exclusions>
+        </dependency>
+      </dependencies>
     </profile>
   </profiles>
 </project>

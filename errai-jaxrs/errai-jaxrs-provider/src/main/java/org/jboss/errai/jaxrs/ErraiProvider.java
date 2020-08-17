@@ -68,7 +68,6 @@ public class ErraiProvider implements MessageBodyReader<Object>, MessageBodyWrit
   public void writeTo(final Object t, final Class<?> type, final Type genericType, final Annotation[] annotations, final MediaType mediaType,
       final MultivaluedMap<String, Object> httpHeaders, final OutputStream entityStream) throws IOException,
       WebApplicationException {
-
     entityStream.write(ServerMarshalling.toJSON(t).getBytes(Charset.forName("UTF-8")));
   }
 

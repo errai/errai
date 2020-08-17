@@ -240,6 +240,7 @@
               <!-- DO NOT REMOVE THE errai.ioc.experimental.infer_dependent_by_reachability 
                 flag or the testsuite WILL fail. -->
               <argLine>-Xmx1500m </argLine>
+              <enableAssertions>false</enableAssertions>
               <systemPropertyVariables>
                 <errai.hosted_mode_testing>true</errai.hosted_mode_testing>
                 <errai.devel.nocache>true</errai.devel.nocache>
@@ -387,6 +388,17 @@
           <groupId>com.google.gwt</groupId>
           <artifactId>gwt-dev</artifactId>
           <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+          <groupId>org.jboss.errai</groupId>
+          <artifactId>errai-codegen</artifactId>
+          <exclusions>
+            <exclusion>
+              <groupId>org.eclipse.jdt</groupId>
+              <artifactId>ecj</artifactId>
+            </exclusion>
+          </exclusions>
         </dependency>
 
         <dependency>

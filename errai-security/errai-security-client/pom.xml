@@ -138,7 +138,7 @@
     </dependency>
     <dependency>
       <groupId>com.google.gwt.gwtmockito</groupId>
-      <artifactId>gwtmockito</artifactId>      
+      <artifactId>gwtmockito</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -148,7 +148,7 @@
     </dependency>
     <dependency>
       <groupId>org.apache.deltaspike.core</groupId>
-      <artifactId>deltaspike-core-api</artifactId>      
+      <artifactId>deltaspike-core-api</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -276,6 +276,18 @@
           </plugin>
         </plugins>
       </build>
+        <dependencies>
+            <dependency>
+                <groupId>org.jboss.errai</groupId>
+                <artifactId>errai-codegen</artifactId>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.eclipse.jdt</groupId>
+                        <artifactId>ecj</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+        </dependencies>
     </profile>
   </profiles>
 </project>
