@@ -23,9 +23,11 @@ import org.jboss.errai.ui.nav.client.local.PageHiding;
 import org.jboss.errai.ui.nav.client.local.PageShowing;
 import org.jboss.errai.ui.nav.client.local.api.NavigationControl;
 
+import javax.enterprise.context.ApplicationScoped;
+
 import com.google.gwt.user.client.ui.SimplePanel;
 
-@Page
+@ApplicationScoped @Page
 public class PageWithNavigationControl extends SimplePanel {
 
   public NavigationControl showControl;
