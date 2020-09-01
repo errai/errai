@@ -45,7 +45,7 @@ public class ApplicationScopedBean {
 
   private static int counter = 0;
 
-  public int beanId = ++counter * Random.nextInt();
+  private int beanId = ++counter * Random.nextInt();
 
   public DependentScopedBean getBean1() {
     return bean1;

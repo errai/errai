@@ -90,6 +90,7 @@
     <dependency>
       <groupId>org.jboss.errai</groupId>
       <artifactId>errai-javax-enterprise</artifactId>
+      <scope>provided</scope>
     </dependency>
 
     <dependency>
@@ -192,7 +193,10 @@
             <configuration>
               <!-- This is required because the BasicIOCTest is run in "simulated 
                 client" mode, which prevents subsequent tests from succeeding -->
-              <forkMode>pertest</forkMode>
+<!--               <forkMode>pertest</forkMode> this is the same as below -->
+<!-- http://maven.apache.org/surefire/maven-surefire-plugin/examples/fork-options-and-parallel-execution.html#Migrating_the_Deprecated_forkMode_Parameter_to_forkCount_and_reuseForks -->
+              <forkCount>1</forkCount>
+              <reuseForks>false</reuseForks>
               <argLine>-Xmx1500m -Dgwt.gen=/tmp/gwt_test_gen_out/ -Derrai.codegen.details=true -Dgwt.args='-testBeginTimeout 5 -generateJsInteropExports ${gwtArgs}' -Xdebug</argLine>
               <enableAssertions>false</enableAssertions>
               <systemProperties>

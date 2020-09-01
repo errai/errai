@@ -142,6 +142,11 @@
       <scope>provided</scope>
     </dependency>
 
+    <dependency>
+      <groupId>org.jboss.errai</groupId>
+      <artifactId>errai-javax-enterprise</artifactId>
+    </dependency>
+
     <!-- Scoped -->
     <dependency>
       <groupId>com.google.gwt</groupId>

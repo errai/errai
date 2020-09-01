@@ -43,6 +43,11 @@
       <artifactId>errai-data-binding</artifactId>
     </dependency>
 
+    <dependency>
+      <groupId>org.jboss.errai</groupId>
+      <artifactId>errai-javax-enterprise</artifactId>
+    </dependency>
+
     <!-- Must come after errai-common is inherited for patched JUnitShell -->
     <dependency>
       <groupId>com.google.gwt</groupId>
@@ -95,7 +100,10 @@
             <artifactId>maven-failsafe-plugin</artifactId>
             <configuration>
               <skipTests>false</skipTests>
-              <forkMode>always</forkMode>
+<!--               <forkMode>always</forkMode> -->
+<!-- http://maven.apache.org/surefire/maven-surefire-plugin/examples/fork-options-and-parallel-execution.html#Migrating_the_Deprecated_forkMode_Parameter_to_forkCount_and_reuseForks -->
+              <forkCount>1</forkCount>
+              <reuseForks>false</reuseForks>
               <argLine>-Xms1g -Xmx1500m ${argLine}</argLine>
 
               <additionalClasspathElements>

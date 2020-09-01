@@ -22,7 +22,10 @@ import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
+import javax.enterprise.event.Event;
+import javax.enterprise.util.AnnotationLiteral;
 import javax.inject.Qualifier;
+
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
@@ -76,10 +79,24 @@ import java.lang.annotation.Target;
  * @author Gavin King
  */
 
-@Target( { TYPE, METHOD, PARAMETER, FIELD })
+@Target({TYPE, METHOD, PARAMETER, FIELD})
 @Retention(RUNTIME)
 @Documented
 @Qualifier
-public @interface Default
-{
+public @interface Default {
+
+    /**
+     * Supports inline instantiation of the {@link Default} qualifier.
+     *
+     * @author Martin Kouba
+     * @see Instance
+     * @see Event
+     * @since 2.0
+     */
+    public static final class Literal extends AnnotationLiteral<Default> implements Default {
+
+        public static final Literal INSTANCE = new Literal();
+
+        private static final long serialVersionUID = 1L;
+    }
 }

@@ -41,7 +41,7 @@
 
     <dependency>
       <groupId>org.jboss.spec.javax.websocket</groupId>
-      <artifactId>jboss-websocket-api_1.0_spec</artifactId>
+      <artifactId>jboss-websocket-api_1.1_spec</artifactId>
       <scope>provided</scope>
     </dependency>
 
@@ -52,7 +52,12 @@
     </dependency>
     <dependency>
       <groupId>org.jboss.weld</groupId>
-      <artifactId>weld-core</artifactId>
+      <artifactId>weld-core-impl</artifactId>
+      <scope>provided</scope>
+    </dependency>
+       <dependency>
+      <groupId>org.jboss.weld.module</groupId>
+      <artifactId>weld-web</artifactId>
       <scope>provided</scope>
     </dependency>
 
@@ -150,10 +155,10 @@
           <plugin>
             <artifactId>maven-surefire-plugin</artifactId>
             <!-- Override exclusions in parent -->
-            <configuration combine.self="override">
-              <excludes>
+            <configuration>
+              <excludes combine.self="override">
               </excludes>
-              <systemPropertyVariables>
+              <systemPropertyVariables combine.self="override">
                 <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
               </systemPropertyVariables>
             </configuration>
