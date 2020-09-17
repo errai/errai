@@ -9,7 +9,7 @@
     <title>Errai Reference Guide</title>
     
     
-    <date>2020-06-15</date>
+    <date>2020-09-17</date>
     
     
     
@@ -57,7 +57,7 @@
 </section>
 <section id="sid-54493220_GettingStartedwithErrai-ContextsandDependencyInjection%28CDI%29">
 <title>Contexts and Dependency Injection (CDI)</title>
-<simpara>CDI is a standard part of the Java EE 6.0 stack, and is defined in the <ulink url="http://jcp.org/en/jsr/detail?id=299">JSR-299</ulink> specification. CDI is the main programming model explored in this guide. As such, the basic concepts of CDI will be introduced in this guide, so pre-existing knowledge is not strictly necessary.</simpara>
+<simpara>CDI is a standard part of the Java EE 6.0 stack, and is defined in the <ulink url="https://jcp.org/en/jsr/detail?id=299">JSR-299</ulink> specification. CDI is the main programming model explored in this guide. As such, the basic concepts of CDI will be introduced in this guide, so pre-existing knowledge is not strictly necessary.</simpara>
 <simpara>Errai&#8217;s support for CDI is two-fold. For the server-side, Errai has integration with Weld, which is the reference implementation (RI) of the JSR-299 specification. The client-side integration for CDI is provided by the Errai CDI extension. Errai CDI implements a subset of the JSR-299 specification to provide the CDI programming model within client code.</simpara>
 </section>
 <section id="sid-54493220_GettingStartedwithErrai-JavaAPIforRESTfulWebServices%28JAXRS%29">
@@ -5118,14 +5118,14 @@ public class CustomerView {
     &lt;/dependency&gt;
 
     &lt;dependency&gt;
-      &lt;groupId&gt;jakarta.validation&lt;/groupId&gt;
-      &lt;artifactId&gt;jakarta.validation-api&lt;/artifactId&gt;
+      &lt;groupId&gt;javax.validation&lt;/groupId&gt;
+      &lt;artifactId&gt;validation-api&lt;/artifactId&gt;
       &lt;scope&gt;provided&lt;/scope&gt;
     &lt;/dependency&gt;
 
     &lt;dependency&gt;
-      &lt;groupId&gt;jakarta.validation&lt;/groupId&gt;
-      &lt;artifactId&gt;jakarta.validation-api&lt;/artifactId&gt;
+      &lt;groupId&gt;javax.validation&lt;/groupId&gt;
+      &lt;artifactId&gt;validation-api&lt;/artifactId&gt;
       &lt;classifier&gt;sources&lt;/classifier&gt;
       &lt;scope&gt;provided&lt;/scope&gt;
     &lt;/dependency&gt;
