@@ -92,7 +92,7 @@
     <version.javax.persistence-api>2.2</version.javax.persistence-api>
     <!-- we can't use this due GWT hard dependency on api 1.x <version.jakarta.validation>2.0.2</version.jakarta.validation> -->
     <version.javax.validation>1.0.0.GA</version.javax.validation>
-    <version.junit>4.12</version.junit>
+    <version.junit>4.13.1</version.junit>
     <version.log4j>1.2.17</version.log4j>
 
     <version.org.apache.commons.lang3>3.8.1</version.org.apache.commons.lang3>
