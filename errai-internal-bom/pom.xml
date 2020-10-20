@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jboss.errai.bom</groupId>
   <artifactId>errai-internal-bom</artifactId>
-  <version>4.2.1-SNAPSHOT</version>
+  <version>4.11.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>Errai Internal BOM (Bill Of Materials)</name>
 
@@ -300,6 +300,12 @@
       <dependency>
         <groupId>org.jboss.errai</groupId>
         <artifactId>errai-api</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.jboss.errai</groupId>
+        <artifactId>errai-jaxrs-resteasy</artifactId>
         <version>${project.version}</version>
       </dependency>
     </dependencies>

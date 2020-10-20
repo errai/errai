@@ -9,7 +9,7 @@
     <title>Errai Reference Guide</title>
     
     
-    <date>2017-08-25</date>
+    <date>2020-09-17</date>
     
     
     
@@ -57,7 +57,7 @@
 </section>
 <section id="sid-54493220_GettingStartedwithErrai-ContextsandDependencyInjection%28CDI%29">
 <title>Contexts and Dependency Injection (CDI)</title>
-<simpara>CDI is a standard part of the Java EE 6.0 stack, and is defined in the <ulink url="http://jcp.org/en/jsr/detail?id=299">JSR-299</ulink> specification. CDI is the main programming model explored in this guide. As such, the basic concepts of CDI will be introduced in this guide, so pre-existing knowledge is not strictly necessary.</simpara>
+<simpara>CDI is a standard part of the Java EE 6.0 stack, and is defined in the <ulink url="https://jcp.org/en/jsr/detail?id=299">JSR-299</ulink> specification. CDI is the main programming model explored in this guide. As such, the basic concepts of CDI will be introduced in this guide, so pre-existing knowledge is not strictly necessary.</simpara>
 <simpara>Errai&#8217;s support for CDI is two-fold. For the server-side, Errai has integration with Weld, which is the reference implementation (RI) of the JSR-299 specification. The client-side integration for CDI is provided by the Errai CDI extension. Errai CDI implements a subset of the JSR-299 specification to provide the CDI programming model within client code.</simpara>
 </section>
 <section id="sid-54493220_GettingStartedwithErrai-JavaAPIforRESTfulWebServices%28JAXRS%29">
@@ -1722,7 +1722,7 @@ public class HelloWorldService implements MessageCallback {
 <simpara>Because one of the filter method parameters is the actual WebSocket session, you also have to add the following dependency to your  <literal><phrase role="code">pom.xml</phrase></literal>:</simpara>
 <programlisting language="xml" linenumbering="unnumbered">&lt;dependency&gt;
 	&lt;groupId&gt;org.jboss.spec.javax.websocket&lt;/groupId&gt;
-	&lt;artifactId&gt;jboss-websocket-api_1.0_spec&lt;/artifactId&gt;
+	&lt;artifactId&gt;jboss-websocket-api_1.1_spec&lt;/artifactId&gt;
 	&lt;scope&gt;provided&lt;/scope&gt;
 	&lt;version&gt;1.0.0.Final&lt;/version&gt;
 &lt;/dependency&gt;</programlisting>
@@ -5110,7 +5110,7 @@ public class CustomerView {
 
 &lt;inherits name="org.hibernate.validator.HibernateValidator" /&gt;</programlisting>
 </example>
-<simpara>To use Errai&#8217;s bean validation module, you must add the module, the javax.validation API and an implementation such as hibernate validator to your classpath. If you are using Maven for your build, add these dependencies:</simpara>
+<simpara>To use Errai&#8217;s bean validation module, you must add the module, the jakarta.validation API and an implementation such as hibernate validator to your classpath. If you are using Maven for your build, add these dependencies:</simpara>
 <programlisting language="xml" linenumbering="unnumbered">    &lt;dependency&gt;
       &lt;groupId&gt;org.jboss.errai&lt;/groupId&gt;
       &lt;artifactId&gt;errai-validation&lt;/artifactId&gt;

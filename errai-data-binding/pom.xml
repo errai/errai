@@ -4,7 +4,7 @@
   <parent>
     <artifactId>errai-parent</artifactId>
     <groupId>org.jboss.errai</groupId>
-    <version>4.2.1-SNAPSHOT</version>
+    <version>4.11.0-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
@@ -124,6 +124,18 @@
           </plugin>
         </plugins>
       </build>
+      <dependencies>
+        <dependency>
+          <groupId>org.jboss.errai</groupId>
+          <artifactId>errai-codegen</artifactId>
+          <exclusions>
+            <exclusion>
+              <groupId>org.eclipse.jdt</groupId>
+              <artifactId>ecj</artifactId>
+            </exclusion>
+          </exclusions>
+        </dependency>
+      </dependencies>
     </profile>
   </profiles>
 </project>

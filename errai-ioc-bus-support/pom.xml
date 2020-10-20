@@ -6,7 +6,7 @@
   <parent>
     <artifactId>errai-parent</artifactId>
     <groupId>org.jboss.errai</groupId>
-    <version>4.2.1-SNAPSHOT</version>
+    <version>4.11.0-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
@@ -22,8 +22,8 @@
     </dependency>
 
     <dependency>
-      <groupId>org.hibernate.javax.persistence</groupId>
-      <artifactId>hibernate-jpa-2.1-api</artifactId>
+      <groupId>javax.persistence</groupId>
+      <artifactId>javax.persistence-api</artifactId>
       <scope>test</scope>
     </dependency>
 
@@ -108,8 +108,18 @@ runtime dependencies on it and it breaks deployment on JBoss AS and Tomcat -->
   <profiles>
      <profile>
        <id>integration-test</id>
-
        <dependencies>
+         <dependency>
+           <groupId>org.jboss.errai</groupId>
+           <artifactId>errai-codegen</artifactId>
+           <exclusions>
+             <exclusion>
+               <groupId>org.eclipse.jdt</groupId>
+               <artifactId>ecj</artifactId>
+             </exclusion>
+           </exclusions>
+         </dependency>
+
          <dependency>
            <groupId>javax.validation</groupId>
            <artifactId>validation-api</artifactId>
@@ -136,7 +146,10 @@ runtime dependencies on it and it breaks deployment on JBoss AS and Tomcat -->
 
                <!-- This is required because the BasicIOCTest is run in "simulated client" mode, which
           prevents subsequent tests from succeeding -->
-               <forkMode>pertest</forkMode>
+<!--               <forkMode>pertest</forkMode> this is the same as below -->
+<!-- http://maven.apache.org/surefire/maven-surefire-plugin/examples/fork-options-and-parallel-execution.html#Migrating_the_Deprecated_forkMode_Parameter_to_forkCount_and_reuseForks -->
+              <forkCount>1</forkCount>
+              <reuseForks>false</reuseForks>
 
                <argLine>${argLine} -Xmx2048m -Dgwt.gen=/tmp/gwt_test_gen_out/ -Dgwt.args='-testBeginTimeout 5 ${gwtArgs}' -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005</argLine>
 

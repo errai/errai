@@ -4,7 +4,7 @@
   <parent>
     <artifactId>jaxrs-integration-parent</artifactId>
     <groupId>org.jboss.errai</groupId>
-    <version>4.2.1-SNAPSHOT</version>
+    <version>4.11.0-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
@@ -49,7 +49,8 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-dependency-plugin</artifactId>
         <configuration>
-          <excludes>**/core/**,**/ext/**</excludes>
+          <includes>**/ws/rs/*.java</includes>
+          <excludes>**/ws/rs/*Exception.java</excludes>
         </configuration>
         <executions>
           <execution>
@@ -62,8 +63,7 @@
               <artifactItems>
                 <artifactItem>
                   <groupId>org.jboss.spec.javax.ws.rs</groupId>
-                  <artifactId>jboss-jaxrs-api_1.1_spec</artifactId>
-                  <version>1.0.1.Final</version>
+                  <artifactId>jboss-jaxrs-api_2.1_spec</artifactId>
                   <classifier>sources</classifier>
                   <overWrite>false</overWrite>
                   <outputDirectory>target/generated-sources/javax/ws/rs/super</outputDirectory>
@@ -132,7 +132,7 @@
 
     <dependency>
       <groupId>org.jboss.spec.javax.ws.rs</groupId>
-      <artifactId>jboss-jaxrs-api_2.0_spec</artifactId>
+      <artifactId>jboss-jaxrs-api_2.1_spec</artifactId>
     </dependency>
 
     <dependency>
@@ -165,6 +165,17 @@
     </dependency>
 
     <dependency>
+      <groupId>org.jboss.errai</groupId>
+      <artifactId>errai-jaxrs-resteasy</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.jboss.errai</groupId>
+      <artifactId>errai-javax-enterprise</artifactId>
+    </dependency>
+
+    <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
       <scope>test</scope>
@@ -186,9 +197,12 @@
                 <additionalClasspathElement>${basedir}/src/test/java/</additionalClasspathElement>
               </additionalClasspathElements>
               <useManifestOnlyJar>false</useManifestOnlyJar>
-              <forkMode>pertest</forkMode>
+<!--               <forkMode>pertest</forkMode> this is the same as below -->
+<!-- http://maven.apache.org/surefire/maven-surefire-plugin/examples/fork-options-and-parallel-execution.html#Migrating_the_Deprecated_forkMode_Parameter_to_forkCount_and_reuseForks -->
+              <forkCount>1</forkCount>
+              <reuseForks>false</reuseForks>
               <argLine>${argLine} -Xmx1500m -Derrai.devel.nocache=true</argLine>
-
+              <enableAssertions>false</enableAssertions>
               <systemProperties>
                 <!-- Must disable long polling for automated tests to succeed -->
                 <property>
@@ -209,6 +223,24 @@
           </plugin>
         </plugins>
       </build>
+      <dependencies>
+        <dependency>
+          <groupId>com.google.gwt</groupId>
+          <artifactId>gwt-dev</artifactId>
+          <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+          <groupId>org.jboss.errai</groupId>
+          <artifactId>errai-codegen</artifactId>
+          <exclusions>
+            <exclusion>
+              <groupId>org.eclipse.jdt</groupId>
+              <artifactId>ecj</artifactId>
+            </exclusion>
+          </exclusions>
+        </dependency>
+      </dependencies>
     </profile>
   </profiles>
 </project>

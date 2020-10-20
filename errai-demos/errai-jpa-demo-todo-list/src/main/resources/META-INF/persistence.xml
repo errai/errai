@@ -47,7 +47,7 @@
         <class>org.picketlink.idm.jpa.model.sample.simple.PasswordCredentialTypeEntity</class>
        <exclude-unlisted-classes>false</exclude-unlisted-classes>
       <properties>
-         <property name="hibernate.dialect" value="org.hibernate.dialect.MySQLDialect" />
+         <property name="hibernate.dialect" value="org.hibernate.dialect.MySQL5Dialect" />
          <!-- Properties for Hibernate -->
          <property name="hibernate.hbm2ddl.auto" value="update" />
          <property name="hibernate.show_sql" value="false" />

@@ -181,7 +181,6 @@ public class Navigation {
             navigate(new Request<>(toPage, token), false);
           }
         } catch (final Exception e) {
-          logger.warn("An error occurred while navigating.", e);
           if (token == null)
             navigationErrorHandler.handleInvalidURLError(e, event.getValue());
           else

@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.jboss.errai</groupId>
     <artifactId>errai-parent</artifactId>
-    <version>4.2.1-SNAPSHOT</version>
+    <version>4.11.0-SNAPSHOT</version>
   </parent>
   <artifactId>errai-annotation-processors</artifactId>
   <name>Errai::Annotation Checkers</name>
@@ -56,8 +56,8 @@
           <plugin>
             <artifactId>maven-surefire-plugin</artifactId>
             <!-- Override exclusions in parent -->
-            <configuration combine.self="override">
-              <excludes>
+            <configuration>
+              <excludes combine.self="override">
               </excludes>
             </configuration>
           </plugin>

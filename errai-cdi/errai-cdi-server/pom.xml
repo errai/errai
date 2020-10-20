@@ -11,7 +11,7 @@
   <parent>
     <groupId>org.jboss.errai</groupId>
     <artifactId>cdi-integration-parent</artifactId>
-    <version>4.2.1-SNAPSHOT</version>
+    <version>4.11.0-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
@@ -52,7 +52,7 @@
           <artifactId>jboss-servlet-api_3.1_spec</artifactId>
           <scope>provided</scope>
         </dependency>
-      
+
         <!-- Errai Core -->
         <dependency>
           <groupId>org.jboss.errai</groupId>
@@ -236,10 +236,14 @@
                 <additionalClasspathElement>${basedir}/${profile.testOutputDirectory}/</additionalClasspathElement>
                 <additionalClasspathElement>${basedir}/src/test/java/</additionalClasspathElement>
               </additionalClasspathElements>
-              <forkMode>pertest</forkMode>
+<!--               <forkMode>pertest</forkMode> this is the same as below -->
+<!-- http://maven.apache.org/surefire/maven-surefire-plugin/examples/fork-options-and-parallel-execution.html#Migrating_the_Deprecated_forkMode_Parameter_to_forkCount_and_reuseForks -->
+              <forkCount>1</forkCount>
+              <reuseForks>false</reuseForks>
               <!-- DO NOT REMOVE THE errai.ioc.experimental.infer_dependent_by_reachability 
                 flag or the testsuite WILL fail. -->
               <argLine>-Xmx1500m </argLine>
+              <enableAssertions>false</enableAssertions>
               <systemPropertyVariables>
                 <errai.hosted_mode_testing>true</errai.hosted_mode_testing>
                 <errai.devel.nocache>true</errai.devel.nocache>
@@ -362,7 +366,7 @@
         <!-- Weld Modules -->
         <dependency>
           <groupId>org.jboss.weld</groupId>
-          <artifactId>weld-core</artifactId>
+          <artifactId>weld-core-impl</artifactId>
           <scope>test</scope>
         </dependency>
         <dependency>
@@ -390,16 +394,25 @@
         </dependency>
 
         <dependency>
+          <groupId>org.jboss.errai</groupId>
+          <artifactId>errai-codegen</artifactId>
+          <exclusions>
+            <exclusion>
+              <groupId>org.eclipse.jdt</groupId>
+              <artifactId>ecj</artifactId>
+            </exclusion>
+          </exclusions>
+        </dependency>
+
+        <dependency>
           <groupId>javax.validation</groupId>
           <artifactId>validation-api</artifactId>
-          <scope>compile</scope>
         </dependency>
 
         <dependency>
           <groupId>javax.validation</groupId>
           <artifactId>validation-api</artifactId>
           <classifier>sources</classifier>
-          <scope>compile</scope>
         </dependency>
 
         <!-- Runtime / Container dependencies -->

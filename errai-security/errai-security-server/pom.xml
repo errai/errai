@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.jboss.errai</groupId>
     <artifactId>errai-security</artifactId>
-    <version>4.2.1-SNAPSHOT</version>
+    <version>4.11.0-SNAPSHOT</version>
   </parent>
   <artifactId>errai-security-server</artifactId>
   <name>Errai::Security::Server</name>
@@ -108,10 +108,10 @@
           <plugin>
             <artifactId>maven-surefire-plugin</artifactId>
             <!-- Override exclusions in parent -->
-            <configuration combine.self="override">
-              <excludes>
+            <configuration>
+              <excludes combine.self="override">
               </excludes>
-              <includes>
+              <includes combine.self="override">
                 <include>**/*Test.java</include>
                 <include>**/*Tests.java</include>
               </includes>

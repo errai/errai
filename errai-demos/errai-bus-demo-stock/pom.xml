@@ -4,7 +4,7 @@
   <name>Errai::Bus::Demos::Stock</name>
   <groupId>org.jboss.errai.demos</groupId>
   <artifactId>errai-bus-demo-stock</artifactId>
-  <version>4.2.1-SNAPSHOT</version>
+  <version>4.11.0-SNAPSHOT</version>
   <packaging>war</packaging>
 
   <url>http://jboss.org/errai/errai</url>
@@ -59,7 +59,7 @@
     <maven.clean.plugin.version>2.4.1</maven.clean.plugin.version>
     <maven.compiler.plugin.version>2.3.2</maven.compiler.plugin.version>
     <maven.deploy.plugin.version>2.7</maven.deploy.plugin.version>
-    <maven.gwt.plugin.version>2.8.2</maven.gwt.plugin.version>
+    <maven.gwt.plugin.version>2.9.0</maven.gwt.plugin.version>
   </properties>
 
   <repositories>
@@ -140,6 +140,11 @@
       <groupId>org.jboss.errai</groupId>
       <artifactId>errai-tools</artifactId>
       <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.jboss.errai</groupId>
+      <artifactId>errai-javax-enterprise</artifactId>
     </dependency>
 
     <!-- Scoped -->

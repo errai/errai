@@ -9,7 +9,7 @@
   <parent>
     <groupId>org.jboss.errai</groupId>
     <artifactId>errai-parent</artifactId>
-    <version>4.2.1-SNAPSHOT</version>
+    <version>4.11.0-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
@@ -119,11 +119,11 @@
           <plugin>
             <artifactId>maven-surefire-plugin</artifactId>
             <!-- Override exclusions in parent -->
-            <configuration combine.self="override">
-              <excludes>
+            <configuration>
+              <excludes combine.self="override">
                 <exclude>**/it/**/*.java</exclude>
               </excludes>
-              <includes>
+              <includes combine.self="override">
                 <include>**/*Tests.java</include>
                 <include>**/*Test.java</include>
               </includes>

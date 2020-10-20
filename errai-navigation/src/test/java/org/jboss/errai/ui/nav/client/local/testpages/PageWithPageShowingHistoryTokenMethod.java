@@ -16,13 +16,13 @@
 
 package org.jboss.errai.ui.nav.client.local.testpages;
 
-import javax.enterprise.context.ApplicationScoped;
-
 import org.jboss.errai.ui.nav.client.local.HistoryToken;
 import org.jboss.errai.ui.nav.client.local.Page;
 import org.jboss.errai.ui.nav.client.local.PageShowing;
 import org.jboss.errai.ui.nav.client.local.PageShown;
 import org.jboss.errai.ui.nav.client.local.PageState;
+
+import javax.enterprise.context.ApplicationScoped;
 
 import com.google.gwt.user.client.ui.VerticalPanel;
 

@@ -7,7 +7,7 @@
   <parent>
     <artifactId>errai-jpa-parent</artifactId>
     <groupId>org.jboss.errai</groupId>
-    <version>4.2.1-SNAPSHOT</version>
+    <version>4.11.0-SNAPSHOT</version>
   </parent>
 
   <artifactId>errai-jpa-datasync</artifactId>
@@ -21,8 +21,8 @@
     <!-- This dependency comes first to ensure this project doesn't see the GWT translatable
          version in errai-jpa-client on its classpath. -->
     <dependency>
-      <groupId>org.hibernate.javax.persistence</groupId>
-      <artifactId>hibernate-jpa-2.1-api</artifactId>
+      <groupId>javax.persistence</groupId>
+      <artifactId>javax.persistence-api</artifactId>
       <scope>provided</scope>
     </dependency>
 
@@ -126,7 +126,10 @@
             <artifactId>maven-failsafe-plugin</artifactId>
             <configuration>
               <skipTests>false</skipTests>
-              <forkMode>always</forkMode>
+<!--               <forkMode>always</forkMode> -->
+<!-- http://maven.apache.org/surefire/maven-surefire-plugin/examples/fork-options-and-parallel-execution.html#Migrating_the_Deprecated_forkMode_Parameter_to_forkCount_and_reuseForks -->
+              <forkCount>1</forkCount>
+              <reuseForks>false</reuseForks>
               <argLine>-Xms1g -Xmx1500m ${argLine}</argLine>
 
               <additionalClasspathElements>

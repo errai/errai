@@ -5,7 +5,7 @@
   <groupId>org.jboss.errai.demos</groupId>
   <name>Errai::JPA::Demos::Basic</name>
   <artifactId>errai-jpa-demo-basic</artifactId>
-  <version>4.2.1-SNAPSHOT</version>
+  <version>4.11.0-SNAPSHOT</version>
   <packaging>war</packaging>
 
   <url>http://jboss.org/errai/errai</url>
@@ -61,12 +61,12 @@
     <maven.clean.plugin.version>2.4.1</maven.clean.plugin.version>
     <maven.compiler.plugin.version>2.3.2</maven.compiler.plugin.version>
     <maven.deploy.plugin.version>2.7</maven.deploy.plugin.version> 
-    <maven.gwt.plugin.version>2.8.2</maven.gwt.plugin.version>
+    <maven.gwt.plugin.version>2.9.0</maven.gwt.plugin.version>
     <weld.version>2.3.3.Final</weld.version>
     <jetty.version>9.2.14.v20151106</jetty.version>
     <!-- Dev Mode config properties -->
     <errai.dev.context>${project.artifactId}</errai.dev.context>
-    <as.version>10.0.0.Final</as.version>
+    <as.version>19.1.0.Final</as.version>
     <!-- Add the absolute path for $JBOSS_HOME below to manage another instance -->
     <errai.jboss.home>${project.build.directory}/wildfly-${as.version}</errai.jboss.home>
   </properties>
@@ -115,6 +115,16 @@
   </dependencyManagement>
 
   <dependencies>
+    <dependency>
+      <groupId>org.jboss.errai</groupId>
+      <artifactId>errai-codegen</artifactId>
+      <exclusions>
+        <exclusion>
+          <groupId>org.eclipse.jdt</groupId>
+          <artifactId>ecj</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
     <dependency>
       <groupId>org.jboss.errai</groupId>
       <artifactId>errai-jpa-client</artifactId>
@@ -195,6 +205,18 @@
       <scope>provided</scope>
     </dependency>
 
+    <dependency>
+      <groupId>com.google.gwt</groupId>
+      <artifactId>gwt-dev</artifactId>
+      <scope>provided</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.eclipse.jetty</groupId>
+          <artifactId>apache-jsp</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
     <!-- Runtime / Container dependencies -->
     <dependency>
       <groupId>org.slf4j</groupId>
@@ -226,13 +248,6 @@
         <dependency>
           <groupId>org.jboss.errai</groupId>
           <artifactId>errai-jboss-as-support</artifactId>
-        </dependency>
-
-        <dependency>
-          <groupId>xml-apis</groupId>
-          <artifactId>xml-apis</artifactId>
-          <version>2.0.2</version>
-          <scope>provided</scope>
         </dependency>
 
         <dependency>

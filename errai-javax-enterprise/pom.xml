@@ -8,9 +8,16 @@
     <parent>
         <artifactId>errai-parent</artifactId>
         <groupId>org.jboss.errai</groupId>
-        <version>4.2.1-SNAPSHOT</version>
+        <version>4.11.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.jboss.errai</groupId>
+            <artifactId>errai-codegen</artifactId>
+        </dependency>
+    </dependencies>
 
     <build>
         <resources>

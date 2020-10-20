@@ -11,7 +11,7 @@
   <parent>
     <groupId>org.jboss.errai</groupId>
     <artifactId>errai-parent</artifactId>
-    <version>4.2.1-SNAPSHOT</version>
+    <version>4.11.0-SNAPSHOT</version>
     <relativePath>../</relativePath>
   </parent>
 
@@ -43,6 +43,7 @@
   <modules>
     <module>errai-jaxrs-client</module>
     <module>errai-jaxrs-provider</module>    
+    <module>errai-jaxrs-resteasy</module>
   </modules>
 
   <build>

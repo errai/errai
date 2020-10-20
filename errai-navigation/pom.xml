@@ -5,7 +5,7 @@
   <parent>
     <artifactId>errai-parent</artifactId>
     <groupId>org.jboss.errai</groupId>
-    <version>4.2.1-SNAPSHOT</version>
+    <version>4.11.0-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
@@ -126,10 +126,10 @@
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-surefire-plugin</artifactId>
             <!-- Override exclusions in parent -->
-            <configuration combine.self="override">
-              <excludes>
+            <configuration >
+              <excludes combine.self="override">
               </excludes>
-              <includes>
+              <includes combine.self="override">
                 <include>**/rebind/**/*Test.java</include>
                 <include>**/rebind/**/*Tests.java</include>
               </includes>
@@ -138,10 +138,13 @@
           <plugin>
             <artifactId>maven-failsafe-plugin</artifactId>
             <configuration>
-              <forkMode>always</forkMode>
+<!--               <forkMode>always</forkMode> -->
+<!-- http://maven.apache.org/surefire/maven-surefire-plugin/examples/fork-options-and-parallel-execution.html#Migrating_the_Deprecated_forkMode_Parameter_to_forkCount_and_reuseForks -->
+              <forkCount>1</forkCount>
+              <reuseForks>false</reuseForks>
               <argLine>-Xmx1500m ${argLine} -Dgwt.args='-prod'</argLine>
               <useManifestOnlyJar>true</useManifestOnlyJar>
-
+              <enableAssertions>false</enableAssertions>
               <systemProperties>
                 <property>
                   <name>java.io.tmpdir</name>

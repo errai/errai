@@ -60,6 +60,16 @@ public class NavigationControl {
   }
 
   /**
+   * Interrupt the navigation process.
+   */
+  public void interrupt() {
+    if (!hasRun && interrupt != null) {
+      interrupt.run();
+      hasRun = true;
+    }
+  }
+
+  /**
    * Redirect to a given page safely.
    *
    * @param toPage Page class annotated with {@link org.jboss.errai.ui.nav.client.local.Page}.
@@ -76,9 +86,7 @@ public class NavigationControl {
    */
   public <C> void redirect(final Class<C> toPage, final Multimap<String, String> state) {
     if (!hasRun) {
-      if (interrupt != null) {
-        interrupt.run();
-      }
+      interrupt();
       navigation.goTo(toPage, state);
     } else {
       throw new IllegalStateException("redirect() method can only be called once.");

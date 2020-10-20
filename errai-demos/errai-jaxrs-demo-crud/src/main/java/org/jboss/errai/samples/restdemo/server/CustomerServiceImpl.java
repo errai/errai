@@ -25,11 +25,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.spi.BeanManager;
 import javax.ws.rs.core.Response;
-
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
 
 import org.jboss.errai.samples.restdemo.client.shared.Customer;
 import org.jboss.errai.samples.restdemo.client.shared.CustomerNotFoundException;
