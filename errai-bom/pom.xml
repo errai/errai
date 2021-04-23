@@ -63,7 +63,7 @@
     <appengine.version>1.7.6</appengine.version>
     <asm.version>7.1</asm.version>
     <gmaven.mojo.version>1.5</gmaven.mojo.version>
-    <guava.version>29.0-jre</guava.version>
+    <guava.version>30.0-jre</guava.version>
     <guice.version>3.0</guice.version>
     <gwt.phonegap.version>3.5.0.1</gwt.phonegap.version>
     <gwt.version>2.9.0</gwt.version>
@@ -145,9 +145,9 @@
     <version.org.powermock>2.0.7</version.org.powermock>
     <version.org.quartz-scheduler>2.3.2 </version.org.quartz-scheduler>
     <version.org.slf4j>1.7.26</version.org.slf4j>
-    <version.org.wildfly>19.1.0.Final</version.org.wildfly>
-    <version.org.wildfly.arquillian>2.2.0.Final</version.org.wildfly.arquillian>
-    <version.org.wildfly.core>11.1.1.Final</version.org.wildfly.core>
+    <version.org.wildfly>23.0.1.Final</version.org.wildfly>
+    <version.org.wildfly.arquillian>3.0.1.Final</version.org.wildfly.arquillian>
+    <version.org.wildfly.core>l5.0.1.Final</version.org.wildfly.core>
     <!-- The version of xercesImpl in the ip-bom is not published on Maven Central.
          Removing this override breaks Errai apps that don't have the JBoss nexus repository configured. -->
     <version.xerces.xercesImpl>2.12.0</version.xerces.xercesImpl>
