@@ -16,11 +16,11 @@
 
 package org.jboss.errai.bus.server.websocket.test.jsr356.cdi.filter;
 
+import jakarta.websocket.Session;
 import org.jboss.errai.bus.server.websocket.jsr356.filter.WebSocketFilter;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.servlet.http.HttpSession;
-import javax.websocket.Session;
 import java.util.Map;
 
 /**
@@ -30,7 +30,7 @@ import java.util.Map;
 public class FooFilter implements WebSocketFilter {
   @Override
   public void beforeProcessingMessage(Session websocketSession, HttpSession httpSession,
-          Map<Object, Object> sharedProperties, String message) {
+                                      Map<Object, Object> sharedProperties, String message) {
   }
 
   @Override

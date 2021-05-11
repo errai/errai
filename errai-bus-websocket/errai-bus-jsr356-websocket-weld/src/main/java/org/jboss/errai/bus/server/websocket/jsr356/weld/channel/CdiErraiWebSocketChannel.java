@@ -17,8 +17,8 @@
 package org.jboss.errai.bus.server.websocket.jsr356.weld.channel;
 
 import javax.servlet.http.HttpSession;
-import javax.websocket.Session;
 
+import jakarta.websocket.Session;
 import org.jboss.errai.bus.server.websocket.jsr356.channel.DefaultErraiWebSocketChannel;
 import org.jboss.errai.bus.server.websocket.jsr356.weld.ScopeAdapter;
 import org.jboss.errai.bus.server.websocket.jsr356.weld.conversation.ConversationScopeAdapter;

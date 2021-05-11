@@ -24,9 +24,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.http.HttpSession;
-import javax.websocket.EndpointConfig;
-import javax.websocket.Session;
 
+import jakarta.websocket.EndpointConfig;
+import jakarta.websocket.Session;
 import org.jboss.errai.bus.server.websocket.jsr356.ErraiWebSocketEndpoint;
 import org.jboss.errai.bus.server.websocket.jsr356.channel.ErraiChannelFactory;
 import org.jboss.errai.bus.server.websocket.jsr356.channel.ErraiWebSocketChannel;
