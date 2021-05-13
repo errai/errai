@@ -50,7 +50,7 @@
   </distributionManagement>
 
   <properties>
-    <as.version>23.0.1.Final</as.version>
+    <as.version>23.0.2.Final</as.version>
   </properties>
 
   <dependencies>
