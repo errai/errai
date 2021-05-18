@@ -29,7 +29,7 @@ import org.jboss.errai.ioc.tests.qualifiers.client.QualifierEqualityTests;
 import org.jboss.errai.ioc.tests.qualifiers.client.QualifierRegressionTests;
 import org.jboss.errai.ioc.tests.wiring.client.AlternativeBeanIntegrationTest;
 import org.jboss.errai.ioc.tests.wiring.client.BasicIOCTest;
-import org.jboss.errai.ioc.tests.wiring.client.BlackListingBeansIntegrationTest;
+import org.jboss.errai.ioc.tests.wiring.client.DenyListingBeansIntegrationTest;
 import org.jboss.errai.ioc.tests.wiring.client.DisposerTest;
 import org.jboss.tests.errai.ioc.wiring.client.WhiteListingBeansIntegrationTest;
 import org.junit.AfterClass;
@@ -56,7 +56,7 @@ import org.junit.runners.Suite.SuiteClasses;
   QualifierEqualityTests.class,
   QualifierRegressionTests.class,
   AlternativeBeanIntegrationTest.class,
-  BlackListingBeansIntegrationTest.class,
+  DenyListingBeansIntegrationTest.class,
   WhiteListingBeansIntegrationTest.class,
   DisposerTest.class
 })

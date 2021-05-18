@@ -20,7 +20,7 @@ import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.IOCResolutionException;
 import org.jboss.errai.ioc.client.test.AbstractErraiIOCTest;
 import org.jboss.tests.errai.ioc.wiring.client.res.NotWhitelistedBean;
-import org.jboss.tests.errai.ioc.wiring.client.res.WhitelistedAndBlacklistedBean;
+import org.jboss.tests.errai.ioc.wiring.client.res.AllowlistedAndDenylistedBean;
 import org.jboss.tests.errai.ioc.wiring.client.res.WhitelistedBean;
 import org.jboss.tests.errai.ioc.wiring.client.res.sub.WhitelistedPackageBean;
 
@@ -54,10 +54,10 @@ public class WhiteListingBeansIntegrationTest extends AbstractErraiIOCTest {
     }
   }
 
-  public void testWhitelistedAndBlacklistedBean() throws Exception {
+  public void testAllowlistedAndDenylistedBean() throws Exception {
     try {
-      IOC.getBeanManager().lookupBean(WhitelistedAndBlacklistedBean.class).getInstance();
-      fail("Should not be able to resolve a whitelisted bean if it is blacklisted!");
+      IOC.getBeanManager().lookupBean(AllowlistedAndDenylistedBean.class).getInstance();
+      fail("Should not be able to resolve a whitelisted bean if it is denylisted!");
     }
     catch (final IOCResolutionException e) {
       // expected

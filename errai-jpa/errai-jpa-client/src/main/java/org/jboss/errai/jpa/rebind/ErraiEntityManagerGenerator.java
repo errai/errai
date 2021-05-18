@@ -84,15 +84,15 @@ public class ErraiEntityManagerGenerator extends AbstractAsyncGenerator {
   private final static String GENERATED_PACKAGE = ErraiEntityManager.class.getPackage().getName();
   private final static String GENERATED_CLASS_NAME = "GeneratedErraiEntityManagerFactory";
   private final static String JPA_WHITELIST_PROPERTY =  "errai.jpa.whitelist";
-  private final static String JPA_BLACKLIST_PROPERTY = "errai.jpa.blacklist";
+  private final static String JPA_DENYLIST_PROPERTY = "errai.jpa.denylist";
   private static final List<Class<? extends Annotation>> LIFECYCLE_EVENT_TYPES;
    private static final String[] implicitWhitelist = { "org.jboss.errai.*", "com.google.gwt.*" };
 
   // Classes in the whitelist are managed by Errai JPA
   private static Set<String> whitelist;
 
-  // Classes in the blacklist are ignored by Errai JPA
-  private static Set<String> blacklist;
+  // Classes in the denylist are ignored by Errai JPA
+  private static Set<String> denylist;
 
   static {
     List<Class<? extends Annotation>> l = new ArrayList<Class<? extends Annotation>>();
@@ -130,7 +130,7 @@ public class ErraiEntityManagerGenerator extends AbstractAsyncGenerator {
     EntityManager em = emf.createEntityManager();
     Metamodel mm = em.getMetamodel();
 
-    blacklist = new HashSet<String>();
+    denylist = new HashSet<String>();
     whitelist = new HashSet<String>();
     populateExclusionLists();
 
@@ -204,9 +204,9 @@ public class ErraiEntityManagerGenerator extends AbstractAsyncGenerator {
     for (final String item : whiteListedEntities) {
       whitelist.add(item);
     }
-    Collection<String> blackListedEntities = PropertiesUtil.getPropertyValues(JPA_BLACKLIST_PROPERTY, "\\s");
-    for (final String item : blackListedEntities) {
-      blacklist.add(item);
+    Collection<String> denyListedEntities = PropertiesUtil.getPropertyValues(JPA_DENYLIST_PROPERTY, "\\s");
+    for (final String item : denyListedEntities) {
+      denylist.add(item);
     }
 
   }
@@ -260,7 +260,7 @@ public class ErraiEntityManagerGenerator extends AbstractAsyncGenerator {
   }
   
   public boolean isIncluded(final MetaClass type) {
-    return isWhitelisted(type) && !isBlacklisted(type);
+    return isWhitelisted(type) && !isDenylisted(type);
   }
 
   public boolean isWhitelisted(final MetaClass type) {
@@ -275,10 +275,10 @@ public class ErraiEntityManagerGenerator extends AbstractAsyncGenerator {
     return implicitFilter.apply(fullName) || whitelistFilter.apply(fullName);
   }
 
-  public boolean isBlacklisted(final MetaClass type) {
-    final SimplePackageFilter blacklistFilter = new SimplePackageFilter(blacklist);
+  public boolean isDenylisted(final MetaClass type) {
+    final SimplePackageFilter denylistFilter = new SimplePackageFilter(denylist);
     final String fullName = type.getFullyQualifiedName();
-    return blacklistFilter.apply(fullName);
+    return denylistFilter.apply(fullName);
   }
 
   public static EntityManagerFactory createHibernateEntityManagerFactory(TreeLogger logger, GeneratorContext context) {

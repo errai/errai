@@ -14,20 +14,35 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.validation.client.blacklisted;
+package org.jboss.tests.errai.jpa.exclusion.denylist;
 
-import javax.validation.constraints.NotNull;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import org.jboss.errai.ioc.client.api.TestOnly;
 
-import org.jboss.errai.common.client.api.annotations.Portable;
-import org.jboss.errai.databinding.client.api.Bindable;
-import org.junit.Ignore;
+/**
+ * @author Divya Dadlani <ddadlani@redhat.com>
+ */
+@TestOnly @Entity
+public class OtherDenyListedPackageEntity {
 
-@Bindable
-@Portable
-@Ignore
-public class ClassWithConstraintInBlacklistedPackage {
+  @GeneratedValue
+  @Id
+  public long id;
 
-  @NotNull
-  private Object o = new Object();
+  public OtherDenyListedPackageEntity() {
+  }
+
+  public long getId() {
+
+    return id;
+  }
+
+  public void setId(long id) {
+    this.id = id;
+  }
+
+
 
 }

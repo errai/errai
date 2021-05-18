@@ -60,7 +60,7 @@ import com.google.common.collect.Multimaps;
 
 /**
  * At every rebind phase, a single {@link InjectionContext} is used. It contains
- * information on enabled alternatives, whitelisted and blacklisted beans, and
+ * information on enabled alternatives, whitelisted and denylisted beans, and
  * annotations associated with various {@link WiringElementType wiring types}.
  *
  * The injection context also stores string-named attributes for sharing data
@@ -85,7 +85,7 @@ public class InjectionContext {
   private final QualifierFactory qualifierFactory;
 
   private final Set<String> whitelist;
-  private final Set<String> blacklist;
+  private final Set<String> denylist;
 
   private static final String[] implicitWhitelist = { "org.jboss.errai.*", "com.google.gwt.*" };
 
@@ -105,7 +105,7 @@ public class InjectionContext {
       this.qualifierFactory = builder.qualifierFactory;
     }
     this.whitelist = Assert.notNull(builder.whitelist);
-    this.blacklist = Assert.notNull(builder.blacklist);
+    this.denylist = Assert.notNull(builder.denylist);
     this.async = builder.async;
   }
 
@@ -115,7 +115,7 @@ public class InjectionContext {
     private QualifierFactory qualifierFactory;
     private final HashSet<String> enabledAlternatives = new HashSet<String>();
     private final HashSet<String> whitelist = new HashSet<String>();
-    private final HashSet<String> blacklist = new HashSet<String>();
+    private final HashSet<String> denylist = new HashSet<String>();
 
     public static Builder create() {
       return new Builder();
@@ -141,8 +141,8 @@ public class InjectionContext {
       return this;
     }
 
-    public Builder addToBlacklist(final String item) {
-      blacklist.add(item);
+    public Builder addToDenylist(final String item) {
+      denylist.add(item);
       return this;
     }
 
@@ -224,7 +224,7 @@ public class InjectionContext {
   }
 
   public boolean isIncluded(final MetaClass type) {
-    return isWhitelisted(type) && !isBlacklisted(type);
+    return isWhitelisted(type) && !isDenylisted(type);
   }
 
   public boolean isWhitelisted(final MetaClass type) {
@@ -239,11 +239,11 @@ public class InjectionContext {
     return implicitFilter.apply(fullName) || whitelistFilter.apply(fullName);
   }
 
-  public boolean isBlacklisted(final MetaClass type) {
-    final SimplePackageFilter blacklistFilter = new SimplePackageFilter(blacklist);
+  public boolean isDenylisted(final MetaClass type) {
+    final SimplePackageFilter denylistFilter = new SimplePackageFilter(denylist);
     final String fullName = type.getFullyQualifiedName();
 
-    return blacklistFilter.apply(fullName);
+    return denylistFilter.apply(fullName);
   }
 
   public void registerDecorator(final IOCDecoratorExtension<?> iocExtension) {

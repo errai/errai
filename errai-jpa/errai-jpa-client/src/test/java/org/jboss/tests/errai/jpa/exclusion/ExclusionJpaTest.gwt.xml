@@ -15,5 +15,5 @@
 
   <source path="client"/>
   <source path="whitelist"/>
-  <source path="blacklist"/>
+  <source path="denylist"/>
 </module>
