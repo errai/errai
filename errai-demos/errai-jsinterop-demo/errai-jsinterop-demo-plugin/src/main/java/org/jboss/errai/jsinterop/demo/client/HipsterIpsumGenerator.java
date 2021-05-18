@@ -31,7 +31,6 @@ public class HipsterIpsumGenerator implements IpsumGenerator {
           + "Banjo kogi health goth messenger bag, roof party swag brooklyn keffiyeh craft beer heirloom."
           + "Pitchfork vice drinking vinegar, portland tousled offal brunch migas mustache hammock asymmetrical fanny pack chicharrones YOLO vegan."
           + "Brunch meh celiac, fap gastropub farm-to-table gentrify microdosing tofu migas stumptown YOLO."
-          + "Meggings master cleanse +1 shabby chic, banjo seitan iPhone authentic."
           + "Bushwick fingerstache direct trade, PBR&B truffaut you probably haven't heard of them lumbersexual"
           + "health goth polaroid banh mi offal biodiesel tote bag chambray."
           + "Chambray ramps chillwave gastropub normcore, literally yuccie ennui seitan photo booth waistcoat.";
