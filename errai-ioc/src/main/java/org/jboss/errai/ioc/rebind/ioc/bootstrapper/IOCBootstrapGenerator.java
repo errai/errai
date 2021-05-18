@@ -86,7 +86,7 @@ public class IOCBootstrapGenerator {
 
   public static final String QUALIFYING_METADATA_FACTORY_PROPERTY = "errai.ioc.QualifyingMetaDataFactory";
   public static final String ENABLED_ALTERNATIVES_PROPERTY = "errai.ioc.enabled.alternatives";
-  public static final String WHITELIST_PROPERTY = "errai.ioc.whitelist";
+  public static final String ALLOWLIST_PROPERTY = "errai.ioc.allowlist";
   public static final String DENYLIST_PROPERTY = "errai.ioc.denylist";
   public static final String EXPERIMENTAL_INFER_DEPENDENT_BY_REACHABILITY
       = "errai.ioc.experimental.infer_dependent_by_reachability";
@@ -189,9 +189,9 @@ public class IOCBootstrapGenerator {
         injectionContextBuilder.enabledAlternative(alternative.trim());
       }
 
-      final Collection<String> whitelistItems = PropertiesUtil.getPropertyValues(WHITELIST_PROPERTY, "\\s");
-      for (final String item : whitelistItems) {
-        injectionContextBuilder.addToWhitelist(item.trim());
+      final Collection<String> allowlistItems = PropertiesUtil.getPropertyValues(ALLOWLIST_PROPERTY, "\\s");
+      for (final String item : allowlistItems) {
+        injectionContextBuilder.addToAllowlist(item.trim());
       }
 
       final Collection<String> denylistItems = PropertiesUtil.getPropertyValues(DENYLIST_PROPERTY, "\\s");

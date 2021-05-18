@@ -116,7 +116,7 @@ public class IOCProcessorErrorTest {
     when(injContext.getAnnotationsForElementType(InjectionPoint)).thenReturn(Arrays.asList(Inject.class));
     when(injContext.getAnnotationsForElementType(ProducerElement)).thenReturn(Arrays.asList(IOCProducer.class));
     when(injContext.getAnnotationsForElementType(Provider)).thenReturn(Arrays.asList(IOCProvider.class));
-    when(injContext.isWhitelisted(any())).thenReturn(true);
+    when(injContext.isAllowlisted(any())).thenReturn(true);
     when(injContext.isDenylisted(any())).thenReturn(false);
 
     final ClassStructureBuilder<?> classBuilder = ClassBuilder

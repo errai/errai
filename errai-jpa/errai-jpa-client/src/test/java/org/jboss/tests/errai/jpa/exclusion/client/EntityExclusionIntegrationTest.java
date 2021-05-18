@@ -61,17 +61,17 @@ public class EntityExclusionIntegrationTest extends JpaClientTestCase {
     IOC.reset();
   }
 
-  public void testWhiteListedEntityIsInEntityManager() throws Exception {
+  public void testAllowListedEntityIsInEntityManager() throws Exception {
     try {
       // we cannot use the class name to test here since the class is not available in client side code generation
       final EntityType et = ((ErraiMetamodel) getEntityManager().getMetamodel())
-                        .entity("org.jboss.tests.errai.jpa.exclusion.client.res.WhiteListedEntity");
+                        .entity("org.jboss.tests.errai.jpa.exclusion.client.res.AllowListedEntity");
 
       assertEquals("Incorrect entity type found", et.getJavaType().getName(),
-                    "org.jboss.tests.errai.jpa.exclusion.client.res.WhiteListedEntity");
+                    "org.jboss.tests.errai.jpa.exclusion.client.res.AllowListedEntity");
 
     } catch (final IllegalArgumentException ex) {
-      fail("WhiteListedEntity was not included in EntityManager");
+      fail("AllowListedEntity was not included in EntityManager");
     }
   }
 
@@ -87,27 +87,27 @@ public class EntityExclusionIntegrationTest extends JpaClientTestCase {
     }
   }
 
-  public void testWhiteListedPackageIsInEntityManager() throws Exception {
+  public void testAllowListedPackageIsInEntityManager() throws Exception {
     try {
       final EntityType et = ((ErraiMetamodel) getEntityManager().getMetamodel())
-                        .entity("org.jboss.tests.errai.jpa.exclusion.whitelist.WhiteListedPackageEntity");
+                        .entity("org.jboss.tests.errai.jpa.exclusion.allowlist.AllowListedPackageEntity");
 
       assertEquals("Incorrect entity type found", et.getJavaType().getName(),
-                    "org.jboss.tests.errai.jpa.exclusion.whitelist.WhiteListedPackageEntity");
+                    "org.jboss.tests.errai.jpa.exclusion.allowlist.AllowListedPackageEntity");
 
     } catch (final IllegalArgumentException e) {
-      fail("WhiteListedPackageEntity was not found in EntityManager");
+      fail("AllowListedPackageEntity was not found in EntityManager");
     }
   }
 
   public void testNestedDenyListedEntityIsNotInEntityManager() throws Exception {
-    // tests to see if a denylisted class that is inside a whitelisted package is excluded
-    // (denylist overrides whitelist)
+    // tests to see if a denylisted class that is inside a allowlisted package is excluded
+    // (denylist overrides allowlist)
     try {
       ((ErraiMetamodel) getEntityManager().getMetamodel())
-        .entity("org.jboss.tests.errai.jpa.exclusion.whitelist.DenyListedEntityInWhiteListedPackage");
+        .entity("org.jboss.tests.errai.jpa.exclusion.allowlist.DenyListedEntityInAllowListedPackage");
 
-      fail("DenyListedEntityInWhiteListedPackage was not excluded from EntityManager");
+      fail("DenyListedEntityInAllowListedPackage was not excluded from EntityManager");
     } catch (final IllegalArgumentException ex) {
       // this is the expected behavior
     }
@@ -125,7 +125,7 @@ public class EntityExclusionIntegrationTest extends JpaClientTestCase {
   }
 
   public void testAllowAndDenyListedEntityIsNotInEntityManager() throws Exception {
-    // denylist overrides whitelist
+    // denylist overrides allowlist
     try {
       ((ErraiMetamodel) getEntityManager().getMetamodel())
         .entity("org.jboss.tests.errai.jpa.exclusion.client.AllowAndDenyListedEntity");

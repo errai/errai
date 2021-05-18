@@ -60,7 +60,7 @@ import com.google.common.collect.Multimaps;
 
 /**
  * At every rebind phase, a single {@link InjectionContext} is used. It contains
- * information on enabled alternatives, whitelisted and denylisted beans, and
+ * information on enabled alternatives, allowlisted and denylisted beans, and
  * annotations associated with various {@link WiringElementType wiring types}.
  *
  * The injection context also stores string-named attributes for sharing data
@@ -84,10 +84,10 @@ public class InjectionContext {
 
   private final QualifierFactory qualifierFactory;
 
-  private final Set<String> whitelist;
+  private final Set<String> allowlist;
   private final Set<String> denylist;
 
-  private static final String[] implicitWhitelist = { "org.jboss.errai.*", "com.google.gwt.*" };
+  private static final String[] implicitAllowlist = { "org.jboss.errai.*", "com.google.gwt.*" };
 
   private final Multimap<Class<? extends Annotation>, IOCDecoratorExtension<? extends Annotation>> decorators = HashMultimap.create();
   private final Multimap<ElementType, Class<? extends Annotation>> decoratorsByElementType = HashMultimap.create();
@@ -104,7 +104,7 @@ public class InjectionContext {
     } else {
       this.qualifierFactory = builder.qualifierFactory;
     }
-    this.whitelist = Assert.notNull(builder.whitelist);
+    this.allowlist = Assert.notNull(builder.allowlist);
     this.denylist = Assert.notNull(builder.denylist);
     this.async = builder.async;
   }
@@ -114,7 +114,7 @@ public class InjectionContext {
     private boolean async;
     private QualifierFactory qualifierFactory;
     private final HashSet<String> enabledAlternatives = new HashSet<String>();
-    private final HashSet<String> whitelist = new HashSet<String>();
+    private final HashSet<String> allowlist = new HashSet<String>();
     private final HashSet<String> denylist = new HashSet<String>();
 
     public static Builder create() {
@@ -136,8 +136,8 @@ public class InjectionContext {
       return this;
     }
 
-    public Builder addToWhitelist(final String item) {
-      whitelist.add(item);
+    public Builder addToAllowlist(final String item) {
+      allowlist.add(item);
       return this;
     }
 
@@ -224,19 +224,19 @@ public class InjectionContext {
   }
 
   public boolean isIncluded(final MetaClass type) {
-    return isWhitelisted(type) && !isDenylisted(type);
+    return isAllowlisted(type) && !isDenylisted(type);
   }
 
-  public boolean isWhitelisted(final MetaClass type) {
-    if (whitelist.isEmpty()) {
+  public boolean isAllowlisted(final MetaClass type) {
+    if (allowlist.isEmpty()) {
       return true;
     }
 
-    final SimplePackageFilter implicitFilter = new SimplePackageFilter(Arrays.asList(implicitWhitelist));
-    final SimplePackageFilter whitelistFilter = new SimplePackageFilter(whitelist);
+    final SimplePackageFilter implicitFilter = new SimplePackageFilter(Arrays.asList(implicitAllowlist));
+    final SimplePackageFilter allowlistFilter = new SimplePackageFilter(allowlist);
     final String fullName = type.getFullyQualifiedName();
 
-    return implicitFilter.apply(fullName) || whitelistFilter.apply(fullName);
+    return implicitFilter.apply(fullName) || allowlistFilter.apply(fullName);
   }
 
   public boolean isDenylisted(final MetaClass type) {

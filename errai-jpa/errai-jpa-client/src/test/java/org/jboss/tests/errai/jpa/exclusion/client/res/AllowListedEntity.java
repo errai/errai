@@ -26,7 +26,7 @@ import javax.persistence.Id;
 import org.jboss.errai.ioc.client.api.TestOnly;
 
 @TestOnly @Entity
-public class WhiteListedEntity {
+public class AllowListedEntity {
 
   @GeneratedValue
   @Id
@@ -40,7 +40,7 @@ public class WhiteListedEntity {
     this.id = id;
   }
 
-  public WhiteListedEntity() {
+  public AllowListedEntity() {
 
   }
 }
