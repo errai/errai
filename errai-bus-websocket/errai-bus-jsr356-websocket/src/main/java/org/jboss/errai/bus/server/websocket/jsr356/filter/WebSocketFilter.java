@@ -17,8 +17,9 @@
 package org.jboss.errai.bus.server.websocket.jsr356.filter;
 
 import javax.servlet.http.HttpSession;
-import javax.websocket.Session;
 import java.util.Map;
+
+import jakarta.websocket.Session;
 
 /**
  * Registered implementations of this filter in web.xml will be invoked for each
@@ -41,7 +42,7 @@ public interface WebSocketFilter {
    *          unaltered Errai message from the websocket text frame
    */
   public void beforeProcessingMessage(Session websocketSession, HttpSession httpSession,
-          Map<Object, Object> sharedProperties, String message);
+                                      Map<Object, Object> sharedProperties, String message);
 
   /**
    * Invoked after Errai has finished processing of the message.

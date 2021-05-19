@@ -16,6 +16,7 @@
 
 package org.jboss.errai.bus.server.websocket.jsr356.channel;
 
+import jakarta.websocket.Session;
 import org.jboss.errai.bus.client.api.QueueSession;
 import org.jboss.errai.bus.client.api.SessionEndEvent;
 import org.jboss.errai.bus.client.api.SessionEndListener;
@@ -31,7 +32,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpSession;
-import javax.websocket.Session;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -40,7 +40,7 @@ import java.util.Map;
 
 /**
  * Handler for websocket messages for both receiving and sending. There is one
- * instance for each {@link javax.websocket.Session} and each one has a relation
+ * instance for each {@link jakarta.websocket.Session} and each one has a relation
  * to its {@link javax.servlet.http.HttpSession}.
  * 
  * @author Michel Werren
