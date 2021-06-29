@@ -93,7 +93,7 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
   /*
    * These pages should not cause @Page validation if no other pages exist.
    */
-  private static final Collection<String> BLACKLISTED_PAGES = Arrays
+  private static final Collection<String> DENYLISTED_PAGES = Arrays
           .asList("org.jboss.errai.security.client.local.context.SecurityContextImpl.SecurityRolesConstraintPage");
 
   @Override
@@ -123,9 +123,9 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
      * This prevents @Page validation logic from aborting compilation if a user has errai security
      * but is not using errai-navigation.
      */
-    final boolean hasNonBlacklistedPages = containsNonBlacklistedPages(pages);
+    final boolean hasNonDenylistedPages = containsNonDenylistedPages(pages);
 
-    if (hasNonBlacklistedPages) {
+    if (hasNonDenylistedPages) {
       for (MetaClass pageClass : pages) {
         if (!(pageClass.isAssignableTo(IsWidget.class)
                 || pageClass.isAssignableTo(IsElement.class)
@@ -184,7 +184,7 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
     }
     ctor.finish();
 
-    if (hasNonBlacklistedPages) {
+    if (hasNonDenylistedPages) {
       validateDefaultPagePresent(pages, pageRoles);
       validateUnique(pageRoles);
       validateExistingRolesPresent(pages, pageRoles);
@@ -196,9 +196,9 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
     return classBuilder.toJavaString();
   }
 
-  private boolean containsNonBlacklistedPages(final Collection<MetaClass> pages) {
+  private boolean containsNonDenylistedPages(final Collection<MetaClass> pages) {
     for (final MetaClass page : pages) {
-      if (!BLACKLISTED_PAGES.contains(page.getCanonicalName())) {
+      if (!DENYLISTED_PAGES.contains(page.getCanonicalName())) {
         return true;
       }
     }
