@@ -29,7 +29,7 @@ import org.jboss.errai.jpa.sync.client.local.ClientSyncManager;
  * just captures its arguments and does not attempt to communicate with the
  * server.
  * <p>
- * Note that this bean is blacklisted in ErraiApp.properties so that it does not
+ * Note that this bean is denylisted in ErraiApp.properties so that it does not
  * get injected in place of the real ClientSyncManager.
  */
 @SuppressWarnings("rawtypes")

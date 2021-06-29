@@ -14,19 +14,18 @@
  * limitations under the License.
  */
 
-package org.jboss.tests.errai.jpa.exclusion.client.res;
-
-/**
- * @author Divya Dadlani <ddadlani@redhat.com>
- */
+package org.jboss.tests.errai.jpa.exclusion.allowlist;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import org.jboss.errai.ioc.client.api.TestOnly;
 
+/**
+ * @author Divya Dadlani <ddadlani@redhat.com>
+ */
 @TestOnly @Entity
-public class WhiteListedEntity {
+public class DenyListedEntityInAllowListedPackage {
 
   @GeneratedValue
   @Id
@@ -40,7 +39,7 @@ public class WhiteListedEntity {
     this.id = id;
   }
 
-  public WhiteListedEntity() {
+  public DenyListedEntityInAllowListedPackage(){
 
   }
 }

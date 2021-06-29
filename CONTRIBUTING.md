@@ -80,7 +80,7 @@ As a web framework it is important that the features in Errai provide utility to
 
 When submitting a pull request to Errai, please:
 
-* Submit it against the Errai *master* branch whenever possible. We will cherry-pick important changes (such as critical bug fixes) to branches for older releases where appropriate.
+* Submit it against the Errai *main* branch whenever possible. We will cherry-pick important changes (such as critical bug fixes) to branches for older releases where appropriate.
 
 * Successfully run a full build (with integration tests) before sending the PR.
 
