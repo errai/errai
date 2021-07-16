@@ -16,14 +16,6 @@
 
 package org.jboss.errai.bus.server.websocket.jsr356;
 
-import jakarta.websocket.CloseReason;
-import jakarta.websocket.EndpointConfig;
-import jakarta.websocket.OnClose;
-import jakarta.websocket.OnError;
-import jakarta.websocket.OnMessage;
-import jakarta.websocket.OnOpen;
-import jakarta.websocket.Session;
-import jakarta.websocket.server.ServerEndpoint;
 import org.jboss.errai.bus.server.websocket.jsr356.channel.ErraiChannelFactory;
 import org.jboss.errai.bus.server.websocket.jsr356.channel.ErraiWebSocketChannel;
 import org.jboss.errai.bus.server.websocket.jsr356.configuration.ErraiEndpointConfigurator;
@@ -31,6 +23,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpSession;
+import javax.websocket.*;
+import javax.websocket.server.ServerEndpoint;
 
 import java.util.HashMap;
 import java.util.Map;

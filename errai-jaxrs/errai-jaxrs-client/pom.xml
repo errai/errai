@@ -62,8 +62,8 @@
             <configuration>
               <artifactItems>
                 <artifactItem>
-                  <groupId>jakarta.ws.rs</groupId>
-                  <artifactId>jakarta.ws.rs-api</artifactId>
+                  <groupId>org.jboss.spec.javax.ws.rs</groupId>
+                  <artifactId>jboss-jaxrs-api_2.1_spec</artifactId>
                   <classifier>sources</classifier>
                   <overWrite>false</overWrite>
                   <outputDirectory>target/generated-sources/javax/ws/rs/super</outputDirectory>
@@ -131,8 +131,8 @@
     </dependency>
 
     <dependency>
-      <groupId>jakarta.ws.rs</groupId>
-      <artifactId>jakarta.ws.rs-api</artifactId>
+      <groupId>org.jboss.spec.javax.ws.rs</groupId>
+      <artifactId>jboss-jaxrs-api_2.1_spec</artifactId>
     </dependency>
 
     <dependency>

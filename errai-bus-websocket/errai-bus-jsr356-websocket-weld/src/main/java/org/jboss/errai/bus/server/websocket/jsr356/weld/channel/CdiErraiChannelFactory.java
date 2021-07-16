@@ -16,11 +16,11 @@
 
 package org.jboss.errai.bus.server.websocket.jsr356.weld.channel;
 
-import jakarta.websocket.Session;
 import org.jboss.errai.bus.server.websocket.jsr356.channel.ErraiChannelFactory;
 import org.jboss.errai.bus.server.websocket.jsr356.channel.ErraiWebSocketChannel;
 
 import javax.servlet.http.HttpSession;
+import javax.websocket.Session;
 
 /**
  * CDI version of the {@link ErraiChannelFactory}

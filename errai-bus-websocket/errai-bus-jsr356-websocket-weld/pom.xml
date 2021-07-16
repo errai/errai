@@ -14,7 +14,7 @@
   <description>JEE 7 / CDI (Weld) extension to the JSR-356 compliant Errai Bus endpoint.</description>
 
   <properties>
-    <wildfly.version>23.0.2.Final</wildfly.version>
+    <wildfly.version>18.0.1.Final</wildfly.version>
     <unpack-as-folder>${project.build.directory}/as-test</unpack-as-folder>
     <test-as-folder>${unpack-as-folder}/wildfly-${wildfly.version}</test-as-folder>
   </properties>
@@ -40,8 +40,8 @@
     </dependency>
 
     <dependency>
-      <groupId>jakarta.websocket</groupId>
-      <artifactId>jakarta.websocket-api</artifactId>
+      <groupId>org.jboss.spec.javax.websocket</groupId>
+      <artifactId>jboss-websocket-api_1.1_spec</artifactId>
       <scope>provided</scope>
     </dependency>
 
@@ -99,10 +99,6 @@
           <artifactId>jta</artifactId>
         </exclusion>
       </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>jakarta.websocket</groupId>
-      <artifactId>jakarta.websocket-api</artifactId>
     </dependency>
   </dependencies>
 

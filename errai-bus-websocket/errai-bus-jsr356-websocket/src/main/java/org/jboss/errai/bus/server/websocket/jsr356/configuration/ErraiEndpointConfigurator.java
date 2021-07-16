@@ -16,13 +16,13 @@
 
 package org.jboss.errai.bus.server.websocket.jsr356.configuration;
 
-import jakarta.websocket.HandshakeResponse;
-import jakarta.websocket.server.HandshakeRequest;
-import jakarta.websocket.server.ServerEndpointConfig;
 import org.apache.commons.lang3.StringUtils;
 import org.jboss.errai.bus.server.websocket.jsr356.filter.FilterLookup;
 
 import javax.servlet.http.HttpSession;
+import javax.websocket.HandshakeResponse;
+import javax.websocket.server.HandshakeRequest;
+import javax.websocket.server.ServerEndpointConfig;
 
 import java.util.Map;
 import java.util.StringTokenizer;
