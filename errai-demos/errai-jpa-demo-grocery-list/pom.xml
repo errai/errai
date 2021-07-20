@@ -65,7 +65,7 @@
     <skipTests>true</skipTests>
     <errai.jboss.home>${project.build.directory}/wildfly-${wildfly.version}</errai.jboss.home>    
     <errai.dev.context>${project.artifactId}</errai.dev.context>
-    <wildfly.version>18.0.1.Final</wildfly.version>
+    <wildfly.version>23.0.2.Final</wildfly.version>
   </properties>
 
   <repositories>
