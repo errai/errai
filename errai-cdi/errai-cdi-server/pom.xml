@@ -48,8 +48,8 @@
       <dependencies>
         <!-- Must come before gwt-user to override servlet api -->
         <dependency>
-          <groupId>org.jboss.spec.javax.servlet</groupId>
-          <artifactId>jboss-servlet-api_3.1_spec</artifactId>
+          <groupId>jakarta.servlet</groupId>
+          <artifactId>jakarta.servlet-api</artifactId>
           <scope>provided</scope>
         </dependency>
 
@@ -96,8 +96,8 @@
         </dependency>
 
         <dependency>
-          <groupId>javax.enterprise</groupId>
-          <artifactId>cdi-api</artifactId>
+          <groupId>jakarta.enterprise</groupId>
+          <artifactId>jakarta.enterprise.cdi-api</artifactId>
           <scope>provided</scope>
         </dependency>
 
@@ -152,8 +152,8 @@
         </dependency>
 
         <dependency>
-          <groupId>org.jboss.spec.javax.ejb</groupId>
-          <artifactId>jboss-ejb-api_3.2_spec</artifactId>
+          <groupId>jakarta.ejb</groupId>
+          <artifactId>jakarta.ejb-api</artifactId>
           <scope>provided</scope>
         </dependency>
 
@@ -280,8 +280,8 @@
       <dependencies> 
         <!-- Must come before gwt-user to override servlet api -->
         <dependency>
-          <groupId>org.jboss.spec.javax.servlet</groupId>
-          <artifactId>jboss-servlet-api_3.1_spec</artifactId>
+          <groupId>jakarta.servlet</groupId>
+          <artifactId>jakarta.servlet-api</artifactId>
           <scope>provided</scope>
         </dependency>
         <dependency>
@@ -317,8 +317,8 @@
           <artifactId>errai-ioc</artifactId>
           <exclusions>
             <exclusion>
-              <groupId>javax.inject</groupId>
-              <artifactId>javax.inject</artifactId>
+              <groupId>jakarta.inject</groupId>
+              <artifactId>jakarta.inject-api</artifactId>
             </exclusion>            
           </exclusions>        
         </dependency>

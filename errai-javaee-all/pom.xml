@@ -85,8 +85,8 @@
       <!-- XXX the following is required at compile time but must not be deployed to the app server -->
       <!-- we need to find a better way! -->
             <dependency>
-        <groupId>javax.enterprise</groupId>
-        <artifactId>cdi-api</artifactId>
+        <groupId>jakarta.enterprise</groupId>
+        <artifactId>jakarta.enterprise.cdi-api</artifactId>
       </dependency>
 
       <!-- Required for Errai Validation -->
