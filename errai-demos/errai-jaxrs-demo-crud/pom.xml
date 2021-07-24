@@ -243,11 +243,6 @@
         </dependency>
 
         <dependency>
-          <groupId>org.jboss.weld.servlet</groupId>
-          <artifactId>weld-servlet</artifactId>
-        </dependency>
-
-        <dependency>
           <groupId>org.jboss.weld.se</groupId>
           <artifactId>weld-se-core</artifactId>
         </dependency>
