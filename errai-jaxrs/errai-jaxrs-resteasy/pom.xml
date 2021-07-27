@@ -5,7 +5,7 @@
   <parent>
     <artifactId>jaxrs-integration-parent</artifactId>
     <groupId>org.jboss.errai</groupId>
-    <version>4.11.3.Final</version>
+    <version>4.11.4.Final</version>
   </parent>
   <artifactId>errai-jaxrs-resteasy</artifactId>
 
