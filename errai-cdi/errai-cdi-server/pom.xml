@@ -183,12 +183,6 @@
 
         <dependency>
           <groupId>org.jboss.errai</groupId>
-          <artifactId>errai-javax-enterprise</artifactId>
-          <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-          <groupId>org.jboss.errai</groupId>
           <artifactId>errai-data-binding</artifactId>
           <scope>provided</scope>
         </dependency>
@@ -315,12 +309,6 @@
         <dependency>
           <groupId>org.jboss.errai</groupId>
           <artifactId>errai-ioc</artifactId>
-          <exclusions>
-            <exclusion>
-              <groupId>jakarta.inject</groupId>
-              <artifactId>jakarta.inject-api</artifactId>
-            </exclusion>            
-          </exclusions>        
         </dependency>
         
          <dependency>
@@ -429,12 +417,6 @@
         <dependency>
           <groupId>org.jboss</groupId>
           <artifactId>jboss-common-core</artifactId>
-        </dependency>
-
-        <dependency>
-          <groupId>org.jboss.errai</groupId>
-          <artifactId>errai-javax-enterprise</artifactId>
-          <scope>provided</scope>
         </dependency>
 
         <dependency>

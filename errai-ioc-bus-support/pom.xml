@@ -74,19 +74,10 @@
     </dependency>
 
     <dependency>
-      <groupId>jakarta.inject</groupId>
-      <artifactId>jakarta.inject-api</artifactId>
-    </dependency>
-
-    <dependency>
       <groupId>org.jboss.errai</groupId>
       <artifactId>errai-javax-enterprise</artifactId>
+      <scope>provided</scope>
     </dependency>    
-
-    <dependency>
-      <groupId>jakarta.enterprise</groupId>
-      <artifactId>jakarta.enterprise.cdi-api</artifactId>
-    </dependency>
 
     <!-- Must come after errai-common is inherited for patched JUnitShell -->
     <dependency>
