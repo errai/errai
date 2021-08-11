@@ -83,16 +83,16 @@ import com.google.gwt.core.ext.UnableToCompleteException;
 public class ErraiEntityManagerGenerator extends AbstractAsyncGenerator {
   private final static String GENERATED_PACKAGE = ErraiEntityManager.class.getPackage().getName();
   private final static String GENERATED_CLASS_NAME = "GeneratedErraiEntityManagerFactory";
-  private final static String JPA_ALLOWLIST_PROPERTY =  "errai.jpa.allowlist";
-  private final static String JPA_DENYLIST_PROPERTY = "errai.jpa.denylist";
+  private final static String JPA_WHITELIST_PROPERTY =  "errai.jpa.whitelist";
+  private final static String JPA_BLACKLIST_PROPERTY = "errai.jpa.blacklist";
   private static final List<Class<? extends Annotation>> LIFECYCLE_EVENT_TYPES;
-   private static final String[] implicitAllowlist = { "org.jboss.errai.*", "com.google.gwt.*" };
+   private static final String[] implicitWhitelist = { "org.jboss.errai.*", "com.google.gwt.*" };
 
-  // Classes in the allowlist are managed by Errai JPA
-  private static Set<String> allowlist;
+  // Classes in the whitelist are managed by Errai JPA
+  private static Set<String> whitelist;
 
-  // Classes in the denylist are ignored by Errai JPA
-  private static Set<String> denylist;
+  // Classes in the blacklist are ignored by Errai JPA
+  private static Set<String> blacklist;
 
   static {
     List<Class<? extends Annotation>> l = new ArrayList<Class<? extends Annotation>>();
@@ -130,8 +130,8 @@ public class ErraiEntityManagerGenerator extends AbstractAsyncGenerator {
     EntityManager em = emf.createEntityManager();
     Metamodel mm = em.getMetamodel();
 
-    denylist = new HashSet<String>();
-    allowlist = new HashSet<String>();
+    blacklist = new HashSet<String>();
+    whitelist = new HashSet<String>();
     populateExclusionLists();
 
     final ClassStructureBuilder<?> classBuilder =
@@ -200,13 +200,13 @@ public class ErraiEntityManagerGenerator extends AbstractAsyncGenerator {
   }
   
   private void populateExclusionLists() {
-    Collection<String> allowListedEntities = PropertiesUtil.getPropertyValues(JPA_ALLOWLIST_PROPERTY, "\\s");
-    for (final String item : allowListedEntities) {
-      allowlist.add(item);
+    Collection<String> whiteListedEntities = PropertiesUtil.getPropertyValues(JPA_WHITELIST_PROPERTY, "\\s");
+    for (final String item : whiteListedEntities) {
+      whitelist.add(item);
     }
-    Collection<String> denyListedEntities = PropertiesUtil.getPropertyValues(JPA_DENYLIST_PROPERTY, "\\s");
-    for (final String item : denyListedEntities) {
-      denylist.add(item);
+    Collection<String> blackListedEntities = PropertiesUtil.getPropertyValues(JPA_BLACKLIST_PROPERTY, "\\s");
+    for (final String item : blackListedEntities) {
+      blacklist.add(item);
     }
 
   }
@@ -260,25 +260,25 @@ public class ErraiEntityManagerGenerator extends AbstractAsyncGenerator {
   }
   
   public boolean isIncluded(final MetaClass type) {
-    return isAllowlisted(type) && !isDenylisted(type);
+    return isWhitelisted(type) && !isBlacklisted(type);
   }
 
-  public boolean isAllowlisted(final MetaClass type) {
-    if (allowlist.isEmpty()) {
+  public boolean isWhitelisted(final MetaClass type) {
+    if (whitelist.isEmpty()) {
       return true;
     }
 
-    final SimplePackageFilter implicitFilter = new SimplePackageFilter(Arrays.asList(implicitAllowlist));
-    final SimplePackageFilter allowlistFilter = new SimplePackageFilter(allowlist);
+    final SimplePackageFilter implicitFilter = new SimplePackageFilter(Arrays.asList(implicitWhitelist));
+    final SimplePackageFilter whitelistFilter = new SimplePackageFilter(whitelist);
     final String fullName = type.getFullyQualifiedName();
 
-    return implicitFilter.apply(fullName) || allowlistFilter.apply(fullName);
+    return implicitFilter.apply(fullName) || whitelistFilter.apply(fullName);
   }
 
-  public boolean isDenylisted(final MetaClass type) {
-    final SimplePackageFilter denylistFilter = new SimplePackageFilter(denylist);
+  public boolean isBlacklisted(final MetaClass type) {
+    final SimplePackageFilter blacklistFilter = new SimplePackageFilter(blacklist);
     final String fullName = type.getFullyQualifiedName();
-    return denylistFilter.apply(fullName);
+    return blacklistFilter.apply(fullName);
   }
 
   public static EntityManagerFactory createHibernateEntityManagerFactory(TreeLogger logger, GeneratorContext context) {

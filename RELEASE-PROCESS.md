@@ -98,7 +98,7 @@ Release Steps
 1. Release the new version on [JIRA](https://issues.jboss.org/projects/ERRAI?selectedItem=com.atlassian.jira.jira-projects-plugin%3Arelease-page&status=unreleased).
 
 1. Update the version number of `errai-tutorial`'s pom.xml:
-  https://github.com/errai/errai-tutorial/blob/main/pom.xml
+  https://github.com/errai/errai-tutorial/blob/master/pom.xml
 
 1. Update the website with links to the new version (https://github.com/errai/errai.github.com)
 

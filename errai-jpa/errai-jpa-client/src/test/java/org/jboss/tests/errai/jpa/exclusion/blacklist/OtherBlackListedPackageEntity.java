@@ -14,25 +14,28 @@
  * limitations under the License.
  */
 
-package org.jboss.tests.errai.jpa.exclusion.denylist;
-
-/**
- * @author Divya Dadlani <ddadlani@redhat.com>
- */
+package org.jboss.tests.errai.jpa.exclusion.blacklist;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import org.jboss.errai.ioc.client.api.TestOnly;
 
+/**
+ * @author Divya Dadlani <ddadlani@redhat.com>
+ */
 @TestOnly @Entity
-public class DenyListedPackageEntity {
+public class OtherBlackListedPackageEntity {
 
   @GeneratedValue
   @Id
-  private long id;
+  public long id;
+
+  public OtherBlackListedPackageEntity() {
+  }
 
   public long getId() {
+
     return id;
   }
 
@@ -40,6 +43,6 @@ public class DenyListedPackageEntity {
     this.id = id;
   }
 
-  public DenyListedPackageEntity() {
-  }
+
+
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Red Hat, Inc. and/or its affiliates.
+ * Copyright (C) 2013 Red Hat, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,33 +14,10 @@
  * limitations under the License.
  */
 
-package org.jboss.tests.errai.jpa.exclusion.allowlist;
+package org.jboss.tests.errai.ioc.wiring.client.res;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import org.jboss.errai.ioc.client.api.TestOnly;
+import javax.inject.Singleton;
 
-/**
- * @author Divya Dadlani <ddadlani@redhat.com>
- */
-
-
-@TestOnly @Entity
-public class AllowListedPackageEntity {
-
-  @GeneratedValue
-  @Id
-  private long id;
-
-  public long getId() {
-    return id;
-  }
-
-  public void setId(long id) {
-    this.id = id;
-  }
-
-  public AllowListedPackageEntity() {
-  }
+@Singleton
+public class WhitelistedBean {
 }

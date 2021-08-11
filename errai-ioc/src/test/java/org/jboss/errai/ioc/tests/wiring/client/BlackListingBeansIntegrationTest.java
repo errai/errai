@@ -19,33 +19,33 @@ package org.jboss.errai.ioc.tests.wiring.client;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.IOCResolutionException;
 import org.jboss.errai.ioc.client.test.AbstractErraiIOCTest;
-import org.jboss.errai.ioc.tests.wiring.client.res.DenylistedBean;
-import org.jboss.errai.ioc.tests.wiring.client.res.sub.DenylistedPackageBean;
+import org.jboss.errai.ioc.tests.wiring.client.res.BlacklistedBean;
+import org.jboss.errai.ioc.tests.wiring.client.res.sub.BlacklistedPackageBean;
 
 /**
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class DenyListingBeansIntegrationTest extends AbstractErraiIOCTest {
+public class BlackListingBeansIntegrationTest extends AbstractErraiIOCTest {
   
   @Override
   public String getModuleName() {
     return "org.jboss.errai.ioc.tests.wiring.IOCWiringTests";
   }
   
-  public void testDenylistedBean() throws Exception {
+  public void testBlacklistedBean() throws Exception {
     try {
-      IOC.getBeanManager().lookupBean(DenylistedBean.class).getInstance();
-      fail("Should not be able to resolve a denylisted bean!");
+      IOC.getBeanManager().lookupBean(BlacklistedBean.class).getInstance();
+      fail("Should not be able to resolve a blacklisted bean!");
     }
     catch (IOCResolutionException e) {
       // expected
     }
   }
   
-  public void testDenylistedPackage() throws Exception {
+  public void testBlacklistedPackage() throws Exception {
     try {
-      IOC.getBeanManager().lookupBean(DenylistedPackageBean.class).getInstance();
-      fail("Should not be able to resolve a bean in a denylisted package!");
+      IOC.getBeanManager().lookupBean(BlacklistedPackageBean.class).getInstance();
+      fail("Should not be able to resolve a bean in a blacklisted package!");
     }
     catch (IOCResolutionException e) {
       // expected

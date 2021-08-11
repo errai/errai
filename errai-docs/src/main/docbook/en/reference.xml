@@ -76,10 +76,10 @@
 <simpara>The first thing you&#8217;ll need to do if you have not already, is <ulink url="http://maven.apache.org/guides/getting-started/maven-in-five-minutes.html">install Maven</ulink>. If you have not already installed Maven, do so now.</simpara>
 <simpara>Warning: If you use maven2, you will run into this problem: <ulink url="https://community.jboss.org/thread/177645">https://community.jboss.org/thread/177645</ulink></simpara>
 </important>
-<simpara>You have two options to set up an Errai application. You can start by copying an existing example application (i.e. the <ulink url="https://github.com/errai/errai-tutorial/archive/main.zip">errai tutorial demo</ulink>) or by building an app with the Errai Forge Addon:</simpara>
+<simpara>You have two options to set up an Errai application. You can start by copying an existing example application (i.e. the <ulink url="https://github.com/errai/errai-tutorial/archive/master.zip">errai tutorial demo</ulink>) or by building an app with the Errai Forge Addon:</simpara>
 <section id="sid-54493220_GettingStartedwithErrai-Startfromaworkingexampleapplication">
 <title>Start from a working example application</title>
-<simpara>Simply download and unzip this <ulink url="https://github.com/errai/errai-tutorial/archive/main.zip">demo</ulink>. Check out the README file and continue with running the app in <link linkend="sid-54493220_GettingStartedwithErrai-RunningtheappinGWT">GWT&#8217;s development mode</link> and importing the project into <link linkend="sid-54493220_GettingStartedwithErrai-ConfiguringyourprojectforEclipse">Eclipse</link>.</simpara>
+<simpara>Simply download and unzip this <ulink url="https://github.com/errai/errai-tutorial/archive/master.zip">demo</ulink>. Check out the README file and continue with running the app in <link linkend="sid-54493220_GettingStartedwithErrai-RunningtheappinGWT">GWT&#8217;s development mode</link> and importing the project into <link linkend="sid-54493220_GettingStartedwithErrai-ConfiguringyourprojectforEclipse">Eclipse</link>.</simpara>
 </section>
 <section id="sid-54493220_GettingStartedwithErrai-ErraiForgeAddon">
 <title>Starting with the Errai Forge Addon</title>
@@ -87,7 +87,7 @@
 <title>Deprecated</title>
 <simpara>The Errai Forge Addon is deprecated. It is no longer being updated and will be removed in a future release.</simpara>
 </warning>
-<simpara>Another way to start a new project with Errai is to use Forge and the Errai Forge Addon. To use this method, follow the instructions <ulink url="https://github.com/errai/errai/blob/main/errai-forge-addon/README.asciidoc">here</ulink> to install the Errai Forge Addon and create a new project.</simpara>
+<simpara>Another way to start a new project with Errai is to use Forge and the Errai Forge Addon. To use this method, follow the instructions <ulink url="https://github.com/errai/errai/blob/master/errai-forge-addon/README.asciidoc">here</ulink> to install the Errai Forge Addon and create a new project.</simpara>
 <simpara>In the upcomming sections, we will demonstrate how to run your app in GWT Development Mode through the command line and eclipse, so it would be nice to have something to run so that you are able to verify that everything is working. Here is a sample class you can use that displays an alert when the app loads:</simpara>
 <programlisting language="java" linenumbering="unnumbered">// Add the package declaration here
 
@@ -3417,7 +3417,7 @@ public class LongRunningServiceImpl implements LongRunningService {
 
 <note>
 <title>Manual Setup</title>
-<simpara>Checkout the <link linkend="Manual-Setup-Section">Manual Setup Section</link> for instructions on how to manually add JAX-RS to your project. You can also go to the <ulink url="https://github.com/errai/errai-tutorial/archive/main.zip">Errai tutorial project</ulink> or the <ulink url="https://github.com/errai/errai/tree/main/errai-demos">demo collection</ulink> for an example of JAX-RS.</simpara>
+<simpara>Checkout the <link linkend="Manual-Setup-Section">Manual Setup Section</link> for instructions on how to manually add JAX-RS to your project. You can also go to the <ulink url="https://github.com/errai/errai-tutorial/archive/master.zip">Errai tutorial project</ulink> or the <ulink url="https://github.com/errai/errai/tree/master/errai-demos">demo collection</ulink> for an example of JAX-RS.</simpara>
 </note>
 <section id="sid-19398997_ErraiJAX-RS-ServerSideJAXRSImplementation">
 <title>Server-Side JAX-RS Implementation</title>
@@ -5152,9 +5152,9 @@ private Validator validator;</programlisting>
 <section id="sid-51282340_DataBinding-ExcludingClassesfromValidation">
 <title>Excluding Classes from Validation</title>
 <simpara>By default, Errai scans the entire classpath for classes with constraints. But sometimes it is necessary or desirable to exclude some shared classes from being validated on the client side. This can be done by adding a list of classes and package masks to the ErraiApp.properties file like so:</simpara>
-<programlisting language="ini" linenumbering="unnumbered"># The following denylists the class some.fully.qualified.ClassName and all classes
+<programlisting language="ini" linenumbering="unnumbered"># The following blacklists the class some.fully.qualified.ClassName and all classes
 # in some.package.mask (and subpackages thereof).
-errai.validation.denylist = some.fully.qualified.ClassName \
+errai.validation.blacklist = some.fully.qualified.ClassName \
                              some.package.mask.*</programlisting>
 </section>
 </section>
@@ -7024,7 +7024,7 @@ public class NavigationErrorHandlerSetter {
 <title>Getting Started</title>
 <section id="_making_users">
 <title>Making Users</title>
-<simpara>The simplest way to begin experimenting with Errai Security is to add Users and Roles to PicketLink programmatically. Here is some sample server-side code from the <ulink url="https://github.com/errai/errai/blob/main/errai-demos/errai-security-demo/src/main/java/org/jboss/errai/security/demo/server/PicketLinkDefaultUsers.java">Errai Security Demo</ulink>.</simpara>
+<simpara>The simplest way to begin experimenting with Errai Security is to add Users and Roles to PicketLink programmatically. Here is some sample server-side code from the <ulink url="https://github.com/errai/errai/blob/master/errai-demos/errai-security-demo/src/main/java/org/jboss/errai/security/demo/server/PicketLinkDefaultUsers.java">Errai Security Demo</ulink>.</simpara>
 <programlisting language="java" linenumbering="numbered">@Singleton
 @Startup
 public class PicketLinkDefaultUsers {
@@ -7571,7 +7571,7 @@ public class NavBar extends Composite {
 <title>Setup</title>
 <note>
 <title>Make sure to check out the Errai Security Demo.</title>
-<simpara>This demo can be configured to work with Keycloak in just a few simple steps as outlined in the <ulink url="https://github.com/errai/errai/tree/main/errai-demos/errai-security-demo">README file</ulink>!</simpara>
+<simpara>This demo can be configured to work with Keycloak in just a few simple steps as outlined in the <ulink url="https://github.com/errai/errai/tree/master/errai-demos/errai-security-demo">README file</ulink>!</simpara>
 </note>
 <simpara>To start from scratch and add Keycloak integration to your application:</simpara>
 
@@ -7588,7 +7588,7 @@ public class NavBar extends Composite {
     </listitem>
   
     <listitem>
-      <simpara>Go to the <ulink url="https://github.com/errai/errai/tree/main/errai-demos/errai-security-demo">Keycloak Administrative Console</ulink> (i.e. <ulink url="http://localhost:8080/auth/admin/)">http://localhost:8080/auth/admin/)</ulink> (the username and password are both <emphasis role="strong">admin</emphasis> on first use).</simpara>
+      <simpara>Go to the <ulink url="https://github.com/errai/errai/tree/master/errai-demos/errai-security-demo">Keycloak Administrative Console</ulink> (i.e. <ulink url="http://localhost:8080/auth/admin/)">http://localhost:8080/auth/admin/)</ulink> (the username and password are both <emphasis role="strong">admin</emphasis> on first use).</simpara>
       
     </listitem>
   
@@ -8199,12 +8199,12 @@ public class MyCacheManifestLinker extends DefaultCacheManifestLinker {
     </listitem>
   
     <listitem>
-      <simpara><emphasis>errai.ioc.denylist</emphasis> specifies a whitespace-separated list of classes that should be hidden from Errai IOC and that will be excluded when generating the bean graph and wiring components. Wildcards are supported to exclude all types underneath a package e.g. org.jboss.myapp.exclude.* (all types under the exclude package will be hidden from ERRAI IOC).</simpara>
+      <simpara><emphasis>errai.ioc.blacklist</emphasis> specifies a whitespace-separated list of classes that should be hidden from Errai IOC and that will be excluded when generating the bean graph and wiring components. Wildcards are supported to exclude all types underneath a package e.g. org.jboss.myapp.exclude.* (all types under the exclude package will be hidden from ERRAI IOC).</simpara>
       
     </listitem>
   
     <listitem>
-      <simpara><emphasis>errai.ioc.allowlist</emphasis> when this property is present all types in your application are hidden from Errai IOC by default. It specifies a whitespace-separated list of classes that should be visible to IOC and that will be included when generating the bean graph and wiring components. Wildcards are supported to include all types underneath a package e.g. org.jboss.myapp.include.* (all types under the include package will be visible to ERRAI IOC).</simpara>
+      <simpara><emphasis>errai.ioc.whitelist</emphasis> when this property is present all types in your application are hidden from Errai IOC by default. It specifies a whitespace-separated list of classes that should be visible to IOC and that will be included when generating the bean graph and wiring components. Wildcards are supported to include all types underneath a package e.g. org.jboss.myapp.include.* (all types under the include package will be visible to ERRAI IOC).</simpara>
       
     </listitem>
   
@@ -8217,12 +8217,12 @@ public class MyCacheManifestLinker extends DefaultCacheManifestLinker {
 <itemizedlist>
   
     <listitem>
-      <simpara><emphasis>errai.jpa.allowlist</emphasis> specifies a whitespace-separated list of fully-qualified class names that should be included in Errai JPA&#8217;s scanning and in the Entity Manager. Any entities that are not part of the allowlist are ignored by Errai JPA. This property supports wildcards to exclude everything within a package (e.g. org.jboss.myapp.exclude.*).</simpara>
+      <simpara><emphasis>errai.jpa.whitelist</emphasis> specifies a whitespace-separated list of fully-qualified class names that should be included in Errai JPA&#8217;s scanning and in the Entity Manager. Any entities that are not part of the whitelist are ignored by Errai JPA. This property supports wildcards to exclude everything within a package (e.g. org.jboss.myapp.exclude.*).</simpara>
       
     </listitem>
   
     <listitem>
-      <simpara><emphasis>errai.jpa.denylist</emphasis> specifies a whitespace-separated list of fully-qualified class names that should be excluded from Errai JPA&#8217;s scanning. This can be used for client-side entities that do not use Errai JPA. This property supports wildcards to exclude everything within a package (e.g. org.jboss.myapp.exclude.*). The denylist has priority over the allowlist. This means that if a class is part of both the denylist and the allowlist, the class will be denylisted, i.e. ignored by Errai JPA.</simpara>
+      <simpara><emphasis>errai.jpa.blacklist</emphasis> specifies a whitespace-separated list of fully-qualified class names that should be excluded from Errai JPA&#8217;s scanning. This can be used for client-side entities that do not use Errai JPA. This property supports wildcards to exclude everything within a package (e.g. org.jboss.myapp.exclude.*). The blacklist has priority over the whitelist. This means that if a class is part of both the blacklist and the whitelist, the class will be blacklisted, i.e. ignored by Errai JPA.</simpara>
       
     </listitem>
   
