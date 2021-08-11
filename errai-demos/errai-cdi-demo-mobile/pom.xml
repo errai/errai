@@ -55,7 +55,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <webDescriptor>wildfly</webDescriptor>
     <skipTests>true</skipTests>
-    <argLine/>
+    <argLine></argLine>
     <!-- maven plugins versions -->
     <maven.war.plugin.version>2.1.1</maven.war.plugin.version>
     <maven.surefire.plugin.version>2.5</maven.surefire.plugin.version>
@@ -362,7 +362,7 @@
                     </goals>
                   </pluginExecutionFilter>
                   <action>
-                    <ignore/>
+                    <ignore></ignore>
                   </action>
                 </pluginExecution>
                 <pluginExecution>
@@ -375,7 +375,7 @@
                     </goals>
                   </pluginExecutionFilter>
                   <action>
-                    <ignore/>
+                    <ignore />
                   </action>
                 </pluginExecution>
               </pluginExecutions>
@@ -459,7 +459,7 @@
         <dependency>
           <groupId>org.slf4j</groupId>
           <artifactId>slf4j-simple</artifactId>
-          <version>1.7.30</version>
+          <version>1.6.4</version>
         </dependency>
 
         <dependency>
