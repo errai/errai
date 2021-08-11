@@ -85,7 +85,7 @@ public class PathParamTestServiceImpl implements PathParamTestService {
 
   @Override
   public String getWithDatePathParam(Date date) {
-    return date.toString();
+    return date.toGMTString();
   }
 
 }

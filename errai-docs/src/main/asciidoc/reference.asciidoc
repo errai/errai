@@ -72,13 +72,13 @@ The first thing you'll need to do if you have not already, is link:$$http://mave
 Warning: If you use maven2, you will run into this problem: https://community.jboss.org/thread/177645
 ====
 
-You have two options to set up an Errai application. You can start by copying an existing example application (i.e. the link:$$https://github.com/errai/errai-tutorial/archive/master.zip$$[errai tutorial demo]) or by building an app with the Errai Forge Addon:
+You have two options to set up an Errai application. You can start by copying an existing example application (i.e. the link:$$https://github.com/errai/errai-tutorial/archive/main.zip$$[errai tutorial demo]) or by building an app with the Errai Forge Addon:
 
 [[sid-54493220_GettingStartedwithErrai-Startfromaworkingexampleapplication]]
 
 ===== Start from a working example application
 
-Simply download and unzip this link:$$https://github.com/errai/errai-tutorial/archive/master.zip$$[demo]. Check out the README file and continue with running the app in <<sid-54493220_GettingStartedwithErrai-RunningtheappinGWT,GWT's development mode>> and importing the project into <<sid-54493220_GettingStartedwithErrai-ConfiguringyourprojectforEclipse,Eclipse>>.
+Simply download and unzip this link:$$https://github.com/errai/errai-tutorial/archive/main.zip$$[demo]. Check out the README file and continue with running the app in <<sid-54493220_GettingStartedwithErrai-RunningtheappinGWT,GWT's development mode>> and importing the project into <<sid-54493220_GettingStartedwithErrai-ConfiguringyourprojectforEclipse,Eclipse>>.
 
 [[sid-54493220_GettingStartedwithErrai-ErraiForgeAddon]]
 
@@ -90,7 +90,7 @@ Simply download and unzip this link:$$https://github.com/errai/errai-tutorial/ar
 The Errai Forge Addon is deprecated. It is no longer being updated and will be removed in a future release.
 ====
 
-Another way to start a new project with Errai is to use Forge and the Errai Forge Addon. To use this method, follow the instructions link:$$https://github.com/errai/errai/blob/master/errai-forge-addon/README.asciidoc$$[here] to install the Errai Forge Addon and create a new project.
+Another way to start a new project with Errai is to use Forge and the Errai Forge Addon. To use this method, follow the instructions link:$$https://github.com/errai/errai/blob/main/errai-forge-addon/README.asciidoc$$[here] to install the Errai Forge Addon and create a new project.
 
 
 In the upcomming sections, we will demonstrate how to run your app in GWT Development Mode through the command line and eclipse, so it would be nice to have something to run so that you are able to verify that everything is working. Here is a sample class you can use that displays an alert when the app loads:
@@ -3679,7 +3679,7 @@ Errai's JAX-RS support consists of the following:
 [NOTE]
 .Manual Setup
 ====
-Checkout the <<Manual-Setup-Section,Manual Setup Section>> for instructions on how to manually add JAX-RS to your project. You can also go to the link:$$https://github.com/errai/errai-tutorial/archive/master.zip$$[Errai tutorial project] or the link:$$https://github.com/errai/errai/tree/master/errai-demos$$[demo collection] for an example of JAX-RS.
+Checkout the <<Manual-Setup-Section,Manual Setup Section>> for instructions on how to manually add JAX-RS to your project. You can also go to the link:$$https://github.com/errai/errai-tutorial/archive/main.zip$$[Errai tutorial project] or the link:$$https://github.com/errai/errai/tree/main/errai-demos$$[demo collection] for an example of JAX-RS.
 ====
 
 [[sid-19398997_ErraiJAX-RS-ServerSideJAXRSImplementation]]
@@ -5473,9 +5473,9 @@ By default, Errai scans the entire classpath for classes with constraints. But s
 
 [source, ini]
 ----
-# The following blacklists the class some.fully.qualified.ClassName and all classes
+# The following denylists the class some.fully.qualified.ClassName and all classes
 # in some.package.mask (and subpackages thereof).
-errai.validation.blacklist = some.fully.qualified.ClassName \
+errai.validation.denylist = some.fully.qualified.ClassName \
                              some.package.mask.*
 ----
 
@@ -7611,7 +7611,7 @@ By default the server-side Errai Security module uses link:$$http://www.picketli
 
 ==== Making Users
 
-The simplest way to begin experimenting with Errai Security is to add Users and Roles to PicketLink programmatically. Here is some sample server-side code from the link:$$https://github.com/errai/errai/blob/master/errai-demos/errai-security-demo/src/main/java/org/jboss/errai/security/demo/server/PicketLinkDefaultUsers.java$$[Errai Security Demo].
+The simplest way to begin experimenting with Errai Security is to add Users and Roles to PicketLink programmatically. Here is some sample server-side code from the link:$$https://github.com/errai/errai/blob/main/errai-demos/errai-security-demo/src/main/java/org/jboss/errai/security/demo/server/PicketLinkDefaultUsers.java$$[Errai Security Demo].
 
 [source,java,numbered]
 ----
@@ -8122,7 +8122,7 @@ Behind the scenes, when the visitor successfully submits credentials she is redi
 [NOTE]
 .Make sure to check out the Errai Security Demo. 
 ====
-This demo can be configured to work with Keycloak in just a few simple steps as outlined in the link:$$https://github.com/errai/errai/tree/master/errai-demos/errai-security-demo$$[README file]!
+This demo can be configured to work with Keycloak in just a few simple steps as outlined in the link:$$https://github.com/errai/errai/tree/main/errai-demos/errai-security-demo$$[README file]!
 ====
 
 To start from scratch and add Keycloak integration to your application:
@@ -8131,7 +8131,7 @@ To start from scratch and add Keycloak integration to your application:
 
 * Start the Keycloak server.
 
-* Go to the link:$$https://github.com/errai/errai/tree/master/errai-demos/errai-security-demo$$[Keycloak Administrative Console] (i.e. http://localhost:8080/auth/admin/) (the username and password are both *admin* on first use).
+* Go to the link:$$https://github.com/errai/errai/tree/main/errai-demos/errai-security-demo$$[Keycloak Administrative Console] (i.e. http://localhost:8080/auth/admin/) (the username and password are both *admin* on first use).
 
 * Click *Add Realm* and create a custom realm for your application.
 
@@ -8581,14 +8581,14 @@ Errai also supports configuring portable types in [code]+ErraiApp.properties+ as
 
 * _errai.ioc.async_bean_manager_ a boolean property that when set to true (defaults to false) will activate asynchronous IOC to allow for link:$$http://www.gwtproject.org/doc/latest/DevGuideCodeSplitting.html$$[code splitting]. The code of types annotated with [code]+@LoadAsync+ will be downloaded the first time it is needed. [code]+@LoadAsync+ also allows to specify a fragment name using a class literal. Using GWT 2.6.0 or higher, all types with the same fragment name will be part of the same split point.
 
-* _errai.ioc.blacklist_ specifies a whitespace-separated list of classes that should be hidden from Errai IOC and that will be excluded when generating the bean graph and wiring components. Wildcards are supported to exclude all types underneath a package e.g. org.jboss.myapp.exclude.* (all types under the exclude package will be hidden from ERRAI IOC).
+* _errai.ioc.denylist_ specifies a whitespace-separated list of classes that should be hidden from Errai IOC and that will be excluded when generating the bean graph and wiring components. Wildcards are supported to exclude all types underneath a package e.g. org.jboss.myapp.exclude.* (all types under the exclude package will be hidden from ERRAI IOC).
 
-* _errai.ioc.whitelist_ when this property is present all types in your application are hidden from Errai IOC by default. It specifies a whitespace-separated list of classes that should be visible to IOC and that will be included when generating the bean graph and wiring components. Wildcards are supported to include all types underneath a package e.g. org.jboss.myapp.include.* (all types under the include package will be visible to ERRAI IOC).
+* _errai.ioc.allowlist_ when this property is present all types in your application are hidden from Errai IOC by default. It specifies a whitespace-separated list of classes that should be visible to IOC and that will be included when generating the bean graph and wiring components. Wildcards are supported to include all types underneath a package e.g. org.jboss.myapp.include.* (all types under the include package will be visible to ERRAI IOC).
 
 ===== Errai JPA Configuration
-* _errai.jpa.whitelist_ specifies a whitespace-separated list of fully-qualified class names that should be included in Errai JPA's scanning and in the Entity Manager. Any entities that are not part of the whitelist are ignored by Errai JPA. This property supports wildcards to exclude everything within a package (e.g. org.jboss.myapp.exclude.*). 
+* _errai.jpa.allowlist_ specifies a whitespace-separated list of fully-qualified class names that should be included in Errai JPA's scanning and in the Entity Manager. Any entities that are not part of the allowlist are ignored by Errai JPA. This property supports wildcards to exclude everything within a package (e.g. org.jboss.myapp.exclude.*).
 
-* _errai.jpa.blacklist_ specifies a whitespace-separated list of fully-qualified class names that should be excluded from Errai JPA's scanning. This can be used for client-side entities that do not use Errai JPA. This property supports wildcards to exclude everything within a package (e.g. org.jboss.myapp.exclude.*). The blacklist has priority over the whitelist. This means that if a class is part of both the blacklist and the whitelist, the class will be blacklisted, i.e. ignored by Errai JPA.
+* _errai.jpa.denylist_ specifies a whitespace-separated list of fully-qualified class names that should be excluded from Errai JPA's scanning. This can be used for client-side entities that do not use Errai JPA. This property supports wildcards to exclude everything within a package (e.g. org.jboss.myapp.exclude.*). The denylist has priority over the allowlist. This means that if a class is part of both the denylist and the allowlist, the class will be denylisted, i.e. ignored by Errai JPA.
 
 [[sid-5931338]]
 

@@ -191,9 +191,9 @@ public class ValidationRulesTest {
   }
 
   @Test
-  public void doNotValidateIfOnlyBlacklistedPages() throws Exception {
-    overrideBlacklistedClassNames(BlacklistedPage.class.getCanonicalName());
-    mockClassScanner(BlacklistedPage.class);
+  public void doNotValidateIfOnlyDenylistedPages() throws Exception {
+    overrideDenylistedClassNames(DenylistedPage.class.getCanonicalName());
+    mockClassScanner(DenylistedPage.class);
 
     try {
       generator.generate(null, null);
@@ -255,18 +255,18 @@ public class ValidationRulesTest {
     when(ClassScanner.getTypesAnnotatedWith(Page.class, null)).thenReturn(createMetaClassList(pages));
   }
 
-  private void overrideBlacklistedClassNames(final String... names) throws SecurityException, NoSuchFieldException,
+  private void overrideDenylistedClassNames(final String... names) throws SecurityException, NoSuchFieldException,
           IllegalArgumentException, IllegalAccessException {
-    final Field blacklistedField = NavigationGraphGenerator.class.getDeclaredField("BLACKLISTED_PAGES");
+    final Field denylistedField = NavigationGraphGenerator.class.getDeclaredField("DENYLISTED_PAGES");
 
-    blacklistedField.setAccessible(true);
+    denylistedField.setAccessible(true);
 
     // Change the field to not be final so that we can overwrite it.
     final Field fieldModifiers = Field.class.getDeclaredField("modifiers");
     fieldModifiers.setAccessible(true);
-    fieldModifiers.setInt(blacklistedField, fieldModifiers.getInt(blacklistedField) & ~Modifier.FINAL);
+    fieldModifiers.setInt(denylistedField, fieldModifiers.getInt(denylistedField) & ~Modifier.FINAL);
 
-    blacklistedField.set(null, Arrays.asList(names));
+    denylistedField.set(null, Arrays.asList(names));
   }
 
   @Page(role = DefaultPage.class)
@@ -315,7 +315,7 @@ public class ValidationRulesTest {
   }
 
   @Page
-  private static class BlacklistedPage implements IsElement {
+  private static class DenylistedPage implements IsElement {
 
     @Override
     public HTMLElement getElement() {

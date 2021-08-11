@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Red Hat, Inc. and/or its affiliates.
+ * Copyright (C) 2015 Red Hat, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,35 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ioc.tests.wiring.client.res.sub;
+package org.jboss.tests.errai.jpa.exclusion.denylist;
 
-import javax.inject.Singleton;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import org.jboss.errai.ioc.client.api.TestOnly;
 
-@Singleton
-public class BlacklistedPackageBean {
+/**
+ * @author Divya Dadlani <ddadlani@redhat.com>
+ */
+@TestOnly @Entity
+public class OtherDenyListedPackageEntity {
+
+  @GeneratedValue
+  @Id
+  public long id;
+
+  public OtherDenyListedPackageEntity() {
+  }
+
+  public long getId() {
+
+    return id;
+  }
+
+  public void setId(long id) {
+    this.id = id;
+  }
+
+
 
 }

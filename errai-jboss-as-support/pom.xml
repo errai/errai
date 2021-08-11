@@ -7,7 +7,7 @@
   <parent>
     <artifactId>errai-parent</artifactId>
     <groupId>org.jboss.errai</groupId>
-    <version>4.11.0.Final</version>
+    <version>4.14.2.Final</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   <description>Adds support for deployments on JBoss Application Server</description>
