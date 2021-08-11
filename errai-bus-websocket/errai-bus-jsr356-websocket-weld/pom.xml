@@ -4,7 +4,7 @@
   <parent>
     <artifactId>errai-bus-websocket-parent</artifactId>
     <groupId>org.jboss.errai</groupId>
-    <version>4.14.2.Final</version>
+    <version>4.11.5.Final</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
@@ -14,7 +14,7 @@
   <description>JEE 7 / CDI (Weld) extension to the JSR-356 compliant Errai Bus endpoint.</description>
 
   <properties>
-    <wildfly.version>18.0.1.Final</wildfly.version>
+    <wildfly.version>23.0.2.Final</wildfly.version>
     <unpack-as-folder>${project.build.directory}/as-test</unpack-as-folder>
     <test-as-folder>${unpack-as-folder}/wildfly-${wildfly.version}</test-as-folder>
   </properties>
@@ -29,19 +29,19 @@
       <artifactId>errai-bus</artifactId>
     </dependency>
     <dependency>
-      <groupId>javax.enterprise</groupId>
-      <artifactId>cdi-api</artifactId>
+      <groupId>jakarta.enterprise</groupId>
+      <artifactId>jakarta.enterprise.cdi-api</artifactId>
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>org.jboss.spec.javax.servlet</groupId>
-      <artifactId>jboss-servlet-api_3.1_spec</artifactId>
+      <groupId>jakarta.servlet</groupId>
+      <artifactId>jakarta.servlet-api</artifactId>
       <scope>provided</scope>
     </dependency>
 
     <dependency>
-      <groupId>org.jboss.spec.javax.websocket</groupId>
-      <artifactId>jboss-websocket-api_1.1_spec</artifactId>
+      <groupId>jakarta.websocket</groupId>
+      <artifactId>jakarta.websocket-api</artifactId>
       <scope>provided</scope>
     </dependency>
 
@@ -72,6 +72,16 @@
       <type>pom</type>
       <scope>test</scope>
       <!--There is a problem with Aether https://issues.jboss.org/browse/SHRINKRES-174 -->
+      <exclusions>
+        <exclusion>
+          <groupId>javax.inject</groupId>
+          <artifactId>javax.inject</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>javax.enterprise</groupId>
+          <artifactId>cdi-api</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.apache.maven</groupId>

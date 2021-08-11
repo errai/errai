@@ -5,7 +5,7 @@
   <parent>
     <artifactId>errai-bus-websocket-parent</artifactId>
     <groupId>org.jboss.errai</groupId>
-    <version>4.14.2.Final</version>
+    <version>4.11.5.Final</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
@@ -19,8 +19,8 @@
     </dependency>
 
     <dependency>
-      <groupId>org.jboss.spec.javax.servlet</groupId>
-      <artifactId>jboss-servlet-api_3.1_spec</artifactId>
+      <groupId>jakarta.servlet</groupId>
+      <artifactId>jakarta.servlet-api</artifactId>
       <scope>provided</scope>
     </dependency>
 

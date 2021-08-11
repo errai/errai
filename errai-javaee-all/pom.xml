@@ -4,7 +4,7 @@
    <parent>
       <artifactId>errai-parent</artifactId>
       <groupId>org.jboss.errai</groupId>
-      <version>4.14.2.Final</version>
+      <version>4.11.5.Final</version>
    </parent>
    <modelVersion>4.0.0</modelVersion>
 
@@ -85,8 +85,8 @@
       <!-- XXX the following is required at compile time but must not be deployed to the app server -->
       <!-- we need to find a better way! -->
             <dependency>
-        <groupId>javax.enterprise</groupId>
-        <artifactId>cdi-api</artifactId>
+        <groupId>jakarta.enterprise</groupId>
+        <artifactId>jakarta.enterprise.cdi-api</artifactId>
       </dependency>
 
       <!-- Required for Errai Validation -->

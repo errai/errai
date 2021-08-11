@@ -11,7 +11,7 @@
   <parent>
     <groupId>org.jboss.errai</groupId>
     <artifactId>cdi-integration-parent</artifactId>
-    <version>4.14.2.Final</version>
+    <version>4.11.5.Final</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
@@ -48,8 +48,8 @@
       <dependencies>
         <!-- Must come before gwt-user to override servlet api -->
         <dependency>
-          <groupId>org.jboss.spec.javax.servlet</groupId>
-          <artifactId>jboss-servlet-api_3.1_spec</artifactId>
+          <groupId>jakarta.servlet</groupId>
+          <artifactId>jakarta.servlet-api</artifactId>
           <scope>provided</scope>
         </dependency>
 
@@ -96,8 +96,8 @@
         </dependency>
 
         <dependency>
-          <groupId>javax.enterprise</groupId>
-          <artifactId>cdi-api</artifactId>
+          <groupId>jakarta.enterprise</groupId>
+          <artifactId>jakarta.enterprise.cdi-api</artifactId>
           <scope>provided</scope>
         </dependency>
 
@@ -152,8 +152,8 @@
         </dependency>
 
         <dependency>
-          <groupId>org.jboss.spec.javax.ejb</groupId>
-          <artifactId>jboss-ejb-api_3.2_spec</artifactId>
+          <groupId>jakarta.ejb</groupId>
+          <artifactId>jakarta.ejb-api</artifactId>
           <scope>provided</scope>
         </dependency>
 
@@ -178,12 +178,6 @@
             than provided. -->
           <groupId>org.jboss</groupId>
           <artifactId>jboss-common-core</artifactId>
-          <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-          <groupId>org.jboss.errai</groupId>
-          <artifactId>errai-javax-enterprise</artifactId>
           <scope>provided</scope>
         </dependency>
 
@@ -280,8 +274,8 @@
       <dependencies> 
         <!-- Must come before gwt-user to override servlet api -->
         <dependency>
-          <groupId>org.jboss.spec.javax.servlet</groupId>
-          <artifactId>jboss-servlet-api_3.1_spec</artifactId>
+          <groupId>jakarta.servlet</groupId>
+          <artifactId>jakarta.servlet-api</artifactId>
           <scope>provided</scope>
         </dependency>
         <dependency>
@@ -315,12 +309,6 @@
         <dependency>
           <groupId>org.jboss.errai</groupId>
           <artifactId>errai-ioc</artifactId>
-          <exclusions>
-            <exclusion>
-              <groupId>javax.inject</groupId>
-              <artifactId>javax.inject</artifactId>
-            </exclusion>            
-          </exclusions>        
         </dependency>
         
          <dependency>
@@ -429,12 +417,6 @@
         <dependency>
           <groupId>org.jboss</groupId>
           <artifactId>jboss-common-core</artifactId>
-        </dependency>
-
-        <dependency>
-          <groupId>org.jboss.errai</groupId>
-          <artifactId>errai-javax-enterprise</artifactId>
-          <scope>provided</scope>
         </dependency>
 
         <dependency>

@@ -5,7 +5,7 @@
     <parent>
       <artifactId>errai-parent</artifactId>
       <groupId>org.jboss.errai</groupId>
-      <version>4.14.2.Final</version>
+      <version>4.11.5.Final</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -105,8 +105,8 @@
 
       <dependencies>
         <dependency>
-          <groupId>org.jboss.spec.javax.servlet</groupId>
-          <artifactId>jboss-servlet-api_3.1_spec</artifactId>
+          <groupId>jakarta.servlet</groupId>
+          <artifactId>jakarta.servlet-api</artifactId>
           <scope>provided</scope>
         </dependency>
         <dependency>
@@ -126,13 +126,7 @@
         </dependency>
         <dependency>
           <groupId>org.jboss.errai</groupId>
-          <artifactId>errai-ioc</artifactId>          
-          <exclusions>
-            <exclusion>
-              <groupId>javax.inject</groupId>
-              <artifactId>javax.inject</artifactId>
-            </exclusion>            
-          </exclusions>
+          <artifactId>errai-ioc</artifactId>
         </dependency>
 
         <dependency>
@@ -204,11 +198,6 @@
           <artifactId>jboss-common-core</artifactId>
         </dependency>
 
-        <dependency>
-          <groupId>org.jboss.errai</groupId>
-          <artifactId>errai-javax-enterprise</artifactId>          
-          <scope>provided</scope>
-        </dependency>
 
       </dependencies>
     </profile>
