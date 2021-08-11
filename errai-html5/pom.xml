@@ -198,6 +198,11 @@
           <artifactId>jboss-common-core</artifactId>
         </dependency>
 
+        <dependency>
+          <groupId>org.jboss.errai</groupId>
+          <artifactId>errai-javax-enterprise</artifactId>
+          <scope>provided</scope>
+        </dependency>
 
       </dependencies>
     </profile>

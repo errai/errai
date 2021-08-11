@@ -127,6 +127,16 @@
       <dependencies>
         <dependency>
           <groupId>org.jboss.errai</groupId>
+          <artifactId>errai-javax-enterprise</artifactId>
+          <scope>provided</scope>
+        </dependency>
+        <dependency>
+          <groupId>jakarta.servlet</groupId>
+          <artifactId>jakarta.servlet-api</artifactId>
+          <scope>test</scope>
+        </dependency>
+        <dependency>
+          <groupId>org.jboss.errai</groupId>
           <artifactId>errai-codegen</artifactId>
           <exclusions>
             <exclusion>

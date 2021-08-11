@@ -111,7 +111,6 @@
       <groupId>com.google.elemental2</groupId>
       <artifactId>elemental2-dom</artifactId>
     </dependency>
-
   </dependencies>
 
   <profiles>
@@ -150,6 +149,19 @@
           </plugin>
         </plugins>
       </build>
+      <dependencies>
+        <dependency>
+          <groupId>jakarta.resource</groupId>
+          <artifactId>jakarta.resource-api</artifactId>
+          <scope>test</scope>
+        </dependency>
+
+        <dependency>
+          <groupId>jakarta.annotation</groupId>
+          <artifactId>jakarta.annotation-api</artifactId>
+          <scope>test</scope>
+        </dependency>
+      </dependencies>
     </profile>
   </profiles>
 </project>
