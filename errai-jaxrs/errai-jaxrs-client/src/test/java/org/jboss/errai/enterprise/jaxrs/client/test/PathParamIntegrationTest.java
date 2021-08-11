@@ -79,8 +79,8 @@ public class PathParamIntegrationTest extends AbstractErraiJaxrsTest {
   public void testGetWithDatePathParam() {
     final Date expected = new Date();
     call(PathParamTestService.class,
-        new SimpleAssertionCallback<>("@GET with @PathParams using java.util.Date failed",
-            expected.toGMTString())).getWithDatePathParam(expected);
+        new AssertionCallback<String, String>("@GET with @PathParams using java.util.Date failed",
+            expected.toGMTString(), str -> new Date(str).toGMTString())).getWithDatePathParam(expected);
   }
 
   @Test
