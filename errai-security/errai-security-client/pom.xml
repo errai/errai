@@ -96,7 +96,7 @@
       <artifactId>errai-javax-enterprise</artifactId>
       <scope>provided</scope>
     </dependency>
-    
+
     <!-- GWT -->
     <dependency>
       <groupId>com.google.gwt</groupId>
