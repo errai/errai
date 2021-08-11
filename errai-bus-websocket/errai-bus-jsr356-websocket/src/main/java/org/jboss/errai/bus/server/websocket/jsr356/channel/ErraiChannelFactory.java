@@ -17,8 +17,7 @@
 package org.jboss.errai.bus.server.websocket.jsr356.channel;
 
 import javax.servlet.http.HttpSession;
-
-import jakarta.websocket.Session;
+import javax.websocket.Session;
 
 /**
  * Factory for {@link ErraiWebSocketChannel}.

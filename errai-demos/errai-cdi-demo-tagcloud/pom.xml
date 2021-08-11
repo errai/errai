@@ -64,7 +64,7 @@
     <jetty.version>9.2.14.v20151106</jetty.version>
     <!-- Dev Mode config properties -->
     <errai.dev.context>${project.artifactId}</errai.dev.context>
-    <as.version>23.0.2.Final</as.version>
+    <as.version>19.1.0.Final</as.version>
     <!-- Add the absolute path for $JBOSS_HOME below to manage another instance -->
     <errai.jboss.home>${project.build.directory}/wildfly-${as.version}</errai.jboss.home>
   </properties>
@@ -408,8 +408,8 @@
         <dependency><groupId>org.jboss.errai</groupId><artifactId>errai-javax-enterprise</artifactId><scope>provided</scope></dependency>
         <dependency><groupId>org.jboss.errai</groupId><artifactId>errai-tools</artifactId><scope>provided</scope></dependency>
         <dependency><groupId>org.jboss.logging</groupId><artifactId>jboss-logging</artifactId><scope>provided</scope></dependency>
-        <dependency><groupId>jakarta.interceptor</groupId><artifactId>jakarta.interceptor-api</artifactId><scope>provided</scope></dependency>
-        <dependency><groupId>jakarta.transaction</groupId><artifactId>jakarta.transaction-api</artifactId><scope>provided</scope></dependency>
+        <dependency><groupId>org.jboss.spec.javax.interceptor</groupId><artifactId>jboss-interceptors-api_1.2_spec</artifactId><scope>provided</scope></dependency>
+        <dependency><groupId>org.jboss.spec.javax.transaction</groupId><artifactId>jboss-transaction-api_1.2_spec</artifactId><scope>provided</scope></dependency>
         <dependency><groupId>io.netty</groupId><artifactId>netty-codec-http</artifactId><scope>provided</scope></dependency>
         <dependency><groupId>io.netty</groupId><artifactId>netty-handler</artifactId><scope>provided</scope></dependency>
         <dependency><groupId>xerces</groupId><artifactId>xercesImpl</artifactId><version>2.12.0</version></dependency>
