@@ -216,8 +216,8 @@
       <artifactId>picketlink-impl</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.jboss.spec.javax.servlet</groupId>
-      <artifactId>jboss-servlet-api_3.1_spec</artifactId>
+      <groupId>jakarta.servlet</groupId>
+      <artifactId>jakarta.servlet-api</artifactId>
       <scope>provided</scope>
     </dependency>
 
@@ -447,11 +447,11 @@
       <dependencies>
         <dependency><groupId>org.jboss.errai</groupId><artifactId>errai-data-binding</artifactId><scope>provided</scope></dependency>
         <dependency><groupId>org.jboss.errai</groupId><artifactId>errai-navigation</artifactId><scope>provided</scope></dependency>
-        <dependency><groupId>javax.inject</groupId><artifactId>javax.inject</artifactId><scope>provided</scope></dependency>
+        <dependency><groupId>jakarta.inject</groupId><artifactId>jakarta.inject-api</artifactId><scope>provided</scope></dependency>
         <dependency><groupId>org.jboss.errai</groupId><artifactId>errai-cdi-jboss</artifactId><scope>provided</scope></dependency>
         <dependency><groupId>org.hsqldb</groupId><artifactId>hsqldb</artifactId><scope>provided</scope></dependency>
         <dependency><groupId>org.jboss.errai</groupId><artifactId>errai-security-client</artifactId><scope>provided</scope></dependency>
-        <dependency><groupId>org.hibernate</groupId><artifactId>hibernate-validator</artifactId><classifier>sources</classifier><scope>provided</scope></dependency>
+        <dependency><groupId>org.hibernate</groupId><artifactId>hibernate-validator</artifactId><classifier>sources</classifier><scope>provided</scope></dependency>        
         <dependency><groupId>jakarta.interceptor</groupId><artifactId>jakarta.interceptor-api</artifactId><scope>provided</scope></dependency>
         <dependency><groupId>junit</groupId><artifactId>junit</artifactId><scope>provided</scope></dependency>
         <dependency><groupId>org.jboss.errai</groupId><artifactId>errai-jaxrs-client</artifactId><scope>provided</scope></dependency>
@@ -463,7 +463,7 @@
         <dependency><groupId>org.hibernate</groupId><artifactId>hibernate-core</artifactId><scope>provided</scope></dependency>
         <dependency><groupId>org.dom4j</groupId><artifactId>dom4j</artifactId><scope>provided</scope></dependency>
         <dependency><groupId>de.benediktmeurer.gwt-slf4j</groupId><artifactId>gwt-slf4j</artifactId><scope>provided</scope></dependency>
-        <dependency><groupId>javax.enterprise</groupId><artifactId>cdi-api</artifactId><scope>provided</scope></dependency>
+        <dependency><groupId>jakarta.enterprise</groupId><artifactId>jakarta.enterprise.cdi-api</artifactId><scope>provided</scope></dependency>
         <dependency><groupId>org.jboss.errai</groupId><artifactId>errai-codegen-gwt</artifactId><scope>provided</scope></dependency>
         <dependency><groupId>org.hibernate</groupId><artifactId>hibernate-entitymanager</artifactId><scope>provided</scope></dependency>
         <dependency><groupId>com.google.guava</groupId><artifactId>guava-gwt</artifactId><scope>provided</scope></dependency>

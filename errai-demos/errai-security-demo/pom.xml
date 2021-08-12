@@ -59,7 +59,6 @@
     <errai.jboss.home>${project.build.directory}/wildfly-${wildfly.version}</errai.jboss.home>    
     <slf4j.version>1.5.11</slf4j.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <javaee.version>3.0.1.Final</javaee.version>
     <errai.dev.context>${project.artifactId}</errai.dev.context>
     <maven.gwt.plugin.version>2.9.0</maven.gwt.plugin.version>
     <maven.deploy.plugin.version>2.7</maven.deploy.plugin.version>
@@ -121,23 +120,6 @@
     <dependency>
       <groupId>org.jboss.errai</groupId>
       <artifactId>errai-javaee-all</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.jboss.spec</groupId>
-      <artifactId>jboss-javaee-6.0</artifactId>
-      <version>${javaee.version}</version>
-      <type>pom</type>
-      <scope>provided</scope>
-      <exclusions>
-        <exclusion>
-          <artifactId>jboss-interceptors-api_1.2_spec</artifactId>
-          <groupId>org.jboss.spec.javax.interceptor</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>jboss-transaction-api_1.2_spec</artifactId>
-          <groupId>org.jboss.spec.javax.transaction</groupId>
-        </exclusion>
-      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.jboss.errai</groupId>
@@ -397,8 +379,8 @@
           <scope>provided</scope>
         </dependency>
         <dependency>
-          <groupId>javax.inject</groupId>
-          <artifactId>javax.inject</artifactId>
+          <groupId>jakarta.inject</groupId>
+          <artifactId>jakarta.inject-api</artifactId>
           <scope>provided</scope>
         </dependency>
         <dependency>
@@ -452,8 +434,8 @@
           <scope>provided</scope>
         </dependency>
         <dependency>
-          <groupId>javax.enterprise</groupId>
-          <artifactId>cdi-api</artifactId>
+          <groupId>jakarta.enterprise</groupId>
+          <artifactId>jakarta.enterprise.cdi-api</artifactId>
           <scope>provided</scope>
         </dependency>
         <dependency>

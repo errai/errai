@@ -45,7 +45,6 @@
     <errai.jboss.home>${project.build.directory}/wildfly-${wildfly.version}</errai.jboss.home>    
     <slf4j.version>1.5.11</slf4j.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <javaee.version>3.0.1.Final</javaee.version>
     <errai.dev.context>${project.artifactId}</errai.dev.context>    
   </properties>
 

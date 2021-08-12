@@ -65,7 +65,7 @@
     <skipTests>true</skipTests>
     <errai.jboss.home>${project.build.directory}/wildfly-${wildfly.version}</errai.jboss.home>    
     <errai.dev.context>${project.artifactId}</errai.dev.context>
-    <wildfly.version>18.0.1.Final</wildfly.version>
+    <wildfly.version>23.0.2.Final</wildfly.version>
   </properties>
 
   <repositories>
@@ -204,14 +204,14 @@
     </dependency>
 
     <dependency>
-      <groupId>org.jboss.spec.javax.servlet</groupId>
-      <artifactId>jboss-servlet-api_3.1_spec</artifactId>
+      <groupId>jakarta.servlet</groupId>
+      <artifactId>jakarta.servlet-api</artifactId>
       <scope>provided</scope>
     </dependency>
 
     <dependency>
-      <groupId>javax.enterprise</groupId>
-      <artifactId>cdi-api</artifactId>
+      <groupId>jakarta.enterprise</groupId>
+      <artifactId>jakarta.enterprise.cdi-api</artifactId>
       <scope>provided</scope>
     </dependency>
 
@@ -226,8 +226,8 @@
       <scope>provided</scope>
       <exclusions>
         <exclusion>
-          <groupId>javax.inject</groupId>
-          <artifactId>javax.inject</artifactId>
+          <groupId>jakarta.inject</groupId>
+          <artifactId>jakarta.inject-api</artifactId>
         </exclusion>        
       </exclusions>
     </dependency>
@@ -327,8 +327,8 @@
               <artifactId>junit</artifactId>
             </exclusion>
             <exclusion>
-              <artifactId>javax.inject</artifactId>
-              <groupId>javax.inject</groupId>
+              <artifactId>jakarta.inject-api</artifactId>
+              <groupId>jakarta.inject</groupId>
             </exclusion>
           </exclusions>
         </dependency>
@@ -346,8 +346,8 @@
         </dependency>
         
         <dependency>
-          <groupId>javax.inject</groupId>
-          <artifactId>javax.inject</artifactId>
+          <groupId>jakarta.inject</groupId>
+          <artifactId>jakarta.inject-api</artifactId>
           <scope>provided</scope>
         </dependency>
 

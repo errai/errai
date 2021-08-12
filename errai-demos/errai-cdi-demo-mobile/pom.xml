@@ -55,7 +55,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <webDescriptor>wildfly</webDescriptor>
     <skipTests>true</skipTests>
-    <argLine/>
+    <argLine></argLine>
     <!-- maven plugins versions -->
     <maven.war.plugin.version>2.1.1</maven.war.plugin.version>
     <maven.surefire.plugin.version>2.5</maven.surefire.plugin.version>
@@ -165,14 +165,14 @@
     </dependency>
 
     <dependency>
-      <groupId>javax.enterprise</groupId>
-      <artifactId>cdi-api</artifactId>
+      <groupId>jakarta.enterprise</groupId>
+      <artifactId>jakarta.enterprise.cdi-api</artifactId>
       <scope>provided</scope>
     </dependency>
 
     <dependency>
-      <groupId>javax.inject</groupId>
-      <artifactId>javax.inject</artifactId>
+      <groupId>jakarta.inject</groupId>
+      <artifactId>jakarta.inject-api</artifactId>
       <scope>provided</scope>
     </dependency>
 
@@ -362,7 +362,7 @@
                     </goals>
                   </pluginExecutionFilter>
                   <action>
-                    <ignore/>
+                    <ignore></ignore>
                   </action>
                 </pluginExecution>
                 <pluginExecution>
@@ -375,7 +375,7 @@
                     </goals>
                   </pluginExecutionFilter>
                   <action>
-                    <ignore/>
+                    <ignore />
                   </action>
                 </pluginExecution>
               </pluginExecutions>
@@ -395,8 +395,8 @@
       <dependencies>
 
         <dependency>
-          <groupId>javax.inject</groupId>
-          <artifactId>javax.inject</artifactId>
+          <groupId>jakarta.inject</groupId>
+          <artifactId>jakarta.inject-api</artifactId>
         </dependency>
 
         <dependency>
@@ -412,8 +412,8 @@
         </dependency>
 
         <dependency>
-          <groupId>javax.enterprise</groupId>
-          <artifactId>cdi-api</artifactId>
+          <groupId>jakarta.enterprise</groupId>
+          <artifactId>jakarta.enterprise.cdi-api</artifactId>
         </dependency>
 
         <dependency>
@@ -454,12 +454,12 @@
         <dependency>
           <groupId>org.slf4j</groupId>
           <artifactId>slf4j-api</artifactId>
-          <version>1.7.30</version>
+          <version>1.7.5</version>
         </dependency>
         <dependency>
           <groupId>org.slf4j</groupId>
           <artifactId>slf4j-simple</artifactId>
-          <version>1.7.30</version>
+          <version>1.6.4</version>
         </dependency>
 
         <dependency>
@@ -484,8 +484,8 @@
 
       <dependencies>
         <dependency>
-          <groupId>javax.enterprise</groupId>
-          <artifactId>cdi-api</artifactId>
+          <groupId>jakarta.enterprise</groupId>
+          <artifactId>jakarta.enterprise.cdi-api</artifactId>
           <scope>compile</scope>
           <version>1.0-SP4</version>
         </dependency>

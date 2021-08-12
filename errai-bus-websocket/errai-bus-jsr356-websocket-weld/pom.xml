@@ -29,13 +29,13 @@
       <artifactId>errai-bus</artifactId>
     </dependency>
     <dependency>
-      <groupId>javax.enterprise</groupId>
-      <artifactId>cdi-api</artifactId>
+      <groupId>jakarta.enterprise</groupId>
+      <artifactId>jakarta.enterprise.cdi-api</artifactId>
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>org.jboss.spec.javax.servlet</groupId>
-      <artifactId>jboss-servlet-api_3.1_spec</artifactId>
+      <groupId>jakarta.servlet</groupId>
+      <artifactId>jakarta.servlet-api</artifactId>
       <scope>provided</scope>
     </dependency>
 
@@ -72,6 +72,16 @@
       <type>pom</type>
       <scope>test</scope>
       <!--There is a problem with Aether https://issues.jboss.org/browse/SHRINKRES-174 -->
+      <exclusions>
+        <exclusion>
+          <groupId>javax.inject</groupId>
+          <artifactId>javax.inject</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>javax.enterprise</groupId>
+          <artifactId>cdi-api</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.apache.maven</groupId>
@@ -99,10 +109,6 @@
           <artifactId>jta</artifactId>
         </exclusion>
       </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>jakarta.websocket</groupId>
-      <artifactId>jakarta.websocket-api</artifactId>
     </dependency>
   </dependencies>
 

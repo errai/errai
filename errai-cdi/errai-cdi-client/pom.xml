@@ -78,23 +78,11 @@
       <groupId>org.jboss.errai</groupId>
       <artifactId>errai-ioc</artifactId>
       <scope>compile</scope>
-      <exclusions>
-        <exclusion>
-          <artifactId>javax.enterprise</artifactId>
-          <groupId>cdi-api</groupId>
-        </exclusion>
-      </exclusions>
     </dependency>
     
     <dependency>
       <groupId>org.jboss.errai</groupId>
       <artifactId>errai-cdi-shared</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>javax</groupId>
-      <artifactId>javaee-api</artifactId>
-      <scope>provided</scope>
     </dependency>
 
     <!--

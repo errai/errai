@@ -36,7 +36,6 @@
       <artifactId>jakarta.interceptor-api</artifactId>
     </dependency>
 
-
     <dependency>
       <groupId>org.jboss.errai</groupId>
       <artifactId>errai-ioc</artifactId>
@@ -86,6 +85,16 @@
     <dependency>
       <groupId>jakarta.ws.rs</groupId>
       <artifactId>jakarta.ws.rs-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>jakarta.servlet</groupId>
+      <artifactId>jakarta.servlet-api</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss.errai</groupId>
+      <artifactId>errai-javax-enterprise</artifactId>
+      <scope>provided</scope>
     </dependency>
 
     <!-- GWT -->

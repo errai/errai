@@ -36,22 +36,13 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>javax.inject</groupId>
-      <artifactId>javax.inject</artifactId>
+      <groupId>org.jboss.errai</groupId>
+      <artifactId>errai-javax-enterprise</artifactId>
+      <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>javax.enterprise</groupId>
-      <artifactId>cdi-api</artifactId>
-      <exclusions>
-        <exclusion>
-          <groupId>javax.el</groupId>
-          <artifactId>javax.el-api</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>javax.interceptor</groupId>
-          <artifactId>javax.interceptor-api</artifactId>
-        </exclusion>
-      </exclusions>
+      <groupId>jakarta.enterprise</groupId>
+      <artifactId>jakarta.enterprise.cdi-api</artifactId>
     </dependency>
 
     <dependency>

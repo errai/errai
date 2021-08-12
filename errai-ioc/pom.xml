@@ -83,29 +83,14 @@
     </dependency>
 
     <dependency>
-      <groupId>javax.inject</groupId>
-      <artifactId>javax.inject</artifactId>
-    </dependency>
-
-    <dependency>
       <groupId>org.jboss.errai</groupId>
       <artifactId>errai-javax-enterprise</artifactId>
       <scope>provided</scope>
     </dependency>
 
     <dependency>
-      <groupId>javax.enterprise</groupId>
-      <artifactId>cdi-api</artifactId>
-      <exclusions>
-        <exclusion>
-          <groupId>javax.el</groupId>
-          <artifactId>javax.el-api</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>javax.interceptor</groupId>
-          <artifactId>javax.interceptor-api</artifactId>
-        </exclusion>
-      </exclusions>
+      <groupId>jakarta.enterprise</groupId>
+      <artifactId>jakarta.enterprise.cdi-api</artifactId>
     </dependency>
 
     <!-- Must come after errai-common is inherited for patched JUnitShell -->
@@ -172,6 +157,18 @@
           <groupId>javax.validation</groupId>
           <artifactId>validation-api</artifactId>
           <classifier>sources</classifier>
+        </dependency>
+
+        <dependency>
+          <groupId>jakarta.servlet</groupId>
+          <artifactId>jakarta.servlet-api</artifactId>
+          <scope>test</scope>
+        </dependency>
+
+        <dependency>
+          <groupId>jakarta.annotation</groupId>
+          <artifactId>jakarta.annotation-api</artifactId>
+          <scope>test</scope>
         </dependency>
 
         <dependency>

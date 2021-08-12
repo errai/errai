@@ -72,12 +72,6 @@
     </dependency>
 
     <dependency>
-      <groupId>javax</groupId>
-      <artifactId>javaee-api</artifactId>
-      <scope>provided</scope>
-    </dependency>
-
-    <dependency>
       <groupId>jakarta.persistence</groupId>
       <artifactId>jakarta.persistence-api</artifactId>
       <scope>test</scope>
@@ -118,8 +112,14 @@
     </dependency>
 
     <dependency>
-      <groupId>org.jboss.spec.javax.servlet</groupId>
-      <artifactId>jboss-servlet-api_3.1_spec</artifactId>
+      <groupId>jakarta.servlet</groupId>
+      <artifactId>jakarta.servlet-api</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>jakarta.xml.bind</groupId>
+      <artifactId>jakarta.xml.bind-api</artifactId>
       <scope>provided</scope>
     </dependency>
 
@@ -131,11 +131,6 @@
     <dependency>
       <groupId>com.google.inject</groupId>
       <artifactId>guice</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>javax.inject</groupId>
-      <artifactId>javax.inject</artifactId>
     </dependency>
 
     <dependency>

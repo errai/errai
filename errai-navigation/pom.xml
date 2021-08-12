@@ -115,6 +115,11 @@
       <artifactId>powermock-api-mockito2</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>jakarta.servlet</groupId>
+      <artifactId>jakarta.servlet-api</artifactId>
+      <scope>provided</scope>
+    </dependency>
   </dependencies>
   
   <profiles>

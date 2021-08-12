@@ -57,7 +57,7 @@
     <dependency>
       <groupId>org.wildfly.core</groupId>
       <artifactId>wildfly-server</artifactId>
-      <version>15.0.1.Final</version>
+      <version>11.1.1.Final</version>
     </dependency>
   </dependencies>
 
