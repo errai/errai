@@ -137,7 +137,7 @@
     <version.org.jboss.weld.weld>3.1.5.SP1</version.org.jboss.weld.weld>
     <version.org.jboss.weld.weld-api>3.1.SP2</version.org.jboss.weld.weld-api>
     <version.org.jgroups>3.6.14.Final</version.org.jgroups>
-    <version.org.jsoup>1.8.3</version.org.jsoup>
+    <version.org.jsoup>1.14.2</version.org.jsoup>
     <!-- Keycloak 9.0.3.Final can't be upgraded due API/class changes-->
     <version.org.keycloak>1.9.4.Final</version.org.keycloak>
     <version.org.lesscss>1.7.0.1.1</version.org.lesscss>
