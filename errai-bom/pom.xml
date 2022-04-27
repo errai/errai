@@ -99,7 +99,6 @@
     <version.org.glassfish.javax.el>3.0.0</version.org.glassfish.javax.el>
     <version.org.hibernate>5.3.15.Final</version.org.hibernate>
     <version.org.hibernate.validator>4.1.0.Final</version.org.hibernate.validator>
-    <!-- <version.org.hibernate.validator>6.0.18.Final</version.org.hibernate.validator> -->
     <version.org.hibernate.commons.annotations>5.0.5.Final</version.org.hibernate.commons.annotations>
     <version.org.hsqldb>2.3.0</version.org.hsqldb>
     <version.org.javassist>3.23.2-GA</version.org.javassist>
@@ -141,7 +140,7 @@
     <!-- Keycloak 9.0.3.Final can't be upgraded due API/class changes-->
     <version.org.keycloak>1.9.4.Final</version.org.keycloak>
     <version.org.lesscss>1.7.0.1.1</version.org.lesscss>
-    <version.org.mockito>2.12.0</version.org.mockito>
+    <version.org.mockito>3.6.0</version.org.mockito>
     <version.org.mvel>2.4.8.Final</version.org.mvel>
     <version.org.picketlink>2.6.0.Final</version.org.picketlink>
     <version.org.powermock>2.0.7</version.org.powermock>
@@ -153,7 +152,6 @@
     <!-- The version of xercesImpl in the ip-bom is not published on Maven Central.
          Removing this override breaks Errai apps that don't have the JBoss nexus repository configured. -->
     <version.xerces.xercesImpl>2.12.0</version.xerces.xercesImpl>
-<!--     <version.xerces>2.12.0.SP02</version.xerces> -->
     <version.xml-apis>1.4.01</version.xml-apis>
   </properties>
 

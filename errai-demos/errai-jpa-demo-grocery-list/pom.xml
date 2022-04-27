@@ -215,6 +215,12 @@
       <scope>provided</scope>
     </dependency>
 
+    <dependency>
+      <groupId>jakarta.xml.bind</groupId>
+      <artifactId>jakarta.xml.bind-api</artifactId>
+    </dependency>
+
+
     <!-- Errai Core -->
     <dependency>
       <groupId>org.jboss.errai</groupId>

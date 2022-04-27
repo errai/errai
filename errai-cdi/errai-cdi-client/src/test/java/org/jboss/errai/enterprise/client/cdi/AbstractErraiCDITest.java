@@ -69,6 +69,7 @@ public abstract class AbstractErraiCDITest extends GWTTestCase {
     super.gwtTearDown();
   }
 
+  @SafeVarargs
   public static boolean annotationSetMatches(final Set<Annotation> annotations,
                                              final Class<? extends Annotation>... annos) {
 
