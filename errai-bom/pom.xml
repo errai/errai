@@ -139,7 +139,7 @@
     <version.org.jgroups>3.6.14.Final</version.org.jgroups>
     <version.org.jsoup>1.8.3</version.org.jsoup>
     <!-- Keycloak 9.0.3.Final can't be upgraded due API/class changes-->
-    <version.org.keycloak>1.9.4.Final</version.org.keycloak>
+    <version.org.keycloak>17.0.1</version.org.keycloak>
     <version.org.lesscss>1.7.0.1.1</version.org.lesscss>
     <version.org.mockito>2.12.0</version.org.mockito>
     <version.org.mvel>2.4.8.Final</version.org.mvel>
