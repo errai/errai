@@ -40,13 +40,13 @@ Release Steps
 
    ```bash
    cd {errai_root_dir}
-   ./updateVersions.sh a.b.c-SNAPSHOT x.y.z.Final
+   ./updateVersions.sh a.b.c-SNAPSHOT a.b.c.Final
    ```
   
    Afterward, verify that all subprojects reference the new parent pom's version:
    
    ```bash
-   find . -name pom.xml | xargs grep x.y.z | grep SNAP
+   find . -name pom.xml | xargs grep a.b.c | grep SNAP
    ```
        
    (if any are out of sync with the parent version, Maven will not have updated them)
@@ -66,27 +66,30 @@ Release Steps
     ```
         
     * **NOTE**: In the case it does not work, repeat Step 2 only before retrying.
-    * **NOTE2**: Upload both for {version} and `latest`. Remember to pass the `--skip-mkdirs` param when uploading `latest`.
-    * **NOTE3**: If you get a "Permission denied" message, make sure that you have your keys on the `~/.ssh` directory and that you've ran `ssh-add -K ${path-to-key}` too.
+    * **NOTE2**: Upload both for {version} and `latest`. Remember to pass the `--skip-mkdirs` param when uploading `latest`. i.e. `scripts/upload_docs.sh latest --skip-mkdirs`
+    * **NOTE3**: If you get a "Permission denied" message, make sure that you have your keys on the `~/.ssh` directory and that you've ran `ssh-add -k ${path-to-key}` too.
+      
+      i.e. `ssh-add -k /home/{user}/.ssh/errai/id_rsa` 
     
+
 1. Tag and push the release to GitHub
 
     ```bash
-    git commit -a -m "Updated to new version x.y.z.Final"
-    git tag x.y.z.Final
+    git commit -a -m "Updated to new version a.b.c.Final"
+    git tag -a a.b.c.Final -m "tagged a.b.c.Final"
     ```
     
- 1. Reset all versions to `a.b.c+1-SNAPSHOT` and commit
+ 1. Reset all versions to `a.b+1.c-SNAPSHOT` and commit
     ```bash
     cd {errai_root_dir}
-    ./updateVersions.sh x.y.z.Final a.b.c+1-SNAPSHOT
-    git commit -a -m "Updated to new development version a.b.c+1-SNAPSHOT"
+    ./updateVersions.sh a.b.c.Final a.b+1.c-SNAPSHOT
+    git commit -a -m "Updated to new development version a.b+1.c-SNAPSHOT"
     ```
   
  1. Push the changes:
     ```bash
     git push upstream {branch}
-    git push upstream --tags
+    git push upstream a.b.c.Final
     ```
 
 1. Browse to nexus (https://repository.jboss.org/nexus/index.html)
@@ -109,7 +112,7 @@ Release Steps
 === You're done! Congrats! You deserve beer! ===
 
 
-Relesing org.jboss.errai:wildfly-dist
+Releasing org.jboss.errai:wildfly-dist
 ----
 
 1. `cd errai-cdi/errai-wildfly-dist`
