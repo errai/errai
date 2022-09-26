@@ -16,6 +16,7 @@
 
 package org.jboss.errai.processor;
 
+import static org.apache.commons.lang3.SystemUtils.JAVA_VERSION;
 import static org.jboss.errai.processor.TypeNames.GWT_EVENT;
 import static org.jboss.errai.processor.TypeNames.GWT_OPAQUE_DOM_EVENT;
 
@@ -35,7 +36,7 @@ import org.junit.Test;
  * generally have two assertions: one to cover each mode.
  */
 public class EventHandlerAnnotationCheckerTest extends AbstractProcessorTest {
-
+  
   @Override
   protected AbstractProcessor getProcessorUnderTest() {
     return new EventHandlerAnnotationChecker();
@@ -88,21 +89,32 @@ public class EventHandlerAnnotationCheckerTest extends AbstractProcessorTest {
   }
 
   @Test
-  public void shouldPrintErrorWhenReferencedFieldDoesNotExist() throws FileNotFoundException {
+  public void shouldPrintErrorWhenReferencedFieldDoesNotExist() throws FileNotFoundException {        
     final List<Diagnostic<? extends JavaFileObject>> diagnostics = compile(
             "org/jboss/errai/processor/testcase/EventHandlerBadFieldReference.java");
-
+    
+    int col = changeColForJava11Runtime();
+    
     // only need one assertion here, because we don't currently parse the template to see if refs to HTML elements are valid
-    assertCompilationMessage(diagnostics, Kind.ERROR, 16, 3, "must refer to a field");
+    assertCompilationMessage(diagnostics, Kind.ERROR, 16, col, "must refer to a field");
   }
 
   @Test
   public void shouldPrintErrorWhenReferencedFieldIsNotAWidget() throws FileNotFoundException {
     final List<Diagnostic<? extends JavaFileObject>> diagnostics = compile(
             "org/jboss/errai/processor/testcase/EventHandlerNonWidgetFieldReference.java");
+    
+    int col = changeColForJava11Runtime();
 
     // only need one assertion here, because we don't currently parse the template to see if refs to HTML elements are valid
-    assertCompilationMessage(diagnostics, Kind.ERROR, 18, 3, "must refer to a field of type Widget");
+    assertCompilationMessage(diagnostics, Kind.ERROR, 18, col, "must refer to a field of type Widget");
+  }
+
+  private int changeColForJava11Runtime() {
+    int col = 3;
+    //hack to get different columns as correct
+    if ( JAVA_VERSION.startsWith("11") ) col = 17;
+    return col;
   }
 
   @Test

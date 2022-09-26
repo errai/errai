@@ -53,7 +53,7 @@ public class TypeHandlerFactory {
     numberHandlers.put(Double.class, new NumberToFloat());
     numberHandlers.put(Byte.class, new NumberToByte());
     numberHandlers.put(java.util.Date.class, new NumberToDate());
-    numberHandlers.put(java.sql.Date.class, new NumberToSQLDate());
+    //numberHandlers.put(java.sql.Date.class, new NumberToSQLDate());
 
     handlers.put(Number.class, numberHandlers);
 

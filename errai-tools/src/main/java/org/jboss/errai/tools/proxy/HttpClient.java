@@ -175,24 +175,25 @@ public class HttpClient {
       throws MalformedURLException {
     try {
 
-      if (isHttps) {
-        /* when communicating with the server which has unsigned or invalid
+/*       if (isHttps) {
+         when communicating with the server which has unsigned or invalid
         * certificate (https), SSLException or IOException is thrown.
         * the following line is a hack to avoid that
         */
-        Security.addProvider(new com.sun.net.ssl.internal.ssl.Provider());
+        
+        /*Security.addProvider(new com.sun.net.ssl.internal.ssl.Provider());
         System.setProperty("java.protocol.handler.pkgs", "com.sun.net.ssl.internal.www.protocol");
         if (isProxy) {
           System.setProperty("https.proxyHost", proxyHost);
           System.setProperty("https.proxyPort", proxyPort + "");
         }
       }
-      else {
+      else { */
         if (isProxy) {
           System.setProperty("http.proxyHost", proxyHost);
           System.setProperty("http.proxyPort", proxyPort + "");
         }
-      }
+//      }
 
       URL url = new URL(str);
       HttpURLConnection uc = (HttpURLConnection) url.openConnection();

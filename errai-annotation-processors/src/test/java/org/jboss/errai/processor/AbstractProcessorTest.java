@@ -62,8 +62,12 @@ public abstract class AbstractProcessorTest {
    */
   private final Set<String> ignorableWarnings = new HashSet<>(
           Arrays.asList(
-                  "bootstrap class path not set in conjunction with -source 1.8",
-                  "Implicitly compiled files were not subject to annotation processing."));
+                  "bootstrap class path not set in conjunction with -source", 
+                  "Implicitly compiled files were not subject to annotation processing.",
+                  "Recompile with",
+                  "Some input files use or override a deprecated API",
+                  "uses or overrides a deprecated API",
+                  "Some input files use unchecked or unsafe operations"));
 
   /**
    * Compile a unit of source code with the specified annotation processor
@@ -89,8 +93,13 @@ public abstract class AbstractProcessorTest {
       final Iterable<? extends JavaFileObject> compilationUnits = fileManager.getJavaFileObjects(path);
 
       // Compile with provided annotation processor
-      final CompilationTask task = compiler
-              .getTask(null, fileManager, diagnosticListener, Arrays.asList("-source", "1.8", "-target", "1.8"), null, compilationUnits);
+      final CompilationTask task;
+      if (compiler.isSupportedOption("--release") == -1 ) {
+        task = compiler.getTask(null, fileManager, diagnosticListener, Arrays.asList("-source", "1.8", "-target", "1.8"), null, compilationUnits);
+      } else {
+        task = compiler.getTask(null, fileManager, diagnosticListener, Arrays.asList("--release", "8"), null, compilationUnits);
+      }
+      
       task.setProcessors(Arrays.asList(getProcessorUnderTest()));
       task.call();
 
@@ -122,7 +131,7 @@ public abstract class AbstractProcessorTest {
         .append(":")
         .append(msg.getColumnNumber())
         .append(": ")
-        .append(msg.getMessage(null))
+            .append(msg.getMessage(null))
         .append("\n");
     }
     if (sb.length() > 0) {
@@ -180,7 +189,7 @@ public abstract class AbstractProcessorTest {
         .append("\n");
       if ( (kind == null || msg.getKind().equals(kind))
               && (line == Diagnostic.NOPOS || msg.getLineNumber() == line)
-              && (col == Diagnostic.NOPOS || msg.getColumnNumber() == col)
+              && (col == Diagnostic.NOPOS) || msg.getColumnNumber() == col
               && msg.getMessage(null).contains(message)) {
         return;
       }
