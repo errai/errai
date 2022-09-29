@@ -98,7 +98,7 @@
     <version.org.eclipse.jetty>9.2.14.v20151106</version.org.eclipse.jetty>
     <version.org.glassfish.javax.el>3.0.0</version.org.glassfish.javax.el>
     <version.org.hibernate>5.3.20.Final</version.org.hibernate>
-    <version.org.hibernate.validator>4.1.0.Final</version.org.hibernate.validator>
+    <version.org.hibernate.validator>4.3.2.Final</version.org.hibernate.validator>
     <version.org.hibernate.commons.annotations>5.0.5.Final</version.org.hibernate.commons.annotations>
     <version.org.hsqldb>2.3.0</version.org.hsqldb>
     <version.org.javassist>3.23.2-GA</version.org.javassist>
