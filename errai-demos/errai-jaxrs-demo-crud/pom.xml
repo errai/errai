@@ -63,8 +63,8 @@
     <maven.compiler.plugin.version>2.3.2</maven.compiler.plugin.version>
     <maven.deploy.plugin.version>2.7</maven.deploy.plugin.version>    
     <maven.surefire.plugin.version>2.5</maven.surefire.plugin.version>
-    <maven.gwt.plugin.version>2.9.0</maven.gwt.plugin.version>
-    <jetty.version>9.2.14.v20151106</jetty.version>
+    <maven.gwt.plugin.version>2.10.0</maven.gwt.plugin.version>
+    <jetty.version>9.4.44.v20210927</jetty.version>
     <!-- Dev Mode config properties -->
     <errai.dev.context>${project.artifactId}</errai.dev.context>
     <as.version>23.0.2.Final</as.version>
@@ -128,7 +128,7 @@
      </dependency>
 
     <dependency>
-      <groupId>com.google.gwt</groupId>
+      <groupId>org.gwtproject</groupId>
       <artifactId>gwt-dev</artifactId>
       <scope>provided</scope>
       <exclusions>
@@ -182,7 +182,7 @@
     </dependency>
 
     <dependency>
-      <groupId>com.google.gwt</groupId>
+      <groupId>org.gwtproject</groupId>
       <artifactId>gwt-user</artifactId>
       <scope>provided</scope>
     </dependency>

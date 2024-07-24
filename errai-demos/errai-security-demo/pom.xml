@@ -60,7 +60,7 @@
     <slf4j.version>1.5.11</slf4j.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <errai.dev.context>${project.artifactId}</errai.dev.context>
-    <maven.gwt.plugin.version>2.9.0</maven.gwt.plugin.version>
+    <maven.gwt.plugin.version>2.10.0</maven.gwt.plugin.version>
     <maven.deploy.plugin.version>2.7</maven.deploy.plugin.version>
   </properties>
 
@@ -147,7 +147,7 @@
       <artifactId>slf4j-log4j12</artifactId>
     </dependency>
     <dependency>
-      <groupId>com.google.gwt</groupId>
+      <groupId>org.gwtproject</groupId>
       <artifactId>gwt-user</artifactId>
       <scope>provided</scope>
     </dependency>
