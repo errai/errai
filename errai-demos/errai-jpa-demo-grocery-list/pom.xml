@@ -288,18 +288,6 @@
       <artifactId>gwt-ajaxloader</artifactId>
       <scope>provided</scope>
       <version>1.1.0</version>
-      <!-- Excluding old com.google.gwt 2.0.3 gwt-user and gwt-dev assets
-      that collides with newer org.gwtproject assets in gwt 2.10+ versions -->
-      <exclusions>
-        <exclusion>
-          <groupId>com.google.gwt</groupId>
-          <artifactId>gwt-dev</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>com.google.gwt</groupId>
-          <artifactId>gwt-user</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
 
     <dependency>
@@ -539,7 +527,7 @@
                   <pluginExecutionFilter>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>gwt-maven-plugin</artifactId>
-                    <versionRange>[2.3.0,)</versionRange>
+                    <versionRange>[2.10.0,)</versionRange>
                     <goals>
                       <goal>resources</goal>
                     </goals>
