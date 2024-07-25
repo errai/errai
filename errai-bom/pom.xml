@@ -63,7 +63,7 @@
     <appengine.version>1.7.6</appengine.version>
     <asm.version>7.1</asm.version>
     <gmaven.mojo.version>1.5</gmaven.mojo.version>
-    <guava.version>32.0.1-jre</guava.version>
+    <guava.version>33.2.1-jre</guava.version>
     <guice.version>3.0</guice.version>
     <gwt-elemental.version>2.9.0</gwt-elemental.version>
     <gwt.phonegap.version>3.5.0.1</gwt.phonegap.version>
@@ -185,6 +185,13 @@
       </dependency>
 
       <!-- Third Party Dependencies -->
+        <dependency>
+          <groupId>org.gwtproject</groupId>
+          <artifactId>gwt</artifactId>
+          <version>${gwt.version}</version>
+          <scope>import</scope>
+          <type>pom</type>
+        </dependency>
       <dependency>
         <groupId>com.google.code.gson</groupId>
         <artifactId>gson</artifactId>
@@ -194,18 +201,6 @@
         <groupId>com.google.gwt.gwtmockito</groupId>
         <artifactId>gwtmockito</artifactId>
         <version>${version.com.google.gwt.gwtmockito}</version>
-        <!-- Excluding old com.google.gwt 2.8.0 gwt-user and gwt-dev assets
-        that collides with newer org.gwtproject assets in gwt 2.10+ versions -->
-        <exclusions>
-          <exclusion>
-            <groupId>com.google.gwt</groupId>
-            <artifactId>gwt-dev</artifactId>
-          </exclusion>
-          <exclusion>
-            <groupId>com.google.gwt</groupId>
-            <artifactId>gwt-user</artifactId>
-          </exclusion>
-        </exclusions>
       </dependency>
       <dependency>
         <groupId>com.h2database</groupId>
@@ -795,17 +790,6 @@
         <artifactId>jgroups</artifactId>
         <version>${version.org.jgroups}</version>
       </dependency>
-      <!-- <dependency>
-        <groupId>org.hibernate.validator</groupId>
-        <artifactId>hibernate-validator</artifactId>
-        <version>${version.org.hibernate.validator}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.hibernate.validator</groupId>
-        <artifactId>hibernate-validator</artifactId>
-        <version>${version.org.hibernate.validator}</version>
-        <classifier>sources</classifier>
-      </dependency> -->
       <dependency>
         <groupId>org.hibernate</groupId>
         <artifactId>hibernate-validator</artifactId>
@@ -868,17 +852,6 @@
         <artifactId>jsinterop-annotations</artifactId>
         <version>${version.com.google.jsinterop}</version>
       </dependency>
-      <!-- <dependency>
-        <groupId>jakarta.validation</groupId>
-        <artifactId>jakarta.validation-api</artifactId>
-        <version>${version.jakarta.validation}</version>
-      </dependency>
-      <dependency>
-        <groupId>jakarta.validation</groupId>
-        <artifactId>jakarta.validation-api</artifactId>
-        <version>${version.jakarta.validation}</version>
-        <classifier>sources</classifier>
-      </dependency> -->
       <dependency>
         <groupId>javax.validation</groupId>
         <artifactId>validation-api</artifactId>
