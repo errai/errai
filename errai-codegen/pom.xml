@@ -184,9 +184,9 @@
             <additionalClasspathElement>${basedir}/src/main/java</additionalClasspathElement>
             <additionalClasspathElement>${basedir}/src/test/java</additionalClasspathElement>
           </additionalClasspathElements>
-          <systemPropertyVariables combine.self="override">
+          <systemProperties combine.self="override">
             <errai.codegen.details>true</errai.codegen.details>
-          </systemPropertyVariables>
+          </systemProperties>
         </configuration>
       </plugin>
       

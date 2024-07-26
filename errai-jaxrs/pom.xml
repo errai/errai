@@ -59,12 +59,12 @@
           <skipTests>true</skipTests>
           <failIfNoTests>false</failIfNoTests>
           <trimStackTrace>false</trimStackTrace>
-          <systemPropertyVariables>
+          <systemProperties>
             <property>
               <name>log4j.output.dir</name>
               <value>${project.build.directory}</value>
             </property>
-          </systemPropertyVariables>
+          </systemProperties>
         </configuration>
       </plugin>
 

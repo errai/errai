@@ -210,7 +210,7 @@
               <reuseForks>false</reuseForks>
               <argLine>${argLine} -Xmx1500m -Derrai.devel.nocache=true</argLine>
               <enableAssertions>false</enableAssertions>
-              <systemPropertyVariables>
+              <systemProperties>
                 <!-- Must disable long polling for automated tests to succeed -->
                 <property>
                   <name>errai.hosted_mode_testing</name>
@@ -221,7 +221,7 @@
                   <name>errai.marshalling.server.classOutput.enabled</name>
                   <value>false</value>
                 </property>
-              </systemPropertyVariables>
+              </systemProperties>
 
               <includes>
                 <include>**/AllJaxrsTests.java</include>

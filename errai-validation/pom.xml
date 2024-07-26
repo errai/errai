@@ -118,7 +118,7 @@
               <reuseForks>false</reuseForks>
               <argLine>${argLine} -Xmx1500m -Derrai.devel.nocache=true -Derrai.codegen.permissive=false -Derrai.dynamic_validation.enabled=true</argLine>
 
-              <systemPropertyVariables>
+              <systemProperties>
                 <!-- Must disable long polling for automated tests to succeed -->
                 <property>
                   <name>errai.hosted_mode_testing</name>
@@ -130,7 +130,7 @@
                   <name>errai.marshalling.server.classOutput.enabled</name>
                   <value>false</value>
                 </property>
-              </systemPropertyVariables>
+              </systemProperties>
             </configuration>
           </plugin>
         </plugins>

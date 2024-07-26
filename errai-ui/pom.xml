@@ -203,7 +203,7 @@
 
               <useManifestOnlyJar>true</useManifestOnlyJar>
 
-              <systemPropertyVariables>
+              <systemProperties>
                 <property>
                   <name>java.io.tmpdir</name>
                   <value>${project.build.directory}</value>
@@ -218,7 +218,7 @@
                   <name>errai.devel.nocache</name>
                   <value>true</value>
                 </property>
-              </systemPropertyVariables>
+              </systemProperties>
 
               <!-- GWT 2.8.1+ has an assertion that fails on tests and works in production -->
               <enableAssertions>false</enableAssertions>

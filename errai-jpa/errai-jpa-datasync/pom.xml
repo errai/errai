@@ -152,7 +152,7 @@
               <useSystemClassLoader>false</useSystemClassLoader>
               <useManifestOnlyJar>true</useManifestOnlyJar>
 
-              <systemPropertyVariables>
+              <systemProperties>
                 <property>
                   <name>java.io.tmpdir</name>
                   <value>${project.build.directory}</value>
@@ -185,7 +185,7 @@
                   <name>errai.devel.nocache</name>
                   <value>true</value>
                 </property>
-              </systemPropertyVariables>
+              </systemProperties>
 
               <includes>
                 <include>**/AllDataSyncTests.java</include>

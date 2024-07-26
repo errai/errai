@@ -150,7 +150,7 @@
               <argLine>-Xmx1500m ${argLine} -Dgwt.args='-prod'</argLine>
               <useManifestOnlyJar>true</useManifestOnlyJar>
               <enableAssertions>false</enableAssertions>
-              <systemPropertyVariables>
+              <systemProperties>
                 <property>
                   <name>java.io.tmpdir</name>
                   <value>${project.build.directory}</value>
@@ -165,7 +165,7 @@
                   <name>errai.devel.nocache</name>
                   <value>true</value>
                 </property>
-              </systemPropertyVariables>
+              </systemProperties>
 
               <excludes>
                 <exclude>**/rebind/**</exclude>

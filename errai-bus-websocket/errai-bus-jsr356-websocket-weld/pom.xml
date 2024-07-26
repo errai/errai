@@ -168,9 +168,9 @@
             <configuration>
               <excludes combine.self="override">
               </excludes>
-              <systemPropertyVariables combine.self="override">
+              <systemProperties combine.self="override">
                 <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
-              </systemPropertyVariables>
+              </systemProperties>
             </configuration>
           </plugin>
 

@@ -226,7 +226,7 @@
               <reuseForks>false</reuseForks>
               <argLine>${argLine} -Xmx2500m -Dgwt.args='-testBeginTimeout 5 ${gwtArgs}'</argLine>
               <useManifestOnlyJar>true</useManifestOnlyJar>
-              <systemPropertyVariables>
+              <systemProperties>
                 <property>
                   <name>java.io.tmpdir</name>
                   <value>${project.build.directory}</value>
@@ -262,7 +262,7 @@
                   <name>java.net.preferIPv4Stack</name>
                   <value>true</value>
                 </property>
-              </systemPropertyVariables>
+              </systemProperties>
               <excludes>
                 <exclude>**/ErraiBusTests.java</exclude>
               </excludes>
