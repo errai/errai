@@ -11,7 +11,7 @@
     
   <modules>
    <module>errai-jsinterop-demo-api</module>
-   <!--<module>errai-jsinterop-demo-plugin</module> -->
+   <module>errai-jsinterop-demo-plugin</module>
    <module>errai-jsinterop-demo-app</module>
   </modules>
 
