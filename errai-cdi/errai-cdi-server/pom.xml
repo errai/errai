@@ -244,7 +244,7 @@
                 flag or the testsuite WILL fail. -->
               <argLine>-Xmx1500m </argLine>
               <enableAssertions>false</enableAssertions>
-              <systemProperties>
+              <systemPropertyVariables>
                 <errai.hosted_mode_testing>true</errai.hosted_mode_testing>
                 <errai.devel.nocache>true</errai.devel.nocache>
                 <org.jboss.errai.bus.do_long_poll>false</org.jboss.errai.bus.do_long_poll>
@@ -255,7 +255,7 @@
                      problems by moving the async tests out of a test suite.
                  -->
                 <gwt.args>-devMode -testBeginTimeout 5 ${gwtArgs}</gwt.args>
-              </systemProperties>
+              </systemPropertyVariables>
               <includes>
                 <include>**/*Test.java</include>
                 <include>**/*Tests.java</include>
