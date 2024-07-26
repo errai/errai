@@ -176,7 +176,6 @@
           <noServer>false</noServer>
           <disableCastChecking>true</disableCastChecking>
           <runTarget>${errai.dev.context}/</runTarget>
-          <soyc>false</soyc>
           <hostedWebapp>src/main/webapp</hostedWebapp>
           <extraJvmArgs>-Xmx1G -XX:CompileThreshold=7000 -Derrai.ioc.reachability=Aggressive -Derrai.ioc.jsinterop.support=true</extraJvmArgs>
           <generateJsInteropExports>true</generateJsInteropExports>

@@ -419,7 +419,6 @@
           <server>org.jboss.errai.cdi.server.gwt.EmbeddedWildFlyLauncher</server>
           <disableCastChecking>true</disableCastChecking>
           <runTarget>${errai.dev.context}/</runTarget>
-          <soyc>false</soyc>
           <hostedWebapp>src/main/webapp</hostedWebapp>
           <extraJvmArgs>-Xmx2g -XX:CompileThreshold=7000 -Derrai.jboss.home=${errai.jboss.home} -Derrai.dev.context=${errai.dev.context}</extraJvmArgs>
         </configuration>

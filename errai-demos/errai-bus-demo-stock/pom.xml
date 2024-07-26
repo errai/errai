@@ -187,9 +187,7 @@
           <extraJvmArgs>-Xmx1g</extraJvmArgs>
           <jvm></jvm>
           <style>DETAILED</style>
-          <soyc>false</soyc>
           <hostedWebapp>src/main/webapp/</hostedWebapp>
-          <treeLogger>true</treeLogger>
           <strict>true</strict>
         </configuration>
         <executions>
