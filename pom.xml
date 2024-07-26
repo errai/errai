@@ -596,7 +596,7 @@
                 <additionalClasspathElement>${basedir}/src/main/java/</additionalClasspathElement>
                 <additionalClasspathElement>${basedir}/src/test/java/</additionalClasspathElement>
               </additionalClasspathElements>
-              <systemProperties>
+              <systemPropertyVariables>
                 <!-- Must disable long polling for automated tests to succeed -->
                 <property>
                   <name>errai.hosted_mode_testing</name>
@@ -611,7 +611,7 @@
                   <name>errai.marshalling.server.classOutput.enabled</name>
                   <value>false</value>
                 </property>
-              </systemProperties>
+              </systemPropertyVariables>
               <includes>
                 <include>**/*Test.java</include>
                 <include>**/*Tests.java</include>

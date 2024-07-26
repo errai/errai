@@ -260,7 +260,7 @@
               <argLine>-Xmx1500m ${argLine} -Dgwt.args='-prod'</argLine>
               <useManifestOnlyJar>true</useManifestOnlyJar>
 
-              <systemProperties>
+              <systemPropertyVariables>
                 <property>
                   <name>java.io.tmpdir</name>
                   <value>${project.build.directory}</value>
@@ -281,7 +281,7 @@
                   <name>errai.devel.nocache</name>
                   <value>true</value>
                 </property>
-              </systemProperties>
+              </systemPropertyVariables>
               <excludes>
                 <exclude>**/mocksafe/**</exclude>
               </excludes>

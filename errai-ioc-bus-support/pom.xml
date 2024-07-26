@@ -150,7 +150,7 @@ runtime dependencies on it and it breaks deployment on JBoss AS and Tomcat -->
 
                <argLine>${argLine} -Xmx2048m -Dgwt.gen=/tmp/gwt_test_gen_out/ -Dgwt.args='-testBeginTimeout 5 ${gwtArgs}' -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005</argLine>
 
-               <systemProperties>
+               <systemPropertyVariables>
                  <property>
                    <name>java.io.tmpdir</name>
                    <value>${project.build.directory}</value>
@@ -172,7 +172,7 @@ runtime dependencies on it and it breaks deployment on JBoss AS and Tomcat -->
                    <name>errai.marshalling.server.classOutput.enabled</name>
                    <value>false</value>
                  </property>
-               </systemProperties>
+               </systemPropertyVariables>
 
                <includes>
                  <include>**/*Test.java</include>

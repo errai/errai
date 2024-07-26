@@ -60,12 +60,6 @@
       <groupId>com.google.gwt</groupId>
       <artifactId>gwt-elemental</artifactId>
       <scope>test</scope>
-      <exclusions>
-        <exclusion>
-          <groupId>com.google.gwt</groupId>
-          <artifactId>gwt-user</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
 
     <dependency>
@@ -209,7 +203,7 @@
 
               <useManifestOnlyJar>true</useManifestOnlyJar>
 
-              <systemProperties>
+              <systemPropertyVariables>
                 <property>
                   <name>java.io.tmpdir</name>
                   <value>${project.build.directory}</value>
@@ -224,7 +218,7 @@
                   <name>errai.devel.nocache</name>
                   <value>true</value>
                 </property>
-              </systemProperties>
+              </systemPropertyVariables>
 
               <!-- GWT 2.8.1+ has an assertion that fails on tests and works in production -->
               <enableAssertions>false</enableAssertions>

@@ -96,12 +96,12 @@
               <argLine>-Xmx1500m ${argLine} -Dgwt.args='-testBeginTimeout 5 ${gwtArgs}' -Derrai.hosted_mode_testing=true
                 -Derrai.ioc.experimental.infer_dependent_by_reachability=true
               </argLine>
-              <systemProperties>
+              <systemPropertyVariables>
                 <property>
                   <name>log4j.output.dir</name>
                   <value>${project.build.directory}</value>
                 </property>
-              </systemProperties>
+              </systemPropertyVariables>
             </configuration>
           </plugin>
         </plugins>

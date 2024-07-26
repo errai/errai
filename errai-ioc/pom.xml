@@ -195,7 +195,7 @@
               <reuseForks>false</reuseForks>
               <argLine>-Xmx1500m -Dgwt.gen=/tmp/gwt_test_gen_out/ -Derrai.codegen.details=true -Dgwt.args='-testBeginTimeout 5 -generateJsInteropExports ${gwtArgs}' -Xdebug</argLine>
               <enableAssertions>false</enableAssertions>
-              <systemProperties>
+              <systemPropertyVariables>
                 <property>
                   <name>java.io.tmpdir</name>
                   <value>${project.build.directory}</value>
@@ -208,7 +208,7 @@
                   <name>errai.ioc.jsinterop.support</name>
                   <value>true</value>
                 </property>
-              </systemProperties>
+              </systemPropertyVariables>
 
               <excludes>
                 <exclude>**/IOCTests.java</exclude>

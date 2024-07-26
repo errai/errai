@@ -53,7 +53,6 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <mvel.version>2.2.4.Final</mvel.version>
     <jetty.version>6.1.26</jetty.version>
     <slf4j.version>1.7.10</slf4j.version>
     <cdiapi.version>1.2</cdiapi.version>
@@ -364,8 +363,8 @@
         </dependency>
 
         <dependency>
-          <groupId>log4j</groupId>
-          <artifactId>log4j</artifactId>
+          <groupId>org.apache.logging.log4j</groupId>
+          <artifactId>log4j-core</artifactId>
           <scope>provided</scope>
         </dependency>
       </dependencies>

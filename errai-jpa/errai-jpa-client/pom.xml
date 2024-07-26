@@ -121,7 +121,7 @@
               <useManifestOnlyJar>true</useManifestOnlyJar>
               <enableAssertions>false</enableAssertions>
 
-              <systemProperties>
+              <systemPropertyVariables>
                 <property>
                   <name>java.io.tmpdir</name>
                   <value>${project.build.directory}</value>
@@ -149,7 +149,7 @@
                   <name>errai.devel.nocache</name>
                   <value>true</value>
                 </property>
-              </systemProperties>
+              </systemPropertyVariables>
 
               <includes>
                 <include>**/AllJpaTests.java</include>

@@ -61,7 +61,7 @@
           </additionalClasspathElements>
           <useSystemClassLoader>false</useSystemClassLoader>
 
-          <systemProperties>
+          <systemPropertyVariables>
             <property>
               <name>java.io.tmpdir</name>
               <value>${project.build.directory}</value>
@@ -70,7 +70,7 @@
               <name>log4j.output.dir</name>
               <value>${project.build.directory}</value>
             </property>
-          </systemProperties>
+          </systemPropertyVariables>
         </configuration>
       </plugin>
     </plugins>
