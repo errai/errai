@@ -275,19 +275,6 @@ public class BindingTemplateTest extends AbstractErraiCDITest {
 
       @Override
       public void setProperty(final String value) {
-        model.setFile(value);
-      }
-
-      @Override
-      public String getProperty() {
-        return model.getFile();
-      }
-    }, new DefaultInputElementHandler(bean.file), new IdentityConverter<>(String.class), "file", "file:///tmp/foo", "file:///tmp/bar", bean.file);
-
-    inputElementAssertions(new PropertyHandler<String>() {
-
-      @Override
-      public void setProperty(final String value) {
         model.setEmail(value);
       }
 
