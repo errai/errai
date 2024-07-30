@@ -295,7 +295,7 @@ public class BindingTemplateTest extends AbstractErraiCDITest {
       public String getProperty() {
         return model.getColor();
       }
-    }, new DefaultInputElementHandler(bean.color), new IdentityConverter<>(String.class), "color", "#000000", "#FFFFFF", bean.color);
+    }, new DefaultInputElementHandler(bean.color), new IdentityConverter<>(String.class), "color", "#000001", "#FFFFFF", bean.color);
 
     inputElementAssertions(new PropertyHandler<Boolean>() {
 
