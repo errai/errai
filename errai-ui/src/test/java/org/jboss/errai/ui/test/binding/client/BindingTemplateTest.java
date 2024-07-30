@@ -41,12 +41,14 @@ import org.jboss.errai.ui.test.common.client.dom.Element;
 import org.jboss.errai.ui.test.common.client.dom.TextInputElement;
 import org.junit.Test;
 
+import com.google.gwt.core.client.JavaScriptException;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.InputElement;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
+
 
 /**
  * Tests for the Errai UI/DataBinding integration.
@@ -271,6 +273,19 @@ public class BindingTemplateTest extends AbstractErraiCDITest {
       }
     }, new CheckboxHandler(bean.checkbox), new IdentityConverter<>(Boolean.class), "checkbox", true, false, bean.checkbox);
 
+    inputElementImmutableAssertions(new PropertyHandler<String>() {
+
+      @Override
+      public void setProperty(final String value) {
+        model.setFile(value);
+      }
+
+      @Override
+      public String getProperty() {
+        return model.getFile();
+      }
+    }, new DefaultInputElementHandler(bean.file), new IdentityConverter<>(String.class), "file", "file:///tmp/foo", bean.file);
+
     inputElementAssertions(new PropertyHandler<String>() {
 
       @Override
@@ -448,16 +463,33 @@ public class BindingTemplateTest extends AbstractErraiCDITest {
     assertEquals("The UI value for input[type='" + type + "'] was not updated after a model change.",
             converter.toWidgetValue(value1), ui.getProperty());
 
+      try {
+        ui.setProperty(value2);
+        invokeEventListeners(TemplateUtil.asElement(element), "change");
+      } catch (final Throwable t) {
+        throw new RuntimeException(
+                "An error occurred for binding of input[type=" + type + "] setting ["
+                        + value2.toString() + "] for the ui value.", t);
+      }
+      assertEquals("The model value for input[type='" + type + "'] was not updated after a UI change.",
+              converter.toModelValue(value2), model.getProperty());
+  }
+
+  private <M, U> void inputElementImmutableAssertions(final PropertyHandler<M> model, final PropertyHandler<U> ui,
+          final Converter<M, U> converter, final String type, final M value1, final InputElement element) {
+    assertNotNull("The element for input[type='" + type + "'] was not injected.", element);
+    assertEquals("The element for input[type='" + type + "'] has the wrong tag name.", "INPUT", element.getTagName());
+    assertEquals("The element for input[type='" + type + "'] has the wrong type.", type, element.getType());
+
+    assertFalse("Precondition failed: ui property already set to [" + value1 + "].", converter.toWidgetValue(value1).equals(ui.getProperty()));
+
     try {
-      ui.setProperty(value2);
-      invokeEventListeners(TemplateUtil.asElement(element), "change");
+      model.setProperty(value1);
+      fail("Shouldn't be possible to assign a value for the element input[type='" + type + "'] ");
     } catch (final Throwable t) {
-      throw new RuntimeException(
-              "An error occurred for binding of input[type=" + type + "] setting ["
-              + value2.toString() + "] for the ui value.", t);
+      assertTrue(t instanceof JavaScriptException);
+      assertTrue(t.getMessage().contains("Failed to set the 'value' property on 'HTMLInputElement'"));
     }
-    assertEquals("The model value for input[type='" + type + "'] was not updated after a UI change.",
-            converter.toModelValue(value2), model.getProperty());
   }
 
   private void automaticBindingAssertions(final BindingTemplate<?> template) {
