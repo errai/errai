@@ -279,16 +279,17 @@
           <artifactId>gwt-maven-plugin</artifactId>              
           <version>2.10.0</version>
             <dependencies>
-            <dependency>
-              <groupId>org.gwtproject</groupId>
-              <artifactId>gwt-dev</artifactId>
-              <version>2.11.0</version>
-            </dependency>
-            <dependency>
-              <groupId>org.gwtproject</groupId>
-              <artifactId>gwt-user</artifactId>
-              <version>2.11.0</version>
-            </dependency>
+              <!-- Forcing gwt-maven-plugin to use GWT 2.11 -->
+              <dependency>
+                <groupId>org.gwtproject</groupId>
+                <artifactId>gwt-dev</artifactId>
+                <version>2.11.0</version>
+              </dependency>
+              <dependency>
+                <groupId>org.gwtproject</groupId>
+                <artifactId>gwt-user</artifactId>
+                <version>2.11.0</version>
+              </dependency>
           </dependencies>
           <executions>
             <execution>
