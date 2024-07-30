@@ -64,7 +64,7 @@
     <version>${maven.compiler.plugin.version}</version>  
     <jetty.version>6.1.25</jetty.version>
     <jboss-as-maven-plugin.version>7.4.Final</jboss-as-maven-plugin.version>
-    <maven.gwt.plugin.version>2.9.0</maven.gwt.plugin.version>
+    <maven.gwt.plugin.version>2.10.0</maven.gwt.plugin.version>
   </properties>
 
   <repositories>
@@ -118,12 +118,12 @@
     </dependency>
     <!-- Must be here because the gwt-maven-plugin snapshot has the wrong gwt-dev version. -->
     <dependency>
-      <groupId>com.google.gwt</groupId>
+      <groupId>org.gwtproject</groupId>
       <artifactId>gwt-dev</artifactId>
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>com.google.gwt</groupId>
+      <groupId>org.gwtproject</groupId>
       <artifactId>gwt-user</artifactId>
       <scope>provided</scope>
     </dependency>
@@ -314,7 +314,7 @@
                   <pluginExecutionFilter>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>gwt-maven-plugin</artifactId>
-                    <versionRange>[2.4.0,)</versionRange>
+                    <versionRange>[2.10.0,)</versionRange>
                     <goals>
                       <goal>resources</goal>
                     </goals>

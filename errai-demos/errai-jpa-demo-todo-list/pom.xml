@@ -55,7 +55,7 @@
     <picketlink.version>2.6.0.Final</picketlink.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.war.plugin.version>2.1.1</maven.war.plugin.version>
-    <maven.gwt.plugin.version>2.9.0</maven.gwt.plugin.version>
+    <maven.gwt.plugin.version>2.10.0</maven.gwt.plugin.version>
     <skipTests>true</skipTests>
     <maven.deploy.plugin.version>2.7</maven.deploy.plugin.version>
     <argLine></argLine>
@@ -124,7 +124,7 @@
 
     <!-- XXX should we get this for free with errai-javaee-all? -->
     <dependency>
-      <groupId>com.google.gwt</groupId>
+      <groupId>org.gwtproject</groupId>
       <artifactId>gwt-user</artifactId>
     </dependency>
 
@@ -274,7 +274,7 @@
                   <pluginExecutionFilter>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>gwt-maven-plugin</artifactId>
-                    <versionRange>[2.4.0,)</versionRange>
+                    <versionRange>[2.10.0,)</versionRange>
                     <goals>
                       <goal>resources</goal>
                     </goals>
@@ -419,7 +419,6 @@
           <server>org.jboss.errai.cdi.server.gwt.EmbeddedWildFlyLauncher</server>
           <disableCastChecking>true</disableCastChecking>
           <runTarget>${errai.dev.context}/</runTarget>
-          <soyc>false</soyc>
           <hostedWebapp>src/main/webapp</hostedWebapp>
           <extraJvmArgs>-Xmx2g -XX:CompileThreshold=7000 -Derrai.jboss.home=${errai.jboss.home} -Derrai.dev.context=${errai.dev.context}</extraJvmArgs>
         </configuration>

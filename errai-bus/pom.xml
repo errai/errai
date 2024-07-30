@@ -84,12 +84,12 @@
     </dependency>
 
     <dependency>
-      <groupId>com.google.gwt</groupId>
+      <groupId>org.gwtproject</groupId>
       <artifactId>gwt-user</artifactId>
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>com.google.gwt</groupId>
+      <groupId>org.gwtproject</groupId>
       <artifactId>gwt-dev</artifactId>
       <!-- This should not be packaged with the Errai Distro. There are no runtime
                 dependencies on it and it breaks deployment on JBoss AS and Tomcat -->

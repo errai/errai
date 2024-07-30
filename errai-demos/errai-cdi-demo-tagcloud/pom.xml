@@ -60,8 +60,8 @@
     <maven.clean.plugin.version>2.4.1</maven.clean.plugin.version>
     <maven.compiler.plugin.version>2.3.2</maven.compiler.plugin.version>
     <maven.deploy.plugin.version>2.7</maven.deploy.plugin.version>
-    <maven.gwt.plugin.version>2.9.0</maven.gwt.plugin.version>
-    <jetty.version>9.2.14.v20151106</jetty.version>
+    <maven.gwt.plugin.version>2.10.0</maven.gwt.plugin.version>
+    <jetty.version>9.4.44.v20210927</jetty.version>
     <!-- Dev Mode config properties -->
     <errai.dev.context>${project.artifactId}</errai.dev.context>
     <as.version>23.0.2.Final</as.version>
@@ -125,7 +125,7 @@
      </dependency>
 
     <dependency>
-      <groupId>com.google.gwt</groupId>
+      <groupId>org.gwtproject</groupId>
       <artifactId>gwt-dev</artifactId>
       <scope>provided</scope>
       <exclusions>
@@ -168,11 +168,10 @@
     <dependency>
       <groupId>xerces</groupId>
       <artifactId>xercesImpl</artifactId>
-      <version>2.12.0</version>
     </dependency>
 
     <dependency>
-      <groupId>com.google.gwt</groupId>
+      <groupId>org.gwtproject</groupId>
       <artifactId>gwt-user</artifactId>
       <scope>provided</scope>
     </dependency>
@@ -221,7 +220,6 @@
           <server>org.jboss.errai.cdi.server.gwt.EmbeddedWildFlyLauncher</server>
           <disableCastChecking>true</disableCastChecking>
           <runTarget>${errai.dev.context}</runTarget>
-          <soyc>false</soyc>
           <hostedWebapp>src/main/webapp</hostedWebapp>
           <strict>true</strict>
           <compileReport>true</compileReport>
@@ -334,7 +332,7 @@
                   <pluginExecutionFilter>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>gwt-maven-plugin</artifactId>
-                    <versionRange>[2.5.0,)</versionRange>
+                    <versionRange>[2.10.0,)</versionRange>
                     <goals>
                       <goal>resources</goal>
                     </goals>

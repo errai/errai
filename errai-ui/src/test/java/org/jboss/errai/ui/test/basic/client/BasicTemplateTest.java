@@ -319,7 +319,8 @@ public class BasicTemplateTest extends AbstractErraiCDITest {
   }
 
   private static native String getPropertyValue(Object elem, String prop) /*-{
-    return $wnd.getComputedStyle(elem,null).getPropertyValue(prop);
+    if (!$wnd.document.body.contains(elem)) $wnd.document.body.appendChild(elem);
+      return $wnd.getComputedStyle(elem).getPropertyValue(prop);
   }-*/;
 
 }

@@ -53,12 +53,11 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <mvel.version>2.2.4.Final</mvel.version>
     <jetty.version>6.1.26</jetty.version>
     <slf4j.version>1.7.10</slf4j.version>
     <cdiapi.version>1.2</cdiapi.version>
     <servletapi.version>1.0.2.Final</servletapi.version>
-    <gwt.maven.version>2.9.0</gwt.maven.version>
+    <gwt.maven.version>2.10.0</gwt.maven.version>
     <maven.compiler.plugin.version>3.2</maven.compiler.plugin.version>
     <maven.deploy.plugin.version>2.8.2</maven.deploy.plugin.version>
     <argLine></argLine>
@@ -124,7 +123,7 @@
      </dependency>
 
     <dependency>
-      <groupId>com.google.gwt</groupId>
+      <groupId>org.gwtproject</groupId>
       <artifactId>gwt-dev</artifactId>
       <scope>provided</scope>
       <exclusions>
@@ -269,7 +268,7 @@
 
     <!-- GWT and GWT Extensions -->
     <dependency>
-      <groupId>com.google.gwt</groupId>
+      <groupId>org.gwtproject</groupId>
       <artifactId>gwt-user</artifactId>
       <scope>provided</scope>
     </dependency>
@@ -364,8 +363,8 @@
         </dependency>
 
         <dependency>
-          <groupId>log4j</groupId>
-          <artifactId>log4j</artifactId>
+          <groupId>org.apache.logging.log4j</groupId>
+          <artifactId>log4j-core</artifactId>
           <scope>provided</scope>
         </dependency>
       </dependencies>
@@ -416,9 +415,8 @@
           <strict>false</strict>
           <logLevel>INFO</logLevel>
           <runTarget>${errai.dev.context}</runTarget>
-          <extraJvmArgs>${argLine} -Xmx1g -Xms1g -XX:+AggressiveOpts -XX:+UseNUMA -Derrai.jboss.home=${errai.jboss.home} -Derrai.dev.context=${errai.dev.context}</extraJvmArgs>
-          <soyc>false</soyc>
-          <hostedWebapp>src/main/webapp/</hostedWebapp>                
+          <extraJvmArgs>${argLine} -Xmx1g -Xms1g -XX:+UseNUMA -Derrai.jboss.home=${errai.jboss.home} -Derrai.dev.context=${errai.dev.context}</extraJvmArgs>
+          <hostedWebapp>src/main/webapp/</hostedWebapp>
           <compileReport>true</compileReport>
         </configuration>
         <executions>
@@ -527,7 +525,7 @@
                   <pluginExecutionFilter>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>gwt-maven-plugin</artifactId>
-                    <versionRange>[2.3.0,)</versionRange>
+                    <versionRange>[2.10.0,)</versionRange>
                     <goals>
                       <goal>resources</goal>
                     </goals>

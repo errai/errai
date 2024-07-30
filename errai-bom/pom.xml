@@ -61,12 +61,13 @@
   <properties>
     <apache.stanbol.htmlextractor.version>0.10.0</apache.stanbol.htmlextractor.version>
     <appengine.version>1.7.6</appengine.version>
-    <asm.version>7.1</asm.version>
+    <asm.version>9.2</asm.version>
     <gmaven.mojo.version>1.5</gmaven.mojo.version>
-    <guava.version>30.1-jre</guava.version>
+    <guava.version>33.2.1-jre</guava.version>
     <guice.version>3.0</guice.version>
+    <gwt-elemental.version>2.9.0</gwt-elemental.version>
     <gwt.phonegap.version>3.5.0.1</gwt.phonegap.version>
-    <gwt.version>2.9.0</gwt.version>
+    <gwt.version>2.11.0</gwt.version>
     <javaee.api.version>8.0.1</javaee.api.version>
 
     <!-- ip-bom uses artifact with groupId org.jboss.remoting3 -->
@@ -78,7 +79,7 @@
     <mojo.executor.version>2.2.0</mojo.executor.version>
     <netty.codec.http.version>4.1.86.Final</netty.codec.http.version>
 
-    <version.com.fasterxml.jackson>2.12.1</version.com.fasterxml.jackson>
+    <version.com.fasterxml.jackson>2.13.4</version.com.fasterxml.jackson>
     <version.com.google.elemental2>1.1.0</version.com.google.elemental2>
     <version.com.google.code.gson>2.8.9</version.com.google.code.gson>
     <version.com.google.jsinterop>2.0.0</version.com.google.jsinterop>
@@ -87,15 +88,15 @@
     <version.com.h2database>1.4.197</version.com.h2database>
     <version.de.benediktmeurer.gwt-slf4j>0.0.2</version.de.benediktmeurer.gwt-slf4j>
 
-    <version.junit>4.13.1</version.junit>
-    <version.log4j>1.2.17</version.log4j>
+    <version.junit>4.13.2</version.junit>
+    <version.log4j>2.23.1</version.log4j>
 
     <version.org.apache.commons.lang3>3.8.1</version.org.apache.commons.lang3>
     <version.org.apache.deltaspike.core>1.5.1</version.org.apache.deltaspike.core>
     <version.org.apache.httpcomponents.httpclient>4.5.13</version.org.apache.httpcomponents.httpclient>
     <version.org.apache.maven>3.3.9</version.org.apache.maven>
     <version.org.dom4j>2.1.3</version.org.dom4j>
-    <version.org.eclipse.jetty>9.2.14.v20151106</version.org.eclipse.jetty>
+    <version.org.eclipse.jetty>9.4.44.v20210927</version.org.eclipse.jetty>
     <version.org.glassfish.javax.el>3.0.0</version.org.glassfish.javax.el>
     <version.org.hibernate>5.3.20.Final</version.org.hibernate>
     <version.org.hibernate.validator>4.1.0.Final</version.org.hibernate.validator>
@@ -108,7 +109,6 @@
     <version.org.jboss.resteasy>3.11.2.Final</version.org.jboss.resteasy>
     <version.org.jboss.shrinkwrap.descriptors>2.0.0</version.org.jboss.shrinkwrap.descriptors>
     <version.org.jboss.shrinkwrap.resolver>2.2.0</version.org.jboss.shrinkwrap.resolver>
-
 
     <!-- <version.jakarta.validation>2.0.2</version.jakarta.validation> we can't use this due GWT hard dependency on api 1.x  -->
     <version.javax.validation>1.0.0.GA</version.javax.validation>
@@ -141,14 +141,16 @@
     <version.org.keycloak>1.9.4.Final</version.org.keycloak>
     <version.org.lesscss>1.7.0.1.1</version.org.lesscss>
     <version.org.mockito>3.6.0</version.org.mockito>
-    <version.org.mvel>2.4.8.Final</version.org.mvel>
+    <version.org.mvel>2.5.2.Final</version.org.mvel>
     <version.org.picketlink>2.6.0.Final</version.org.picketlink>
     <version.org.powermock>2.0.7</version.org.powermock>
-    <version.org.quartz-scheduler>2.3.2 </version.org.quartz-scheduler>
+    <version.org.quartz-scheduler>2.3.2</version.org.quartz-scheduler>
     <version.org.slf4j>1.7.26</version.org.slf4j>
     <version.org.wildfly>23.0.2.Final</version.org.wildfly>
     <version.org.wildfly.arquillian>3.0.1.Final</version.org.wildfly.arquillian>
     <version.org.wildfly.core>15.0.1.Final</version.org.wildfly.core>
+    <version.xalan>2.7.3</version.xalan>
+
     <!-- The version of xercesImpl in the ip-bom is not published on Maven Central.
          Removing this override breaks Errai apps that don't have the JBoss nexus repository configured. -->
     <version.xerces.xercesImpl>2.12.2</version.xerces.xercesImpl>
@@ -184,6 +186,13 @@
       </dependency>
 
       <!-- Third Party Dependencies -->
+     <dependency>
+        <groupId>org.gwtproject</groupId>
+        <artifactId>gwt</artifactId>
+        <version>${gwt.version}</version>
+        <scope>import</scope>
+        <type>pom</type>
+      </dependency>
       <dependency>
         <groupId>com.google.code.gson</groupId>
         <artifactId>gson</artifactId>
@@ -230,8 +239,8 @@
         <version>${version.jakarta.ws.rs-api}</version>
       </dependency>
       <dependency>
-        <groupId>log4j</groupId>
-        <artifactId>log4j</artifactId>
+        <groupId>org.apache.logging.log4j</groupId>
+        <artifactId>log4j-core</artifactId>
         <version>${version.log4j}</version>
         <exclusions>
           <exclusion>
@@ -782,17 +791,6 @@
         <artifactId>jgroups</artifactId>
         <version>${version.org.jgroups}</version>
       </dependency>
-      <!-- <dependency>
-        <groupId>org.hibernate.validator</groupId>
-        <artifactId>hibernate-validator</artifactId>
-        <version>${version.org.hibernate.validator}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.hibernate.validator</groupId>
-        <artifactId>hibernate-validator</artifactId>
-        <version>${version.org.hibernate.validator}</version>
-        <classifier>sources</classifier>
-      </dependency> -->
       <dependency>
         <groupId>org.hibernate</groupId>
         <artifactId>hibernate-validator</artifactId>
@@ -815,7 +813,7 @@
         <version>${version.jakarta.xml.bind-api}</version>
       </dependency>
       <dependency>
-        <groupId>com.google.gwt</groupId>
+        <groupId>org.gwtproject</groupId>
         <artifactId>gwt-user</artifactId>
         <version>${gwt.version}</version>
         <exclusions>
@@ -828,10 +826,10 @@
       <dependency>
         <groupId>com.google.gwt</groupId>
         <artifactId>gwt-elemental</artifactId>
-        <version>${gwt.version}</version>
+        <version>${gwt-elemental.version}</version>
       </dependency>
       <dependency>
-        <groupId>com.google.gwt</groupId>
+        <groupId>org.gwtproject</groupId>
         <artifactId>gwt-dev</artifactId>
         <version>${gwt.version}</version>
         <exclusions>
@@ -855,17 +853,6 @@
         <artifactId>jsinterop-annotations</artifactId>
         <version>${version.com.google.jsinterop}</version>
       </dependency>
-      <!-- <dependency>
-        <groupId>jakarta.validation</groupId>
-        <artifactId>jakarta.validation-api</artifactId>
-        <version>${version.jakarta.validation}</version>
-      </dependency>
-      <dependency>
-        <groupId>jakarta.validation</groupId>
-        <artifactId>jakarta.validation-api</artifactId>
-        <version>${version.jakarta.validation}</version>
-        <classifier>sources</classifier>
-      </dependency> -->
       <dependency>
         <groupId>javax.validation</groupId>
         <artifactId>validation-api</artifactId>
@@ -1070,6 +1057,11 @@
         <artifactId>xml-apis</artifactId>
         <!-- Note that version 2.0.2 is actually 1.0.b2 and it is not compatible with xercesImpl 2.9.1 -->
         <version>${version.xml-apis}</version>
+      </dependency>
+      <dependency>
+        <groupId>xalan</groupId>
+        <artifactId>xalan</artifactId>
+        <version>${version.xalan}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

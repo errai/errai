@@ -61,9 +61,9 @@
     <maven.clean.plugin.version>2.4.1</maven.clean.plugin.version>
     <maven.compiler.plugin.version>2.3.2</maven.compiler.plugin.version>
     <maven.deploy.plugin.version>2.7</maven.deploy.plugin.version> 
-    <maven.gwt.plugin.version>2.9.0</maven.gwt.plugin.version>
+    <maven.gwt.plugin.version>2.10.0</maven.gwt.plugin.version>
     <weld.version>2.3.3.Final</weld.version>
-    <jetty.version>9.2.14.v20151106</jetty.version>
+    <jetty.version>9.4.44.v20210927</jetty.version>
     <!-- Dev Mode config properties -->
     <errai.dev.context>${project.artifactId}</errai.dev.context>
     <as.version>23.0.2.Final</as.version>
@@ -153,8 +153,8 @@
     </dependency>
 
     <dependency>
-      <groupId>log4j</groupId>
-      <artifactId>log4j</artifactId>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-core</artifactId>
     </dependency>
 
     <dependency>
@@ -205,13 +205,13 @@
 
     <!-- GWT and GWT Extensions -->
     <dependency>
-      <groupId>com.google.gwt</groupId>
+      <groupId>org.gwtproject</groupId>
       <artifactId>gwt-user</artifactId>
       <scope>provided</scope>
     </dependency>
 
     <dependency>
-      <groupId>com.google.gwt</groupId>
+      <groupId>org.gwtproject</groupId>
       <artifactId>gwt-dev</artifactId>
       <scope>provided</scope>
       <exclusions>
@@ -317,8 +317,8 @@
           <scope>provided</scope>
         </dependency>
         <dependency>
-          <groupId>log4j</groupId>
-          <artifactId>log4j</artifactId>
+          <groupId>org.apache.logging.log4j</groupId>
+          <artifactId>log4j-core</artifactId>
         </dependency>
 
         <!-- Errai Core -->
@@ -366,13 +366,13 @@
 
         <!-- GWT and GWT Extensions -->
         <dependency>
-          <groupId>com.google.gwt</groupId>
+          <groupId>org.gwtproject</groupId>
           <artifactId>gwt-user</artifactId>
           <scope>compile</scope>
         </dependency>
 
         <dependency>
-          <groupId>com.google.gwt</groupId>
+          <groupId>org.gwtproject</groupId>
           <artifactId>gwt-dev</artifactId>
           <scope>compile</scope>
         </dependency>
@@ -470,7 +470,7 @@
           <strict>true</strict>
           <logLevel>INFO</logLevel>
           <runTarget>${errai.dev.context}</runTarget>
-          <extraJvmArgs>${argLine} -Xmx2g -Xms1g -XX:+AggressiveOpts -XX:+UseNUMA -XX:CompileThreshold=100 -Derrai.jboss.home=${errai.jboss.home} -Derrai.dev.context=${errai.dev.context}</extraJvmArgs>
+          <extraJvmArgs>${argLine} -Xmx2g -Xms1g -XX:+UseNUMA -XX:CompileThreshold=100 -Derrai.jboss.home=${errai.jboss.home} -Derrai.dev.context=${errai.dev.context}</extraJvmArgs>
           <server>org.jboss.errai.cdi.server.gwt.EmbeddedWildFlyLauncher</server>
           <hostedWebapp>src/main/webapp/</hostedWebapp>
         </configuration>
@@ -589,7 +589,7 @@
                   <pluginExecutionFilter>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>gwt-maven-plugin</artifactId>
-                    <versionRange>[2.3.0,)</versionRange>
+                    <versionRange>[2.10.0,)</versionRange>
                     <goals>
                       <goal>resources</goal>
                     </goals>
