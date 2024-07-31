@@ -80,6 +80,7 @@
     <netty.codec.http.version>4.1.108.Final</netty.codec.http.version>
 
     <version.com.fasterxml.jackson>2.13.4</version.com.fasterxml.jackson>
+    <version.com.fasterxml.jackson.databind>2.13.4.2</version.com.fasterxml.jackson.databind>
     <version.com.google.elemental2>1.1.0</version.com.google.elemental2>
     <version.com.google.code.gson>2.8.9</version.com.google.code.gson>
     <version.com.google.jsinterop>2.0.0</version.com.google.jsinterop>
@@ -953,7 +954,7 @@
       <dependency>
         <groupId>com.fasterxml.jackson.core</groupId>
         <artifactId>jackson-databind</artifactId>
-        <version>${version.com.fasterxml.jackson}</version>
+        <version>${version.com.fasterxml.jackson.databind}</version>
       </dependency>
       <dependency>
         <groupId>com.fasterxml.jackson.core</groupId>
