@@ -9,7 +9,7 @@ newversion=$2
 
 mvn versions:set -DnewVersion=$newversion
 mvn clean install -Dgwt.compiler.skip=true -Dmaven.test.skip=true
-for proj in errai-demos errai-demos/errai-* errai-bom errai-internal-bom errai-forge-addon; do (cd $proj; mvn versions:set -DnewVersion=$newversion); done
+for proj in errai-demos errai-demos/errai-* errai-bom errai-internal-bom; do (cd $proj; mvn versions:set -DnewVersion=$newversion); done
 
 echo "Visual Sanity Check for old version $oldversion and snapshots..."
 find . -name pom.xml | xargs grep -3 "$oldversion"
