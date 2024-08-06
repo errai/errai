@@ -86,7 +86,7 @@
     <version.com.google.jsinterop>2.0.0</version.com.google.jsinterop>
     <version.org.eclipse.jdt.ecj>3.18.0</version.org.eclipse.jdt.ecj>
     <version.com.google.gwt.gwtmockito>1.1.9</version.com.google.gwt.gwtmockito>
-    <version.com.h2database>1.4.197</version.com.h2database>
+    <version.com.h2database>2.1.210</version.com.h2database>
     <version.de.benediktmeurer.gwt-slf4j>0.0.2</version.de.benediktmeurer.gwt-slf4j>
 
     <version.junit>4.13.2</version.junit>
