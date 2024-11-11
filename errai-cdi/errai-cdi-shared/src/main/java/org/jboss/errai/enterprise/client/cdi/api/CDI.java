@@ -74,6 +74,7 @@ public class CDI {
 
   private static Map<String, List<AbstractCDIEventCallback<?>>> eventObservers = new HashMap<>();
   private static Set<String> localOnlyObserverTypes = new HashSet<>();
+  private static Set<String> singleOnlyObserverTypes = new HashSet<>();
   private static Map<String, Collection<String>> lookupTable = Collections.emptyMap();
   private static Map<String, List<MessageFireDeferral>> fireOnSubscribe = new LinkedHashMap<>();
 
@@ -142,10 +143,7 @@ public class CDI {
   }
 
 
-  public static void fireEvent(final boolean local,
-                               final Object payload,
-                               final Annotation... qualifiers) {
-
+  public static void fireEvent(final boolean local, final Object payload, final Annotation... qualifiers) {
     if (payload == null) return;
 
     final Object beanRef;
@@ -177,22 +175,51 @@ public class CDI {
     }
   }
 
-  public static Subscription subscribeLocal(final String eventType, final AbstractCDIEventCallback<?> callback) {
-    return subscribeLocal(eventType, callback, true);
+  public static Subscription subscribeJsType(final String eventType, final JsTypeEventObserver<?> callback) {
+    return subscribeJsType(eventType, false, callback);
   }
 
-  public static Subscription subscribeJsType(final String eventType, final JsTypeEventObserver<?> callback) {
+  public static Subscription subscribeJsType(final String eventType, boolean isSingleOnly, final JsTypeEventObserver<?> callback) {
+    if (isSingleOnlyEventType(eventType) && hasOneOrMoreObservers(eventType)) {
+      logger.debug("Attempted to subscribeJsType '" +
+          eventType + "' which is 'single only' and already has an event observer.");
+      return null;
+    }
+
+    setSingleOnlyEventType(eventType, isSingleOnly);
+
     WindowEventObservers.createOrGet().add(eventType, callback);
-     return new Subscription() {
-       @Override
-       public void remove() {
-         // TODO can't unsubscribe per module atm.
-       }
-     };
+    return new Subscription() {
+      @Override
+      public void remove() {
+        // TODO can't unsubscribe per module atm.
+      }
+    };
+  }
+
+  public static Subscription subscribeLocal(final String eventType, final AbstractCDIEventCallback<?> callback) {
+    return subscribeLocal(eventType, false, callback);
+  }
+
+  public static Subscription subscribeLocal(final String eventType, boolean isSingleOnly, final AbstractCDIEventCallback<?> callback) {
+    return subscribeLocal(eventType, isSingleOnly, callback, true);
   }
 
   private static Subscription subscribeLocal(final String eventType, final AbstractCDIEventCallback<?> callback,
-          final boolean isLocalOnly) {
+                                             final boolean isLocalOnly) {
+    return subscribeLocal(eventType, false, callback, isLocalOnly);
+  }
+
+  private static Subscription subscribeLocal(final String eventType, boolean isSingleOnly, final AbstractCDIEventCallback<?> callback,
+                                             final boolean isLocalOnly) {
+
+    if (isSingleOnlyEventType(eventType) && hasOneOrMoreObservers(eventType)) {
+      logger.debug("Attempted to subscribeLocal '" +
+          eventType + "' which is 'single only' and already has an event observer.");
+      return null;
+    }
+
+    setSingleOnlyEventType(eventType, isSingleOnly);
 
     if (!eventObservers.containsKey(eventType)) {
       eventObservers.put(eventType, new ArrayList<AbstractCDIEventCallback<?>>());
@@ -212,9 +239,19 @@ public class CDI {
   }
 
   public static Subscription subscribe(final String eventType, final AbstractCDIEventCallback<?> callback) {
+    return subscribe(eventType, false, callback);
+  }
+
+  public static Subscription subscribe(final String eventType, boolean singleOnly, final AbstractCDIEventCallback<?> callback) {
+
+    if (isSingleOnlyEventType(eventType) && hasOneOrMoreObservers(eventType)) {
+      logger.debug("Attempted to subscribe '" +
+          eventType + "' which is 'single only' and already has an event observer.");
+      return null;
+    }
 
     if (isRemoteCommunicationEnabled() && ErraiBus.get() instanceof ClientMessageBusImpl
-            && ((ClientMessageBusImpl) ErraiBus.get()).getState().equals(BusState.CONNECTED)) {
+        && ((ClientMessageBusImpl) ErraiBus.get()).getState().equals(BusState.CONNECTED)) {
       MessageBuilder.createMessage()
           .toSubject(CDI.SERVER_DISPATCHER_SUBJECT)
           .command(CDICommands.RemoteSubscribe)
@@ -223,7 +260,7 @@ public class CDI {
           .noErrorHandling().sendNowWith(ErraiBus.get());
     }
 
-    return subscribeLocal(eventType, callback, false);
+    return subscribeLocal(eventType, singleOnly, callback, false);
   }
 
   private static void unsubscribe(final String eventType, final AbstractCDIEventCallback<?> callback) {
@@ -252,6 +289,41 @@ public class CDI {
         if (eventObservers.get(eventType).isEmpty()) {
           eventObservers.remove(eventType);
         }
+      }
+    }
+  }
+
+  public static boolean isSingleOnlyEventType(final String eventType) {
+    return singleOnlyObserverTypes.contains(eventType);
+  }
+
+  /**
+   * Mark an event type as 'single only' in order to restrict multiple event handlers from being registered.
+   * If an event type already has registered observers they will remain subscribed.
+   *
+   * @param eventType the event type name used when registering an event.
+   */
+  public static void setSingleOnlyEventType(String eventType, boolean isSingleOnly) {
+    if (isSingleOnly) {
+      singleOnlyObserverTypes.add(eventType);
+    } else {
+      singleOnlyObserverTypes.remove(eventType);
+    }
+  }
+
+  public static boolean hasOneOrMoreObservers(final String eventType) {
+    List<AbstractCDIEventCallback<?>> callbacks = eventObservers.get(eventType);
+    return callbacks != null && !callbacks.isEmpty();
+  }
+
+  /**
+   * Unsubscribe all handlers from a given event type.
+   * @param eventType the event type name used when registering an event.
+   */
+  public static void unsubscribeAll(String eventType) {
+    if (hasOneOrMoreObservers(eventType)) {
+      for (AbstractCDIEventCallback<?> callback : new ArrayList<>(eventObservers.get(eventType))) {
+        unsubscribe(eventType, callback);
       }
     }
   }

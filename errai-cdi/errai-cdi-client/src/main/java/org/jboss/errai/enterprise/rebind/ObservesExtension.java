@@ -34,15 +34,15 @@ import javax.enterprise.inject.Any;
 
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.Subscription;
-import org.jboss.errai.codegen.Context;
-import org.jboss.errai.codegen.Parameter;
-import org.jboss.errai.codegen.Statement;
+import org.jboss.errai.codegen.*;
 import org.jboss.errai.codegen.builder.AnonymousClassStructureBuilder;
 import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.builder.ContextualStatementBuilder;
+import org.jboss.errai.codegen.builder.impl.BooleanExpressionBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
+import org.jboss.errai.codegen.util.Bool;
 import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.config.rebind.EnvUtil;
@@ -50,6 +50,7 @@ import org.jboss.errai.enterprise.client.cdi.AbstractCDIEventCallback;
 import org.jboss.errai.enterprise.client.cdi.EventQualifierSerializer;
 import org.jboss.errai.enterprise.client.cdi.JsTypeEventObserver;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
+import org.jboss.errai.enterprise.client.cdi.api.SingleOnly;
 import org.jboss.errai.ioc.client.api.CodeDecorator;
 import org.jboss.errai.ioc.client.container.Factory;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.InjectUtil;
@@ -144,12 +145,14 @@ public class ObservesExtension extends IOCDecoratorExtension<Observes> {
       callBackBlock = getSubscriptionCallback(decorable, controller);
     }
 
-    final Statement subscribeStatement = Stmt.create(ctx).invokeStatic(CDI.class, subscribeMethod, parmClassName,
+    boolean isSingleOnly = qualifierNames.contains(SingleOnly.class.getName());
+
+    final Statement subscribeStatement = Stmt.create(ctx).invokeStatic(CDI.class, subscribeMethod, parmClassName, isSingleOnly,
             callBackBlock.finish().finish());
 
     if (isEnclosingTypeDependent) {
       initStatements.add(controller.setReferenceStmt(subscrVar, subscribeStatement));
-      destroyStatements.add(controller.getReferenceStmt(subscrVar, Subscription.class).invoke("remove"));
+      destroyStatements.add(Stmt.if_(Bool.notEquals(subscrVar, "null")).append(controller.getReferenceStmt(subscrVar, Subscription.class).invoke("remove")).finish());
     } else {
       initStatements.add(subscribeStatement);
     }
@@ -162,7 +165,9 @@ public class ObservesExtension extends IOCDecoratorExtension<Observes> {
           final String subscrHandle = subscrVar + "For" + cls.getSimpleName();
           initStatements.add(controller.setReferenceStmt(subscrHandle, routingSubStmt));
           destroyStatements.add(
-                  Stmt.nestedCall(controller.getReferenceStmt(subscrHandle, Subscription.class)).invoke("remove"));
+              Stmt.if_(Bool.notEquals(subscrHandle, "null")).append(
+                  Stmt.nestedCall(controller.getReferenceStmt(subscrHandle, Subscription.class)).invoke("remove"))
+                .finish());
         } else {
           initStatements.add(routingSubStmt);
         }
