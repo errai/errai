@@ -268,6 +268,11 @@
         <version>${version.org.apache.deltaspike.core}</version>
       </dependency>
       <dependency>
+        <groupId>org.apache.deltaspike.core</groupId>
+        <artifactId>deltaspike-core-impl</artifactId>
+        <version>${version.org.apache.deltaspike.core}</version>
+      </dependency>
+      <dependency>
         <groupId>org.apache.maven</groupId>
         <artifactId>maven-model-builder</artifactId>
         <version>${version.org.apache.maven}</version>

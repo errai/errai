@@ -162,6 +162,11 @@
       <scope>test</scope>
     </dependency>
     <dependency>
+      <groupId>org.apache.deltaspike.core</groupId>
+      <artifactId>deltaspike-core-impl</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>org.eclipse.jetty</groupId>
       <artifactId>jetty-server</artifactId>
       <scope>test</scope>

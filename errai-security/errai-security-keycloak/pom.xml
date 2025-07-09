@@ -51,7 +51,11 @@
       <artifactId>deltaspike-core-api</artifactId>
       <scope>compile</scope>
     </dependency>
-
+    <dependency>
+      <groupId>org.apache.deltaspike.core</groupId>
+      <artifactId>deltaspike-core-impl</artifactId>
+      <scope>compile</scope>
+    </dependency>
     <dependency>
       <groupId>org.jboss.logging</groupId>
       <artifactId>jboss-logging</artifactId>
