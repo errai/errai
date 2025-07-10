@@ -53,7 +53,11 @@
       <artifactId>deltaspike-core-api</artifactId>      
       <scope>compile</scope>
     </dependency>
-
+    <dependency>
+      <groupId>org.apache.deltaspike.core</groupId>
+      <artifactId>deltaspike-core-impl</artifactId>
+      <scope>runtime</scope>
+    </dependency>
     <dependency>
       <groupId>org.jboss.weld.se</groupId>
       <artifactId>weld-se-core</artifactId>
