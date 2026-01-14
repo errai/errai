@@ -11,7 +11,7 @@
   <artifactId>errai-data-binding</artifactId>
   <name>Errai::Data::Binding</name>
 
-  <description></description>
+  <description>Errai Data Binding Module</description>
 
   <developers>
     <developer>
