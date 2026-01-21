@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.google.gwt.http.client.Header;
+import com.google.gwt.core.client.GWT;
 import org.jboss.errai.bus.client.api.InvalidBusContentException;
 import org.jboss.errai.bus.client.api.RetryInfo;
 import org.jboss.errai.bus.client.api.base.DefaultErrorCallback;
@@ -57,7 +57,7 @@ import com.google.gwt.user.client.Timer;
 public class HttpPollingHandler implements TransportHandler, TransportStatistics {
   public static int THROTTLE_TIME_MS = 175;
   public static int POLL_FREQUENCY_MS = 500;
-  
+
   private static final Logger logger = LoggerFactory.getLogger(HttpPollingHandler.class);
 
   private boolean configured;
@@ -186,7 +186,7 @@ public class HttpPollingHandler implements TransportHandler, TransportStatistics
       transmit(txMessages, false);
     }
   }
-  
+
   private void transmit(final List<Message> txMessages, boolean isRetry) {
     if (txMessages.isEmpty()) {
       return;
@@ -280,7 +280,7 @@ public class HttpPollingHandler implements TransportHandler, TransportStatistics
   public Collection<Message> stop(final boolean stopAllCurrentRequests) {
     receiveCommCallback.cancel();
     throttleTimer.cancel();
-    
+
     try {
       if (stopAllCurrentRequests) {
         // Now stop all the in-flight XHRs
@@ -303,7 +303,7 @@ public class HttpPollingHandler implements TransportHandler, TransportStatistics
   public boolean isCancelled() {
     return receiveCommCallback.canceled;
   }
-  
+
   private class NoPollRequestCallback extends LongPollRequestCallback {
 
     @Override
@@ -342,12 +342,12 @@ public class HttpPollingHandler implements TransportHandler, TransportStatistics
   public void handleProtocolExtension(final Message message) {
   }
 
-  private static void validateContentType(final Response response) {
+  private static void validateContentType(final Response response) throws InvalidBusContentException {
     int statusCode = response.getStatusCode();
     // in case the response is OK (200), then the content type always has to be 'application/json'
     if (statusCode == 200) {
       String contentType = response.getHeader("Content-Type");
-      if (!contentType.contains("application/json")) {
+      if (contentType == null || !contentType.contains("application/json")) {
         String content = response.getText();
         throw new InvalidBusContentException(contentType, content);
       }
@@ -415,33 +415,42 @@ public class HttpPollingHandler implements TransportHandler, TransportStatistics
 
     @Override
     public void onResponseReceived(final Request request, final Response response) {
-      validateContentType(response);
       final int statusCode = response.getStatusCode();
-      if (statusCode != 200) {
-        switch (statusCode) {
-          case 300:
-          case 301:
-          case 302:
-          case 303:
-          case 304:
-          case 305:
-          case 307:
-            break;
 
-          default:
-            onError(request,
-                new TransportIOException("unexpected response code: " + statusCode, statusCode, response
-                    .getStatusText()), statusCode);
-            return;
+      try {
+        validateContentType(response);
+
+        if (statusCode != 200) {
+          switch (statusCode) {
+            case 300:
+            case 301:
+            case 302:
+            case 303:
+            case 304:
+            case 305:
+            case 307:
+              break;
+
+            default:
+              onError(request,
+                  new TransportIOException("unexpected response code: " + statusCode, statusCode, response
+                      .getStatusText()), statusCode);
+              return;
+          }
         }
-      }
 
-      notifyConnected();
+        notifyConnected();
 
-      BusToolsCli.decodeToCallback(response.getText(), messageBus);
+        BusToolsCli.decodeToCallback(response.getText(), messageBus);
 
-      if (pendingRequests.isEmpty()) {
-        schedule();
+        if (pendingRequests.isEmpty()) {
+          schedule();
+        }
+      } catch (InvalidBusContentException ex) {
+        GWT.log("Invalid bus content", ex);
+        final BusTransportError transportError =
+            new BusTransportError(HttpPollingHandler.this, request, ex, statusCode, RetryInfo.NO_RETRY);
+        messageBus.handleTransportError(transportError);
       }
     }
 
@@ -498,18 +507,18 @@ public class HttpPollingHandler implements TransportHandler, TransportStatistics
     boolean activeWaitChannel = false;
 
     final Iterator<RxInfo> iterator = pendingRequests.iterator();
-      while (iterator.hasNext()) {
-        final RxInfo pendingRx = iterator.next();
-        if (pendingRx.getRequest().isPending() && pendingRx.isWaiting()) {
+    while (iterator.hasNext()) {
+      final RxInfo pendingRx = iterator.next();
+      if (pendingRx.getRequest().isPending() && pendingRx.isWaiting()) {
         //  LogUtil.log("[bus] ABORT SEND: " + pendingRx + " is waiting" );
-         // return null;
-          activeWaitChannel = true;
-        }
-
-        if (!pendingRx.getRequest().isPending()) {
-          iterator.remove();
-        }
+        // return null;
+        activeWaitChannel = true;
       }
+
+      if (!pendingRx.getRequest().isPending()) {
+        iterator.remove();
+      }
+    }
 
     if (!activeWaitChannel && receiveCommCallback.canWait() && !rxActive) {
       parmsMap = new HashMap<String, String>(extraParameters);
@@ -723,93 +732,100 @@ public class HttpPollingHandler implements TransportHandler, TransportStatistics
 
     @Override
     public void onResponseReceived(final Request request, final Response response) {
-      validateContentType(response);
-      txActive = false;
-      statusCode = response.getStatusCode();
+      try {
+        validateContentType(response);
+        txActive = false;
+        statusCode = response.getStatusCode();
 
-      switch (statusCode) {
-        case 401:
-          if (System.currentTimeMillis() - startTime > 2000) {
-            undeliveredMessages.removeAll(toSend);
-          }
-          try {
-            if (BusToolsCli.decodeToCallback(response.getText(), messageBus)) {
-              break;
+        switch (statusCode) {
+          case 401:
+            if (System.currentTimeMillis() - startTime > 2000) {
+              undeliveredMessages.removeAll(toSend);
             }
-          }
-          catch (Throwable e) {
-             // fall through.
-          }
-        case 0:
-        case 1:
-        case 400: // happens when JBossAS is going down
-        case 404: // happens after errai app is undeployed
-        case 408: // request timeout--probably worth retrying
-        case 500: // we expect this may happen during restart of some non-JBoss servers
-        case 502: // bad gateway--could happen if long poll request was proxied to a down server
-        case 503: // temporary overload (probably on a proxy)
-        case 504: // gateway timeout--same possibilities as 502
-        {
-          final int retryDelay = Math.min((txRetries * 1000) + 1, 10000);
-          final RetryInfo retryInfo = new RetryInfo(retryDelay, txRetries);
-          final BusTransportError transportError =
-                  new BusTransportError(HttpPollingHandler.this, request, null, statusCode, retryInfo);
+            try {
+              if (BusToolsCli.decodeToCallback(response.getText(), messageBus)) {
+                break;
+              }
+            } catch (Throwable e) {
+              // fall through.
+            }
+          case 0:
+          case 1:
+          case 400: // happens when JBossAS is going down
+          case 404: // happens after errai app is undeployed
+          case 408: // request timeout--probably worth retrying
+          case 500: // we expect this may happen during restart of some non-JBoss servers
+          case 502: // bad gateway--could happen if long poll request was proxied to a down server
+          case 503: // temporary overload (probably on a proxy)
+          case 504: // gateway timeout--same possibilities as 502
+          {
+            final int retryDelay = Math.min((txRetries * 1000) + 1, 10000);
+            final RetryInfo retryInfo = new RetryInfo(retryDelay, txRetries);
+            final BusTransportError transportError =
+                new BusTransportError(HttpPollingHandler.this, request, null, statusCode, retryInfo);
 
-          notifyDisconnected();
+            notifyDisconnected();
 
-          if (messageBus.handleTransportError(transportError)) {
+            if (messageBus.handleTransportError(transportError)) {
+              return;
+            }
+
+            logger.info("attempting Tx reconnection in " + retryDelay + "ms -- attempt: " + (txRetries + 1));
+            txRetries++;
+
+            throttleTimer.cancel();
+            new Timer() {
+              @Override
+              public void run() {
+                undeliveredMessages.removeAll(toSend);
+                transmit(toSend, true);
+              }
+            }.schedule(retryDelay);
+
             return;
           }
+          case 200:
+            txRetries = 0;
+            notifyConnected();
+            undeliveredMessages.removeAll(toSend);
+            schedulePolling();
+            break;
 
-          logger.info("attempting Tx reconnection in " + retryDelay + "ms -- attempt: " + (txRetries + 1));
-          txRetries++;
-
-          throttleTimer.cancel();
-          new Timer() {
-            @Override
-            public void run() {
+          // Happens for first bus request when CSRF token is enabled
+          case 403: {
+            final String assignedCSRFToken = response.getHeader(ERRAI_CSRF_TOKEN_HEADER);
+            if (assignedCSRFToken != null) {
+              ClientCSRFTokenCache.setAssignedCSRFToken(assignedCSRFToken);
+              txRetries++;
               undeliveredMessages.removeAll(toSend);
               transmit(toSend, true);
+              return;
             }
-          }.schedule(retryDelay);
+          }
+          default: {
+            final BusTransportError transportError =
+                new BusTransportError(HttpPollingHandler.this, request, null, statusCode, RetryInfo.NO_RETRY);
 
-          return;
-        }
-        case 200:
-          txRetries = 0;
-          notifyConnected();
-          undeliveredMessages.removeAll(toSend);
-          schedulePolling();
-          break;
+            if (messageBus.handleTransportError(transportError)) {
+              return;
+            }
 
-        // Happens for first bus request when CSRF token is enabled
-        case 403: {
-          final String assignedCSRFToken = response.getHeader(ERRAI_CSRF_TOKEN_HEADER);
-          if (assignedCSRFToken != null) {
-            ClientCSRFTokenCache.setAssignedCSRFToken(assignedCSRFToken);
-            txRetries++;
-            undeliveredMessages.removeAll(toSend);
-            transmit(toSend, true);
-            return;
+            // polling error is probably unrecoverable; go to local-only mode
+            DefaultErrorCallback.INSTANCE.error(null, null);
+
+            messageBus.handleTransportError(transportError);
           }
         }
-        default: {
-          final BusTransportError transportError =
-                  new BusTransportError(HttpPollingHandler.this, request, null, statusCode, RetryInfo.NO_RETRY);
-
-          if (messageBus.handleTransportError(transportError)) {
-            return;
-          }
-
-          // polling error is probably unrecoverable; go to local-only mode
-          DefaultErrorCallback.INSTANCE.error(null, null);
-
-          messageBus.handleTransportError(transportError);
+        // do not decode the payload in case of server returning an error code
+        if (statusCode == 200) {
+          BusToolsCli.decodeToCallback(response.getText(), messageBus);
         }
-      }
-      // do not decode the payload in case of server returning an error code
-      if (statusCode == 200) {
-        BusToolsCli.decodeToCallback(response.getText(), messageBus);
+      } catch (InvalidBusContentException ex) {
+        GWT.log("Invalid bus content", ex);
+
+        final BusTransportError transportError =
+            new BusTransportError(HttpPollingHandler.this, request, ex, statusCode, RetryInfo.NO_RETRY);
+        messageBus.handleTransportError(transportError);
       }
     }
 
@@ -819,7 +835,7 @@ public class HttpPollingHandler implements TransportHandler, TransportStatistics
       notifyDisconnected();
 
       messageBus.handleTransportError(
-              new BusTransportError(HttpPollingHandler.this, request, exception, statusCode, RetryInfo.NO_RETRY));
+          new BusTransportError(HttpPollingHandler.this, request, exception, statusCode, RetryInfo.NO_RETRY));
 
       for (final Message txM : txMessages) {
         if (txM.getErrorCallback() == null || txM.getErrorCallback().error(txM, exception)) {
