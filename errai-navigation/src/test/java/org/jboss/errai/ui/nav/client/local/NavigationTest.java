@@ -645,4 +645,17 @@ public class NavigationTest extends AbstractErraiCDITest {
     navigation.goTo(AppScopedPageWithNoLifecycleMethods.class.getSimpleName());
     assertEquals("The page bean should have been loaded when the page was displayed", 1, AppScopedPageWithNoLifecycleMethods.postConstructCount);
   }
+
+  public void testInterruptHiding() {
+    final PageWithNavigationControl page = Factory.maybeUnwrapProxy(
+        IOC.getBeanManager().lookupBean(PageWithNavigationControl.class).getInstance());
+
+    navigation.goTo(PageWithNavigationControl.class, ArrayListMultimap.create());
+    page.showControl.proceed();
+
+    navigation.goTo(PageA.class, ArrayListMultimap.create());
+    page.hideControl.interrupt();
+
+    assertEquals(PageWithNavigationControl.class, navigation.getCurrentPage().contentType());
+  }
 }
