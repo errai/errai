@@ -125,6 +125,15 @@
   </dependencies>
 
   <build>
+    <testResources>
+      <testResource>
+        <directory>src/test/resources</directory>
+      </testResource>
+      <!-- ReachabilityTest loads .java source files from the classpath -->
+      <testResource>
+        <directory>src/test/java</directory>
+      </testResource>
+    </testResources>
     <plugins>
       <plugin>
         <artifactId>maven-shade-plugin</artifactId>

@@ -242,7 +242,10 @@
               <reuseForks>false</reuseForks>
               <!-- DO NOT REMOVE THE errai.ioc.experimental.infer_dependent_by_reachability 
                 flag or the testsuite WILL fail. -->
-              <argLine>-Xmx1500m </argLine>
+              <argLine>-Xmx1500m
+                --add-opens java.base/java.lang=ALL-UNNAMED
+                --add-opens java.base/java.util=ALL-UNNAMED
+                --add-opens java.base/java.io=ALL-UNNAMED</argLine>
               <enableAssertions>false</enableAssertions>
               <systemPropertyVariables>
                 <errai.hosted_mode_testing>true</errai.hosted_mode_testing>
@@ -254,7 +257,7 @@
                      In the future, if we need to run the tests with a prod compile we might be able to fix these
                      problems by moving the async tests out of a test suite.
                  -->
-                <gwt.args>-devMode -testBeginTimeout 5 ${gwtArgs}</gwt.args>
+                <gwt.args>-devMode -testBeginTimeout 5 -Xjvm "--add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED --add-opens java.base/java.io=ALL-UNNAMED" ${gwtArgs}</gwt.args>
               </systemPropertyVariables>
               <includes>
                 <include>**/*Test.java</include>

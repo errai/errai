@@ -70,7 +70,10 @@
 
   <properties>
     <gwtArgs></gwtArgs>
-    <argLine>-Dgwt.args="${gwtArgs}"</argLine>
+    <argLine>-Dgwt.args="${gwtArgs}"
+      --add-opens java.base/java.lang=ALL-UNNAMED
+      --add-opens java.base/java.util=ALL-UNNAMED
+      --add-opens java.base/java.io=ALL-UNNAMED</argLine>
     <illegaltransitivereportonly>false</illegaltransitivereportonly>
   </properties>
 
