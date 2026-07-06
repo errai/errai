@@ -100,6 +100,14 @@ public class TransmissionBuffer implements Buffer {
   };
 
   /**
+   * A global write lock that serialises all cross-color writes so that headSequence is never
+   * published before the corresponding segmentMap entries have been written. Without this, a fast
+   * writer for color B can publish headSequence before a concurrent writer for color A has written
+   * its segmentMap entries, causing readers to silently skip color-A slots.
+   */
+  private final ReentrantLock globalWriteLock = new ReentrantLock();
+
+  /**
    * The visible head sequence number seen by the readers.
    */
   private volatile long headSequence = STARTING_SEQUENCE;
@@ -208,8 +216,21 @@ public class TransmissionBuffer implements Buffer {
       throw new IOException("write size larger than buffer can fit");
     }
 
-    final ReentrantLock lock = bufferColor.lock;
-    lock.lock();
+    /*
+     * Serialise all cross-color writes under a single global lock.
+     *
+     * The original code serialised writes per-color (each BufferColor has its own lock), but that
+     * allowed two writers for *different* colors to run concurrently. The race:
+     *   1. Writer A (color A) atomically reserves seq=5 via getAndAdd.
+     *   2. Writer B (color B) atomically reserves seq=6 via getAndAdd.
+     *   3. Writer B finishes first: writes segmentMap[6]=B, publishes headSequence=7, signals readers.
+     *   4. A reader wakes, scans slots 0..6; slot 5 still has stale/unset segmentMap value → skipped.
+     *   5. Writer A finally writes segmentMap[5]=A — too late; the reader's cursor is already past 5.
+     *
+     * Using a single global lock ensures that no writer can publish headSequence until all prior
+     * sequence slots have had their segmentMap entries written, eliminating the missed-message race.
+     */
+    globalWriteLock.lock();
     try {
       final int allocSize = (int) (((long) writeSize + (long) SEGMENT_HEADER_SIZE) / segmentSize) + 1;
       final long writeHead = writeSequenceNumber.getAndAdd(allocSize);
@@ -224,8 +245,8 @@ public class TransmissionBuffer implements Buffer {
       final int initialRead = end > bufferSize ? bufferSize : end;
 
       /*
-      * Allocate the segments to the this color
-      */
+       * Allocate the segments to this color
+       */
       final short color = bufferColor.color;
       for (int i = 0; i < allocSize; i++) {
         segmentMap[((seq + i) % segments)] = color;
@@ -245,10 +266,18 @@ public class TransmissionBuffer implements Buffer {
     }
     finally {
       try {
-        bufferColor.wake();
+        // Signal waiting readers. Condition.signal() requires the associated per-color lock.
+        final ReentrantLock colorLock = bufferColor.lock;
+        colorLock.lock();
+        try {
+          bufferColor.wake();
+        }
+        finally {
+          colorLock.unlock();
+        }
       }
       finally {
-        lock.unlock();
+        globalWriteLock.unlock();
       }
     }
   }

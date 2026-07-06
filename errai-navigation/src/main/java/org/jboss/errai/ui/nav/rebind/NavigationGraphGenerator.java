@@ -92,8 +92,9 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
 
   /*
    * These pages should not cause @Page validation if no other pages exist.
+   * Package-private (not final) so that tests in the same package can substitute a different list.
    */
-  private static final Collection<String> DENYLISTED_PAGES = Arrays
+  static Collection<String> DENYLISTED_PAGES = Arrays
           .asList("org.jboss.errai.security.client.local.context.SecurityContextImpl.SecurityRolesConstraintPage");
 
   @Override

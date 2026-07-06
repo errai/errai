@@ -1,0 +1,411 @@
+
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>GWT 2.13.1 Lock Analysis — Jakarta EE 10 Migration</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, "Segoe UI", system-ui, sans-serif; font-size: 14px; line-height: 1.6; color: #1f2328; background: #fff; padding: 24px; }
+  .container { max-width: 760px; margin: 0 auto; }
+  h1 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+  .subtitle { color: #57606a; font-size: 13px; margin-bottom: 24px; }
+  h2 { font-size: 15px; font-weight: 600; margin: 28px 0 10px; padding-bottom: 4px; border-bottom: 1px solid #e5e7eb; }
+  h3 { font-size: 13px; font-weight: 600; color: #57606a; margin: 14px 0 6px; text-transform: uppercase; letter-spacing: .04em; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { background: #f7f8fa; text-align: left; padding: 7px 10px; font-weight: 600; border: 1px solid #e5e7eb; }
+  td { padding: 7px 10px; border: 1px solid #e5e7eb; vertical-align: top; }
+  tr:nth-child(even) td { background: #fafbfc; }
+  .badge { display: inline-block; padding: 1px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+  .hard { background: #fee2e2; color: #991b1b; }
+  .soft { background: #fef3c7; color: #92400e; }
+  .free { background: #d1fae5; color: #065f46; }
+  .info { background: #dbeafe; color: #1e40af; }
+  code { font-size: 11.5px; font-family: "SFMono-Regular", Consolas, monospace; background: #f7f8fa; border: 1px solid #e5e7eb; border-radius: 3px; padding: 0 4px; }
+  .callout { background: #f7f8fa; border-left: 3px solid #3b82d4; padding: 10px 14px; margin: 14px 0; font-size: 13px; }
+  .callout.warn { border-left-color: #d97706; background: #fffbeb; }
+  .callout.danger { border-left-color: #dc2626; background: #fef2f2; }
+  ul { padding-left: 20px; }
+  li { margin-bottom: 4px; }
+  .footnote { font-size: 12px; color: #57606a; margin-top: 6px; }
+  footer { margin-top: 40px; padding-top: 12px; border-top: 1px solid #e5e7eb; text-align: center; font-size: 11px; color: #57606a; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <h1>GWT 2.13.1 Dependency Lock Analysis</h1>
+  <p class="subtitle">Pre-migration assessment for JavaEE → Jakarta EE 10 · Errai 4.19.0-SNAPSHOT</p>
+
+  <div class="callout danger">
+    <strong>Key finding:</strong> GWT 2.13.1's <code>gwt-user</code> JAR hard-codes <code>javax.validation:validation-api:1.0.0.GA</code> as a compile dependency <em>and</em> bundles the super-source classes under the <code>javax.validation.*</code> namespace inside the JAR. This creates the deepest lock in the whole graph — the GWT Validation module cannot be migrated to <code>jakarta.validation</code> without either patching GWT or forking the errai-validation GWT module.
+  </div>
+
+  <h2>1. Lock Legend</h2>
+  <table>
+    <tr><th>Badge</th><th>Meaning</th></tr>
+    <tr><td><span class="badge hard">HARD LOCK</span></td><td>Cannot be changed without replacing or patching the GWT runtime itself. Blocked for Jakarta EE 10.</td></tr>
+    <tr><td><span class="badge soft">SOFT LOCK</span></td><td>Version is constrained by a transitive dependency that is itself upgradeable in isolation — needs a coordinated upgrade.</td></tr>
+    <tr><td><span class="badge free">UPGRADEABLE</span></td><td>No GWT constraint; can be upgraded to the Jakarta EE 10 equivalents.</td></tr>
+    <tr><td><span class="badge info">PARTIAL</span></td><td>Split artifact: server-side code can be migrated, GWT client-side portion stays on <code>javax.*</code>.</td></tr>
+  </table>
+
+  <h2>2. Dependency-by-Dependency Analysis</h2>
+
+  <h3>2a. Hard Locked — Cannot Migrate to Jakarta EE 10</h3>
+  <table>
+    <tr>
+      <th>Dependency</th>
+      <th>Current</th>
+      <th>Reason for Lock</th>
+      <th>Status</th>
+    </tr>
+    <tr>
+      <td><code>javax.validation:validation-api</code></td>
+      <td><code>1.0.0.GA</code></td>
+      <td>
+        <code>gwt-user-2.13.1.jar</code> declares a compile dependency on <code>javax.validation:validation-api:1.0.0.GA</code>.
+        The JAR also bundles GWT super-source files under <code>javax/validation/super/</code> and a
+        <code>javax/validation/Validation.gwt.xml</code> module descriptor. The GWT Validation rebind
+        framework (<code>com.google.gwt.validation.*</code> inside <code>gwt-user</code>) generates
+        validators that reference <code>javax.validation.*</code> types at compile time.
+        Moving to <code>jakarta.validation</code> is impossible without GWT itself shipping a
+        <code>jakarta.validation</code> super-source.
+      </td>
+      <td><span class="badge hard">HARD LOCK</span></td>
+    </tr>
+    <tr>
+      <td><code>javax.servlet:javax.servlet-api</code></td>
+      <td><code>3.1.0</code></td>
+      <td>
+        <code>gwt-user-2.13.1.jar</code> declares a compile dependency on <code>javax.servlet:javax.servlet-api:3.1.0</code>.
+        <code>gwt-dev-2.13.1.jar</code> similarly lists Jetty 9.x in its BOM (<code>jetty.version=9.4.58.v20250814</code>)
+        and Jetty 9 is a <em>javax.servlet</em> container. The GWT embedded DevMode server
+        and codeserver run inside Jetty 9. Migrating the Errai <em>server-side</em> servlets to
+        <code>jakarta.servlet</code> breaks the GWT DevMode classpath.
+      </td>
+      <td><span class="badge hard">HARD LOCK</span></td>
+    </tr>
+    <tr>
+      <td><code>javax.validation:validation-api</code> (sources classifier)</td>
+      <td><code>1.0.0.GA</code></td>
+      <td>
+        <code>gwt-user</code> also pulls the <code>-sources</code> classifier of the same
+        <code>1.0.0.GA</code> validation-api because GWT compiles <code>.java</code> sources for
+        the client-side validator generation. Both the binary and sources classifier must stay at
+        <code>1.0.0.GA</code>.
+      </td>
+      <td><span class="badge hard">HARD LOCK</span></td>
+    </tr>
+    <tr>
+      <td><code>org.eclipse.jetty:jetty-*</code> (all 9.4.x)</td>
+      <td><code>9.4.44.v20210927</code></td>
+      <td>
+        GWT 2.13.1 BOM pins Jetty to <code>9.4.58.v20250814</code>. Jetty 9 is the last series
+        on <code>javax.servlet</code>. Errai currently overrides Jetty to <code>9.4.44</code>,
+        but it cannot jump to Jetty 10+ (jakarta.servlet) while staying on GWT 2.13.1's DevMode
+        and codeserver, which depend on Jetty 9 internally. <code>jetty-continuation</code> was
+        removed in Jetty 10.
+      </td>
+      <td><span class="badge hard">HARD LOCK</span></td>
+    </tr>
+    <tr>
+      <td><code>org.glassfish:javax.el</code></td>
+      <td><code>3.0.0</code></td>
+      <td>
+        This is the EL 3.0 implementation under the <code>javax.el</code> namespace. Used at
+        runtime during DevMode and tests via the Weld servlet integration. Weld 3.x (which is
+        locked — see §2b) expects <code>javax.el</code> / EL 3. Moving to EL 5
+        (<code>jakarta.el</code>) requires Weld 5+.
+      </td>
+      <td><span class="badge hard">HARD LOCK</span></td>
+    </tr>
+  </table>
+
+  <h3>2b. Soft Locked — Requires Coordinated Upgrade of the Locking Component</h3>
+  <table>
+    <tr>
+      <th>Dependency</th>
+      <th>Current</th>
+      <th>Locking Component</th>
+      <th>Required Upgrade</th>
+      <th>Status</th>
+    </tr>
+    <tr>
+      <td><code>jakarta.enterprise:jakarta.enterprise.cdi-api</code></td>
+      <td><code>2.0.2</code> (CDI 2.0 = EE8)</td>
+      <td>
+        <code>weld-api-parent:3.1.SP2</code> hard-pins <code>cdi.api.version=2.0.2</code>.
+        Weld 3.x only implements CDI 2.0. CDI 4.0 (EE10) requires Weld 5.x.
+      </td>
+      <td>Weld 3.x → Weld 5.x + CDI API 4.0.1</td>
+      <td><span class="badge soft">SOFT LOCK</span></td>
+    </tr>
+    <tr>
+      <td><code>org.jboss.weld.*</code> (weld-core-impl, weld-se-core, weld-servlet-core, etc.)</td>
+      <td><code>3.1.5.SP1</code></td>
+      <td>
+        Weld 3.x supports CDI 2.0 / EE8 only. It depends on <code>jboss-servlet-api_4.0_spec</code>
+        (= Servlet 4.0 = javax.servlet). Weld 4.x targets EE9 (jakarta.* namespace shift),
+        Weld 5.x targets EE10.
+      </td>
+      <td>Weld 3.1 → Weld 5.x</td>
+      <td><span class="badge soft">SOFT LOCK</span></td>
+    </tr>
+    <tr>
+      <td><code>jakarta.persistence:jakarta.persistence-api</code></td>
+      <td><code>2.2.3</code> (JPA 2.2 = EE8)</td>
+      <td>
+        <code>hibernate-core:5.3.20.Final</code> declares a compile dependency on
+        <code>javax.persistence:javax.persistence-api:2.2</code> (old groupId). Hibernate 5.x
+        cannot use <code>jakarta.persistence</code> 3.x (JPA 3.0 / EE10). Hibernate 6.x
+        renamed to <code>jakarta.persistence</code>.
+      </td>
+      <td>Hibernate 5.x → Hibernate 6.x</td>
+      <td><span class="badge soft">SOFT LOCK</span></td>
+    </tr>
+    <tr>
+      <td><code>org.jboss.resteasy:resteasy-jaxrs / resteasy-cdi</code></td>
+      <td><code>3.11.2.Final</code></td>
+      <td>
+        RESTEasy 3.x depends on <code>org.jboss.spec.javax.ws.rs:jboss-jaxrs-api_2.1_spec</code>
+        (JAX-RS 2.1 = javax.ws.rs = EE8). RESTEasy 6.x moves to
+        <code>jakarta.ws.rs</code> for EE10.
+      </td>
+      <td>RESTEasy 3.x → RESTEasy 6.x</td>
+      <td><span class="badge soft">SOFT LOCK</span></td>
+    </tr>
+    <tr>
+      <td><code>org.hibernate:hibernate-validator</code></td>
+      <td><code>4.1.0.Final</code></td>
+      <td>
+        Hibernate Validator 4.x implements Bean Validation 1.0 (<code>javax.validation</code>),
+        which is already hard-locked by GWT. Cannot move to BV 3.0 (<code>jakarta.validation</code>)
+        while GWT 2.13.1 is in play.
+      </td>
+      <td>Blocked by GWT validation hard lock</td>
+      <td><span class="badge hard">HARD LOCK</span></td>
+    </tr>
+    <tr>
+      <td><code>org.apache.deltaspike.core:*</code></td>
+      <td><code>1.9.6</code></td>
+      <td>
+        DeltaSpike 1.x is built against <code>javax.enterprise</code> / CDI 2.0. It depends on
+        Weld 3.x internally. No Jakarta EE 10 release of DeltaSpike 1.x exists; DeltaSpike 2.x
+        targets Jakarta EE 10.
+      </td>
+      <td>DeltaSpike 1.x → DeltaSpike 2.x (+ Weld 5.x)</td>
+      <td><span class="badge soft">SOFT LOCK</span></td>
+    </tr>
+    <tr>
+      <td><code>jakarta.ws.rs:jakarta.ws.rs-api</code></td>
+      <td><code>2.1.6</code> (JAX-RS 2.1 = EE8)</td>
+      <td>
+        Locked via RESTEasy 3.x. JAX-RS 3.1 (<code>jakarta.ws.rs-api:3.1.0</code>) is the EE10
+        version. Cannot upgrade in isolation because RESTEasy and other consumers must move first.
+      </td>
+      <td>RESTEasy 3 → 6</td>
+      <td><span class="badge soft">SOFT LOCK</span></td>
+    </tr>
+    <tr>
+      <td><code>jakarta.servlet:jakarta.servlet-api</code></td>
+      <td><code>4.0.2</code> (Servlet 4.0 = EE8)</td>
+      <td>
+        Even though <code>jakarta.*</code> groupId is already used, version 4.0 is the EE8
+        "bridge" release — it still maps to the same byte-code as <code>javax.servlet 4.0</code>.
+        EE10 Servlet is <code>6.0</code>. Upgrading requires Jetty 10+, which breaks GWT DevMode.
+      </td>
+      <td>Jetty 9 → Jetty 11 + GWT DevMode fix</td>
+      <td><span class="badge soft">SOFT LOCK</span></td>
+    </tr>
+  </table>
+
+  <h3>2c. Free to Upgrade (no GWT constraint)</h3>
+  <table>
+    <tr>
+      <th>Dependency</th>
+      <th>Current</th>
+      <th>EE10 Target</th>
+      <th>Notes</th>
+      <th>Status</th>
+    </tr>
+    <tr>
+      <td><code>jakarta.inject:jakarta.inject-api</code></td>
+      <td><code>1.0.3</code></td>
+      <td><code>2.0.1</code></td>
+      <td>CDI 4.0 (Weld 5) brings jakarta.inject 2.0 transitively. Pure server-side.</td>
+      <td><span class="badge free">UPGRADEABLE</span></td>
+    </tr>
+    <tr>
+      <td><code>jakarta.interceptor:jakarta.interceptor-api</code></td>
+      <td><code>1.2.5</code></td>
+      <td><code>2.1.0</code></td>
+      <td>Server-side only. EE10 interceptors are <code>2.1</code>.</td>
+      <td><span class="badge free">UPGRADEABLE</span></td>
+    </tr>
+    <tr>
+      <td><code>jakarta.annotation:jakarta.annotation-api</code></td>
+      <td><code>1.3.5</code></td>
+      <td><code>2.1.1</code></td>
+      <td>Server-side annotations (<code>@PostConstruct</code>, etc.). No GWT dependency.</td>
+      <td><span class="badge free">UPGRADEABLE</span></td>
+    </tr>
+    <tr>
+      <td><code>jakarta.transaction:jakarta.transaction-api</code></td>
+      <td><code>1.3.3</code></td>
+      <td><code>2.0.1</code></td>
+      <td>Server-side JTA. No GWT dependency.</td>
+      <td><span class="badge free">UPGRADEABLE</span></td>
+    </tr>
+    <tr>
+      <td><code>jakarta.ejb:jakarta.ejb-api</code></td>
+      <td><code>3.2.6</code></td>
+      <td><code>4.0.1</code></td>
+      <td>Server-side EJB. No GWT dependency.</td>
+      <td><span class="badge free">UPGRADEABLE</span></td>
+    </tr>
+    <tr>
+      <td><code>jakarta.jms:jakarta.jms-api</code></td>
+      <td><code>2.0.3</code></td>
+      <td><code>3.1.0</code></td>
+      <td>Server-side JMS. No GWT dependency.</td>
+      <td><span class="badge free">UPGRADEABLE</span></td>
+    </tr>
+    <tr>
+      <td><code>jakarta.resource:jakarta.resource-api</code></td>
+      <td><code>1.7.4</code></td>
+      <td><code>2.1.0</code></td>
+      <td>Server-side JCA. No GWT dependency.</td>
+      <td><span class="badge free">UPGRADEABLE</span></td>
+    </tr>
+    <tr>
+      <td><code>jakarta.security.jacc:jakarta.security.jacc-api</code></td>
+      <td><code>1.6.1</code></td>
+      <td><code>2.1.0</code></td>
+      <td>Server-side security. No GWT dependency.</td>
+      <td><span class="badge free">UPGRADEABLE</span></td>
+    </tr>
+    <tr>
+      <td><code>jakarta.xml.bind:jakarta.xml.bind-api</code></td>
+      <td><code>2.3.3</code></td>
+      <td><code>4.0.0</code></td>
+      <td>Server-side JAXB. No GWT dependency.</td>
+      <td><span class="badge free">UPGRADEABLE</span></td>
+    </tr>
+    <tr>
+      <td><code>jakarta.xml.ws:jakarta.xml.ws-api</code></td>
+      <td><code>2.3.3</code></td>
+      <td><code>4.0.0</code></td>
+      <td>Server-side JAX-WS. No GWT dependency.</td>
+      <td><span class="badge free">UPGRADEABLE</span></td>
+    </tr>
+    <tr>
+      <td><code>jakarta.el:jakarta.el-api</code></td>
+      <td><code>3.0.3</code></td>
+      <td><code>5.0.1</code></td>
+      <td>Server-side EL. Requires replacing <code>org.glassfish:javax.el</code> impl with a EL 5 impl (e.g. Expressly). Blocked in practice by Weld 3.x.</td>
+      <td><span class="badge free">UPGRADEABLE</span></td>
+    </tr>
+    <tr>
+      <td><code>jakarta.websocket:jakarta.websocket-api</code></td>
+      <td><code>1.1.2</code></td>
+      <td><code>2.1.1</code></td>
+      <td>Server-side WebSocket. Used in <code>errai-bus-jsr356-websocket</code>. No GWT dependency.</td>
+      <td><span class="badge free">UPGRADEABLE</span></td>
+    </tr>
+    <tr>
+      <td><code>jakarta.enterprise.concurrent:jakarta.enterprise.concurrent-api</code></td>
+      <td><code>1.1.2</code></td>
+      <td><code>3.0.3</code></td>
+      <td>Server-side Concurrency. No GWT dependency.</td>
+      <td><span class="badge free">UPGRADEABLE</span></td>
+    </tr>
+    <tr>
+      <td><code>jakarta.servlet.jsp:jakarta.servlet.jsp-api</code></td>
+      <td><code>3.0.0</code></td>
+      <td><code>3.1.0</code></td>
+      <td>Only used in errai-demos. Blocked by Jetty 9 / Servlet 6 chain.</td>
+      <td><span class="badge soft">SOFT LOCK</span></td>
+    </tr>
+  </table>
+
+  <h3>2d. Server-Side Source Migration — Partial (server vs. client split)</h3>
+  <table>
+    <tr>
+      <th>Dependency / Usage</th>
+      <th>Situation</th>
+      <th>Status</th>
+    </tr>
+    <tr>
+      <td><code>javax.enterprise.cdi-api</code> imports in server classes</td>
+      <td>Server-side <code>.java</code> files under <code>src/main/java</code> that import <code>javax.enterprise.*</code>, <code>javax.inject.*</code> can be renamed to <code>jakarta.*</code>. GWT client-side code that goes through the GWT compiler must keep <code>javax.*</code> because the CDI super-source stubs in <code>errai-javax-enterprise</code> are under the <code>javax</code> namespace.</td>
+      <td><span class="badge info">PARTIAL</span></td>
+    </tr>
+    <tr>
+      <td><code>errai-javax-enterprise</code> GWT super-source module</td>
+      <td>This module provides client-side stubs for CDI annotations (<code>@ApplicationScoped</code>, <code>@Inject</code>, etc.) under the <code>javax.*</code> namespace. GWT code generation in <code>errai-ioc</code>, <code>errai-cdi-client</code> etc. reference these as <code>javax.*</code>. These <em>cannot</em> be renamed to <code>jakarta.*</code> until GWT ships native jakarta.enterprise/inject support.</td>
+      <td><span class="badge hard">HARD LOCK</span></td>
+    </tr>
+    <tr>
+      <td><code>javax</code>→<code>jakarta</code> rename in server servlet code</td>
+      <td>Errai bus servlets, CDI server extension, bus-websocket server endpoint, and all non-GWT-compiled server code can have imports renamed. However, running those in a DevMode context still goes through GWT's embedded Jetty 9 (<code>javax.servlet</code>), so a dual-path or server-only deployment mode is needed.</td>
+      <td><span class="badge info">PARTIAL</span></td>
+    </tr>
+  </table>
+
+  <h2>3. Cascade Upgrade Summary</h2>
+  <div class="callout">
+    To fully reach Jakarta EE 10 the following <strong>coordinated upgrades</strong> are required as a group — they cannot be done independently:
+    <ul style="margin-top:8px">
+      <li><strong>Weld 3.1 → Weld 5.x</strong> — unlocks CDI 4.0 (jakarta.enterprise), Interceptors 2.1, EL 5</li>
+      <li><strong>Hibernate ORM 5.3 → Hibernate ORM 6.x</strong> — unlocks jakarta.persistence 3.1 (JPA 3.1)</li>
+      <li><strong>RESTEasy 3.11 → RESTEasy 6.x</strong> — unlocks jakarta.ws.rs 3.1 (JAX-RS 3.1)</li>
+      <li><strong>DeltaSpike 1.9 → DeltaSpike 2.x</strong> — follows Weld 5 / CDI 4</li>
+      <li><strong>Jetty 9.4 → Jetty 11.x</strong> — unlocks jakarta.servlet 6.0 (Servlet 6)</li>
+    </ul>
+  </div>
+
+  <h2>4. Items That Stay on <code>javax.*</code> Permanently (GWT 2.13.1)</h2>
+  <div class="callout warn">
+    The following items <strong>cannot be migrated</strong> as long as GWT 2.13.1 is the compiler and runtime. They require either a future GWT release with native Jakarta EE support, or maintaining a dual <code>javax/jakarta</code> compatibility shim:
+    <ul style="margin-top:8px">
+      <li><code>javax.validation:validation-api:1.0.0.GA</code> — bundled super-source in gwt-user JAR, used by GWT validator code generation</li>
+      <li><code>javax.validation:validation-api:1.0.0.GA:sources</code> — sources classifier required by GWT rebind</li>
+      <li><code>javax.servlet:javax.servlet-api:3.1.0</code> — compile dependency of gwt-user; Jetty 9 (gwt-dev) is javax.servlet</li>
+      <li><code>errai-javax-enterprise</code> GWT super-source stubs — all CDI/inject annotations used on the client side</li>
+      <li><code>org.eclipse.jetty:*:9.4.x</code> — embedded in GWT DevMode codeserver</li>
+      <li><code>org.glassfish:javax.el:3.0.0</code> — EL 3.0 impl for javax namespace, matched to Weld 3.x + Jetty 9</li>
+      <li><code>org.hibernate:hibernate-validator:4.1.0.Final</code> — implements BV 1.0 (javax.validation), locked to gwt-user's BV 1.0 dependency</li>
+    </ul>
+  </div>
+
+  <h2>5. Current vs. Jakarta EE 10 Namespace Map</h2>
+  <table>
+    <tr>
+      <th>Current spec artifact</th>
+      <th>EE version</th>
+      <th>Jakarta EE 10 artifact</th>
+      <th>Migratable?</th>
+    </tr>
+    <tr><td><code>javax.servlet-api 3.1.0</code></td><td>EE 7</td><td><code>jakarta.servlet-api 6.0.0</code></td><td><span class="badge hard">Blocked</span></td></tr>
+    <tr><td><code>jakarta.servlet-api 4.0.2</code></td><td>EE 8 bridge</td><td><code>jakarta.servlet-api 6.0.0</code></td><td><span class="badge soft">After Jetty 11</span></td></tr>
+    <tr><td><code>jakarta.enterprise.cdi-api 2.0.2</code></td><td>CDI 2.0 / EE 8</td><td><code>jakarta.enterprise.cdi-api 4.0.1</code></td><td><span class="badge soft">After Weld 5</span></td></tr>
+    <tr><td><code>jakarta.persistence-api 2.2.3</code></td><td>JPA 2.2 / EE 8</td><td><code>jakarta.persistence-api 3.1.0</code></td><td><span class="badge soft">After Hibernate 6</span></td></tr>
+    <tr><td><code>jakarta.ws.rs-api 2.1.6</code></td><td>JAX-RS 2.1 / EE 8</td><td><code>jakarta.ws.rs-api 3.1.0</code></td><td><span class="badge soft">After RESTEasy 6</span></td></tr>
+    <tr><td><code>javax.validation:validation-api 1.0.0</code></td><td>BV 1.0</td><td><code>jakarta.validation-api 3.0.2</code></td><td><span class="badge hard">Blocked by GWT</span></td></tr>
+    <tr><td><code>jakarta.inject-api 1.0.3</code></td><td>Inject 1</td><td><code>jakarta.inject-api 2.0.1</code></td><td><span class="badge free">Free</span></td></tr>
+    <tr><td><code>jakarta.interceptor-api 1.2.5</code></td><td>Interceptors 1.2</td><td><code>jakarta.interceptor-api 2.1.0</code></td><td><span class="badge free">Free</span></td></tr>
+    <tr><td><code>jakarta.annotation-api 1.3.5</code></td><td>Annotations 1.3</td><td><code>jakarta.annotation-api 2.1.1</code></td><td><span class="badge free">Free</span></td></tr>
+    <tr><td><code>jakarta.transaction-api 1.3.3</code></td><td>JTA 1.3</td><td><code>jakarta.transaction-api 2.0.1</code></td><td><span class="badge free">Free</span></td></tr>
+    <tr><td><code>jakarta.ejb-api 3.2.6</code></td><td>EJB 3.2</td><td><code>jakarta.ejb-api 4.0.1</code></td><td><span class="badge free">Free</span></td></tr>
+    <tr><td><code>jakarta.websocket-api 1.1.2</code></td><td>WS 1.1</td><td><code>jakarta.websocket-api 2.1.1</code></td><td><span class="badge free">Free</span></td></tr>
+    <tr><td><code>jakarta.xml.bind-api 2.3.3</code></td><td>JAXB 2.3</td><td><code>jakarta.xml.bind-api 4.0.0</code></td><td><span class="badge free">Free</span></td></tr>
+  </table>
+
+  <p class="footnote" style="margin-top:12px">
+    <strong>Note on <code>javax</code> vs <code>jakarta</code> groupId:</strong> Starting with EE9, all spec JARs moved from <code>javax.*</code> groupId to <code>jakarta.*</code> groupId. Versions 4.0.x and above in the <code>jakarta.*</code> namespace are the EE10 target versions.
+  </p>
+
+  <footer>Made with IBM Bob</footer>
+</div>
+</body>
+</html>

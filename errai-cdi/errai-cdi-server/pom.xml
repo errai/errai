@@ -257,7 +257,7 @@
                      In the future, if we need to run the tests with a prod compile we might be able to fix these
                      problems by moving the async tests out of a test suite.
                  -->
-                <gwt.args>-devMode -testBeginTimeout 5 -Xjvm "--add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED --add-opens java.base/java.io=ALL-UNNAMED" ${gwtArgs}</gwt.args>
+                <gwt.args>-devMode -testBeginTimeout 5 ${gwtArgs}</gwt.args>
               </systemPropertyVariables>
               <includes>
                 <include>**/*Test.java</include>
@@ -439,12 +439,6 @@
           <artifactId>errai-data-binding</artifactId>
           <scope>provided</scope>
         </dependency>        
-        <dependency>
-          <groupId>javax</groupId>
-          <artifactId>javaee-api</artifactId>
-          <scope>provided</scope>
-        </dependency>
-
         <dependency>
           <groupId>org.jsoup</groupId>
           <artifactId>jsoup</artifactId>
