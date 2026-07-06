@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.jboss</groupId>
     <artifactId>jboss-parent</artifactId>
-    <version>36</version>
+    <version>51</version>
     <relativePath/>
   </parent>
 
@@ -267,7 +267,7 @@
       <plugins>
         <plugin>
           <artifactId>maven-shade-plugin</artifactId>
-          <version>3.2.1</version>
+          <version>3.5.0</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -296,6 +296,17 @@
                 <version>2.11.0</version>
               </dependency>
           </dependencies>
+          <configuration>
+            <!-- GWT 2.11 supports up to Java 11 source level; pin it explicitly
+                 so 'auto' detection does not pick up Java 17 and fail -->
+            <sourceLevel>11</sourceLevel>
+            <!-- Allow Errai code generators to reflectively access JDK internals
+                 (e.g. Throwable.detailMessage) during GWT compilation on Java 17 -->
+            <extraJvmArgs>-Xmx2g -XX:CompileThreshold=7000
+              --add-opens java.base/java.lang=ALL-UNNAMED
+              --add-opens java.base/java.util=ALL-UNNAMED
+              --add-opens java.base/java.io=ALL-UNNAMED</extraJvmArgs>
+          </configuration>
           <executions>
             <execution>
               <goals>
@@ -332,11 +343,6 @@
               <version>2.0.0</version>
             </dependency>
           </dependencies>
-        </plugin>
-        <plugin>
-          <groupId>org.sonatype.plugins</groupId>
-          <artifactId>jarjar-maven-plugin</artifactId>
-          <version>1.5</version>
         </plugin>
         <plugin>
           <groupId>org.eclipse.m2e</groupId>
@@ -496,12 +502,12 @@
   <!-- Profiles -->
   <profiles>
     <profile>
-      <id>java9+</id>
+      <id>java17+</id>
       <activation>
-        <jdk>[9,)</jdk>
+        <jdk>[17,)</jdk>
       </activation>
       <properties>
-        <maven.compiler.release>8</maven.compiler.release>
+        <maven.compiler.release>17</maven.compiler.release>
       </properties>
       <build>
         <pluginManagement>

@@ -262,12 +262,12 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
           else {
             // use default constructor
 
-            builder._(
+            builder.append(
                 Stmt.declareVariable(toMap).named("entity").initializeWith(
                     Stmt.nestedCall(Stmt.newObject(toMap))));
           }
 
-          builder._(loadVariable("a1").invoke("recordObject",
+          builder.append(loadVariable("a1").invoke("recordObject",
               loadVariable("objId"), loadVariable("entity")));
         }
         

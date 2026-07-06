@@ -52,11 +52,11 @@
   </organization>
 
   <properties>
+    <maven.war.plugin.version>3.4.0</maven.war.plugin.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <skipTests>true</skipTests>
     <argLine></argLine>
     <!-- maven plugins versions -->
-    <maven.war.plugin.version>2.1.1</maven.war.plugin.version>
     <maven.clean.plugin.version>2.4.1</maven.clean.plugin.version>
     <maven.compiler.plugin.version>2.3.2</maven.compiler.plugin.version>
     <maven.deploy.plugin.version>2.7</maven.deploy.plugin.version>
@@ -216,7 +216,7 @@
             to avoid class loading problems for classes that are not needed on the server. 
             To configure an alternative package filter for client-only classes, specify: 
             -Derrai.client.local.class.pattern=.*/myproject/client/.* -->
-          <extraJvmArgs>-Xmx2048m -XX:CompileThreshold=7000 -Derrai.jboss.home=${errai.jboss.home} -Derrai.dev.context=${errai.dev.context}</extraJvmArgs>
+          <extraJvmArgs>-Xmx2048m -XX:CompileThreshold=7000 -Derrai.jboss.home=${errai.jboss.home} -Derrai.dev.context=${errai.dev.context} --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED --add-opens java.base/java.io=ALL-UNNAMED</extraJvmArgs>
           <server>org.jboss.errai.cdi.server.gwt.EmbeddedWildFlyLauncher</server>
           <disableCastChecking>true</disableCastChecking>
           <runTarget>${errai.dev.context}</runTarget>
@@ -369,13 +369,14 @@
         <activeByDefault>true</activeByDefault>
       </activation>
       <properties>
+    <maven.war.plugin.version>3.4.0</maven.war.plugin.version>
         <webDescriptor>wildfly</webDescriptor>
       </properties>
       <build>
         <plugins>
           <plugin>
             <artifactId>maven-war-plugin</artifactId>
-            <version>2.2</version>
+            <version>3.4.0</version>
             <configuration>
               <packagingExcludes>**/javax/**/*.*,**/client/local/**/*.class</packagingExcludes>
               <outputFileNameMapping>@{artifactId}@-@{baseVersion}@@{dashClassifier?}@.@{extension}@</outputFileNameMapping>
@@ -417,6 +418,7 @@
     <profile>
       <id>jetty</id>
       <properties>
+    <maven.war.plugin.version>3.4.0</maven.war.plugin.version>
         <webDescriptor>jetty</webDescriptor>
       </properties>
       <dependencies>

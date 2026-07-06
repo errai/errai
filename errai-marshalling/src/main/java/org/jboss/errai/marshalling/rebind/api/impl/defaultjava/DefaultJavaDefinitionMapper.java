@@ -213,6 +213,10 @@ public class DefaultJavaDefinitionMapper {
         catch (final IllegalStateException e) {
           // field is not known to the current classloader. continue anyway.
         }
+        catch (final RuntimeException e) {
+          // InaccessibleObjectException (Java 9+) or similar: JDK strong encapsulation
+          // prevents reflective access to this field. Skip it.
+        }
 
         if (writeKeys.contains(field.getName()) && readKeys.contains(field.getName())) {
           continue;

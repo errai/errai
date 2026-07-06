@@ -182,7 +182,7 @@ public abstract class ProxyUtil {
     proceedLogic.addStatement(Stmt.loadVariable("status").invoke("proceed"));
 
     ElseBlockBuilder interceptorStack =
-              If.isNull(Stmt.loadVariable("status").invoke("getNextInterceptor"))._(proceed).finish();
+              If.isNull(Stmt.loadVariable("status").invoke("getNextInterceptor")).append(proceed).finish();
 
     for (final Class<?> interceptor : interceptors) {
       interceptorStack = interceptorStack.elseif_(Bool.equals(

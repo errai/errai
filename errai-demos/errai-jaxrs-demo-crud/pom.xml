@@ -51,6 +51,7 @@
   </organization>
 
   <properties>
+    <maven.war.plugin.version>3.4.0</maven.war.plugin.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <webDescriptor>wildfly</webDescriptor>
     <skipTests>true</skipTests>
@@ -58,7 +59,6 @@
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
     <!-- maven plugins versions -->
-    <maven.war.plugin.version>2.1.1</maven.war.plugin.version>
     <maven.clean.plugin.version>2.4.1</maven.clean.plugin.version>
     <maven.compiler.plugin.version>2.3.2</maven.compiler.plugin.version>
     <maven.deploy.plugin.version>2.7</maven.deploy.plugin.version>    
@@ -207,6 +207,7 @@
     <profile>
       <id>jetty</id>
       <properties>
+    <maven.war.plugin.version>3.4.0</maven.war.plugin.version>
         <webDescriptor>jetty</webDescriptor>
       </properties>
       <dependencies>
@@ -254,13 +255,14 @@
         <activeByDefault>true</activeByDefault>
       </activation>
       <properties>
+    <maven.war.plugin.version>3.4.0</maven.war.plugin.version>
         <webDescriptor>wildfly</webDescriptor>
       </properties>
       <build>
         <plugins>
           <plugin>
             <artifactId>maven-war-plugin</artifactId>
-            <version>2.2</version>
+            <version>3.4.0</version>
             <configuration>
               <packagingExcludes>**/javax/**/*.*,**/client/local/**/*.class</packagingExcludes>
               <outputFileNameMapping>@{artifactId}@-@{baseVersion}@@{dashClassifier?}@.@{extension}@</outputFileNameMapping>
@@ -330,6 +332,7 @@
     <profile>
       <id>tomcat</id>
       <properties>
+    <maven.war.plugin.version>3.4.0</maven.war.plugin.version>
         <webDescriptor>tomcat</webDescriptor>
       </properties>
     </profile>
@@ -345,7 +348,7 @@
         <configuration>
           <logLevel>INFO</logLevel>
           <noServer>false</noServer>
-          <extraJvmArgs>-Xmx2048m -XX:CompileThreshold=7000 -Derrai.jboss.home=${errai.jboss.home} -Derrai.dev.context=${errai.dev.context}</extraJvmArgs>
+          <extraJvmArgs>-Xmx2048m -XX:CompileThreshold=7000 -Derrai.jboss.home=${errai.jboss.home} -Derrai.dev.context=${errai.dev.context} --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED --add-opens java.base/java.io=ALL-UNNAMED</extraJvmArgs>
           <server>org.jboss.errai.cdi.server.gwt.EmbeddedWildFlyLauncher</server>
           <disableCastChecking>true</disableCastChecking>
           <runTarget>${errai.dev.context}</runTarget>

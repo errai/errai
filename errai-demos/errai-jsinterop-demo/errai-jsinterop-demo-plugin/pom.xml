@@ -177,7 +177,7 @@
           <disableCastChecking>true</disableCastChecking>
           <runTarget>${errai.dev.context}/</runTarget>
           <hostedWebapp>src/main/webapp</hostedWebapp>
-          <extraJvmArgs>-Xmx1G -XX:CompileThreshold=7000 -Derrai.ioc.reachability=Aggressive -Derrai.ioc.jsinterop.support=true</extraJvmArgs>
+          <extraJvmArgs>-Xmx1G -XX:CompileThreshold=7000 -Derrai.ioc.reachability=Aggressive -Derrai.ioc.jsinterop.support=true --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED --add-opens java.base/java.io=ALL-UNNAMED</extraJvmArgs>
           <generateJsInteropExports>true</generateJsInteropExports>
         </configuration>
       </plugin>

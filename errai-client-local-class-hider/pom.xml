@@ -45,27 +45,29 @@
       </plugin>
       
       <!-- The agent uses asm to generate the classes, but although asm is generally available
-           in app servers already, the module systems may hide it from the system classloader. 
-           Safest alternative is to jarjar it into a custom package. -->
+           in app servers already, the module systems may hide it from the system classloader.
+           Safest alternative is to shade it into a custom package. -->
       <plugin>
-        <groupId>org.sonatype.plugins</groupId>
-        <artifactId>jarjar-maven-plugin</artifactId>
+        <artifactId>maven-shade-plugin</artifactId>
         <executions>
           <execution>
             <phase>package</phase>
             <goals>
-              <goal>jarjar</goal>
+              <goal>shade</goal>
             </goals>
             <configuration>
-              <includes>
-                <include>org.ow2.asm:asm</include>
-              </includes>
-              <rules>
-                <rule>
-                  <pattern>org.objectweb.asm.**</pattern>
-                  <result>org.jboss.errai.classhider.internal.asm.@1</result>
-                </rule>
-              </rules>
+              <artifactSet>
+                <includes>
+                  <include>org.ow2.asm:asm</include>
+                </includes>
+              </artifactSet>
+              <relocations>
+                <relocation>
+                  <pattern>org.objectweb.asm</pattern>
+                  <shadedPattern>org.jboss.errai.classhider.internal.asm</shadedPattern>
+                </relocation>
+              </relocations>
+              <shadedArtifactAttached>false</shadedArtifactAttached>
             </configuration>
           </execution>
         </executions>

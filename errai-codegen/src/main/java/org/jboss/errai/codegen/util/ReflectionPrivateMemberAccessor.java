@@ -56,15 +56,15 @@ public class ReflectionPrivateMemberAccessor implements PrivateMemberAccessor {
     classBuilder.privateMethod(Field.class, JAVA_REFL_FLD_UTIL_METH).modifiers(Modifier.Static)
             .parameters(DefParameters.of(Parameter.of(Class.class, "cls"), Parameter.of(String.class, "name")))
             .body()
-            ._(Stmt.try_()
-                    ._(Stmt.declareVariable("fld", Stmt.loadVariable("cls").invoke("getDeclaredField",
+            .append(Stmt.try_()
+                    .append(Stmt.declareVariable("fld", Stmt.loadVariable("cls").invoke("getDeclaredField",
                             Stmt.loadVariable("name"))))
-                    ._(Stmt.loadVariable("fld").invoke("setAccessible", true))
-                    ._(Stmt.loadVariable("fld").returnValue())
+                    .append(Stmt.loadVariable("fld").invoke("setAccessible", true))
+                    .append(Stmt.loadVariable("fld").returnValue())
                     .finish()
                     .catch_(Throwable.class, "e")
-                    ._(Stmt.loadVariable("e").invoke("printStackTrace"))
-                    ._(Stmt.throw_(RuntimeException.class, Refs.get("e")))
+                    .append(Stmt.loadVariable("e").invoke("printStackTrace"))
+                    .append(Stmt.throw_(RuntimeException.class, Refs.get("e")))
                     .finish())
             .finish();
   }
@@ -80,15 +80,15 @@ public class ReflectionPrivateMemberAccessor implements PrivateMemberAccessor {
             .parameters(DefParameters.of(Parameter.of(Class.class, "cls"), Parameter.of(String.class, "name"),
                     Parameter.of(Class[].class, "parms")))
             .body()
-            ._(Stmt.try_()
-                    ._(Stmt.declareVariable("meth", Stmt.loadVariable("cls").invoke("getDeclaredMethod",
+            .append(Stmt.try_()
+                    .append(Stmt.declareVariable("meth", Stmt.loadVariable("cls").invoke("getDeclaredMethod",
                             Stmt.loadVariable("name"), Stmt.loadVariable("parms"))))
-                    ._(Stmt.loadVariable("meth").invoke("setAccessible", true))
-                    ._(Stmt.loadVariable("meth").returnValue())
+                    .append(Stmt.loadVariable("meth").invoke("setAccessible", true))
+                    .append(Stmt.loadVariable("meth").returnValue())
                     .finish()
                     .catch_(Throwable.class, "e")
-                    ._(Stmt.loadVariable("e").invoke("printStackTrace"))
-                    ._(Stmt.throw_(RuntimeException.class, Refs.get("e")))
+                    .append(Stmt.loadVariable("e").invoke("printStackTrace"))
+                    .append(Stmt.throw_(RuntimeException.class, Refs.get("e")))
                     .finish())
             .finish();
   }
@@ -104,15 +104,15 @@ public class ReflectionPrivateMemberAccessor implements PrivateMemberAccessor {
     classBuilder.privateMethod(Constructor.class, JAVA_REFL_CONSTRUCTOR_UTIL_METH).modifiers(Modifier.Static)
             .parameters(DefParameters.of(Parameter.of(Class.class, "cls"), Parameter.of(Class[].class, "parms")))
             .body()
-            ._(Stmt.try_()
-                    ._(Stmt.declareVariable("cons", Stmt.loadVariable("cls").invoke("getDeclaredConstructor",
+            .append(Stmt.try_()
+                    .append(Stmt.declareVariable("cons", Stmt.loadVariable("cls").invoke("getDeclaredConstructor",
                             Stmt.loadVariable("parms"))))
-                    ._(Stmt.loadVariable("cons").invoke("setAccessible", true))
-                    ._(Stmt.loadVariable("cons").returnValue())
+                    .append(Stmt.loadVariable("cons").invoke("setAccessible", true))
+                    .append(Stmt.loadVariable("cons").returnValue())
                     .finish()
                     .catch_(Throwable.class, "e")
-                    ._(Stmt.loadVariable("e").invoke("printStackTrace"))
-                    ._(Stmt.throw_(RuntimeException.class, Refs.get("e")))
+                    .append(Stmt.loadVariable("e").invoke("printStackTrace"))
+                    .append(Stmt.throw_(RuntimeException.class, Refs.get("e")))
                     .finish())
             .finish();
   }
@@ -182,12 +182,12 @@ public class ReflectionPrivateMemberAccessor implements PrivateMemberAccessor {
 
     methodBuilder.modifiers(modifiers)
             .body()
-            ._(Stmt.try_()
-                    ._(Stmt.loadVariable(cachedField).invoke(setterName, Refs.get("instance"), Refs.get("value")))
+            .append(Stmt.try_()
+                    .append(Stmt.loadVariable(cachedField).invoke(setterName, Refs.get("instance"), Refs.get("value")))
                     .finish()
                     .catch_(Throwable.class, "e")
-                    ._(Stmt.loadVariable("e").invoke("printStackTrace"))
-                    ._(Stmt.throw_(RuntimeException.class, Refs.get("e")))
+                    .append(Stmt.loadVariable("e").invoke("printStackTrace"))
+                    .append(Stmt.throw_(RuntimeException.class, Refs.get("e")))
                     .finish())
             .finish();
   }
@@ -215,13 +215,13 @@ public class ReflectionPrivateMemberAccessor implements PrivateMemberAccessor {
 
     methodBuilder.modifiers(modifiers)
             .body()
-            ._(Stmt.try_()
-                    ._(Stmt.nestedCall(Cast.to(field.getType().getErased(), Stmt.loadVariable(cachedField)
+            .append(Stmt.try_()
+                    .append(Stmt.nestedCall(Cast.to(field.getType().getErased(), Stmt.loadVariable(cachedField)
                             .invoke(getterName, field.isStatic() ? null : Refs.get("instance")))).returnValue())
                     .finish()
                     .catch_(Throwable.class, "e")
-                    ._(Stmt.loadVariable("e").invoke("printStackTrace"))
-                    ._(Stmt.throw_(RuntimeException.class, Refs.get("e")))
+                    .append(Stmt.loadVariable("e").invoke("printStackTrace"))
+                    .append(Stmt.throw_(RuntimeException.class, Refs.get("e")))
                     .finish())
             .finish();
   }
@@ -262,17 +262,17 @@ public class ReflectionPrivateMemberAccessor implements PrivateMemberAccessor {
             .invoke("invoke", method.isStatic() ? null : Refs.get("instance"), args);
 
     if (method.getReturnType().isVoid()) {
-      tryBuilder._(statementBuilder);
+      tryBuilder.append(statementBuilder);
     }
     else {
-      tryBuilder._(Stmt.castTo(method.getReturnType().asBoxed(), statementBuilder).returnValue());
+      tryBuilder.append(Stmt.castTo(method.getReturnType().asBoxed(), statementBuilder).returnValue());
     }
 
-    body._(tryBuilder
+    body.append(tryBuilder
             .finish()
             .catch_(Throwable.class, "e")
-            ._(Stmt.loadVariable("e").invoke("printStackTrace"))
-            ._(Stmt.throw_(RuntimeException.class, Refs.get("e")))
+            .append(Stmt.loadVariable("e").invoke("printStackTrace"))
+            .append(Stmt.throw_(RuntimeException.class, Refs.get("e")))
             .finish())
             .finish();
   }

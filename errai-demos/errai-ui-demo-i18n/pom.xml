@@ -51,13 +51,13 @@
   </organization>
 
   <properties>
+    <maven.war.plugin.version>3.4.0</maven.war.plugin.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
     <skipTests>true</skipTests>
     <argLine></argLine>
     <!-- maven plugins versions -->
-    <maven.war.plugin.version>2.1.1</maven.war.plugin.version>
     <maven.clean.plugin.version>2.4.1</maven.clean.plugin.version>
     <maven.deploy.plugin.version>2.7</maven.deploy.plugin.version>
     <maven.resources.plugin.version>2.6</maven.resources.plugin.version>  
@@ -194,7 +194,7 @@
         <version>${maven.gwt.plugin.version}</version>
         <configuration>
           <runTarget>index.html</runTarget>
-          <extraJvmArgs>${argLine} -Xmx1g -Xms756m -XX:CompileThreshold=1000</extraJvmArgs>
+          <extraJvmArgs>${argLine} -Xmx1g -Xms756m -XX:CompileThreshold=1000 --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED --add-opens java.base/java.io=ALL-UNNAMED</extraJvmArgs>
           <hostedWebapp>src/main/webapp/</hostedWebapp>
           <logLevel>INFO</logLevel>
           <strict>true</strict>

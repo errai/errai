@@ -102,16 +102,6 @@ public class BlockBuilderImpl<T> implements BlockBuilder<T> {
   }
 
   @Override
-  public BlockBuilder<T> _(final Statement stmt) {
-    return append(stmt);
-  }
-
-  @Override
-  public BlockBuilder<T> _(final InnerClass innerClass) {
-    return append(innerClass);
-  }
-
-  @Override
   public List<Statement> splitFrom(final Statement statement) {
     final List<Statement> statements = blockStatement.getStatements();
     final int index = statements.indexOf(statement);
