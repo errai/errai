@@ -61,6 +61,7 @@
     <maven.compiler.plugin.version>2.3.2</maven.compiler.plugin.version>
     <maven.deploy.plugin.version>2.7</maven.deploy.plugin.version>
     <maven.gwt.plugin.version>2.10.0</maven.gwt.plugin.version>
+    <gwt.version>2.13.1</gwt.version>
     <jetty.version>9.4.44.v20210927</jetty.version>
     <!-- Dev Mode config properties -->
     <errai.dev.context>${project.artifactId}</errai.dev.context>
@@ -200,7 +201,19 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>gwt-maven-plugin</artifactId>
-        <version>${maven.gwt.plugin.version}</version>     
+        <version>${maven.gwt.plugin.version}</version>
+        <dependencies>
+          <dependency>
+            <groupId>org.gwtproject</groupId>
+            <artifactId>gwt-dev</artifactId>
+            <version>${gwt.version}</version>
+          </dependency>
+          <dependency>
+            <groupId>org.gwtproject</groupId>
+            <artifactId>gwt-user</artifactId>
+            <version>${gwt.version}</version>
+          </dependency>
+        </dependencies>
         <configuration>
           <logLevel>INFO</logLevel>
           <noServer>false</noServer>          

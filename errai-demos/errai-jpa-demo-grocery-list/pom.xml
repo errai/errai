@@ -58,6 +58,7 @@
     <cdiapi.version>1.2</cdiapi.version>
     <servletapi.version>1.0.2.Final</servletapi.version>
     <gwt.maven.version>2.10.0</gwt.maven.version>
+    <gwt.version>2.13.1</gwt.version>
     <maven.compiler.plugin.version>3.2</maven.compiler.plugin.version>
     <maven.deploy.plugin.version>2.8.2</maven.deploy.plugin.version>
     <argLine></argLine>
@@ -410,6 +411,18 @@
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>gwt-maven-plugin</artifactId>
         <version>${gwt.maven.version}</version>
+        <dependencies>
+          <dependency>
+            <groupId>org.gwtproject</groupId>
+            <artifactId>gwt-dev</artifactId>
+            <version>${gwt.version}</version>
+          </dependency>
+          <dependency>
+            <groupId>org.gwtproject</groupId>
+            <artifactId>gwt-user</artifactId>
+            <version>${gwt.version}</version>
+          </dependency>
+        </dependencies>
         <configuration>
           <server>org.jboss.errai.cdi.server.gwt.EmbeddedWildFlyLauncher</server>
           <strict>false</strict>

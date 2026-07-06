@@ -287,25 +287,23 @@
           <artifactId>gwt-maven-plugin</artifactId>              
           <version>2.10.0</version>
             <dependencies>
-              <!-- Forcing gwt-maven-plugin to use GWT 2.11 -->
+              <!-- Forcing gwt-maven-plugin to use GWT 2.13.1 -->
               <dependency>
                 <groupId>org.gwtproject</groupId>
                 <artifactId>gwt-dev</artifactId>
-                <version>2.11.0</version>
+                <version>2.13.1</version>
               </dependency>
               <dependency>
                 <groupId>org.gwtproject</groupId>
                 <artifactId>gwt-user</artifactId>
-                <version>2.11.0</version>
+                <version>2.13.1</version>
               </dependency>
           </dependencies>
           <configuration>
-            <!-- GWT 2.11 supports up to Java 11 source level; pin it explicitly
-                 so 'auto' detection does not pick up Java 17 and fail -->
-            <sourceLevel>11</sourceLevel>
+            <sourceLevel>17</sourceLevel>
             <!-- Allow Errai code generators to reflectively access JDK internals
                  (e.g. Throwable.detailMessage) during GWT compilation on Java 17 -->
-            <extraJvmArgs>-Xmx2g -XX:CompileThreshold=7000
+            <extraJvmArgs>-Xmx2g
               --add-opens java.base/java.lang=ALL-UNNAMED
               --add-opens java.base/java.util=ALL-UNNAMED
               --add-opens java.base/java.io=ALL-UNNAMED</extraJvmArgs>

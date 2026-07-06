@@ -65,6 +65,7 @@
     <jetty.version>6.1.25</jetty.version>
     <jboss-as-maven-plugin.version>7.4.Final</jboss-as-maven-plugin.version>
     <maven.gwt.plugin.version>2.10.0</maven.gwt.plugin.version>
+    <gwt.version>2.13.1</gwt.version>
   </properties>
 
   <repositories>
@@ -192,6 +193,18 @@
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>gwt-maven-plugin</artifactId>
         <version>${maven.gwt.plugin.version}</version>
+        <dependencies>
+          <dependency>
+            <groupId>org.gwtproject</groupId>
+            <artifactId>gwt-dev</artifactId>
+            <version>${gwt.version}</version>
+          </dependency>
+          <dependency>
+            <groupId>org.gwtproject</groupId>
+            <artifactId>gwt-user</artifactId>
+            <version>${gwt.version}</version>
+          </dependency>
+        </dependencies>
         <configuration>
           <runTarget>index.html</runTarget>
           <extraJvmArgs>${argLine} -Xmx1g -Xms756m -XX:CompileThreshold=1000 --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED --add-opens java.base/java.io=ALL-UNNAMED</extraJvmArgs>
