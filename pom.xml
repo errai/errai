@@ -75,6 +75,8 @@
       --add-opens java.base/java.util=ALL-UNNAMED
       --add-opens java.base/java.io=ALL-UNNAMED</argLine>
     <illegaltransitivereportonly>false</illegaltransitivereportonly>
+    <!-- Selenium 2.x — last version compatible with selenium-maven-plugin:2.3 (firefox-test profile) -->
+    <version.org.seleniumhq.selenium>2.53.1</version.org.seleniumhq.selenium>
   </properties>
 
   <modules>
@@ -578,11 +580,13 @@
         <dependency>
           <groupId>org.seleniumhq.selenium</groupId>
           <artifactId>selenium-firefox-driver</artifactId>
+          <version>${version.org.seleniumhq.selenium}</version>
           <scope>test</scope>
         </dependency>
         <dependency>
           <groupId>org.seleniumhq.selenium</groupId>
           <artifactId>selenium-java</artifactId>
+          <version>${version.org.seleniumhq.selenium}</version>
           <scope>test</scope>
         </dependency>
       </dependencies>
