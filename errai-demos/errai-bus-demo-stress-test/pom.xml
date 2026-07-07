@@ -304,7 +304,6 @@
         <activeByDefault>true</activeByDefault>
       </activation>
       <properties>
-    <maven.war.plugin.version>3.4.0</maven.war.plugin.version>
         <webDescriptor>jetty</webDescriptor>
         <errai-jboss-as-support.scope>provided</errai-jboss-as-support.scope>
       </properties>
@@ -313,7 +312,6 @@
     <profile>
       <id>wildfly</id>
       <properties>
-    <maven.war.plugin.version>3.4.0</maven.war.plugin.version>
         <webDescriptor>wildfly</webDescriptor>
         <errai-jboss-as-support.scope>compile</errai-jboss-as-support.scope>
       </properties>
@@ -362,7 +360,6 @@
     <profile>
       <id>tomcat</id>
       <properties>
-    <maven.war.plugin.version>3.4.0</maven.war.plugin.version>
         <webDescriptor>tomcat</webDescriptor>
         <errai-jboss-as-support.scope>provided</errai-jboss-as-support.scope>
       </properties>

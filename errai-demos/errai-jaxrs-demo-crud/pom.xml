@@ -208,7 +208,6 @@
     <profile>
       <id>jetty</id>
       <properties>
-    <maven.war.plugin.version>3.4.0</maven.war.plugin.version>
         <webDescriptor>jetty</webDescriptor>
       </properties>
       <dependencies>
@@ -256,7 +255,6 @@
         <activeByDefault>true</activeByDefault>
       </activation>
       <properties>
-    <maven.war.plugin.version>3.4.0</maven.war.plugin.version>
         <webDescriptor>wildfly</webDescriptor>
       </properties>
       <build>
@@ -333,7 +331,6 @@
     <profile>
       <id>tomcat</id>
       <properties>
-    <maven.war.plugin.version>3.4.0</maven.war.plugin.version>
         <webDescriptor>tomcat</webDescriptor>
       </properties>
     </profile>
