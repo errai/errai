@@ -62,7 +62,7 @@
     <maven.deploy.plugin.version>2.7</maven.deploy.plugin.version>
     <maven.gwt.plugin.version>2.10.0</maven.gwt.plugin.version>
     <gwt.version>2.13.1</gwt.version>
-    <jetty.version>9.4.44.v20210927</jetty.version>
+    <jetty.version>9.4.58.v20250814</jetty.version>
     <!-- Dev Mode config properties -->
     <errai.dev.context>${project.artifactId}</errai.dev.context>
     <as.version>23.0.2.Final</as.version>
