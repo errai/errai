@@ -16,10 +16,10 @@
 
 package org.jboss.errai.cdi.rpc.client;
 
-import javax.annotation.PostConstruct;
-import javax.ejb.Startup;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.annotation.PostConstruct;
+import jakarta.ejb.Startup;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 import org.jboss.errai.cdi.client.payload.GenericPayload;
 import org.jboss.errai.cdi.client.payload.ParameterizedSubtypePayload;

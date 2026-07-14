@@ -16,7 +16,7 @@
 
 package org.jboss.errai.security.test.style.client.local.res;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.jboss.errai.common.client.dom.Div;
 import org.jboss.errai.security.shared.api.annotation.RestrictedAccess;

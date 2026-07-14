@@ -16,8 +16,8 @@
 
 package org.jboss.errai.ui.test.basic.client.res;
 
-import javax.annotation.PostConstruct;
-import javax.enterprise.context.ApplicationScoped;
+import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.context.ApplicationScoped;
 
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 

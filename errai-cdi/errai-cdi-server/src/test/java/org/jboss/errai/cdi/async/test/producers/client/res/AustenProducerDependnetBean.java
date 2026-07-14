@@ -16,8 +16,8 @@
 
 package org.jboss.errai.cdi.async.test.producers.client.res;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 /**
  * @author Mike Brock

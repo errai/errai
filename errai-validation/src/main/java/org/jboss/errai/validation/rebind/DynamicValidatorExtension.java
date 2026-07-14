@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 import javax.validation.ConstraintValidator;
 
 import org.jboss.errai.codegen.meta.MetaClass;

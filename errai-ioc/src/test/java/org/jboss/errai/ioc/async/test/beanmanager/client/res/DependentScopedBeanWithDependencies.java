@@ -18,7 +18,7 @@ package org.jboss.errai.ioc.async.test.beanmanager.client.res;
 
 import org.jboss.errai.ioc.client.api.LoadAsync;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 /**
  * @author Mike Brock

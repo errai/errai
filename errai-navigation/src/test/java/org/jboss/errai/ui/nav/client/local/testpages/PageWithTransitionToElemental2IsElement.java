@@ -24,7 +24,7 @@ import org.jboss.errai.ui.client.local.api.elemental2.IsElement;
 import org.jboss.errai.ui.nav.client.local.Page;
 import org.jboss.errai.ui.nav.client.local.TransitionTo;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>

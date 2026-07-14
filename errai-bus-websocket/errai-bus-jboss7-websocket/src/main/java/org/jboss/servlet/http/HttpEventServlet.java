@@ -18,8 +18,8 @@ package org.jboss.servlet.http;
 
 import java.io.IOException;
 
-import javax.servlet.Servlet;
-import javax.servlet.ServletException;
+import jakarta.servlet.Servlet;
+import jakarta.servlet.ServletException;
 
 /**
  * This interface should be implemented by Servlets which would like to handle

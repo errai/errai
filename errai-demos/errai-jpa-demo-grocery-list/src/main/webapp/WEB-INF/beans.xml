@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://xmlns.jcp.org/xml/ns/javaee">
+<beans xmlns="https://jakarta.ee/xml/ns/jakartaee" bean-discovery-mode="all" version="4.0">
   <scan>
     <!-- These exclusions were added by Errai to avoid deploying client-side classes to the server -->
     <exclude name = "org.jboss.errai.demo.grocery.client.local.GroceryListWidget$SortBy$3" />

@@ -16,9 +16,9 @@
 
 package org.jboss.errai.cdi.injection.client;
 
-import javax.enterprise.context.Dependent;
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.enterprise.context.Dependent;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
 /**
  * @author Mike Brock

@@ -20,7 +20,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.ws.rs.Path;
+import jakarta.ws.rs.Path;
 
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.meta.MetaMethod;

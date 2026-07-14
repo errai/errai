@@ -19,7 +19,7 @@ package org.jboss.errai.codegen.builder.impl;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.enterprise.util.TypeLiteral;
+import jakarta.enterprise.util.TypeLiteral;
 
 import org.jboss.errai.codegen.BooleanExpression;
 import org.jboss.errai.codegen.Cast;

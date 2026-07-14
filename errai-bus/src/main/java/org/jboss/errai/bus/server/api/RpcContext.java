@@ -16,9 +16,9 @@
 
 package org.jboss.errai.bus.server.api;
 
-import javax.servlet.ServletRequest;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 
 import org.jboss.errai.bus.client.api.QueueSession;
 import org.jboss.errai.bus.client.api.messaging.Message;

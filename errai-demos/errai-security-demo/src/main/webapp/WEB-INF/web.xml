@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<web-app version="3.0" xmlns="http://java.sun.com/xml/ns/javaee"
+<web-app version="5.0" xmlns="https://jakarta.ee/xml/ns/jakartaee"
    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-   xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
+   xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_5_0.xsd">
    <!-- This is inherited from the web-fragment.xml in errai-javaee-all -->
   <!--<servlet>-->
     <!--<servlet-name>ErraiServlet</servlet-name>-->
@@ -37,7 +37,7 @@
   </filter>
 
   <servlet-mapping>
-    <servlet-name>javax.ws.rs.core.Application</servlet-name>
+    <servlet-name>jakarta.ws.rs.core.Application</servlet-name>
     <url-pattern>/rest/*</url-pattern>
   </servlet-mapping>
 

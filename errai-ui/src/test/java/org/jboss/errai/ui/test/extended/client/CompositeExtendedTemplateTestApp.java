@@ -16,8 +16,8 @@
 
 package org.jboss.errai.ui.test.extended.client;
 
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
+import jakarta.annotation.PostConstruct;
+import jakarta.inject.Inject;
 
 import org.jboss.errai.ioc.client.api.EntryPoint;
 import org.jboss.errai.ui.test.extended.client.res.CompositeSecondLevelExtensionComponent;

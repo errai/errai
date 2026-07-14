@@ -18,10 +18,10 @@ package org.jboss.errai.demo.grocery.client.local;
 
 import static com.google.gwt.dom.client.Style.Unit.PX;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import javax.enterprise.event.Observes;
-import javax.inject.Inject;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
+import jakarta.enterprise.event.Observes;
+import jakarta.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.validation.Validator;
 

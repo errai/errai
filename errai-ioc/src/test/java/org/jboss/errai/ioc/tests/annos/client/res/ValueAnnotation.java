@@ -16,7 +16,7 @@
 
 package org.jboss.errai.ioc.tests.annos.client.res;
 
-import javax.inject.Qualifier;
+import jakarta.inject.Qualifier;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 

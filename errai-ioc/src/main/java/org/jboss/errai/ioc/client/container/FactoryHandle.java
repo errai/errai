@@ -19,9 +19,9 @@ package org.jboss.errai.ioc.client.container;
 import java.lang.annotation.Annotation;
 import java.util.Collection;
 
-import javax.enterprise.context.Dependent;
-import javax.inject.Named;
-import javax.inject.Qualifier;
+import jakarta.enterprise.context.Dependent;
+import jakarta.inject.Named;
+import jakarta.inject.Qualifier;
 
 import org.jboss.errai.ioc.client.api.ActivatedBy;
 

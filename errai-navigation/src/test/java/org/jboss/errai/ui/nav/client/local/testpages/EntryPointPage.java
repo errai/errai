@@ -16,7 +16,7 @@
 
 package org.jboss.errai.ui.nav.client.local.testpages;
 
-import javax.annotation.PreDestroy;
+import jakarta.annotation.PreDestroy;
 
 import org.jboss.errai.ioc.client.api.EntryPoint;
 import org.jboss.errai.ui.nav.client.local.Page;

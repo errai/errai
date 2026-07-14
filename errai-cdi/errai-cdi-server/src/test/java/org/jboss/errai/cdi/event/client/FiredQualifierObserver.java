@@ -19,8 +19,8 @@ package org.jboss.errai.cdi.event.client;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.enterprise.context.Dependent;
-import javax.enterprise.event.Observes;
+import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.event.Observes;
 
 import org.jboss.errai.cdi.event.client.shared.FiredQualifier;
 

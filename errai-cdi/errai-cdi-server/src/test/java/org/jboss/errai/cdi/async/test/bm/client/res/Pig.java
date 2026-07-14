@@ -19,8 +19,8 @@ package org.jboss.errai.cdi.async.test.bm.client.res;
 
 import org.jboss.errai.ioc.client.api.LoadAsync;
 
-import javax.enterprise.context.Dependent;
-import javax.inject.Named;
+import jakarta.enterprise.context.Dependent;
+import jakarta.inject.Named;
 
 /**
  * @author Mike Brock

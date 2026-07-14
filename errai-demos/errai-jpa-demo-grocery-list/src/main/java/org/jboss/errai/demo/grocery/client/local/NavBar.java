@@ -18,7 +18,7 @@ package org.jboss.errai.demo.grocery.client.local;
 
 import java.util.ArrayList;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.jboss.errai.ioc.client.api.AfterInitialization;
 import org.jboss.errai.ui.client.widget.ListWidget;

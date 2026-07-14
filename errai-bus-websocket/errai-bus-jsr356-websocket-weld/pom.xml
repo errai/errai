@@ -36,13 +36,15 @@
     <dependency>
       <groupId>jakarta.servlet</groupId>
       <artifactId>jakarta.servlet-api</artifactId>
-      <scope>provided</scope>
+      <scope>compile</scope>
+      <version>6.0.0</version>
     </dependency>
 
     <dependency>
       <groupId>jakarta.websocket</groupId>
       <artifactId>jakarta.websocket-api</artifactId>
-      <scope>provided</scope>
+      <scope>compile</scope>
+      <version>2.1.1</version>
     </dependency>
 
     <dependency>
@@ -80,6 +82,14 @@
         <exclusion>
           <groupId>javax.enterprise</groupId>
           <artifactId>cdi-api</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>jakarta.enterprise</groupId>
+          <artifactId>jakarta.enterprise.cdi-api</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>jakarta.inject</groupId>
+          <artifactId>jakarta.inject-api</artifactId>
         </exclusion>
       </exclusions>
     </dependency>

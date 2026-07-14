@@ -16,7 +16,7 @@
 
 package org.jboss.errai.cdi.injection.client;
 
-import javax.enterprise.inject.Any;
+import jakarta.enterprise.inject.Any;
 
 /**
  * @author Mike Brock

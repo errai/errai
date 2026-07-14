@@ -16,7 +16,7 @@
 
 package org.jboss.errai.ui.test.nested.client.res;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.Templated;

@@ -23,7 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.enterprise.inject.Alternative;
+import jakarta.enterprise.inject.Alternative;
 import javax.persistence.CascadeType;
 import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
@@ -593,6 +593,26 @@ public class ErraiEntityManager implements EntityManager {
     }
     return metamodel;
   }
+//
+//  @Override
+//  public <T> EntityGraph<T> createEntityGraph(Class<T> aClass) {
+//    return null;
+//  }
+//
+//  @Override
+//  public EntityGraph<?> createEntityGraph(String s) {
+//    return null;
+//  }
+//
+//  @Override
+//  public EntityGraph<?> getEntityGraph(String s) {
+//    return null;
+//  }
+//
+//  @Override
+//  public <T> List<EntityGraph<? super T>> getEntityGraphs(Class<T> aClass) {
+//    return List.of();
+//  }
 
   @Override
   public void persist(final Object entity) {
@@ -774,6 +794,16 @@ public class ErraiEntityManager implements EntityManager {
     throw new UnsupportedOperationException("Not implemented");
   }
 
+//  @Override
+//  public Query createQuery(CriteriaUpdate criteriaUpdate) {
+//    return null;
+//  }
+//
+//  @Override
+//  public Query createQuery(CriteriaDelete criteriaDelete) {
+//    return null;
+//  }
+
   @Override
   public <T> TypedQuery<T> createQuery(final String qlString, final Class<T> resultClass) {
     throw new UnsupportedOperationException("Not implemented");
@@ -794,10 +824,35 @@ public class ErraiEntityManager implements EntityManager {
     throw new UnsupportedOperationException("Not implemented");
   }
 
+//  @Override
+//  public StoredProcedureQuery createNamedStoredProcedureQuery(String s) {
+//    return null;
+//  }
+//
+//  @Override
+//  public StoredProcedureQuery createStoredProcedureQuery(String s) {
+//    return null;
+//  }
+//
+//  @Override
+//  public StoredProcedureQuery createStoredProcedureQuery(String s, Class... classes) {
+//    return null;
+//  }
+//
+//  @Override
+//  public StoredProcedureQuery createStoredProcedureQuery(String s, String... strings) {
+//    return null;
+//  }
+
   @Override
   public void joinTransaction() {
     throw new UnsupportedOperationException("Not implemented");
   }
+
+//  @Override
+//  public boolean isJoinedToTransaction() {
+//    return false;
+//  }
 
   @Override
   public <T> T unwrap(final Class<T> cls) {

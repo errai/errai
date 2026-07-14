@@ -16,7 +16,7 @@
 
 package org.jboss.errai.cdi.async.test.cyclic.client.res;
 
-import javax.enterprise.inject.Alternative;
+import jakarta.enterprise.inject.Alternative;
 
 /**
  * @author Mike Brock

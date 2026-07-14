@@ -16,7 +16,7 @@
 
 package org.jboss.errai.cdi.injection.client;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 
 

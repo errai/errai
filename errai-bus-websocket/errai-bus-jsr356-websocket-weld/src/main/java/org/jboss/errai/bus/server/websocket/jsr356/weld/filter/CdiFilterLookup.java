@@ -21,9 +21,9 @@ import org.jboss.errai.bus.server.websocket.jsr356.filter.WebSocketFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.BeanManager;
-import javax.inject.Inject;
+import jakarta.enterprise.inject.spi.Bean;
+import jakarta.enterprise.inject.spi.BeanManager;
+import jakarta.inject.Inject;
 
 import java.util.ArrayList;
 import java.util.List;

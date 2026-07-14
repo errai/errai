@@ -20,7 +20,7 @@ import static org.jboss.errai.bus.client.api.base.MessageBuilder.*;
 
 import java.lang.annotation.Annotation;
 
-import javax.enterprise.inject.Default;
+import jakarta.enterprise.inject.Default;
 
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.common.client.api.RemoteCallback;

@@ -80,8 +80,8 @@ public class ReachabilityTest {
     final Set<String> expected = new HashSet<String>(
         Arrays.asList(
             "org.jboss.errai.codegen.test.model.FakeBean",
-            "javax.enterprise.inject.Instance",
-            "javax.inject.Inject",
+            "jakarta.enterprise.inject.Instance",
+            "jakarta.inject.Inject",
             "org.jboss.errai.codegen.test.model.Bar",
             "org.jboss.errai.codegen.test.model.Bwah",
             BigDecimal.class.getName(),

@@ -18,7 +18,7 @@ package org.jboss.errai.codegen.test;
 
 import java.lang.annotation.Target;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 
 import static org.apache.commons.lang3.SystemUtils.IS_JAVA_1_8;
 import org.jboss.errai.codegen.AnnotationEncoder;

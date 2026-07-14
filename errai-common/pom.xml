@@ -17,7 +17,8 @@
     <dependency>
       <groupId>jakarta.servlet</groupId>
       <artifactId>jakarta.servlet-api</artifactId>
-      <scope>provided</scope>
+      <scope>compile</scope>
+      <version>6.0.0</version>
     </dependency>
 
     <dependency>
@@ -83,6 +84,11 @@
       <groupId>de.benediktmeurer.gwt-slf4j</groupId>
       <artifactId>gwt-slf4j</artifactId>
     </dependency>
+    <dependency>
+      <groupId>jakarta.annotation</groupId>
+      <artifactId>jakarta.annotation-api</artifactId>
+      <version>2.1.1</version>
+    </dependency>
 
     <dependency>
       <groupId>org.apache.commons</groupId>
@@ -122,6 +128,7 @@
             <artifactId>maven-surefire-plugin</artifactId>
             <!-- Override exclusions in parent -->
             <configuration>
+              <argLine>${argLine}</argLine>
               <excludes combine.self="override">
                 <exclude>**/it/**/*.java</exclude>
               </excludes>
@@ -134,6 +141,12 @@
           <plugin>
             <artifactId>maven-failsafe-plugin</artifactId>
             <configuration>
+              <!-- Pass gwt.args via system property so GWT JUnit runner uses HtmlUnit
+                   (headless) instead of waiting for a real browser. argLine cannot be
+                   used here because the value contains spaces. -->
+              <systemPropertyVariables>
+                <gwt.args>-runStyle HtmlUnit:FF</gwt.args>
+              </systemPropertyVariables>
               <includes>
                 <include>**/it/**/*Tests.java</include>
                 <include>**/it/**/*Test.java</include>
@@ -160,6 +173,7 @@
           <groupId>jakarta.annotation</groupId>
           <artifactId>jakarta.annotation-api</artifactId>
           <scope>test</scope>
+          <version>2.1.1</version>
         </dependency>
       </dependencies>
     </profile>

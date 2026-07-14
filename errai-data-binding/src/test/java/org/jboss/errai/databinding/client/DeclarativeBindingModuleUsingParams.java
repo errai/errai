@@ -18,7 +18,7 @@ package org.jboss.errai.databinding.client;
 
 import java.util.Date;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.jboss.errai.databinding.client.api.Converter;
 import org.jboss.errai.ioc.client.api.EntryPoint;

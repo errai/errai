@@ -16,8 +16,8 @@
 
 package org.jboss.errai.ui.nav.client.local.testpages;
 
-import javax.annotation.PreDestroy;
-import javax.inject.Singleton;
+import jakarta.annotation.PreDestroy;
+import jakarta.inject.Singleton;
 
 import org.jboss.errai.ui.nav.client.local.Page;
 

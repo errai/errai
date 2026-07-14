@@ -25,7 +25,7 @@ import org.jboss.errai.ui.nav.client.local.PageHiding;
 import org.jboss.errai.ui.nav.client.local.PageShowing;
 import org.jboss.errai.ui.nav.client.local.PageShown;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import java.lang.annotation.Annotation;
 import java.util.LinkedList;
 import java.util.List;

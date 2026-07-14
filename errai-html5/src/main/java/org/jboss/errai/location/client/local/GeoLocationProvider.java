@@ -22,10 +22,10 @@ import com.google.gwt.geolocation.client.Position;
 import com.google.gwt.geolocation.client.PositionError;
 import org.jboss.errai.location.client.shared.GeoLocationEvent;
 
-import javax.annotation.PostConstruct;
-import javax.enterprise.event.Event;
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.event.Event;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 
 import static com.google.gwt.geolocation.client.Position.Coordinates;
 

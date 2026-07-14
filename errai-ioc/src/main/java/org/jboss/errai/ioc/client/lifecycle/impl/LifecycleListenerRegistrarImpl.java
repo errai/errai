@@ -24,7 +24,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 
 import org.jboss.errai.ioc.client.container.Factory;
 import org.jboss.errai.ioc.client.lifecycle.api.AuditableLifecycleListener;

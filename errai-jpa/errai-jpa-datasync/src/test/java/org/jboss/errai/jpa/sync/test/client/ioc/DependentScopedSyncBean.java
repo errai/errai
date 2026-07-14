@@ -16,8 +16,8 @@
 
 package org.jboss.errai.jpa.sync.test.client.ioc;
 
-import javax.annotation.PostConstruct;
-import javax.enterprise.context.Dependent;
+import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.context.Dependent;
 
 import org.jboss.errai.jpa.sync.client.local.Sync;
 import org.jboss.errai.jpa.sync.client.local.SyncParam;

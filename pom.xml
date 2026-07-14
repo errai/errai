@@ -204,6 +204,24 @@
       </plugin>
 
       <plugin>
+        <groupId>org.openrewrite.maven</groupId>
+        <artifactId>rewrite-maven-plugin</artifactId>
+        <version>6.43.0</version>
+        <configuration>
+          <activeRecipes>
+            <recipe>org.openrewrite.java.migrate.jakarta.JakartaEE10</recipe>
+          </activeRecipes>
+        </configuration>
+        <dependencies>
+          <dependency>
+            <groupId>org.openrewrite.recipe</groupId>
+            <artifactId>rewrite-migrate-java</artifactId>
+            <version>3.39.0</version>
+          </dependency>
+        </dependencies>
+      </plugin>
+
+      <plugin>
         <artifactId>maven-source-plugin</artifactId>
         <executions>
           <execution>
@@ -538,7 +556,10 @@
       </activation>
       <!-- If we could limit this profile to JDK <=6 on Mac, we'd include -d32 in argLine. But we can't, because profile activation settings are ORed rather than ANDed together. See http://jira.codehaus.org/browse/MNG-4565 -->
       <properties>
-        <argLine>-XX:CompileThreshold=1000 -Djava.awt.headless=true</argLine>
+        <argLine>-XX:CompileThreshold=1000 -Djava.awt.headless=true
+          --add-opens java.base/java.lang=ALL-UNNAMED
+          --add-opens java.base/java.util=ALL-UNNAMED
+          --add-opens java.base/java.io=ALL-UNNAMED</argLine>
       </properties>
     </profile>
 
@@ -613,6 +634,11 @@
                 <additionalClasspathElement>${basedir}/src/main/java/</additionalClasspathElement>
                 <additionalClasspathElement>${basedir}/src/test/java/</additionalClasspathElement>
               </additionalClasspathElements>
+              <!-- Default run style for modules that do not set gwt.args in their own argLine.
+                   Modules with an explicit -Dgwt.args in argLine override this automatically. -->
+              <systemPropertyVariables>
+                <gwt.args>-runStyle HtmlUnit:FF</gwt.args>
+              </systemPropertyVariables>
               <systemProperties>
                 <!-- Must disable long polling for automated tests to succeed -->
                 <property>
@@ -645,6 +671,41 @@
           </plugin>
         </plugins>
       </build>
+      <dependencies>
+        <!-- GWT 2.13.1 JUnit runner (JettyLauncher + JUnitShell) references
+             javax.servlet.Filter and javax.annotation.Resource internally.
+             These classes are absent when only jakarta.* APIs are on the
+             classpath, causing NoClassDefFoundError in every GWTTestCase module.
+             Declared here once so all integration-test modules inherit them. -->
+        <dependency>
+          <groupId>javax.servlet</groupId>
+          <artifactId>javax.servlet-api</artifactId>
+          <version>3.1.0</version>
+          <scope>test</scope>
+        </dependency>
+        <dependency>
+          <groupId>javax.annotation</groupId>
+          <artifactId>javax.annotation-api</artifactId>
+          <version>1.3.2</version>
+          <scope>test</scope>
+        </dependency>
+        <!-- Hibernate JPA (used by errai-jpa-client's GWT code generator at compile time)
+             has static initializers that reference javax.transaction.SystemException and
+             javax.xml.bind.JAXBException. Providing the old JTA and JAXB APIs on the test
+             classpath prevents NoClassDefFoundError during GWT module compilation. -->
+        <dependency>
+          <groupId>javax.transaction</groupId>
+          <artifactId>javax.transaction-api</artifactId>
+          <version>1.3</version>
+          <scope>test</scope>
+        </dependency>
+        <dependency>
+          <groupId>javax.xml.bind</groupId>
+          <artifactId>jaxb-api</artifactId>
+          <version>2.3.1</version>
+          <scope>test</scope>
+        </dependency>
+      </dependencies>
     </profile>
 
     <profile>
@@ -787,6 +848,41 @@
           </plugin>
         </plugins>
       </build>
+      <dependencies>
+        <!-- GWT 2.13.1 JUnit runner (JettyLauncher + JUnitShell) references
+             javax.servlet.Filter and javax.annotation.Resource internally.
+             These classes are absent when only jakarta.* APIs are on the
+             classpath, causing NoClassDefFoundError in every GWTTestCase module.
+             Declared here once so all integration-test modules inherit them. -->
+        <dependency>
+          <groupId>javax.servlet</groupId>
+          <artifactId>javax.servlet-api</artifactId>
+          <version>3.1.0</version>
+          <scope>test</scope>
+        </dependency>
+        <dependency>
+          <groupId>javax.annotation</groupId>
+          <artifactId>javax.annotation-api</artifactId>
+          <version>1.3.2</version>
+          <scope>test</scope>
+        </dependency>
+        <!-- Hibernate JPA (used by errai-jpa-client's GWT code generator at compile time)
+             has static initializers that reference javax.transaction.SystemException and
+             javax.xml.bind.JAXBException. Providing the old JTA and JAXB APIs on the test
+             classpath prevents NoClassDefFoundError during GWT module compilation. -->
+        <dependency>
+          <groupId>javax.transaction</groupId>
+          <artifactId>javax.transaction-api</artifactId>
+          <version>1.3</version>
+          <scope>test</scope>
+        </dependency>
+        <dependency>
+          <groupId>javax.xml.bind</groupId>
+          <artifactId>jaxb-api</artifactId>
+          <version>2.3.1</version>
+          <scope>test</scope>
+        </dependency>
+      </dependencies>
     </profile>
 
     <profile>

@@ -17,7 +17,7 @@
 package org.jboss.errai.ioc.tests.wiring.client.res;
 
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 /**
  * @author Mike Brock

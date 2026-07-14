@@ -23,7 +23,7 @@ import static org.junit.Assert.fail;
 import java.util.List;
 import java.util.Map;
 
-import javax.enterprise.util.TypeLiteral;
+import jakarta.enterprise.util.TypeLiteral;
 
 import org.jboss.errai.codegen.AssignmentOperator;
 import org.jboss.errai.codegen.BooleanOperator;

@@ -16,7 +16,7 @@
 
 package org.jboss.errai.cdi.async.test.postconstruct.client.res;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 
 /**
  * @author Mike Brock

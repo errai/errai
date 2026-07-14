@@ -18,8 +18,8 @@ package org.jboss.errai.demo.todo.client.local;
 
 import java.util.List;
 
-import javax.enterprise.event.Observes;
-import javax.inject.Inject;
+import jakarta.enterprise.event.Observes;
+import jakarta.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 

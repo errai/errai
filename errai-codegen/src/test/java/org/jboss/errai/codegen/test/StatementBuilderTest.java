@@ -25,9 +25,9 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
-import javax.annotation.PostConstruct;
-import javax.enterprise.util.TypeLiteral;
-import javax.inject.Inject;
+import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.util.TypeLiteral;
+import jakarta.inject.Inject;
 
 import org.jboss.errai.codegen.AssignmentOperator;
 import org.jboss.errai.codegen.Cast;
@@ -250,12 +250,12 @@ public class StatementBuilderTest extends AbstractCodegenTest {
             "new java.lang.annotation.Annotation[] { " +
                     "new java.lang.annotation.Annotation() {\n" +
                     " public Class annotationType() {\n" +
-                    "   return javax.inject.Inject.class;\n" +
+                    "   return jakarta.inject.Inject.class;\n" +
                     " }\n" +
                     "}" +
                     ", new java.lang.annotation.Annotation() {\n" +
                     "   public Class annotationType() {\n" +
-                    "     return javax.annotation.PostConstruct.class;\n" +
+                    "     return jakarta.annotation.PostConstruct.class;\n" +
                     "   }\n" +
                     " }\n" +
                     "}", s);

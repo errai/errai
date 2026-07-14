@@ -16,7 +16,7 @@
 
 package org.jboss.errai.demo.todo.client.local;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 

@@ -21,10 +21,9 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.enterprise.inject.Alternative;
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpSession;
-import javax.servlet.http.HttpSessionContext;
+import jakarta.enterprise.inject.Alternative;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.HttpSession;
 
 @Alternative
 @SuppressWarnings("deprecation")
@@ -63,18 +62,8 @@ public class MockHttpSession implements HttpSession {
   }
 
   @Override
-  public HttpSessionContext getSessionContext() {
-    throw new UnsupportedOperationException("Not implemented.");
-  }
-
-  @Override
   public Object getAttribute(String name) {
     return attributes.get(name);
-  }
-
-  @Override
-  public Object getValue(String name) {
-    throw new UnsupportedOperationException("Not implemented.");
   }
 
   @Override
@@ -83,18 +72,8 @@ public class MockHttpSession implements HttpSession {
   }
 
   @Override
-  public String[] getValueNames() {
-    throw new UnsupportedOperationException("Not implemented.");
-  }
-
-  @Override
   public void setAttribute(String name, Object value) {
     attributes.put(name, value);
-  }
-
-  @Override
-  public void putValue(String name, Object value) {
-    throw new UnsupportedOperationException("Not implemented.");
   }
 
   @Override
@@ -102,10 +81,6 @@ public class MockHttpSession implements HttpSession {
     attributes.remove(name);
   }
 
-  @Override
-  public void removeValue(String name) {
-    throw new UnsupportedOperationException("Not implemented.");
-  }
 
   @Override
   public void invalidate() {

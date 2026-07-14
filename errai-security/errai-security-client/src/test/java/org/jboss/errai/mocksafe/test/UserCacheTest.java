@@ -25,7 +25,7 @@ import static org.mockito.Mockito.when;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
-import javax.enterprise.event.Event;
+import jakarta.enterprise.event.Event;
 
 import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.ErrorCallback;

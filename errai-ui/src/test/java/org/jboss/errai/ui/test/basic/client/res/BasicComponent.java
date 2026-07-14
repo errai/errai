@@ -18,8 +18,8 @@ package org.jboss.errai.ui.test.basic.client.res;
 
 import static org.jboss.errai.ui.test.common.client.dom.Document.getDocument;
 
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
+import jakarta.annotation.PostConstruct;
+import jakarta.inject.Inject;
 
 import org.jboss.errai.ui.shared.TemplateUtil;
 import org.jboss.errai.ui.shared.api.annotations.DataField;

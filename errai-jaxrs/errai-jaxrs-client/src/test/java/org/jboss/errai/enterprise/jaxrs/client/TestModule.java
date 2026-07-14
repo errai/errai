@@ -16,8 +16,8 @@
 
 package org.jboss.errai.enterprise.jaxrs.client;
 
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
+import jakarta.annotation.PostConstruct;
+import jakarta.inject.Inject;
 
 import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.enterprise.jaxrs.client.shared.ClientExceptionMappingTestService;

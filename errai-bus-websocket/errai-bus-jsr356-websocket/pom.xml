@@ -32,14 +32,23 @@
 
     <dependency>
       <groupId>jakarta.websocket</groupId>
+      <artifactId>jakarta.websocket-client-api</artifactId>
+      <scope>compile</scope>
+      <version>2.1.1</version>
+    </dependency>
+
+    <dependency>
+      <groupId>jakarta.websocket</groupId>
       <artifactId>jakarta.websocket-api</artifactId>
-      <scope>provided</scope>
+      <scope>compile</scope>
+      <version>2.1.1</version>
     </dependency>
 
     <dependency>
       <groupId>jakarta.servlet</groupId>
       <artifactId>jakarta.servlet-api</artifactId>
-      <scope>provided</scope>
+      <scope>compile</scope>
+      <version>6.0.0</version>
     </dependency>
 
     <dependency>

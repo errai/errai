@@ -16,7 +16,7 @@
 
 package org.jboss.errai.cdi.async.test.bm.client.res;
 
-import javax.enterprise.context.Dependent;
+import jakarta.enterprise.context.Dependent;
 
 /**
  * @author Max Barkley <mbarkley@redhat.com>

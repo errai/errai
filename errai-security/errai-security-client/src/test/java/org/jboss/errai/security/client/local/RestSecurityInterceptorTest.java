@@ -18,7 +18,7 @@ package org.jboss.errai.security.client.local;
 
 import java.lang.annotation.Annotation;
 
-import javax.enterprise.inject.Default;
+import jakarta.enterprise.inject.Default;
 
 import org.jboss.errai.bus.client.api.BusErrorCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;

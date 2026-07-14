@@ -16,7 +16,7 @@
 
 package org.jboss.errai.codegen;
 
-import javax.enterprise.util.TypeLiteral;
+import jakarta.enterprise.util.TypeLiteral;
 
 import org.jboss.errai.codegen.builder.impl.DeclareAssignmentBuilder;
 import org.jboss.errai.codegen.exception.InvalidTypeException;

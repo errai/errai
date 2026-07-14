@@ -16,8 +16,8 @@
 
 package org.jboss.errai.ioc.tests.wiring.client.res;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 /**
  * @author Max Barkley <mbarkley@redhat.com>

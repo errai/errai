@@ -16,7 +16,7 @@
 
 package org.jboss.errai.cdi.rpc.server;
 
-import javax.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 
 import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.cdi.client.remote.MyInterceptedRemote;

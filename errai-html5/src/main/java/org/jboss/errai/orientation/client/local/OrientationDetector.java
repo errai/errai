@@ -19,10 +19,10 @@ package org.jboss.errai.orientation.client.local;
 import com.google.gwt.core.client.GWT;
 import org.jboss.errai.orientation.client.shared.OrientationEvent;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Event;
-import javax.enterprise.inject.Produces;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Event;
+import jakarta.enterprise.inject.Produces;
+import jakarta.inject.Inject;
 
 public interface OrientationDetector {
 

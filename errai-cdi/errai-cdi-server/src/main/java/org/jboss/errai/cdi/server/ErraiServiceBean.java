@@ -25,17 +25,17 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.context.spi.CreationalContext;
-import javax.enterprise.inject.Any;
-import javax.enterprise.inject.Default;
-import javax.enterprise.inject.spi.AnnotatedType;
-import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.BeanManager;
-import javax.enterprise.inject.spi.InjectionPoint;
-import javax.enterprise.inject.spi.InjectionTarget;
-import javax.enterprise.inject.spi.PassivationCapable;
-import javax.enterprise.util.AnnotationLiteral;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.spi.CreationalContext;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Default;
+import jakarta.enterprise.inject.spi.AnnotatedType;
+import jakarta.enterprise.inject.spi.Bean;
+import jakarta.enterprise.inject.spi.BeanManager;
+import jakarta.enterprise.inject.spi.InjectionPoint;
+import jakarta.enterprise.inject.spi.InjectionTarget;
+import jakarta.enterprise.inject.spi.PassivationCapable;
+import jakarta.enterprise.util.AnnotationLiteral;
 
 import org.jboss.errai.bus.server.service.ErraiService;
 import org.jboss.errai.bus.server.service.ErraiServiceImpl;
@@ -66,7 +66,7 @@ public class ErraiServiceBean implements Bean, PassivationCapable {
     final AnnotatedType at = bm.createAnnotatedType(ErraiServiceImpl.class);
 
     //use this to create the class and inject dependencies
-    this.it = bm.createInjectionTarget(at);
+    this.it = bm.getInjectionTargetFactory(at).createInjectionTarget(null);
     this.name = name;
   }
 
@@ -111,10 +111,10 @@ public class ErraiServiceBean implements Bean, PassivationCapable {
     return false;
   }
 
-  @Override
-  public boolean isNullable() {
-    return false;
-  }
+//  @Override
+//  public boolean isNullable() {
+//    return false;
+//  }
 
   @Override
   @SuppressWarnings("unchecked")

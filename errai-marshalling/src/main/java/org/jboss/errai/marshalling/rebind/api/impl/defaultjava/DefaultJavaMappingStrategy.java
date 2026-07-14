@@ -23,7 +23,7 @@ import static org.jboss.errai.codegen.util.Stmt.loadVariable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import javax.enterprise.util.TypeLiteral;
+import jakarta.enterprise.util.TypeLiteral;
 
 import org.jboss.errai.codegen.Cast;
 import org.jboss.errai.codegen.InnerClass;

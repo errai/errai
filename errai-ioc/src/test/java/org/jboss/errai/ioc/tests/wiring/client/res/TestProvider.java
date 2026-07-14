@@ -18,8 +18,8 @@ package org.jboss.errai.ioc.tests.wiring.client.res;
 
 import org.jboss.errai.ioc.client.api.IOCProvider;
 
-import javax.inject.Provider;
-import javax.inject.Singleton;
+import jakarta.inject.Provider;
+import jakarta.inject.Singleton;
 
 /**
  * @author Mike Brock

@@ -29,9 +29,9 @@ import com.googlecode.gwtphonegap.client.file.File;
 import com.googlecode.gwtphonegap.client.media.MediaModule;
 import com.googlecode.gwtphonegap.client.notification.Notification;
 
-import javax.enterprise.inject.Produces;
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.enterprise.inject.Produces;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 
 /**
  * @author edewit@redhat.com

@@ -25,7 +25,7 @@ import java.lang.reflect.ParameterizedType;
 import java.math.BigInteger;
 import java.util.*;
 
-import javax.enterprise.util.TypeLiteral;
+import jakarta.enterprise.util.TypeLiteral;
 import javax.persistence.*;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EntityType;

@@ -16,7 +16,7 @@
 
 package org.jboss.errai.ui.nav.client.local.testpages;
 
-import javax.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 
 import org.jboss.errai.ui.nav.client.local.*;
 import org.jboss.errai.ui.shared.api.annotations.Templated;

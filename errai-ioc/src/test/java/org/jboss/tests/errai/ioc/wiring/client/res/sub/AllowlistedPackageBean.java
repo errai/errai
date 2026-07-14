@@ -16,7 +16,7 @@
 
 package org.jboss.tests.errai.ioc.wiring.client.res.sub;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 
 @Singleton
 public class AllowlistedPackageBean {

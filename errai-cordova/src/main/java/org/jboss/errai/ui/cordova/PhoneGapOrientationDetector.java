@@ -16,9 +16,9 @@
 
 package org.jboss.errai.ui.cordova;
 
-import javax.enterprise.event.Event;
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.enterprise.event.Event;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 
 import org.jboss.errai.ioc.client.api.AfterInitialization;
 import org.jboss.errai.orientation.client.local.OrientationDetector;

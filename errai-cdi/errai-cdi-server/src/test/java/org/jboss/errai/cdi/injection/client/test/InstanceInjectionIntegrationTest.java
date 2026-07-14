@@ -23,7 +23,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.enterprise.inject.Instance;
+import jakarta.enterprise.inject.Instance;
 
 import org.jboss.errai.cdi.injection.client.ApplicationScopedBeanA;
 import org.jboss.errai.cdi.injection.client.DefaultImpl;

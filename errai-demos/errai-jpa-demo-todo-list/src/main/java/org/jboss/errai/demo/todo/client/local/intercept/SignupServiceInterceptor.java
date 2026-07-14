@@ -16,8 +16,8 @@
 
 package org.jboss.errai.demo.todo.client.local.intercept;
 
-import javax.enterprise.context.Dependent;
-import javax.inject.Inject;
+import jakarta.enterprise.context.Dependent;
+import jakarta.inject.Inject;
 
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.common.client.api.interceptor.InterceptsRemoteCall;

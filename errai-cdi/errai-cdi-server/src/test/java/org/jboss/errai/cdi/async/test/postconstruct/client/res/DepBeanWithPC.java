@@ -16,8 +16,8 @@
 
 package org.jboss.errai.cdi.async.test.postconstruct.client.res;
 
-import javax.annotation.PostConstruct;
-import javax.enterprise.context.Dependent;
+import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.context.Dependent;
 
 /**
  * @author Mike Brock

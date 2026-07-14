@@ -16,8 +16,8 @@
 
 package org.jboss.errai.demo.grocery.client.local;
 
-import javax.enterprise.context.Dependent;
-import javax.inject.Inject;
+import jakarta.enterprise.context.Dependent;
+import jakarta.inject.Inject;
 import javax.persistence.EntityManager;
 
 import org.gwtopenmaps.openlayers.client.Bounds;

@@ -16,9 +16,9 @@
 
 package org.jboss.errai.cdi.specialization.client;
 
-import javax.enterprise.context.Dependent;
-import javax.enterprise.inject.Produces;
-import javax.inject.Named;
+import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.inject.Produces;
+import jakarta.inject.Named;
 
 @Dependent
 public class Shop {

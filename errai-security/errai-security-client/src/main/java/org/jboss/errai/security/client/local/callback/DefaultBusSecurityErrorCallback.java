@@ -25,7 +25,7 @@ import org.jboss.errai.security.shared.exception.UnauthorizedException;
 import org.jboss.errai.ui.nav.client.local.api.LoginPage;
 import org.jboss.errai.ui.nav.client.local.api.SecurityError;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 /**
  * Catches {@link SecurityException SecurityExceptions}. If an

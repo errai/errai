@@ -16,7 +16,7 @@
 
 package org.jboss.errai.ui.test.form.client.res;
 
-import javax.enterprise.context.Dependent;
+import jakarta.enterprise.context.Dependent;
 
 import org.jboss.errai.ui.client.widget.AbstractForm;
 import org.jboss.errai.ui.shared.api.annotations.DataField;

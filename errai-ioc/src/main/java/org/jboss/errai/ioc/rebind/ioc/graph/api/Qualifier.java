@@ -21,7 +21,7 @@ import java.util.Spliterators;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import javax.inject.Named;
+import jakarta.inject.Named;
 
 /**
  * A single object for holding all the qualifier annotations of an injectable or

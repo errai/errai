@@ -16,10 +16,10 @@
 
 package org.jboss.errai.ui.test.i18n.client;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import javax.enterprise.context.Dependent;
-import javax.inject.Inject;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
+import jakarta.enterprise.context.Dependent;
+import jakarta.inject.Inject;
 
 import org.jboss.errai.ui.shared.api.annotations.Bundle;
 import org.jboss.errai.ui.test.i18n.client.res.I18nComponent;

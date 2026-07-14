@@ -16,7 +16,7 @@
 
 package org.jboss.errai.demo.todo.client.local;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.jboss.errai.bus.client.api.BusErrorCallback;
 import org.jboss.errai.bus.client.api.messaging.Message;

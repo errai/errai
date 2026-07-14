@@ -65,8 +65,8 @@ import org.jboss.errai.ui.nav.client.local.spi.PageNode;
 import org.jboss.errai.ui.nav.client.shared.NavigationEvent;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Singleton;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Singleton;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;

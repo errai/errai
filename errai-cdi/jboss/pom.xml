@@ -58,6 +58,14 @@
           <groupId>org.eclipse.jetty</groupId>
           <artifactId>apache-jsp</artifactId>
         </exclusion>
+        <exclusion>
+          <groupId>org.eclipse.jetty.ee9</groupId>
+          <artifactId>jetty-ee9-apache-jsp</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.eclipse.jetty.ee10</groupId>
+          <artifactId>jetty-ee10-apache-jsp</artifactId>
+        </exclusion>
       </exclusions>
     </dependency>
   </dependencies>

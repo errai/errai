@@ -16,7 +16,7 @@
 
 package org.jboss.errai.cdi.injection.client;
 
-import javax.enterprise.context.Dependent;
+import jakarta.enterprise.context.Dependent;
 
 import org.jboss.errai.cdi.injection.client.qualifier.Qual2;
 

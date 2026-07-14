@@ -16,8 +16,8 @@
 
 package org.jboss.errai.ioc.tests.wiring.client.res;
 
-import javax.enterprise.context.Dependent;
-import javax.enterprise.inject.Typed;
+import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.inject.Typed;
 
 /**
  *

@@ -29,8 +29,8 @@ import org.jboss.errai.security.shared.exception.UnauthorizedException;
 import org.jboss.errai.security.shared.spi.RequiredRolesExtractor;
 import org.jboss.errai.security.shared.util.AnnotationUtils;
 
-import javax.enterprise.context.Dependent;
-import javax.inject.Inject;
+import jakarta.enterprise.context.Dependent;
+import jakarta.inject.Inject;
 import java.lang.annotation.Annotation;
 import java.util.Set;
 

@@ -21,7 +21,7 @@ import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.TextResource;
 import org.jboss.errai.ui.cordova.JavascriptInjector;
 
-import javax.enterprise.event.Event;
+import jakarta.enterprise.event.Event;
 
 /**
  * GeoFencingProvider provides geo fencing events dependent on the Geofencing cordova plugin

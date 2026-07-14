@@ -16,7 +16,7 @@
 
 package org.jboss.errai.cdi.event.client.test;
 
-import javax.inject.Named;
+import jakarta.inject.Named;
 
 import org.jboss.errai.cdi.client.qualifier.Value;
 import org.jboss.errai.cdi.client.qualifier.WithClazz;

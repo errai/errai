@@ -18,8 +18,8 @@ package org.jboss.errai.cdi.injection.client.mvp;
 
 import com.google.gwt.event.shared.HandlerManager;
 
-import javax.enterprise.context.Dependent;
-import javax.inject.Inject;
+import jakarta.enterprise.context.Dependent;
+import jakarta.inject.Inject;
 
 /**
  * @author Mike Brock

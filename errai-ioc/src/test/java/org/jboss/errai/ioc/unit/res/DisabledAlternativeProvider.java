@@ -16,8 +16,8 @@
 
 package org.jboss.errai.ioc.unit.res;
 
-import javax.enterprise.inject.Alternative;
-import javax.inject.Provider;
+import jakarta.enterprise.inject.Alternative;
+import jakarta.inject.Provider;
 
 import org.jboss.errai.ioc.client.api.IOCProvider;
 

@@ -16,9 +16,9 @@
 
 package org.jboss.errai.cdi.rpc.server;
 
-import javax.interceptor.AroundInvoke;
-import javax.interceptor.Interceptor;
-import javax.interceptor.InvocationContext;
+import jakarta.interceptor.AroundInvoke;
+import jakarta.interceptor.Interceptor;
+import jakarta.interceptor.InvocationContext;
 
 /**
  * Simple interceptor for testing purposes. Takes the first parameter and assumes

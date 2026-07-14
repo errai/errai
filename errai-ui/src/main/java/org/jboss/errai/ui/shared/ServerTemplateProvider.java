@@ -16,7 +16,7 @@
 
 package org.jboss.errai.ui.shared;
 
-import javax.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 
 import org.jboss.errai.ui.client.local.spi.TemplateProvider;
 import org.jboss.errai.ui.client.local.spi.TemplateRenderingCallback;

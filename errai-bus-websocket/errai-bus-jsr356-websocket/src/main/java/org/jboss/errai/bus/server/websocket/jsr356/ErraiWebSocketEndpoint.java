@@ -22,9 +22,9 @@ import org.jboss.errai.bus.server.websocket.jsr356.configuration.ErraiEndpointCo
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.http.HttpSession;
-import javax.websocket.*;
-import javax.websocket.server.ServerEndpoint;
+import jakarta.servlet.http.HttpSession;
+import jakarta.websocket.*;
+import jakarta.websocket.server.ServerEndpoint;
 
 import java.util.HashMap;
 import java.util.Map;

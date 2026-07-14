@@ -16,8 +16,8 @@
 
 package org.jboss.errai.enterprise.client.jaxrs.api;
 
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.PathSegment;
+import jakarta.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.core.PathSegment;
 
 import com.google.gwt.http.client.URL;
 

@@ -61,6 +61,16 @@
       <groupId>com.google.guava</groupId>
       <artifactId>guava-gwt</artifactId>
     </dependency>
+    <dependency>
+      <groupId>jakarta.annotation</groupId>
+      <artifactId>jakarta.annotation-api</artifactId>
+      <version>2.1.1</version>
+    </dependency>
+    <dependency>
+      <groupId>jakarta.enterprise</groupId>
+      <artifactId>jakarta.enterprise.cdi-api</artifactId>
+      <version>4.0.1</version>
+    </dependency>
 
     <!-- GWT -->
     <!-- Must come after errai-common is inherited for patched JUnitShell -->
@@ -147,7 +157,7 @@
 <!-- http://maven.apache.org/surefire/maven-surefire-plugin/examples/fork-options-and-parallel-execution.html#Migrating_the_Deprecated_forkMode_Parameter_to_forkCount_and_reuseForks -->
               <forkCount>1</forkCount>
               <reuseForks>false</reuseForks>
-              <argLine>-Xmx1500m ${argLine} -Dgwt.args='-prod'</argLine>
+              <argLine>-Xmx1500m ${argLine} -Dgwt.args='-prod -runStyle HtmlUnit:FF'</argLine>
               <useManifestOnlyJar>true</useManifestOnlyJar>
               <enableAssertions>false</enableAssertions>
               <systemProperties>

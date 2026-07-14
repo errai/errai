@@ -16,7 +16,7 @@
 
 package org.jboss.errai.databinding.client;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 import org.jboss.errai.ui.shared.api.annotations.Bound;
 import org.jboss.errai.ui.shared.api.annotations.Model;

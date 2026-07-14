@@ -1,6 +1,6 @@
 package org.jboss.errai.ioc.support.bus.tests.server;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.ioc.support.bus.tests.client.res.Greeter;

@@ -19,7 +19,7 @@ package org.jboss.errai.security.client.local.roles;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.enterprise.context.Dependent;
+import jakarta.enterprise.context.Dependent;
 
 import org.jboss.errai.common.client.util.CreationalCallback;
 import org.jboss.errai.ioc.client.container.IOC;

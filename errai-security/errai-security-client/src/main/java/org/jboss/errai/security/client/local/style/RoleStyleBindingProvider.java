@@ -19,8 +19,8 @@ package org.jboss.errai.security.client.local.style;
 import java.lang.annotation.Annotation;
 import java.util.Set;
 
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
+import jakarta.annotation.PostConstruct;
+import jakarta.inject.Inject;
 
 import org.jboss.errai.ioc.client.api.EntryPoint;
 import org.jboss.errai.security.client.local.spi.ActiveUserCache;

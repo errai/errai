@@ -16,7 +16,7 @@
 
 package org.jboss.errai.ui.test.basic.client.res;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;

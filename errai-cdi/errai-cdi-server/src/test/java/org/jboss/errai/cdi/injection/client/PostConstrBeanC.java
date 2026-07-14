@@ -16,7 +16,7 @@
 
 package org.jboss.errai.cdi.injection.client;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 
 /**
  * @author Mike Brock

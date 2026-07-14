@@ -26,18 +26,18 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import javax.enterprise.inject.Alternative;
-import javax.servlet.Filter;
-import javax.servlet.FilterRegistration;
-import javax.servlet.RequestDispatcher;
-import javax.servlet.Servlet;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRegistration;
-import javax.servlet.ServletRegistration.Dynamic;
-import javax.servlet.SessionCookieConfig;
-import javax.servlet.SessionTrackingMode;
-import javax.servlet.descriptor.JspConfigDescriptor;
+import jakarta.enterprise.inject.Alternative;
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterRegistration;
+import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.Servlet;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRegistration;
+import jakarta.servlet.ServletRegistration.Dynamic;
+import jakarta.servlet.SessionCookieConfig;
+import jakarta.servlet.SessionTrackingMode;
+import jakarta.servlet.descriptor.JspConfigDescriptor;
 
 @Alternative
 public class MockServletContext implements ServletContext {
@@ -110,27 +110,7 @@ public class MockServletContext implements ServletContext {
   }
 
   @Override
-  public Servlet getServlet(String name) throws ServletException {
-    throw new UnsupportedOperationException("Not implemented.");
-  }
-
-  @Override
-  public Enumeration<Servlet> getServlets() {
-    throw new UnsupportedOperationException("Not implemented.");
-  }
-
-  @Override
-  public Enumeration<String> getServletNames() {
-    throw new UnsupportedOperationException("Not implemented.");
-  }
-
-  @Override
   public void log(String msg) {
-    throw new UnsupportedOperationException("Not implemented.");
-  }
-
-  @Override
-  public void log(Exception exception, String msg) {
     throw new UnsupportedOperationException("Not implemented.");
   }
 
@@ -226,17 +206,17 @@ public class MockServletContext implements ServletContext {
   }
 
   @Override
-  public javax.servlet.FilterRegistration.Dynamic addFilter(String filterName, String className) {
+  public FilterRegistration.Dynamic addFilter(String filterName, String className) {
     throw new UnsupportedOperationException("Not implemented.");
   }
 
   @Override
-  public javax.servlet.FilterRegistration.Dynamic addFilter(String filterName, Filter filter) {
+  public FilterRegistration.Dynamic addFilter(String filterName, Filter filter) {
     throw new UnsupportedOperationException("Not implemented.");
   }
 
   @Override
-  public javax.servlet.FilterRegistration.Dynamic addFilter(String filterName, Class<? extends Filter> filterClass) {
+  public FilterRegistration.Dynamic addFilter(String filterName, Class<? extends Filter> filterClass) {
     throw new UnsupportedOperationException("Not implemented.");
   }
 

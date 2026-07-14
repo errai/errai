@@ -18,7 +18,7 @@ package org.jboss.errai.ui.test.binding.client.res;
 
 import static org.jboss.errai.ui.test.common.client.dom.Document.getDocument;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.ui.shared.api.annotations.AutoBound;

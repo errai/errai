@@ -20,10 +20,10 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.annotation.PostConstruct;
-import javax.enterprise.event.Event;
-import javax.enterprise.event.Observes;
-import javax.inject.Inject;
+import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.event.Event;
+import jakarta.enterprise.event.Observes;
+import jakarta.inject.Inject;
 
 import org.jboss.errai.cdi.demo.tagcloud.client.shared.Deleted;
 import org.jboss.errai.cdi.demo.tagcloud.client.shared.New;

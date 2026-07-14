@@ -16,8 +16,8 @@
 
 package org.jboss.errai.cdi.async.test.bm.client.res;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Named;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Named;
 
 /**
  * @author Mike Brock

@@ -16,7 +16,7 @@
 
 package org.jboss.errai.cdi.specialization.client;
 
-import javax.enterprise.context.Dependent;
+import jakarta.enterprise.context.Dependent;
 
 /**
  * @author Mike Brock

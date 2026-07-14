@@ -18,8 +18,8 @@ package org.jboss.as.websockets;
 
 import org.jboss.websockets.oio.OioWebSocket;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 
 /**
  * Represents a handle to a single WebSocket connection. It has reader and writer methods to get data in and out.

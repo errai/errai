@@ -29,7 +29,7 @@ import org.jboss.errai.ui.shared.api.annotations.AutoBound;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 /**
 * @author edewit@redhat.com

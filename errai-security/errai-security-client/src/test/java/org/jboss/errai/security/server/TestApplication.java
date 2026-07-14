@@ -17,8 +17,8 @@ package org.jboss.errai.security.server;
 
 import com.google.gwt.dev.util.collect.HashSet;
 
-import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.core.Application;
+import jakarta.ws.rs.ApplicationPath;
+import jakarta.ws.rs.core.Application;
 import java.util.Arrays;
 import java.util.Set;
 

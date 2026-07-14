@@ -21,7 +21,7 @@ import elemental2.dom.HTMLElement;
 import org.jboss.errai.common.client.api.elemental2.IsElement;
 import org.jboss.errai.ui.nav.client.local.Page;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 /**
  *

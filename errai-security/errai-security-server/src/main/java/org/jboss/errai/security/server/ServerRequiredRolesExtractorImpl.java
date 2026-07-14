@@ -19,11 +19,11 @@ package org.jboss.errai.security.server;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.enterprise.context.Dependent;
-import javax.enterprise.context.spi.CreationalContext;
-import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.BeanManager;
-import javax.inject.Inject;
+import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.context.spi.CreationalContext;
+import jakarta.enterprise.inject.spi.Bean;
+import jakarta.enterprise.inject.spi.BeanManager;
+import jakarta.inject.Inject;
 
 import org.jboss.errai.security.shared.api.RequiredRolesProvider;
 import org.jboss.errai.security.shared.roles.SharedRequiredRolesExtractorImpl;

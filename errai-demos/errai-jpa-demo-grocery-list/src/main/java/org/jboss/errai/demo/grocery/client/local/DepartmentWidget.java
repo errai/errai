@@ -16,7 +16,7 @@
 
 package org.jboss.errai.demo.grocery.client.local;
 
-import javax.enterprise.inject.Alternative;
+import jakarta.enterprise.inject.Alternative;
 
 import org.jboss.errai.demo.grocery.client.shared.Department;
 import org.jboss.errai.ui.client.widget.HasModel;

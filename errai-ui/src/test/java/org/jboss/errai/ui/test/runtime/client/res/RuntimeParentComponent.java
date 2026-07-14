@@ -16,8 +16,8 @@
 
 package org.jboss.errai.ui.test.runtime.client.res;
 
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
+import jakarta.annotation.PostConstruct;
+import jakarta.inject.Inject;
 
 import org.jboss.errai.ui.shared.ServerTemplateProvider;
 import org.jboss.errai.ui.shared.TemplateInitializedEvent;

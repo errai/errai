@@ -16,8 +16,8 @@
 
 package org.jboss.errai.enterprise.jaxrs.client.shared;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
 
 /**
  * This service is used to test client-side JAX-RS interceptors.

@@ -20,7 +20,7 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.gwt.user.client.ui.Widget;
 import org.jboss.errai.ui.nav.client.local.Page;
 
-import javax.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 
 /**
  * Simple test page for tracing lifecycle methods.

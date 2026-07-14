@@ -29,8 +29,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.enterprise.event.Observes;
-import javax.enterprise.inject.Any;
+import jakarta.enterprise.event.Observes;
+import jakarta.enterprise.inject.Any;
 
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.Subscription;

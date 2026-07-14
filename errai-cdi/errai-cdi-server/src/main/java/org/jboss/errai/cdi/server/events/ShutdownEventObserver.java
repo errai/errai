@@ -21,10 +21,10 @@ import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.Set;
 
-import javax.enterprise.event.Reception;
-import javax.enterprise.event.TransactionPhase;
-import javax.enterprise.inject.spi.BeforeShutdown;
-import javax.enterprise.inject.spi.ObserverMethod;
+import jakarta.enterprise.event.Reception;
+import jakarta.enterprise.event.TransactionPhase;
+import jakarta.enterprise.inject.spi.BeforeShutdown;
+import jakarta.enterprise.inject.spi.ObserverMethod;
 
 import org.jboss.errai.bus.client.api.messaging.MessageBus;
 import org.jboss.errai.bus.server.util.ServiceParser;

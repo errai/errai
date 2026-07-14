@@ -18,12 +18,11 @@ package org.jboss.errai.security.keycloak.extension;
 
 import java.lang.annotation.Annotation;
 
-import javax.enterprise.event.Observes;
-import javax.enterprise.inject.Default;
-import javax.enterprise.inject.spi.Extension;
-import javax.enterprise.inject.spi.ProcessAnnotatedType;
+import jakarta.enterprise.event.Observes;
+import jakarta.enterprise.inject.Default;
+import jakarta.enterprise.inject.spi.Extension;
+import jakarta.enterprise.inject.spi.ProcessAnnotatedType;
 
-import org.apache.deltaspike.core.util.metadata.builder.AnnotatedTypeBuilder;
 import org.jboss.errai.security.keycloak.KeycloakAuthenticationService;
 import org.jboss.errai.security.shared.service.AuthenticationService;
 
@@ -47,9 +46,9 @@ public class AuthenticationServiceWrapperExtension implements Extension {
     final Class<T> type = processedAnnotatedType.getAnnotatedType().getJavaClass();
 
     if (isNonKeycloakAuthenticationService(type)) {
-      processedAnnotatedType.setAnnotatedType(new AnnotatedTypeBuilder<T>()
-              .readFromType(processedAnnotatedType.getAnnotatedType()).removeFromClass(Default.class)
-              .addToClass(wrapped).create());
+      processedAnnotatedType.configureAnnotatedType()
+              .remove(a -> a.annotationType().equals(Default.class))
+              .add(wrapped);
     }
   }
 

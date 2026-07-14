@@ -20,7 +20,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import java.lang.annotation.Retention;
 
-import javax.inject.Qualifier;
+import jakarta.inject.Qualifier;
 
 /**
  * @author Max Barkley <mbarkley@redhat.com>

@@ -18,7 +18,7 @@ package org.jboss.errai.codegen.builder.impl;
 
 import java.util.Collection;
 
-import javax.enterprise.util.TypeLiteral;
+import jakarta.enterprise.util.TypeLiteral;
 
 import org.jboss.errai.codegen.Context;
 import org.jboss.errai.codegen.Statement;

@@ -20,8 +20,8 @@ import org.jboss.errai.enterprise.client.cdi.api.CDI;
 import org.jboss.errai.ioc.client.api.ContextualTypeProvider;
 import org.jboss.errai.ioc.client.api.IOCProvider;
 
-import javax.enterprise.event.Event;
-import javax.inject.Singleton;
+import jakarta.enterprise.event.Event;
+import jakarta.inject.Singleton;
 import java.lang.annotation.Annotation;
 
 @IOCProvider

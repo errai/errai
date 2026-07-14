@@ -43,12 +43,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Map.Entry;
 
-import javax.enterprise.context.Dependent;
-import javax.enterprise.inject.Any;
-import javax.enterprise.inject.Default;
-import javax.enterprise.inject.Typed;
-import javax.inject.Named;
-import javax.inject.Qualifier;
+import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Default;
+import jakarta.enterprise.inject.Typed;
+import jakarta.inject.Named;
+import jakarta.inject.Qualifier;
 
 import org.jboss.errai.codegen.BooleanOperator;
 import org.jboss.errai.codegen.InnerClass;

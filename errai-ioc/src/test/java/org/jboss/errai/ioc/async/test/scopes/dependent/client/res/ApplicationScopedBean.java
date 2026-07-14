@@ -19,10 +19,10 @@ package org.jboss.errai.ioc.async.test.scopes.dependent.client.res;
 import com.google.gwt.user.client.Random;
 import org.jboss.errai.ioc.client.api.LoadAsync;
 
-import javax.annotation.PreDestroy;
-import javax.enterprise.context.Dependent;
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.annotation.PreDestroy;
+import jakarta.enterprise.context.Dependent;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 
 /**
  * @author Mike Brock

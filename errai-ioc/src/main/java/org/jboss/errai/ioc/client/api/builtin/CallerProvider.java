@@ -19,7 +19,7 @@ package org.jboss.errai.ioc.client.api.builtin;
 
 import java.lang.annotation.Annotation;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 
 import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.ErrorCallback;

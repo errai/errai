@@ -419,9 +419,9 @@
         </dependency>
 
         <dependency>
-          <groupId>org.eclipse.jetty</groupId>
-          <artifactId>jetty-servlet</artifactId>
-          <version>${jetty.version}</version>
+          <groupId>org.eclipse.jetty.ee10</groupId>
+          <artifactId>jetty-ee10-servlet</artifactId>
+          <version>12.0.37</version>
         </dependency>
 
         <dependency>
@@ -460,6 +460,14 @@
             <exclusion>
               <groupId>org.eclipse.jetty</groupId>
               <artifactId>apache-jsp</artifactId>
+            </exclusion>
+            <exclusion>
+              <groupId>org.eclipse.jetty.ee9</groupId>
+              <artifactId>jetty-ee9-apache-jsp</artifactId>
+            </exclusion>
+            <exclusion>
+              <groupId>org.eclipse.jetty.ee10</groupId>
+              <artifactId>jetty-ee10-apache-jsp</artifactId>
             </exclusion>
           </exclusions>
         </dependency>
@@ -500,7 +508,7 @@
           <groupId>jakarta.enterprise</groupId>
           <artifactId>jakarta.enterprise.cdi-api</artifactId>
           <scope>compile</scope>
-          <version>1.0-SP4</version>
+          <version>4.0.1</version>
         </dependency>
       </dependencies>
     </profile>

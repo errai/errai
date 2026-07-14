@@ -28,10 +28,10 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import javax.enterprise.inject.Any;
-import javax.enterprise.inject.Default;
-import javax.enterprise.inject.Stereotype;
-import javax.inject.Named;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Default;
+import jakarta.enterprise.inject.Stereotype;
+import jakarta.inject.Named;
 
 import org.jboss.errai.codegen.meta.HasAnnotations;
 import org.jboss.errai.codegen.meta.MetaClass;
@@ -121,7 +121,7 @@ public class DefaultQualifierFactory implements QualifierFactory {
   private SortedSet<AnnotationWrapper> getRawQualifiers(final HasAnnotations annotated) {
     final SortedSet<AnnotationWrapper> annos = new TreeSet<>();
     for (final Annotation anno : annotated.getAnnotations()) {
-      if (anno.annotationType().isAnnotationPresent(javax.inject.Qualifier.class)) {
+      if (anno.annotationType().isAnnotationPresent(jakarta.inject.Qualifier.class)) {
         if (anno.annotationType().equals(Named.class) && ((Named) anno).value().equals("")) {
           annos.add(createNamed(annotated));
         } else {

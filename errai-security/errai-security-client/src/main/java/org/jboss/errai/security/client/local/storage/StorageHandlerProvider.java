@@ -16,8 +16,8 @@
 
 package org.jboss.errai.security.client.local.storage;
 
-import javax.inject.Provider;
-import javax.inject.Singleton;
+import jakarta.inject.Provider;
+import jakarta.inject.Singleton;
 
 import org.jboss.errai.ioc.client.api.IOCProvider;
 import org.jboss.errai.marshalling.client.Marshalling;

@@ -131,6 +131,34 @@
       <artifactId>errai-jpa-client</artifactId>
     </dependency>
 
+    <!-- errai-jpa-client source files import javax.persistence.*; GWT needs
+         the javax.persistence sources on its classpath to translate them.
+         The jakarta.persistence-api jar uses the jakarta.* namespace and does
+         not satisfy this requirement. -->
+    <dependency>
+      <groupId>javax.persistence</groupId>
+      <artifactId>javax.persistence-api</artifactId>
+      <version>2.2</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>javax.transaction</groupId>
+      <artifactId>javax.transaction-api</artifactId>
+      <version>1.3</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <!-- Hibernate's static initializer references javax.xml.bind.JAXBException
+         (old javax namespace). Java 11+ removed JAXB from the JDK; add the
+         legacy API jar so the GWT compiler process can load Hibernate classes. -->
+    <dependency>
+      <groupId>javax.xml.bind</groupId>
+      <artifactId>jaxb-api</artifactId>
+      <version>2.3.1</version>
+      <scope>provided</scope>
+    </dependency>
+
     <dependency>
       <groupId>org.jboss.errai</groupId>
       <artifactId>errai-data-binding</artifactId>
@@ -219,6 +247,14 @@
         <exclusion>
           <groupId>org.eclipse.jetty</groupId>
           <artifactId>apache-jsp</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.eclipse.jetty.ee9</groupId>
+          <artifactId>jetty-ee9-apache-jsp</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.eclipse.jetty.ee10</groupId>
+          <artifactId>jetty-ee10-apache-jsp</artifactId>
         </exclusion>
       </exclusions>
     </dependency>
@@ -379,16 +415,18 @@
         </dependency>
 
         <dependency>
-          <groupId>javax.validation</groupId>
-          <artifactId>validation-api</artifactId>
+          <groupId>jakarta.validation</groupId>
+          <artifactId>jakarta.validation-api</artifactId>
           <scope>compile</scope>
+          <version>3.0.2</version>
         </dependency>
 
         <dependency>
-          <groupId>javax.validation</groupId>
-          <artifactId>validation-api</artifactId>
+          <groupId>jakarta.validation</groupId>
+          <artifactId>jakarta.validation-api</artifactId>
           <classifier>sources</classifier>
           <scope>compile</scope>
+          <version>3.0.2</version>
         </dependency>
 
         <!-- Runtime / Container dependencies -->
@@ -425,9 +463,9 @@
         </dependency>
 
         <dependency>
-          <groupId>org.eclipse.jetty</groupId>
-          <artifactId>jetty-servlet</artifactId>
-          <version>${jetty.version}</version>
+          <groupId>org.eclipse.jetty.ee10</groupId>
+          <artifactId>jetty-ee10-servlet</artifactId>
+          <version>12.0.37</version>
         </dependency>
 
         <dependency>

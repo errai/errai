@@ -16,8 +16,8 @@
 
 package org.jboss.errai.cdi.injectioncycle.client;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 @ApplicationScoped
 public class Cycle1TypeAImpl implements Cycle1TypeA {

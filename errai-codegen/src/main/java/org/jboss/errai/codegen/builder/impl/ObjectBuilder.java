@@ -20,7 +20,7 @@ import static org.jboss.errai.codegen.CallParameters.fromStatements;
 
 import java.util.Arrays;
 
-import javax.enterprise.util.TypeLiteral;
+import jakarta.enterprise.util.TypeLiteral;
 
 import org.jboss.errai.codegen.CallParameters;
 import org.jboss.errai.codegen.Context;
