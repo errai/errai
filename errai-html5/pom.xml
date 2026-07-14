@@ -178,7 +178,6 @@
           <groupId>jakarta.validation</groupId>
           <artifactId>jakarta.validation-api</artifactId>
           <scope>compile</scope>
-          <version>3.0.2</version>
         </dependency>
 
         <dependency>
@@ -186,7 +185,6 @@
           <artifactId>jakarta.validation-api</artifactId>
           <classifier>sources</classifier>
           <scope>compile</scope>
-          <version>3.0.2</version>
         </dependency>
 
         <!-- Runtime / Container dependencies -->

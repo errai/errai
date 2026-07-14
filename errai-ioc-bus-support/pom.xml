@@ -120,14 +120,12 @@ runtime dependencies on it and it breaks deployment on JBoss AS and Tomcat -->
          <dependency>
            <groupId>jakarta.validation</groupId>
            <artifactId>jakarta.validation-api</artifactId>
-          <version>3.0.2</version>
          </dependency>
 
          <dependency>
            <groupId>jakarta.validation</groupId>
            <artifactId>jakarta.validation-api</artifactId>
            <classifier>sources</classifier>
-          <version>3.0.2</version>
          </dependency>
        </dependencies>
 

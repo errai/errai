@@ -91,7 +91,6 @@
     <dependency>
       <groupId>jakarta.enterprise</groupId>
       <artifactId>jakarta.enterprise.cdi-api</artifactId>
-      <version>4.0.1</version>
     </dependency>
 
     <!-- Must come after errai-common is inherited for patched JUnitShell -->
@@ -152,14 +151,12 @@
         <dependency>
           <groupId>jakarta.validation</groupId>
           <artifactId>jakarta.validation-api</artifactId>
-          <version>3.0.2</version>
         </dependency>
 
         <dependency>
           <groupId>jakarta.validation</groupId>
           <artifactId>jakarta.validation-api</artifactId>
           <classifier>sources</classifier>
-          <version>3.0.2</version>
         </dependency>
 
         <dependency>

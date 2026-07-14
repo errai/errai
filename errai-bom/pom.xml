@@ -1111,6 +1111,17 @@
         <artifactId>jakarta.websocket-api</artifactId>
         <version>${version.jakarta.websocket-api}</version>
       </dependency>
+      <dependency>
+        <groupId>jakarta.websocket</groupId>
+        <artifactId>jakarta.websocket-client-api</artifactId>
+        <version>${version.jakarta.websocket-api}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.wildfly</groupId>
+        <artifactId>wildfly-dist</artifactId>
+        <version>${version.org.wildfly}</version>
+        <type>zip</type>
+      </dependency>
       <!-- This artifact is not managed in the ip-bom -->
       <dependency>
         <groupId>org.wildfly.arquillian</groupId>

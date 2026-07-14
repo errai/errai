@@ -94,7 +94,6 @@
          <groupId>jakarta.validation</groupId>
          <artifactId>jakarta.validation-api</artifactId>
          <classifier>sources</classifier>
-      <version>3.0.2</version>
       </dependency>
 
       <dependency>

@@ -15,7 +15,6 @@
       <groupId>jakarta.servlet</groupId>
       <artifactId>jakarta.servlet-api</artifactId>
       <scope>compile</scope>
-      <version>6.0.0</version>
     </dependency>
     <dependency>
       <groupId>jakarta.interceptor</groupId>
@@ -26,7 +25,6 @@
       <groupId>jakarta.ws.rs</groupId>
       <artifactId>jakarta.ws.rs-api</artifactId>
       <scope>compile</scope>
-      <version>3.1.0</version>
     </dependency>
 
     <dependency>
