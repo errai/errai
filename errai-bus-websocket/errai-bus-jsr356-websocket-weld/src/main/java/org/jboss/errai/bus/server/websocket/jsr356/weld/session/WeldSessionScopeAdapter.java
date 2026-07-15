@@ -19,9 +19,9 @@ package org.jboss.errai.bus.server.websocket.jsr356.weld.session;
 import javax.naming.OperationNotSupportedException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
-import org.jboss.weld.context.http.HttpSessionContext;
 
 import org.jboss.errai.bus.server.websocket.jsr356.weld.SyncBeanStore;
+import org.jboss.weld.context.http.HttpSessionContext;
 import org.jboss.weld.manager.BeanManagerImpl;
 import org.jboss.weld.module.web.servlet.SessionHolder;
 
