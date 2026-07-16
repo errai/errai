@@ -79,20 +79,10 @@ public class MockHttpSession implements HttpSession{
     return 0;
   }
 
-//  @Override
-//  public HttpSessionContext getSessionContext() {
-//    throw new UnsupportedOperationException();
-//  }
-
   @Override
   public Object getAttribute(String s) {
     return attributeMap.get(s);
   }
-
-//  @Override
-//  public Object getValue(String s) {
-//    return valueMap.get(s);
-//  }
 
   @Override
   public Enumeration<String> getAttributeNames() {
@@ -111,30 +101,15 @@ public class MockHttpSession implements HttpSession{
     };
   }
 
-//  @Override
-//  public String[] getValueNames() {
-//    return valueMap.keySet().toArray(new String[valueMap.size()]);
-//  }
-
   @Override
   public void setAttribute(String s, Object o) {
     attributeMap.put(s, o);
   }
 
-//  @Override
-//  public void putValue(String s, Object o) {
-//    valueMap.put(s, o);
-//  }
-
   @Override
   public void removeAttribute(String s) {
     attributeMap.remove(s);
   }
-
-//  @Override
-//  public void removeValue(String s) {
-//    valueMap.remove(s);
-//  }
 
   @Override
   public void invalidate() {

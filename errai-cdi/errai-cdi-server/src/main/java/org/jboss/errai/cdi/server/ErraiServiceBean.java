@@ -111,11 +111,6 @@ public class ErraiServiceBean implements Bean, PassivationCapable {
     return false;
   }
 
-//  @Override
-//  public boolean isNullable() {
-//    return false;
-//  }
-
   @Override
   @SuppressWarnings("unchecked")
   public Object create(final CreationalContext ctx) {

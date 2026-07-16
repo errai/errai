@@ -85,11 +85,6 @@ public class SenderBean implements Bean {
     return false;
   }
 
-//  @Override
-//  public boolean isNullable() {
-//    return false;
-//  }
-
   @Override
   public Set<InjectionPoint> getInjectionPoints() {
     return Collections.emptySet();
