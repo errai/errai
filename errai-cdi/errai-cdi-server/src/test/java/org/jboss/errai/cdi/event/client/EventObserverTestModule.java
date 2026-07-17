@@ -92,10 +92,6 @@ public class EventObserverTestModule extends EventTestObserverSuperClass {
     startEventsReceived = 0;
     startEvent.fire(new StartEvent());
   }
-
-//  private void onObject(@Observes Object foo) {
-//    
-//  }
   
   private void onStart(@Observes StartEvent event) {
     startEventsReceived++;

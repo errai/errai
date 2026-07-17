@@ -101,11 +101,6 @@ public class MessageBusBean implements Bean, PassivationCapable {
     return false;
   }
 
-//  @Override
-//  public boolean isNullable() {
-//    return false;
-//  }
-
   @Override
   public Object create(CreationalContext ctx) {
     return delegate;

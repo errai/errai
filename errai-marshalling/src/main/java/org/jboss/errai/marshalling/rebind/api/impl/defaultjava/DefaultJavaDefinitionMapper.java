@@ -34,9 +34,12 @@ import org.jboss.errai.marshalling.rebind.api.model.impl.SimpleConstructorMappin
 import org.jboss.errai.marshalling.rebind.api.model.impl.SimpleFactoryMapping;
 import org.jboss.errai.marshalling.rebind.api.model.impl.WriteMapping;
 import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.lang.reflect.InaccessibleObjectException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -47,6 +50,8 @@ import java.util.Set;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class DefaultJavaDefinitionMapper {
+  private static final Logger log = LoggerFactory.getLogger(DefaultJavaDefinitionMapper.class);
+
   public static MappingDefinition map(final MetaClass toMap, final DefinitionsFactory definitionsFactory) {
     if ((toMap.isAbstract() && !toMap.isEnum()) || toMap.isInterface()) {
       throw new RuntimeException("cannot marshal an abstract class or interface: " + toMap.getFullyQualifiedName());
@@ -213,9 +218,10 @@ public class DefaultJavaDefinitionMapper {
         catch (final IllegalStateException e) {
           // field is not known to the current classloader. continue anyway.
         }
-        catch (final RuntimeException e) {
-          // InaccessibleObjectException (Java 9+) or similar: JDK strong encapsulation
-          // prevents reflective access to this field. Skip it.
+        catch (final InaccessibleObjectException e) {
+          // Java 9+ strong encapsulation prevents reflective access to this field. Skip it.
+          log.warn("Skipping field '{}' on '{}' due to JDK module encapsulation: {}",
+              field.getName(), c.getFullyQualifiedName(), e.getMessage());
         }
 
         if (writeKeys.contains(field.getName()) && readKeys.contains(field.getName())) {
