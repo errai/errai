@@ -27,7 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import javax.ws.rs.QueryParam;
+import jakarta.ws.rs.QueryParam;
 
 import org.jboss.errai.codegen.BlockStatement;
 import org.jboss.errai.codegen.BooleanOperator;
@@ -408,7 +408,7 @@ public class JaxrsProxyMethodGenerator {
     if (methodReturnType.equals(MetaClassFactory.get(void.class))) {
       result = load(null).returnValue();
     }
-    else if (methodReturnType.isAssignableTo(javax.ws.rs.core.Response.class)) {
+    else if (methodReturnType.isAssignableTo(jakarta.ws.rs.core.Response.class)) {
       result = loadVariable("response").returnValue();
     }
     else {

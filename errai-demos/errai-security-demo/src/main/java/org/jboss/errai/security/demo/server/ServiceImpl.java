@@ -18,8 +18,8 @@ package org.jboss.errai.security.demo.server;
 
 import static org.jboss.errai.security.shared.api.identity.User.StandardUserProperties.*;
 
-import javax.enterprise.context.Dependent;
-import javax.inject.Inject;
+import jakarta.enterprise.context.Dependent;
+import jakarta.inject.Inject;
 
 import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.security.demo.client.shared.AdminService;

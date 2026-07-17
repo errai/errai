@@ -18,9 +18,8 @@ package org.jboss.errai.bus.server.mock;
 
 import org.jboss.errai.bus.server.util.SecureHashUtil;
 
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpSession;
-import javax.servlet.http.HttpSessionContext;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.HttpSession;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -81,18 +80,8 @@ public class MockHttpSession implements HttpSession{
   }
 
   @Override
-  public HttpSessionContext getSessionContext() {
-    throw new UnsupportedOperationException();    
-  }
-
-  @Override
   public Object getAttribute(String s) {
     return attributeMap.get(s);
-  }
-
-  @Override
-  public Object getValue(String s) {
-    return valueMap.get(s);
   }
 
   @Override
@@ -113,28 +102,13 @@ public class MockHttpSession implements HttpSession{
   }
 
   @Override
-  public String[] getValueNames() {
-    return valueMap.keySet().toArray(new String[valueMap.size()]);
-  }
-
-  @Override
   public void setAttribute(String s, Object o) {
     attributeMap.put(s, o);
   }
 
   @Override
-  public void putValue(String s, Object o) {
-    valueMap.put(s, o);
-  }
-
-  @Override
   public void removeAttribute(String s) {
     attributeMap.remove(s);
-  }
-
-  @Override
-  public void removeValue(String s) {
-    valueMap.remove(s);
   }
 
   @Override

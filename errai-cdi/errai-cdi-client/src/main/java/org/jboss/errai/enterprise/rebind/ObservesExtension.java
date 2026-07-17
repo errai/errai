@@ -29,8 +29,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.enterprise.event.Observes;
-import javax.enterprise.inject.Any;
+import jakarta.enterprise.event.Observes;
+import jakarta.enterprise.inject.Any;
 
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.Subscription;
@@ -123,7 +123,7 @@ public class ObservesExtension extends IOCDecoratorExtension<Observes> {
         .appendAll(callbackStatements)
         .finish()
         .publicOverridesMethod("toString")
-        ._(Stmt.load("Observer: " + parmClassName + " " + Arrays.toString(qualifiers)).returnValue());
+        .append(Stmt.load("Observer: " + parmClassName + " " + Arrays.toString(qualifiers)).returnValue());
 
     final List<Statement> initStatements = new ArrayList<>();
     final List<Statement> destroyStatements = new ArrayList<>();
@@ -213,7 +213,7 @@ public class ObservesExtension extends IOCDecoratorExtension<Observes> {
         .appendAll(fireEventStmts)
         .finish()
         .publicOverridesMethod("toString")
-        ._(Stmt.load("Observer: " + parmClassName + " " + Arrays.toString(qualifiers)).returnValue());
+        .append(Stmt.load("Observer: " + parmClassName + " " + Arrays.toString(qualifiers)).returnValue());
 
     return callBackBlock;
   }
@@ -239,7 +239,7 @@ public class ObservesExtension extends IOCDecoratorExtension<Observes> {
         .appendAll(fireEventStmts)
         .finish()
         .publicOverridesMethod("toString")
-        ._(Stmt.load("JsTypeObserver: " + parmClassName).returnValue());
+        .append(Stmt.load("JsTypeObserver: " + parmClassName).returnValue());
 
     return callBackBlock;
   }

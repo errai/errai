@@ -16,8 +16,8 @@
 
 package org.jboss.errai.ioc.tests.beanmanager.client.res;
 
-import javax.enterprise.context.Dependent;
-import javax.inject.Inject;
+import jakarta.enterprise.context.Dependent;
+import jakarta.inject.Inject;
 
 import org.jboss.errai.common.client.api.annotations.IOCProducer;
 import org.jboss.errai.ioc.client.api.ManagedInstance;

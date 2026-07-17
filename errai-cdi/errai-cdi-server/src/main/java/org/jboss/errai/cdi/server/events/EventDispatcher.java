@@ -27,9 +27,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.enterprise.inject.spi.BeanManager;
-import javax.enterprise.inject.spi.EventMetadata;
-import javax.enterprise.inject.spi.ObserverMethod;
+import jakarta.enterprise.inject.spi.BeanManager;
+import jakarta.enterprise.inject.spi.EventMetadata;
+import jakarta.enterprise.inject.spi.ObserverMethod;
 
 import org.jboss.errai.bus.client.api.QueueSession;
 import org.jboss.errai.bus.client.api.RoutingFlag;

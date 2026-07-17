@@ -16,10 +16,10 @@
 
 package org.jboss.errai.cdi.event.client;
 
-import javax.enterprise.context.Dependent;
-import javax.enterprise.event.Event;
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.event.Event;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
 import org.jboss.errai.cdi.client.qualifier.Value;
 import org.jboss.errai.cdi.client.qualifier.WithClazz;

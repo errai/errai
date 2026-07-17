@@ -18,9 +18,9 @@ package org.jboss.errai.demo.grocery.client.local;
 
 import static com.google.gwt.dom.client.Style.Unit.PX;
 
-import javax.annotation.PostConstruct;
-import javax.enterprise.context.Dependent;
-import javax.inject.Inject;
+import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.context.Dependent;
+import jakarta.inject.Inject;
 import javax.persistence.EntityManager;
 
 import org.jboss.errai.databinding.client.api.DataBinder;

@@ -72,11 +72,11 @@ public class LongTapRecognizer extends AbstractRecognizer {
     case INVALID:
       break;
     case READY:
-      startPositions.add(new TouchPoint(touches.get(touchCount - 1)));
+      startPositions.add(new TouchPoint(touches.get(touchCount - 1).getIdentifier(), touches.get(touchCount - 1).getPageX(), touches.get(touchCount - 1).getPageY()));
       state = State.FINGERS_DOWN;
       break;
     case FINGERS_DOWN:
-      startPositions.add(new TouchPoint(touches.get(touchCount - 1)));
+      startPositions.add(new TouchPoint(touches.get(touchCount - 1).getIdentifier(), touches.get(touchCount - 1).getPageX(), touches.get(touchCount - 1).getPageY()));
       break;
     case FINGERS_UP:
     default:

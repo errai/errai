@@ -16,7 +16,7 @@
 
 package org.jboss.errai.bus.server.servlet;
 
-import javax.servlet.ServletContext;
+import jakarta.servlet.ServletContext;
 
 /**
  * A simple abstraction interface around ServletConfig and FilterConfig for the purpose of unifying configuration

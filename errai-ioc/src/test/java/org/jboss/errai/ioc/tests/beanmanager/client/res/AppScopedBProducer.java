@@ -16,7 +16,7 @@
 
 package org.jboss.errai.ioc.tests.beanmanager.client.res;
 
-import javax.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 
 import org.jboss.errai.common.client.api.annotations.IOCProducer;
 import org.jboss.errai.ioc.client.api.ManagedInstance;

@@ -16,7 +16,7 @@
 
 package org.jboss.errai.jpa.sync.test.client;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import javax.persistence.EntityManager;
 
 import org.jboss.errai.ioc.client.api.EntryPoint;

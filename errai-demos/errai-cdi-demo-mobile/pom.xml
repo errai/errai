@@ -52,18 +52,19 @@
   </organization>
 
   <properties>
+    <maven.war.plugin.version>3.4.0</maven.war.plugin.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <webDescriptor>wildfly</webDescriptor>
     <skipTests>true</skipTests>
     <argLine></argLine>
     <!-- maven plugins versions -->
-    <maven.war.plugin.version>2.1.1</maven.war.plugin.version>
     <maven.surefire.plugin.version>2.5</maven.surefire.plugin.version>
     <maven.clean.plugin.version>2.4.1</maven.clean.plugin.version>
     <maven.compiler.plugin.version>2.3.2</maven.compiler.plugin.version>
     <maven.deploy.plugin.version>2.7</maven.deploy.plugin.version>
     <maven.gwt.plugin.version>2.10.0</maven.gwt.plugin.version>
-    <jetty.version>9.4.44.v20210927</jetty.version>
+    <gwt.version>2.13.1</gwt.version>
+    <jetty.version>9.4.58.v20250814</jetty.version>
     <!-- Dev Mode config properties -->
     <errai.dev.context>${project.artifactId}</errai.dev.context>
     <as.version>23.0.2.Final</as.version>
@@ -215,10 +216,22 @@
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>gwt-maven-plugin</artifactId>
         <version>${maven.gwt.plugin.version}</version>
+        <dependencies>
+          <dependency>
+            <groupId>org.gwtproject</groupId>
+            <artifactId>gwt-dev</artifactId>
+            <version>${gwt.version}</version>
+          </dependency>
+          <dependency>
+            <groupId>org.gwtproject</groupId>
+            <artifactId>gwt-user</artifactId>
+            <version>${gwt.version}</version>
+          </dependency>
+        </dependencies>
         <configuration>
           <logLevel>INFO</logLevel>
           <noServer>false</noServer>
-          <extraJvmArgs>-Xmx2048m -XX:CompileThreshold=7000 -Derrai.jboss.home=${errai.jboss.home} -Derrai.dev.context=${errai.dev.context}</extraJvmArgs>
+          <extraJvmArgs>-Xmx2048m -XX:CompileThreshold=7000 -Derrai.jboss.home=${errai.jboss.home} -Derrai.dev.context=${errai.dev.context} --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED --add-opens java.base/java.io=ALL-UNNAMED</extraJvmArgs>
           <server>org.jboss.errai.cdi.server.gwt.EmbeddedWildFlyLauncher</server>
           <runTarget>${errai.dev.context}</runTarget>
           <hostedWebapp>src/main/webapp</hostedWebapp>
@@ -272,7 +285,7 @@
 
       <plugin>
         <artifactId>maven-war-plugin</artifactId>
-        <version>2.1.1</version>
+        <version>3.4.0</version>
         <configuration>
           <warName>${project.artifactId}</warName>
           <outputFileNameMapping>@{artifactId}@-@{baseVersion}@@{dashClassifier?}@.@{extension}@</outputFileNameMapping>
@@ -406,9 +419,9 @@
         </dependency>
 
         <dependency>
-          <groupId>org.eclipse.jetty</groupId>
-          <artifactId>jetty-servlet</artifactId>
-          <version>${jetty.version}</version>
+          <groupId>org.eclipse.jetty.ee10</groupId>
+          <artifactId>jetty-ee10-servlet</artifactId>
+          <version>12.0.37</version>
         </dependency>
 
         <dependency>
@@ -447,6 +460,14 @@
             <exclusion>
               <groupId>org.eclipse.jetty</groupId>
               <artifactId>apache-jsp</artifactId>
+            </exclusion>
+            <exclusion>
+              <groupId>org.eclipse.jetty.ee9</groupId>
+              <artifactId>jetty-ee9-apache-jsp</artifactId>
+            </exclusion>
+            <exclusion>
+              <groupId>org.eclipse.jetty.ee10</groupId>
+              <artifactId>jetty-ee10-apache-jsp</artifactId>
             </exclusion>
           </exclusions>
         </dependency>
@@ -487,7 +508,7 @@
           <groupId>jakarta.enterprise</groupId>
           <artifactId>jakarta.enterprise.cdi-api</artifactId>
           <scope>compile</scope>
-          <version>1.0-SP4</version>
+          <version>4.0.1</version>
         </dependency>
       </dependencies>
     </profile>

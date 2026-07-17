@@ -18,8 +18,8 @@ package org.jboss.errai.demo.todo.server;
 
 import java.util.List;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.jpa.sync.client.shared.DataSyncService;

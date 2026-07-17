@@ -16,7 +16,7 @@
 
 package org.jboss.errai.ioc.tests.qualifiers.client.res;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.jboss.errai.ioc.client.api.EntryPoint;
 

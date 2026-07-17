@@ -18,7 +18,7 @@ package org.jboss.errai.databinding.client;
 
 import java.lang.annotation.Annotation;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 
 import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.ioc.client.api.ContextualTypeProvider;

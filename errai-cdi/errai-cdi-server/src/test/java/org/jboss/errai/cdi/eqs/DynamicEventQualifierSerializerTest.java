@@ -21,7 +21,7 @@ import static org.junit.Assert.assertEquals;
 
 import java.lang.annotation.Annotation;
 
-import javax.enterprise.util.Nonbinding;
+import jakarta.enterprise.util.Nonbinding;
 
 import org.jboss.errai.cdi.server.DynamicEventQualifierSerializer;
 import org.junit.Before;

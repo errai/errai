@@ -48,14 +48,15 @@
     <url>scm:git:git@github.com:errai/errai.git</url>
   </scm>
   <properties>
+    <maven.war.plugin.version>3.4.0</maven.war.plugin.version>
     <maven.resources.plugin.version>2.6</maven.resources.plugin.version>
     <jetty.version>6.1.25</jetty.version>    
     <maven.clean.plugin.version>2.4.1</maven.clean.plugin.version>
     <wildfly.plugin.version>1.1.0.Alpha8</wildfly.plugin.version>
     <picketlink.version>2.6.0.Final</picketlink.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <maven.war.plugin.version>2.1.1</maven.war.plugin.version>
     <maven.gwt.plugin.version>2.10.0</maven.gwt.plugin.version>
+    <gwt.version>2.13.1</gwt.version>
     <skipTests>true</skipTests>
     <maven.deploy.plugin.version>2.7</maven.deploy.plugin.version>
     <argLine></argLine>
@@ -194,6 +195,58 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
+      <groupId>javax.persistence</groupId>
+      <artifactId>javax.persistence-api</artifactId>
+      <version>2.2</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>javax.transaction</groupId>
+      <artifactId>javax.transaction-api</artifactId>
+      <version>1.3</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <!-- Hibernate's static initializer references javax.xml.bind.JAXBException
+         (old javax namespace). Java 11+ removed JAXB from the JDK; add the
+         legacy API jar so the GWT compiler process can load Hibernate classes. -->
+    <dependency>
+      <groupId>javax.xml.bind</groupId>
+      <artifactId>jaxb-api</artifactId>
+      <version>2.3.1</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <!-- GWT's embedded JDT cannot process class files compiled at Java 11+
+         bytecode level. The BOM pins jetty-server/http/io/util to 11.0.26
+         which are Java 11 modules. Override them to the 9.4.x version that
+         is already on the classpath via other Jetty 9.4 transitive deps. -->
+    <dependency>
+      <groupId>org.eclipse.jetty</groupId>
+      <artifactId>jetty-server</artifactId>
+      <version>9.4.58.v20250814</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.jetty</groupId>
+      <artifactId>jetty-http</artifactId>
+      <version>9.4.58.v20250814</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.jetty</groupId>
+      <artifactId>jetty-io</artifactId>
+      <version>9.4.58.v20250814</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.jetty</groupId>
+      <artifactId>jetty-util</artifactId>
+      <version>9.4.58.v20250814</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
       <groupId>org.jboss.errai</groupId>
       <artifactId>errai-jpa-datasync</artifactId>      
     </dependency>
@@ -209,11 +262,13 @@
     <dependency>
       <groupId>org.picketlink</groupId>
       <artifactId>picketlink-api</artifactId>
+      <version>${picketlink.version}</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.picketlink</groupId>
       <artifactId>picketlink-impl</artifactId>
+      <version>${picketlink.version}</version>
     </dependency>
     <dependency>
       <groupId>jakarta.servlet</groupId>
@@ -346,7 +401,7 @@
       </plugin>
       <plugin>
         <artifactId>maven-dependency-plugin</artifactId>
-        <version>2.8</version>
+        <version>3.4.0</version>
         <executions>
           <execution>
             <id>unpack</id>
@@ -394,8 +449,20 @@
       </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
-        <artifactId>gwt-maven-plugin</artifactId> 
-        <version>${maven.gwt.plugin.version}</version>       
+        <artifactId>gwt-maven-plugin</artifactId>
+        <version>${maven.gwt.plugin.version}</version>
+        <dependencies>
+          <dependency>
+            <groupId>org.gwtproject</groupId>
+            <artifactId>gwt-dev</artifactId>
+            <version>${gwt.version}</version>
+          </dependency>
+          <dependency>
+            <groupId>org.gwtproject</groupId>
+            <artifactId>gwt-user</artifactId>
+            <version>${gwt.version}</version>
+          </dependency>
+        </dependencies>
         <executions>
           <execution>
             <id>resources</id>
@@ -420,7 +487,7 @@
           <disableCastChecking>true</disableCastChecking>
           <runTarget>${errai.dev.context}/</runTarget>
           <hostedWebapp>src/main/webapp</hostedWebapp>
-          <extraJvmArgs>-Xmx2g -XX:CompileThreshold=7000 -Derrai.jboss.home=${errai.jboss.home} -Derrai.dev.context=${errai.dev.context}</extraJvmArgs>
+          <extraJvmArgs>-Xmx2g -XX:CompileThreshold=7000 -Derrai.jboss.home=${errai.jboss.home} -Derrai.dev.context=${errai.dev.context} --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED --add-opens java.base/java.io=ALL-UNNAMED</extraJvmArgs>
         </configuration>
       </plugin>
     </plugins>
@@ -440,7 +507,7 @@
           </plugin>
           <plugin>
             <artifactId>maven-war-plugin</artifactId>
-            <version>2.2</version>
+            <version>3.4.0</version>
             <configuration>
               <packagingExcludes>**/javax/**/*.*,**/client/local/**/*.class</packagingExcludes>
               <outputFileNameMapping>@{artifactId}@-@{baseVersion}@@{dashClassifier?}@.@{extension}@</outputFileNameMapping>

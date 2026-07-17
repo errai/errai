@@ -18,7 +18,7 @@ package org.jboss.errai.enterprise.rebind;
 
 import java.util.Collection;
 
-import javax.ws.rs.Path;
+import jakarta.ws.rs.Path;
 
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;

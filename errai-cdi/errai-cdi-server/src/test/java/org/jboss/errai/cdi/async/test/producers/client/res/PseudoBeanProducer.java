@@ -16,7 +16,7 @@
 
 package org.jboss.errai.cdi.async.test.producers.client.res;
 
-import javax.enterprise.inject.Produces;
+import jakarta.enterprise.inject.Produces;
 
 public class PseudoBeanProducer {
   

@@ -20,7 +20,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import org.jboss.errai.ui.nav.client.local.Page;
 import org.jboss.errai.ui.nav.client.local.PageShowing;
 
-import javax.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 
 /**
  * Simple test page which throws an exception in {@link PageShowing}.

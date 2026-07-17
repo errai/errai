@@ -18,8 +18,8 @@ package org.jboss.errai.demo.todo.client.local;
 
 import java.util.Set;
 
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
+import jakarta.annotation.PostConstruct;
+import jakarta.inject.Inject;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 

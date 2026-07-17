@@ -18,8 +18,8 @@ package org.jboss.errai.ui.nav.client.local;
 
 import java.lang.annotation.Annotation;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 
 import org.jboss.errai.ioc.client.api.ContextualTypeProvider;
 import org.jboss.errai.ioc.client.api.IOCProvider;

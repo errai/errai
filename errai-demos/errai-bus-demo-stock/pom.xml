@@ -51,15 +51,16 @@
   </organization>
 
   <properties>
+    <maven.war.plugin.version>3.4.0</maven.war.plugin.version>
     <skipTests>true</skipTests>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <!-- maven plugins versions -->
-    <maven.war.plugin.version>2.1.1</maven.war.plugin.version>
     <maven.surefire.plugin.version>2.5</maven.surefire.plugin.version>
     <maven.clean.plugin.version>2.4.1</maven.clean.plugin.version>
     <maven.compiler.plugin.version>2.3.2</maven.compiler.plugin.version>
     <maven.deploy.plugin.version>2.7</maven.deploy.plugin.version>
     <maven.gwt.plugin.version>2.10.0</maven.gwt.plugin.version>
+    <gwt.version>2.13.1</gwt.version>
   </properties>
 
   <repositories>
@@ -180,11 +181,23 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>gwt-maven-plugin</artifactId>
-        <version>${maven.gwt.plugin.version}</version>    
+        <version>${maven.gwt.plugin.version}</version>
+        <dependencies>
+          <dependency>
+            <groupId>org.gwtproject</groupId>
+            <artifactId>gwt-dev</artifactId>
+            <version>${gwt.version}</version>
+          </dependency>
+          <dependency>
+            <groupId>org.gwtproject</groupId>
+            <artifactId>gwt-user</artifactId>
+            <version>${gwt.version}</version>
+          </dependency>
+        </dependencies>
         <configuration>
           <logLevel>INFO</logLevel>
           <runTarget>App.html</runTarget>
-          <extraJvmArgs>-Xmx1g</extraJvmArgs>
+          <extraJvmArgs>-Xmx1g --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED --add-opens java.base/java.io=ALL-UNNAMED</extraJvmArgs>
           <jvm></jvm>
           <style>DETAILED</style>
           <hostedWebapp>src/main/webapp/</hostedWebapp>

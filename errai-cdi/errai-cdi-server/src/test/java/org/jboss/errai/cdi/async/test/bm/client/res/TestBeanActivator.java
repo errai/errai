@@ -16,7 +16,7 @@
 
 package org.jboss.errai.cdi.async.test.bm.client.res;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 
 import org.jboss.errai.ioc.client.container.BeanActivator;
 import org.junit.Ignore;

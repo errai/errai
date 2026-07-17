@@ -18,9 +18,9 @@ package org.jboss.errai.ioc.async.test.scopes.dependent.client.res;
 
 import org.jboss.errai.ioc.client.api.LoadAsync;
 
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.annotation.PostConstruct;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import java.util.ArrayList;
 
 /**

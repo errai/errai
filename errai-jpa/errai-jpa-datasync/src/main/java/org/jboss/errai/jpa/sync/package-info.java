@@ -4,4 +4,3 @@
  */
 @java.lang.Deprecated
 package org.jboss.errai.jpa.sync;
-

@@ -19,7 +19,7 @@ package org.jboss.errai.ui.rebind.ioc.element;
 import org.jboss.errai.codegen.meta.HasAnnotations;
 import org.jboss.errai.codegen.util.CDIAnnotationUtils;
 
-import javax.inject.Named;
+import jakarta.inject.Named;
 import java.lang.annotation.Annotation;
 
 /**

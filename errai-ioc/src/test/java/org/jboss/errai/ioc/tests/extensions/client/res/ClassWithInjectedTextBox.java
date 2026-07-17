@@ -16,8 +16,8 @@
 
 package org.jboss.errai.ioc.tests.extensions.client.res;
 
-import javax.enterprise.context.Dependent;
-import javax.inject.Inject;
+import jakarta.enterprise.context.Dependent;
+import jakarta.inject.Inject;
 
 import com.google.gwt.user.client.ui.TextBox;
 

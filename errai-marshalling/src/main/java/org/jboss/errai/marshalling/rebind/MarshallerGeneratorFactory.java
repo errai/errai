@@ -33,8 +33,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.enterprise.context.Dependent;
-import javax.enterprise.util.TypeLiteral;
+import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.util.TypeLiteral;
 
 import org.jboss.errai.codegen.Context;
 import org.jboss.errai.codegen.InnerClass;

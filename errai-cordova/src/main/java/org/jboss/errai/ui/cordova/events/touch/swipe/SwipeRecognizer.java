@@ -132,7 +132,7 @@ public class SwipeRecognizer extends AbstractRecognizer {
           direction = touch.getPageX() - x > 0 ? Direction.LEFT_TO_RIGHT : Direction.RIGHT_TO_LEFT;
 
           SwipeStartEvent swipeStartEvent =
-                  new SwipeStartEvent(new TouchPoint(touch), touch.getPageX() - x, direction);
+                  new SwipeStartEvent(new TouchPoint(touch.getIdentifier(), touch.getPageX(), touch.getPageY()), touch.getPageX() - x, direction);
 
           source.fireEvent(swipeStartEvent);
 
@@ -143,7 +143,7 @@ public class SwipeRecognizer extends AbstractRecognizer {
             direction = touch.getPageY() - y > 0 ? Direction.TOP_TO_BOTTOM : Direction.BOTTOM_TO_TOP;
 
             SwipeStartEvent swipeStartEvent =
-                    new SwipeStartEvent(new TouchPoint(touch), touch.getPageY() - y, direction);
+                    new SwipeStartEvent(new TouchPoint(touch.getIdentifier(), touch.getPageX(), touch.getPageY()), touch.getPageY() - y, direction);
 
             source.fireEvent(swipeStartEvent);
 
@@ -159,7 +159,7 @@ public class SwipeRecognizer extends AbstractRecognizer {
           case BOTTOM_TO_TOP:
             lastDistance = Math.abs(touch.getPageY() - y);
             source.fireEvent(
-                    new SwipeMoveEvent(new TouchPoint(touch), lastDistance > minDistance,
+                    new SwipeMoveEvent(new TouchPoint(touch.getIdentifier(), touch.getPageX(), touch.getPageY()), lastDistance > minDistance,
                             lastDistance, direction));
             break;
 
@@ -167,7 +167,7 @@ public class SwipeRecognizer extends AbstractRecognizer {
           case RIGHT_TO_LEFT:
             lastDistance = Math.abs(touch.getPageX() - x);
             source.fireEvent(
-                    new SwipeMoveEvent(new TouchPoint(touch), lastDistance > minDistance,
+                    new SwipeMoveEvent(new TouchPoint(touch.getIdentifier(), touch.getPageX(), touch.getPageY()), lastDistance > minDistance,
                             lastDistance, direction));
 
             break;

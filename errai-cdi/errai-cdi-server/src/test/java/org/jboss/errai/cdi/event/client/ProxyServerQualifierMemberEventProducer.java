@@ -16,8 +16,8 @@
 
 package org.jboss.errai.cdi.event.client;
 
-import javax.enterprise.context.Dependent;
-import javax.inject.Inject;
+import jakarta.enterprise.context.Dependent;
+import jakarta.inject.Inject;
 
 import org.jboss.errai.cdi.event.client.shared.QualifiedMemberEventProducer;
 import org.jboss.errai.common.client.api.Caller;

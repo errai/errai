@@ -20,8 +20,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.Produces;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.Produces;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jboss.errai.codegen.meta.MetaClass;

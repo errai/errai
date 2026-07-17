@@ -14,9 +14,8 @@
   <description>JEE 7 / CDI (Weld) extension to the JSR-356 compliant Errai Bus endpoint.</description>
 
   <properties>
-    <wildfly.version>23.0.2.Final</wildfly.version>
     <unpack-as-folder>${project.build.directory}/as-test</unpack-as-folder>
-    <test-as-folder>${unpack-as-folder}/wildfly-${wildfly.version}</test-as-folder>
+    <test-as-folder>${unpack-as-folder}/wildfly-${version.org.wildfly}</test-as-folder>
   </properties>
 
   <dependencies>
@@ -36,13 +35,13 @@
     <dependency>
       <groupId>jakarta.servlet</groupId>
       <artifactId>jakarta.servlet-api</artifactId>
-      <scope>provided</scope>
+      <scope>compile</scope>
     </dependency>
 
     <dependency>
       <groupId>jakarta.websocket</groupId>
       <artifactId>jakarta.websocket-api</artifactId>
-      <scope>provided</scope>
+      <scope>compile</scope>
     </dependency>
 
     <dependency>
@@ -81,6 +80,14 @@
           <groupId>javax.enterprise</groupId>
           <artifactId>cdi-api</artifactId>
         </exclusion>
+        <exclusion>
+          <groupId>jakarta.enterprise</groupId>
+          <artifactId>jakarta.enterprise.cdi-api</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>jakarta.inject</groupId>
+          <artifactId>jakarta.inject-api</artifactId>
+        </exclusion>
       </exclusions>
     </dependency>
     <dependency>
@@ -100,7 +107,6 @@
     <dependency>
       <groupId>org.wildfly</groupId>
       <artifactId>wildfly-dist</artifactId>
-      <version>${wildfly.version}</version>
       <type>zip</type>
       <scope>test</scope>
       <exclusions>
@@ -188,7 +194,7 @@
                     <artifactItem>
                       <groupId>org.wildfly</groupId>
                       <artifactId>wildfly-dist</artifactId>
-                      <version>${wildfly.version}</version>
+                      <version>${version.org.wildfly}</version>
                       <type>zip</type>
                       <outputDirectory>${unpack-as-folder}</outputDirectory>
                     </artifactItem>

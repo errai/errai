@@ -16,8 +16,8 @@
 
 package org.jboss.errai.cdi.specialization.client;
 
-import javax.enterprise.context.Dependent;
-import javax.enterprise.inject.Specializes;
+import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.inject.Specializes;
 
 @Dependent
 @Specializes

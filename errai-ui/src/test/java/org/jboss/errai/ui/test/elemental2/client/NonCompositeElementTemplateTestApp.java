@@ -21,9 +21,9 @@ import jsinterop.base.Js;
 import org.jboss.errai.ui.test.elemental2.client.res.ElementFormComponent;
 import org.jboss.errai.ui.test.elemental2.client.res.NonCompositeElementFormComponent;
 
-import javax.annotation.PostConstruct;
-import javax.enterprise.context.Dependent;
-import javax.inject.Inject;
+import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.context.Dependent;
+import jakarta.inject.Inject;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>

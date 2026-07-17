@@ -16,9 +16,9 @@
 
 package org.jboss.errai.security.demo.server;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.servlet.ServletContext;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.servlet.ServletContext;
 
 import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.security.demo.client.shared.KeycloakActivatorService;

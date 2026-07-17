@@ -16,8 +16,8 @@
 
 package org.jboss.errai.bus.server.websocket.jsr356.filter;
 
-import javax.servlet.http.HttpSession;
-import javax.websocket.Session;
+import jakarta.servlet.http.HttpSession;
+import jakarta.websocket.Session;
 import java.util.Map;
 
 /**

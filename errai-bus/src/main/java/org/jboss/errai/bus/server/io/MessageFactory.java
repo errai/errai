@@ -26,7 +26,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.jboss.errai.bus.client.api.QueueSession;
 import org.jboss.errai.bus.client.api.RoutingFlag;

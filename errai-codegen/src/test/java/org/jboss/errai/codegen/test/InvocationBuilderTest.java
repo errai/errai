@@ -33,7 +33,7 @@ import org.jboss.errai.codegen.test.model.Foo;
 import org.jboss.errai.codegen.util.Refs;
 import org.junit.Test;
 
-import javax.enterprise.util.TypeLiteral;
+import jakarta.enterprise.util.TypeLiteral;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;

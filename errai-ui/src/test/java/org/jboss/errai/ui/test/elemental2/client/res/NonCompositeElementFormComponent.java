@@ -24,7 +24,7 @@ import org.jboss.errai.ui.shared.api.annotations.EventHandler;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 import org.jboss.errai.ui.test.common.client.dom.Document;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import static elemental2.dom.DomGlobal.document;
 

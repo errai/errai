@@ -20,9 +20,9 @@ import org.jboss.errai.cdi.client.event.FunFinishEvent;
 import org.jboss.errai.cdi.client.event.FunStartEvent;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 
-import javax.enterprise.event.Event;
-import javax.enterprise.event.Observes;
-import javax.inject.Inject;
+import jakarta.enterprise.event.Event;
+import jakarta.enterprise.event.Observes;
+import jakarta.inject.Inject;
 
 /**
  * Test module used by {@see EventObserverIntegrationTest}.

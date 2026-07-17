@@ -1,6 +1,6 @@
 package org.jboss.errai.ioc.support.bus.tests.client.res;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 
 @Singleton
 public class Greeter {

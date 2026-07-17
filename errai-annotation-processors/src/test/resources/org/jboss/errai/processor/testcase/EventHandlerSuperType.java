@@ -16,7 +16,7 @@
 
 package org.jboss.errai.processor.testcase;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 

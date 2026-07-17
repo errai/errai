@@ -16,8 +16,8 @@
 
 package org.errai.samples.i18ndemo.client.local;
 
-import javax.annotation.PostConstruct;
-import javax.enterprise.context.Dependent;
+import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.context.Dependent;
 
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 

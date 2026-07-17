@@ -19,8 +19,8 @@ package org.jboss.errai.enterprise.rebind;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.enterprise.event.Observes;
-import javax.enterprise.inject.Produces;
+import jakarta.enterprise.event.Observes;
+import jakarta.enterprise.inject.Produces;
 
 import org.jboss.errai.codegen.BlockStatement;
 import org.jboss.errai.codegen.Modifier;

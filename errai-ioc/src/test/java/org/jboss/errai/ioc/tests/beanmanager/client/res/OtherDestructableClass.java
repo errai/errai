@@ -16,8 +16,8 @@
 
 package org.jboss.errai.ioc.tests.beanmanager.client.res;
 
-import javax.annotation.PreDestroy;
-import javax.enterprise.context.Dependent;
+import jakarta.annotation.PreDestroy;
+import jakarta.enterprise.context.Dependent;
 
 /**
  *

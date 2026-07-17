@@ -16,11 +16,11 @@
 
 package org.jboss.errai.cdi.injection.client;
 
-import javax.enterprise.context.Dependent;
-import javax.enterprise.inject.Any;
-import javax.enterprise.inject.Default;
-import javax.enterprise.inject.Instance;
-import javax.inject.Inject;
+import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Default;
+import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
 
 import org.jboss.errai.cdi.injection.client.qualifier.Qual1;
 import org.jboss.errai.cdi.injection.client.qualifier.Qual2;

@@ -21,9 +21,9 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.enterprise.inject.Alternative;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletContext;
+import jakarta.enterprise.inject.Alternative;
+import jakarta.servlet.FilterConfig;
+import jakarta.servlet.ServletContext;
 
 @Alternative
 public class MockFilterConfig implements FilterConfig {

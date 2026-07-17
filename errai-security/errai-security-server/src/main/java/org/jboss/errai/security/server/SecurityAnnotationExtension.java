@@ -19,12 +19,11 @@ package org.jboss.errai.security.server;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
-import javax.enterprise.event.Observes;
-import javax.enterprise.inject.spi.AnnotatedMethod;
-import javax.enterprise.inject.spi.Extension;
-import javax.enterprise.inject.spi.ProcessAnnotatedType;
+import jakarta.enterprise.event.Observes;
+import jakarta.enterprise.inject.spi.Extension;
+import jakarta.enterprise.inject.spi.ProcessAnnotatedType;
+import jakarta.enterprise.inject.spi.configurator.AnnotatedTypeConfigurator;
 
-import org.apache.deltaspike.core.util.metadata.builder.AnnotatedTypeBuilder;
 import org.jboss.errai.security.shared.api.annotation.RestrictedAccess;
 
 /**
@@ -52,25 +51,17 @@ public class SecurityAnnotationExtension implements Extension {
     final Annotation typeAnnotation = anInterface.getAnnotation(annotation);
 
     if (methodAnnotation != null || typeAnnotation != null) {
-      AnnotatedTypeBuilder<X> builder = new AnnotatedTypeBuilder<X>().readFromType(annotatedType.getAnnotatedType());
+      final AnnotatedTypeConfigurator<X> configurator = annotatedType.configureAnnotatedType();
 
       if (typeAnnotation != null) {
-        builder = builder.addToClass(typeAnnotation);
+        configurator.add(typeAnnotation);
       }
       if (methodAnnotation != null) {
-        builder = builder.addToMethod(getMethod(annotatedType, method.getName()), methodAnnotation);
-      }
-
-      annotatedType.setAnnotatedType(builder.create());
-    }
-  }
-
-  private <X> AnnotatedMethod<? super X> getMethod(final ProcessAnnotatedType<X> annotatedType, final String name) {
-    for (final AnnotatedMethod<? super X> annotatedMethod : annotatedType.getAnnotatedType().getMethods()) {
-      if (name.equals(annotatedMethod.getJavaMember().getName())) {
-        return annotatedMethod;
+        final String methodName = method.getName();
+        configurator.filterMethods(m -> methodName.equals(m.getJavaMember().getName()))
+                    .findFirst()
+                    .ifPresent(m -> m.add(methodAnnotation));
       }
     }
-    throw new IllegalArgumentException("cannot find method on implementation class that is on the interface");
   }
 }

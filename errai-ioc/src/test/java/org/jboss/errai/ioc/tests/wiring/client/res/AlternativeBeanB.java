@@ -16,8 +16,8 @@
 
 package org.jboss.errai.ioc.tests.wiring.client.res;
 
-import javax.enterprise.inject.Alternative;
-import javax.inject.Singleton;
+import jakarta.enterprise.inject.Alternative;
+import jakarta.inject.Singleton;
 
 /**
  * @author Mike Brock

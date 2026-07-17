@@ -16,8 +16,8 @@
 
 package org.jboss.errai.ioc.async.test.scopes.dependent.client.res;
 
-import javax.annotation.PreDestroy;
-import javax.enterprise.context.Dependent;
+import jakarta.annotation.PreDestroy;
+import jakarta.enterprise.context.Dependent;
 
 import org.jboss.errai.ioc.client.api.LoadAsync;
 

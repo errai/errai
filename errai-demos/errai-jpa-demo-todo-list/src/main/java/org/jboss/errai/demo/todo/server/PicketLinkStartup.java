@@ -16,10 +16,10 @@
 
 package org.jboss.errai.demo.todo.server;
 
-import javax.annotation.PostConstruct;
-import javax.ejb.Singleton;
-import javax.ejb.Startup;
-import javax.inject.Inject;
+import jakarta.annotation.PostConstruct;
+import jakarta.ejb.Singleton;
+import jakarta.ejb.Startup;
+import jakarta.inject.Inject;
 
 import org.picketlink.idm.PartitionManager;
 import org.picketlink.idm.model.basic.Realm;

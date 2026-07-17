@@ -16,7 +16,7 @@
 
 package org.jboss.errai.ui.client.widget;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.FormElement;

@@ -149,13 +149,13 @@
 
       <dependencies>
         <dependency>
-          <groupId>javax.validation</groupId>
-          <artifactId>validation-api</artifactId>
+          <groupId>jakarta.validation</groupId>
+          <artifactId>jakarta.validation-api</artifactId>
         </dependency>
 
         <dependency>
-          <groupId>javax.validation</groupId>
-          <artifactId>validation-api</artifactId>
+          <groupId>jakarta.validation</groupId>
+          <artifactId>jakarta.validation-api</artifactId>
           <classifier>sources</classifier>
         </dependency>
 
@@ -193,7 +193,7 @@
 <!-- http://maven.apache.org/surefire/maven-surefire-plugin/examples/fork-options-and-parallel-execution.html#Migrating_the_Deprecated_forkMode_Parameter_to_forkCount_and_reuseForks -->
               <forkCount>1</forkCount>
               <reuseForks>false</reuseForks>
-              <argLine>-Xmx1500m -Dgwt.gen=/tmp/gwt_test_gen_out/ -Derrai.codegen.details=true -Dgwt.args='-testBeginTimeout 5 -generateJsInteropExports ${gwtArgs}' -Xdebug</argLine>
+              <argLine>-Xmx1500m -Dgwt.gen=/tmp/gwt_test_gen_out/ -Derrai.codegen.details=true -Dgwt.args='-testBeginTimeout 5 -runStyle HtmlUnit:FF -generateJsInteropExports ${gwtArgs}' -Xdebug</argLine>
               <enableAssertions>false</enableAssertions>
               <systemProperties>
                 <property>
@@ -222,6 +222,8 @@
             <artifactId>maven-surefire-plugin</artifactId>
             <!-- Override exclusions in parent -->
             <configuration>
+              <useManifestOnlyJar>false</useManifestOnlyJar>
+              <useSystemClassLoader>true</useSystemClassLoader>
               <excludes combine.self="override">
               </excludes>
               <includes combine.self="override">

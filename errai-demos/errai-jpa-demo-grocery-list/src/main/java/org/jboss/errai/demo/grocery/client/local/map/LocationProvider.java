@@ -23,7 +23,7 @@ import com.google.gwt.geolocation.client.Position;
 import com.google.gwt.geolocation.client.PositionError;
 import com.google.gwt.maps.client.base.LatLng;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 
 /**
  * @author edewit@redhat.com

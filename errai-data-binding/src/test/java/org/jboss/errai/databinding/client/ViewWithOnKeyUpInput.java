@@ -16,8 +16,8 @@
 
 package org.jboss.errai.databinding.client;
 
-import javax.enterprise.context.Dependent;
-import javax.inject.Inject;
+import jakarta.enterprise.context.Dependent;
+import jakarta.inject.Inject;
 
 import org.jboss.errai.common.client.dom.TextInput;
 import org.jboss.errai.common.client.dom.Window;

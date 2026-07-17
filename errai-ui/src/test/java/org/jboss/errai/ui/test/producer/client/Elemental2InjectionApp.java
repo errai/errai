@@ -22,9 +22,9 @@ import elemental2.dom.HTMLElement;
 import org.jboss.errai.common.client.dom.Div;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.annotation.PostConstruct;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>

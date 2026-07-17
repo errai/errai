@@ -16,8 +16,8 @@
 
 package org.jboss.errai.ui.nav.client.local.testpages;
 
-import javax.annotation.PostConstruct;
-import javax.enterprise.context.ApplicationScoped;
+import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.context.ApplicationScoped;
 
 import org.jboss.errai.ui.nav.client.local.Page;
 

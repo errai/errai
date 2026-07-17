@@ -16,7 +16,7 @@
 
 package org.jboss.errai.security.test.page.client.res;
 
-import javax.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 
 import com.google.gwt.user.client.ui.SimplePanel;
 

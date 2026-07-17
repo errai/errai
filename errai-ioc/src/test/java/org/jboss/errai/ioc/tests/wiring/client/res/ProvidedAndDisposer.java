@@ -16,7 +16,7 @@
 
 package org.jboss.errai.ioc.tests.wiring.client.res;
 
-import javax.inject.Provider;
+import jakarta.inject.Provider;
 
 import org.jboss.errai.ioc.client.api.Disposer;
 import org.jboss.errai.ioc.client.api.IOCProvider;

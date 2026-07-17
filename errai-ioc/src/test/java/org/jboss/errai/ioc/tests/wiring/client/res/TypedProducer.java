@@ -19,8 +19,8 @@ package org.jboss.errai.ioc.tests.wiring.client.res;
 import static org.jboss.errai.ioc.tests.wiring.client.res.QualForProducedTypeBean.ProducerType.FIELD;
 import static org.jboss.errai.ioc.tests.wiring.client.res.QualForProducedTypeBean.ProducerType.METHOD;
 
-import javax.enterprise.context.Dependent;
-import javax.enterprise.inject.Typed;
+import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.inject.Typed;
 
 import org.jboss.errai.common.client.api.annotations.IOCProducer;
 

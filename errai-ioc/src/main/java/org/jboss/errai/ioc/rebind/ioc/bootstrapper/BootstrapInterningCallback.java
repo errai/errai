@@ -32,8 +32,8 @@ import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.ioc.client.QualifierUtil;
 
-import javax.enterprise.inject.Any;
-import javax.enterprise.inject.Default;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Default;
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.HashMap;

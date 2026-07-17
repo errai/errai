@@ -20,7 +20,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import org.jboss.errai.orientation.client.shared.OrientationEvent;
 
-import javax.enterprise.event.Event;
+import jakarta.enterprise.event.Event;
 
 /**
  * Handles DeviceMotion events, such as those fired by Gecko-based browsers on laptop computers.

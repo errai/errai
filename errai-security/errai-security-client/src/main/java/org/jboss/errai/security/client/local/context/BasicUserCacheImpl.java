@@ -16,11 +16,11 @@
 
 package org.jboss.errai.security.client.local.context;
 
-import javax.annotation.PostConstruct;
-import javax.enterprise.context.Dependent;
-import javax.enterprise.inject.Produces;
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.inject.Produces;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 
 import org.jboss.errai.common.client.api.Assert;
 import org.jboss.errai.security.client.local.spi.ActiveUserCache;

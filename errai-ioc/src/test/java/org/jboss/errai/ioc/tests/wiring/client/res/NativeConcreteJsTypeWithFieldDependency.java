@@ -16,7 +16,7 @@
 
 package org.jboss.errai.ioc.tests.wiring.client.res;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import jsinterop.annotations.JsPackage;
 import jsinterop.annotations.JsType;

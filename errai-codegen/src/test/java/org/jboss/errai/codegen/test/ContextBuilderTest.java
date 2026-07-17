@@ -22,7 +22,7 @@ import static org.junit.Assert.fail;
 
 import java.util.List;
 
-import javax.enterprise.util.TypeLiteral;
+import jakarta.enterprise.util.TypeLiteral;
 
 import org.jboss.errai.codegen.Context;
 import org.jboss.errai.codegen.Variable;

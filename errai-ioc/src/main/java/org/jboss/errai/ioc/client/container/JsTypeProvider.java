@@ -16,7 +16,7 @@
 
 package org.jboss.errai.ioc.client.container;
 
-import javax.inject.Named;
+import jakarta.inject.Named;
 
 import org.jboss.errai.ioc.client.JsArray;
 

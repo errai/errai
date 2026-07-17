@@ -16,7 +16,7 @@
 
 package org.jboss.errai.ui.nav.client.local.testpages;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.jboss.errai.ui.nav.client.local.Page;
 import org.jboss.errai.ui.nav.client.local.TransitionAnchor;

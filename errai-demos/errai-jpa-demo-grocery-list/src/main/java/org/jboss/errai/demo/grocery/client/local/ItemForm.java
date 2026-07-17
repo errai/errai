@@ -21,7 +21,7 @@ import static com.google.gwt.dom.client.Style.Unit.PX;
 import java.util.Date;
 import java.util.Set;
 
-import javax.enterprise.context.Dependent;
+import jakarta.enterprise.context.Dependent;
 import javax.validation.ConstraintViolation;
 
 import org.jboss.errai.demo.grocery.client.shared.Department;

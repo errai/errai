@@ -21,11 +21,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.PreDestroy;
-import javax.enterprise.event.Event;
-import javax.enterprise.event.Observes;
-import javax.enterprise.inject.Any;
-import javax.inject.Inject;
+import jakarta.annotation.PreDestroy;
+import jakarta.enterprise.event.Event;
+import jakarta.enterprise.event.Observes;
+import jakarta.enterprise.inject.Any;
+import jakarta.inject.Inject;
 
 import org.jboss.errai.cdi.client.event.FinishEvent;
 import org.jboss.errai.cdi.client.event.StartEvent;
@@ -92,10 +92,6 @@ public class EventObserverTestModule extends EventTestObserverSuperClass {
     startEventsReceived = 0;
     startEvent.fire(new StartEvent());
   }
-
-//  private void onObject(@Observes Object foo) {
-//    
-//  }
   
   private void onStart(@Observes StartEvent event) {
     startEventsReceived++;

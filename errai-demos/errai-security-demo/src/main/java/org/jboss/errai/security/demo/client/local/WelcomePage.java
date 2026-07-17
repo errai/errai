@@ -18,9 +18,9 @@ package org.jboss.errai.security.demo.client.local;
 
 import static org.jboss.errai.security.shared.api.identity.User.StandardUserProperties.FIRST_NAME;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Observes;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Observes;
+import jakarta.inject.Inject;
 
 import org.jboss.errai.bus.client.api.BusErrorCallback;
 import org.jboss.errai.bus.client.api.messaging.Message;

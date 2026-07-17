@@ -16,9 +16,9 @@
 
 package org.jboss.errai.ioc.rebind.ioc.graph.api;
 
-import javax.enterprise.inject.Any;
-import javax.enterprise.inject.Default;
-import javax.inject.Named;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Default;
+import jakarta.inject.Named;
 
 import org.jboss.errai.codegen.meta.HasAnnotations;
 

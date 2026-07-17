@@ -16,9 +16,9 @@
 
 package org.jboss.errai.cdi.server.events;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Observes;
-import javax.enterprise.inject.spi.EventMetadata;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Observes;
+import jakarta.enterprise.inject.spi.EventMetadata;
 
 import org.jboss.errai.config.rebind.EnvUtil;
 

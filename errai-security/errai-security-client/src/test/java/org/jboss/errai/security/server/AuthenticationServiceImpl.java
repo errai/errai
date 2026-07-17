@@ -19,7 +19,7 @@ package org.jboss.errai.security.server;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 
 import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.security.shared.api.Role;

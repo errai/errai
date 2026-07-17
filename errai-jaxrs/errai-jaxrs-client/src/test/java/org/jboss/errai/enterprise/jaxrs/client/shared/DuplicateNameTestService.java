@@ -16,7 +16,7 @@
 
 package org.jboss.errai.enterprise.jaxrs.client.shared;
 
-import javax.ws.rs.Path;
+import jakarta.ws.rs.Path;
 
 // This guard against regressions of https://issues.jboss.org/browse/ERRAI-476
 @Path("/")

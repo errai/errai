@@ -30,8 +30,8 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 
-import javax.enterprise.inject.Alternative;
-import javax.inject.Provider;
+import jakarta.enterprise.inject.Alternative;
+import jakarta.inject.Provider;
 
 import org.jboss.errai.common.client.util.CreationalCallback;
 import org.jboss.errai.ioc.client.QualifierUtil;

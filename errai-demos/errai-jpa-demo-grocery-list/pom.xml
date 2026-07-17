@@ -58,6 +58,7 @@
     <cdiapi.version>1.2</cdiapi.version>
     <servletapi.version>1.0.2.Final</servletapi.version>
     <gwt.maven.version>2.10.0</gwt.maven.version>
+    <gwt.version>2.13.1</gwt.version>
     <maven.compiler.plugin.version>3.2</maven.compiler.plugin.version>
     <maven.deploy.plugin.version>2.8.2</maven.deploy.plugin.version>
     <argLine></argLine>
@@ -112,6 +113,15 @@
 
   <dependencies>
     <dependency>
+      <groupId>jakarta.inject</groupId>
+      <artifactId>jakarta.inject-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>jakarta.persistence</groupId>
+      <artifactId>jakarta.persistence-api</artifactId>
+      <version>3.1.0</version>
+    </dependency>
+    <dependency>
        <groupId>org.jboss.errai</groupId>
        <artifactId>errai-codegen</artifactId>
        <exclusions>
@@ -131,6 +141,14 @@
           <groupId>org.eclipse.jetty</groupId>
           <artifactId>apache-jsp</artifactId>
         </exclusion>
+        <exclusion>
+          <groupId>org.eclipse.jetty.ee9</groupId>
+          <artifactId>jetty-ee9-apache-jsp</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.eclipse.jetty.ee10</groupId>
+          <artifactId>jetty-ee10-apache-jsp</artifactId>
+        </exclusion>
       </exclusions>
     </dependency>
 
@@ -143,6 +161,29 @@
     <dependency>
       <groupId>org.jboss.errai</groupId>
       <artifactId>errai-jpa-client</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>javax.persistence</groupId>
+      <artifactId>javax.persistence-api</artifactId>
+      <version>2.2</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>javax.transaction</groupId>
+      <artifactId>javax.transaction-api</artifactId>
+      <version>1.3</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <!-- Hibernate's static initializer references javax.xml.bind.JAXBException
+         (old javax namespace). Java 11+ removed JAXB from the JDK; add the
+         legacy API jar so the GWT compiler process can load Hibernate classes. -->
+    <dependency>
+      <groupId>javax.xml.bind</groupId>
+      <artifactId>jaxb-api</artifactId>
+      <version>2.3.1</version>
       <scope>provided</scope>
     </dependency>
 
@@ -177,16 +218,18 @@
     </dependency>
 
     <dependency>
-      <groupId>javax.validation</groupId>
-      <artifactId>validation-api</artifactId>
-      <scope>provided</scope>
+      <groupId>jakarta.validation</groupId>
+      <artifactId>jakarta.validation-api</artifactId>
+      <scope>compile</scope>
+      <version>3.0.2</version>
     </dependency>
 
     <dependency>
-      <groupId>javax.validation</groupId>
-      <artifactId>validation-api</artifactId>
+      <groupId>jakarta.validation</groupId>
+      <artifactId>jakarta.validation-api</artifactId>
       <classifier>sources</classifier>
-      <scope>provided</scope>
+      <scope>compile</scope>
+      <version>3.0.2</version>
     </dependency>
 
     <dependency>
@@ -354,6 +397,7 @@
           <groupId>jakarta.inject</groupId>
           <artifactId>jakarta.inject-api</artifactId>
           <scope>provided</scope>
+          <version>2.0.1</version>
         </dependency>
 
         <dependency>
@@ -410,12 +454,24 @@
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>gwt-maven-plugin</artifactId>
         <version>${gwt.maven.version}</version>
+        <dependencies>
+          <dependency>
+            <groupId>org.gwtproject</groupId>
+            <artifactId>gwt-dev</artifactId>
+            <version>${gwt.version}</version>
+          </dependency>
+          <dependency>
+            <groupId>org.gwtproject</groupId>
+            <artifactId>gwt-user</artifactId>
+            <version>${gwt.version}</version>
+          </dependency>
+        </dependencies>
         <configuration>
           <server>org.jboss.errai.cdi.server.gwt.EmbeddedWildFlyLauncher</server>
           <strict>false</strict>
           <logLevel>INFO</logLevel>
           <runTarget>${errai.dev.context}</runTarget>
-          <extraJvmArgs>${argLine} -Xmx1g -Xms1g -XX:+UseNUMA -Derrai.jboss.home=${errai.jboss.home} -Derrai.dev.context=${errai.dev.context}</extraJvmArgs>
+          <extraJvmArgs>${argLine} -Xmx1g -Xms1g -XX:+UseNUMA -Derrai.jboss.home=${errai.jboss.home} -Derrai.dev.context=${errai.dev.context} --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED --add-opens java.base/java.io=ALL-UNNAMED</extraJvmArgs>
           <hostedWebapp>src/main/webapp/</hostedWebapp>
           <compileReport>true</compileReport>
         </configuration>
@@ -464,7 +520,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-war-plugin</artifactId>
-        <version>2.3</version>
+        <version>3.4.0</version>
         <configuration>
           <warName>${project.artifactId}</warName>
           <outputFileNameMapping>@{artifactId}@-@{baseVersion}@@{dashClassifier?}@.@{extension}@</outputFileNameMapping>

@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.locks.LockSupport;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.jboss.errai.bus.server.io.ByteWriteAdapter;
@@ -101,6 +102,13 @@ public class TransmissionBuffer implements Buffer {
 
   /**
    * The visible head sequence number seen by the readers.
+   *
+   * <p>Writers advance this value using a sequence-barrier commit protocol: each writer atomically
+   * reserves a range of slots via {@link #writeSequenceNumber}, writes its data and segmentMap
+   * entries, then waits until {@code headSequence == writeHead} before publishing
+   * {@code headSequence = writeHead + allocSize}. This guarantees readers never see a slot
+   * whose segmentMap entry has not yet been written, without serialising concurrent writes
+   * behind a single global lock.</p>
    */
   private volatile long headSequence = STARTING_SEQUENCE;
 
@@ -208,48 +216,62 @@ public class TransmissionBuffer implements Buffer {
       throw new IOException("write size larger than buffer can fit");
     }
 
-    final ReentrantLock lock = bufferColor.lock;
-    lock.lock();
+    // Step 1: atomically reserve [writeHead, writeHead + allocSize) in the ring.
+    final int allocSize = (int) (((long) writeSize + (long) SEGMENT_HEADER_SIZE) / segmentSize) + 1;
+    final long writeHead = writeSequenceNumber.getAndAdd(allocSize);
+    final int seq = (int) (writeHead % segments);
+
+    int writeCursor = seq * segmentSize;
+
+    // Step 2: write the chunk-size header and payload into the reserved slots.
+    writeChunkSize(writeCursor, writeSize);
+
+    final int end = (writeCursor += SEGMENT_HEADER_SIZE) + writeSize;
+    final int initialRead = end > bufferSize ? bufferSize : end;
+
+    /*
+     * Step 3: mark the reserved slots with this color in the segment map.
+     * This must happen before we publish headSequence so that readers always
+     * see a fully-initialised segmentMap entry for every slot up to headSequence.
+     */
+    final short color = bufferColor.color;
+    for (int i = 0; i < allocSize; i++) {
+      segmentMap[((seq + i) % segments)] = color;
+    }
+
+    for (; writeCursor < initialRead; writeCursor++) {
+      _buffer.put(writeCursor, (byte) inputStream.read());
+    }
+
+    if (writeCursor < end) {
+      for (int i = 0; i < end - bufferSize; i++) {
+        _buffer.put(i, (byte) inputStream.read());
+      }
+    }
+
+    /*
+     * Step 4: sequence-barrier commit.
+     *
+     * Only advance headSequence once all earlier reservations have been committed.
+     * If writer B (seq=6) finishes before writer A (seq=5), it spins here until
+     * writer A publishes headSequence=6, then immediately publishes headSequence=7.
+     *
+     * In the common (uncontended) case headSequence == writeHead on the first check
+     * and the loop body is never entered.
+     */
+    while (headSequence != writeHead) {
+      LockSupport.parkNanos(1L);
+    }
+    headSequence = writeHead + allocSize;
+
+    // Step 5: signal waiting readers (Condition.signal() requires the associated lock).
+    final ReentrantLock colorLock = bufferColor.lock;
+    colorLock.lock();
     try {
-      final int allocSize = (int) (((long) writeSize + (long) SEGMENT_HEADER_SIZE) / segmentSize) + 1;
-      final long writeHead = writeSequenceNumber.getAndAdd(allocSize);
-      final int seq = (int) (writeHead % segments);
-
-      int writeCursor = seq * segmentSize;
-
-      // write the chunk size header for the data we're about to write
-      writeChunkSize(writeCursor, writeSize);
-
-      final int end = (writeCursor += SEGMENT_HEADER_SIZE) + writeSize;
-      final int initialRead = end > bufferSize ? bufferSize : end;
-
-      /*
-      * Allocate the segments to the this color
-      */
-      final short color = bufferColor.color;
-      for (int i = 0; i < allocSize; i++) {
-        segmentMap[((seq + i) % segments)] = color;
-      }
-
-      for (; writeCursor < initialRead; writeCursor++) {
-        _buffer.put(writeCursor, (byte) inputStream.read());
-      }
-
-      if (writeCursor < end) {
-        for (int i = 0; i < end - bufferSize; i++) {
-          _buffer.put(i, (byte) inputStream.read());
-        }
-      }
-
-      headSequence = writeHead + allocSize;
+      bufferColor.wake();
     }
     finally {
-      try {
-        bufferColor.wake();
-      }
-      finally {
-        lock.unlock();
-      }
+      colorLock.unlock();
     }
   }
 

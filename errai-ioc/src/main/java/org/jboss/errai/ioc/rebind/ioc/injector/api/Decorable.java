@@ -28,7 +28,7 @@ import static org.jboss.errai.ioc.rebind.ioc.bootstrapper.FactoryGenerator.getLo
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 
-import javax.enterprise.context.Dependent;
+import jakarta.enterprise.context.Dependent;
 
 import org.jboss.errai.codegen.Context;
 import org.jboss.errai.codegen.Statement;

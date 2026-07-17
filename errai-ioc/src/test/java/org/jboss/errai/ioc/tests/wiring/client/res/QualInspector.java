@@ -18,8 +18,8 @@ package org.jboss.errai.ioc.tests.wiring.client.res;
 
 import org.jboss.errai.ioc.client.api.EntryPoint;
 
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
+import jakarta.annotation.PostConstruct;
+import jakarta.inject.Inject;
 
 /**
  * @author Mike Brock

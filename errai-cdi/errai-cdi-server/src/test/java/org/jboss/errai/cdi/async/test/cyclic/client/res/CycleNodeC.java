@@ -18,8 +18,8 @@ package org.jboss.errai.cdi.async.test.cyclic.client.res;
 
 import org.jboss.errai.ioc.client.api.LoadAsync;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 
 /**

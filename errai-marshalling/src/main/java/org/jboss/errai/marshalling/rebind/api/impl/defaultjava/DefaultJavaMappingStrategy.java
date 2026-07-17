@@ -23,7 +23,7 @@ import static org.jboss.errai.codegen.util.Stmt.loadVariable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import javax.enterprise.util.TypeLiteral;
+import jakarta.enterprise.util.TypeLiteral;
 
 import org.jboss.errai.codegen.Cast;
 import org.jboss.errai.codegen.InnerClass;
@@ -262,12 +262,12 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
           else {
             // use default constructor
 
-            builder._(
+            builder.append(
                 Stmt.declareVariable(toMap).named("entity").initializeWith(
                     Stmt.nestedCall(Stmt.newObject(toMap))));
           }
 
-          builder._(loadVariable("a1").invoke("recordObject",
+          builder.append(loadVariable("a1").invoke("recordObject",
               loadVariable("objId"), loadVariable("entity")));
         }
         

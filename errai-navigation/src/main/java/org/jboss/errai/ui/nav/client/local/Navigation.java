@@ -51,9 +51,9 @@ import org.jboss.errai.ui.nav.client.local.spi.PageNode;
 import org.jboss.errai.ui.shared.TemplateWidgetMapper;
 import org.slf4j.Logger;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import javax.inject.Inject;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
+import jakarta.inject.Inject;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;

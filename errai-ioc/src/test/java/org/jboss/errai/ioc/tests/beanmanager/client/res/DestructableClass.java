@@ -16,7 +16,7 @@
 
 package org.jboss.errai.ioc.tests.beanmanager.client.res;
 
-import javax.annotation.PreDestroy;
+import jakarta.annotation.PreDestroy;
 
 /**
  *

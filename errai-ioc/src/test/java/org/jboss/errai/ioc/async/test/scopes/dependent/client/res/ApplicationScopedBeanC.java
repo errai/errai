@@ -18,7 +18,7 @@ package org.jboss.errai.ioc.async.test.scopes.dependent.client.res;
 
 import org.jboss.errai.ioc.client.api.LoadAsync;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 
 @Singleton @LoadAsync
 public class ApplicationScopedBeanC extends NonAbstractBean {

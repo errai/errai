@@ -21,9 +21,8 @@ import java.util.Enumeration;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpSession;
-import javax.servlet.http.HttpSessionContext;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.HttpSession;
 
 /**
  * Fake session to activate the session context for test cases.
@@ -65,18 +64,8 @@ public class FakeHttpSession implements HttpSession {
   }
 
   @Override
-  public HttpSessionContext getSessionContext() {
-    return null;
-  }
-
-  @Override
   public Object getAttribute(String name) {
     return attrs.get(name);
-  }
-
-  @Override
-  public Object getValue(String name) {
-    return null;
   }
 
   @Override
@@ -85,27 +74,12 @@ public class FakeHttpSession implements HttpSession {
   }
 
   @Override
-  public String[] getValueNames() {
-    return new String[0];
-  }
-
-  @Override
   public void setAttribute(String name, Object value) {
     attrs.put(name, value);
   }
 
   @Override
-  public void putValue(String name, Object value) {
-
-  }
-
-  @Override
   public void removeAttribute(String name) {
-
-  }
-
-  @Override
-  public void removeValue(String name) {
 
   }
 

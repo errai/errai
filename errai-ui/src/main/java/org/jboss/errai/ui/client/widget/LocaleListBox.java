@@ -18,8 +18,8 @@ package org.jboss.errai.ui.client.widget;
 
 import java.io.IOException;
 
-import javax.enterprise.context.Dependent;
-import javax.inject.Inject;
+import jakarta.enterprise.context.Dependent;
+import jakarta.inject.Inject;
 
 import org.jboss.errai.ioc.client.api.AfterInitialization;
 import org.jboss.errai.ui.shared.TemplateUtil;

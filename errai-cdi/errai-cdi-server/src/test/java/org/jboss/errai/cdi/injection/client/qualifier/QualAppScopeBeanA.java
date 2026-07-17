@@ -16,7 +16,7 @@
 
 package org.jboss.errai.cdi.injection.client.qualifier;
 
-import javax.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 
 import org.jboss.errai.cdi.injection.client.CommonInterface;
 

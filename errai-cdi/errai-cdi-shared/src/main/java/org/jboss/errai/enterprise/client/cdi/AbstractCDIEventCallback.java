@@ -19,7 +19,7 @@ package org.jboss.errai.enterprise.client.cdi;
 import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.bus.client.api.messaging.MessageCallback;
 
-import javax.enterprise.inject.Any;
+import jakarta.enterprise.inject.Any;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;

@@ -20,9 +20,9 @@ import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.Set;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.context.Dependent;
-import javax.enterprise.inject.Any;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.inject.Any;
 
 import org.jboss.errai.cdi.async.test.bm.client.res.AbstractBean;
 import org.jboss.errai.cdi.async.test.bm.client.res.ActivatedBean;

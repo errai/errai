@@ -16,8 +16,8 @@
 
 package org.jboss.errai.validation.client;
 
-import javax.inject.Provider;
-import javax.inject.Singleton;
+import jakarta.inject.Provider;
+import jakarta.inject.Singleton;
 import javax.validation.Validation;
 import javax.validation.Validator;
 

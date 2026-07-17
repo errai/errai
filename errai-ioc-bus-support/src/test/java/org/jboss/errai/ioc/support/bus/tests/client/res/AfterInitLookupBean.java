@@ -16,7 +16,7 @@
 
 package org.jboss.errai.ioc.support.bus.tests.client.res;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 
 import org.jboss.errai.ioc.client.api.AfterInitialization;
 import org.jboss.errai.ioc.client.api.EntryPoint;

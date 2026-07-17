@@ -230,18 +230,18 @@ public class ProxyMaker {
         System.arraycopy(statementVars, 0, privateAccessStmts, 1, statementVars.length);
 
         if (method.getReturnType().isVoid()) {
-          ifBody._(loadVariable("this").invoke(PrivateAccessUtil.getPrivateMethodName(method), privateAccessStmts));
+          ifBody.append(loadVariable("this").invoke(PrivateAccessUtil.getPrivateMethodName(method), privateAccessStmts));
         }
         else {
-          ifBody._(loadVariable("this").invoke(PrivateAccessUtil.getPrivateMethodName(method), privateAccessStmts).returnValue());
+          ifBody.append(loadVariable("this").invoke(PrivateAccessUtil.getPrivateMethodName(method), privateAccessStmts).returnValue());
         }
       }
       else {
         if (method.getReturnType().isVoid()) {
-          ifBody._(loadVariable(proxyVar).invoke(method, statementVars));
+          ifBody.append(loadVariable(proxyVar).invoke(method, statementVars));
         }
         else {
-          ifBody._(loadVariable(proxyVar).invoke(method, statementVars).returnValue());
+          ifBody.append(loadVariable(proxyVar).invoke(method, statementVars).returnValue());
         }
       }
 
@@ -263,12 +263,12 @@ public class ProxyMaker {
       builder.publicMethod(int.class, "hashCode")
           .annotatedWith(OVERRIDE_ANNOTATION)
           .body()
-          ._(
+          .append(
               If.isNull(loadVariable(proxyVar))
-                  ._(throw_(IllegalStateException.class, "call to hashCode() on an unclosed proxy."))
+                  .append(throw_(IllegalStateException.class, "call to hashCode() on an unclosed proxy."))
                   .finish()
                   .else_()
-                  ._(Stmt.loadVariable(proxyVar).invoke("hashCode").returnValue())
+                  .append(Stmt.loadVariable(proxyVar).invoke("hashCode").returnValue())
                   .finish()
           )
           .finish();
@@ -277,21 +277,21 @@ public class ProxyMaker {
       builder.publicMethod(boolean.class, "equals", Parameter.of(Object.class, "o"))
           .annotatedWith(OVERRIDE_ANNOTATION)
           .body()
-          ._(
+          .append(
               If.isNull(loadVariable(proxyVar))
-                  ._(throw_(IllegalStateException.class, "call to equals() on an unclosed proxy."))
+                  .append(throw_(IllegalStateException.class, "call to equals() on an unclosed proxy."))
                   .finish()
                   .else_()
-                  ._(Stmt.loadVariable(proxyVar).invoke("equals", Refs.get("o")).returnValue())
+                  .append(Stmt.loadVariable(proxyVar).invoke("equals", Refs.get("o")).returnValue())
                   .finish()
           )
           .finish();
     }
     
     builder.publicMethod(void.class, PROXY_BIND_METHOD).parameters(DefParameters.of(Parameter.of(toProxy, "proxy")))
-        ._(loadVariable(proxyVar).assignValue(loadVariable("proxy")))
+        .append(loadVariable(proxyVar).assignValue(loadVariable("proxy")))
         // Set proxy state to initialized
-        ._(loadVariable(stateVar).assignValue(true))
+        .append(loadVariable(stateVar).assignValue(true))
         .finish();
 
     return builder.getClassDefinition();

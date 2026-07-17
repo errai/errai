@@ -16,7 +16,7 @@
 
 package org.jboss.errai.cdi.async.test.bm.client;
 
-import javax.enterprise.context.Dependent;
+import jakarta.enterprise.context.Dependent;
 
 import org.jboss.errai.cdi.async.test.bm.client.res.Async;
 import org.jboss.errai.cdi.async.test.bm.client.res.ViaInstance;

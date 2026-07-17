@@ -20,7 +20,7 @@ import org.jboss.errai.common.client.util.TimeUnit;
 import org.jboss.errai.ioc.client.api.Timed;
 import org.jboss.errai.ioc.client.api.TimerType;
 
-import javax.enterprise.context.Dependent;
+import jakarta.enterprise.context.Dependent;
 
 /**
  * @author Mike Brock

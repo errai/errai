@@ -19,8 +19,8 @@ package org.jboss.errai.ioc.support.bus.client;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.inject.Provider;
-import javax.inject.Singleton;
+import jakarta.inject.Provider;
+import jakarta.inject.Singleton;
 
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.BusErrorCallback;

@@ -16,7 +16,7 @@
 
 package org.jboss.errai.enterprise.jaxrs.server;
 
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response;
 
 import org.jboss.errai.enterprise.jaxrs.client.shared.JaxrsResponseObjectTestService;
 import org.jboss.errai.enterprise.jaxrs.client.shared.entity.Entity;

@@ -61,6 +61,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <errai.dev.context>${project.artifactId}</errai.dev.context>
     <maven.gwt.plugin.version>2.10.0</maven.gwt.plugin.version>
+    <gwt.version>2.13.1</gwt.version>
     <maven.deploy.plugin.version>2.7</maven.deploy.plugin.version>
   </properties>
 
@@ -130,10 +131,6 @@
       <artifactId>errai-security-keycloak</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.jboss.errai</groupId>
-      <artifactId>errai-security-picketlink</artifactId>
-    </dependency>
-    <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
     </dependency>
@@ -158,6 +155,11 @@
     <dependency>
       <groupId>org.jboss.errai</groupId>
       <artifactId>errai-jboss-as-support</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>jakarta.ejb</groupId>
+      <artifactId>jakarta.ejb-api</artifactId>
+      <scope>provided</scope>
     </dependency>
   </dependencies>
   <build>
@@ -265,8 +267,20 @@
       </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
-        <artifactId>gwt-maven-plugin</artifactId>   
+        <artifactId>gwt-maven-plugin</artifactId>
         <version>${maven.gwt.plugin.version}</version>
+        <dependencies>
+          <dependency>
+            <groupId>org.gwtproject</groupId>
+            <artifactId>gwt-dev</artifactId>
+            <version>${gwt.version}</version>
+          </dependency>
+          <dependency>
+            <groupId>org.gwtproject</groupId>
+            <artifactId>gwt-user</artifactId>
+            <version>${gwt.version}</version>
+          </dependency>
+        </dependencies>
         <executions>
           <execution>
             <goals>
@@ -284,7 +298,7 @@
           <disableCastChecking>true</disableCastChecking>
           <runTarget>${errai.dev.context}/</runTarget>
           <hostedWebapp>src/main/webapp</hostedWebapp>
-          <extraJvmArgs>-Xmx1G -XX:CompileThreshold=7000 -Derrai.jboss.home=${errai.jboss.home} -Derrai.dev.context=${errai.dev.context}</extraJvmArgs>
+          <extraJvmArgs>-Xmx1G -XX:CompileThreshold=7000 -Derrai.jboss.home=${errai.jboss.home} -Derrai.dev.context=${errai.dev.context} --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED --add-opens java.base/java.io=ALL-UNNAMED</extraJvmArgs>
         </configuration>
       </plugin>
       <plugin>
@@ -307,7 +321,7 @@
         <plugins>
           <plugin>
             <artifactId>maven-war-plugin</artifactId>
-            <version>2.2</version>
+            <version>3.4.0</version>
             <configuration>
               <archive>
                 <manifestEntries>
@@ -428,6 +442,29 @@
           <scope>provided</scope>
         </dependency>
         <dependency>
+          <groupId>javax.persistence</groupId>
+          <artifactId>javax.persistence-api</artifactId>
+          <version>2.2</version>
+          <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+          <groupId>javax.transaction</groupId>
+          <artifactId>javax.transaction-api</artifactId>
+          <version>1.3</version>
+          <scope>provided</scope>
+        </dependency>
+
+        <!-- Hibernate's static initializer references javax.xml.bind.JAXBException
+             (old javax namespace). Java 11+ removed JAXB from the JDK; add the
+             legacy API jar so the GWT compiler process can load Hibernate classes. -->
+        <dependency>
+          <groupId>javax.xml.bind</groupId>
+          <artifactId>jaxb-api</artifactId>
+          <version>2.3.1</version>
+          <scope>provided</scope>
+        </dependency>
+        <dependency>
           <groupId>jakarta.enterprise</groupId>
           <artifactId>jakarta.enterprise.cdi-api</artifactId>
           <scope>provided</scope>
@@ -448,9 +485,10 @@
           <scope>provided</scope>
         </dependency>
         <dependency>
-          <groupId>javax.validation</groupId>
-          <artifactId>validation-api</artifactId>
+          <groupId>jakarta.validation</groupId>
+          <artifactId>jakarta.validation-api</artifactId>
           <scope>provided</scope>
+          <version>3.0.2</version>
         </dependency>
         <dependency>
           <groupId>xml-apis</groupId>

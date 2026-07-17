@@ -25,7 +25,7 @@ public interface MarshallerGenerationCallback {
 
   public static final MarshallerGenerationCallback NO_OP = new MarshallerGenerationCallback() {
     @Override
-    public void callback(MetaClass _) {
+    public void callback(MetaClass ignored) {
       return;
     }
   };

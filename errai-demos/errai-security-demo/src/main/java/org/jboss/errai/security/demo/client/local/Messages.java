@@ -18,9 +18,9 @@ package org.jboss.errai.security.demo.client.local;
 
 import static org.jboss.errai.security.shared.api.identity.User.StandardUserProperties.FIRST_NAME;
 
-import javax.enterprise.context.Dependent;
-import javax.enterprise.inject.Instance;
-import javax.inject.Inject;
+import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
 
 import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.RemoteCallback;

@@ -18,7 +18,7 @@ package javax.enterprise.inject;
 
 import java.lang.annotation.Annotation;
 
-import javax.inject.Provider;
+import jakarta.inject.Provider;
 
 
 /**

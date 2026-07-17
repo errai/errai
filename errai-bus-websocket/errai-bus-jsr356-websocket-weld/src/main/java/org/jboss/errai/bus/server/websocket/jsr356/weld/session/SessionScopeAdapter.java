@@ -18,7 +18,7 @@ package org.jboss.errai.bus.server.websocket.jsr356.weld.session;
 
 import org.jboss.errai.bus.server.websocket.jsr356.weld.ScopeAdapter;
 
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpSession;
 
 /**
  * @author Michel Werren

@@ -25,9 +25,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.context.Dependent;
-import javax.inject.Singleton;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.Dependent;
+import jakarta.inject.Singleton;
 
 import org.jboss.errai.codegen.BlockStatement;
 import org.jboss.errai.codegen.BooleanOperator;
@@ -182,7 +182,7 @@ public abstract class ProxyUtil {
     proceedLogic.addStatement(Stmt.loadVariable("status").invoke("proceed"));
 
     ElseBlockBuilder interceptorStack =
-              If.isNull(Stmt.loadVariable("status").invoke("getNextInterceptor"))._(proceed).finish();
+              If.isNull(Stmt.loadVariable("status").invoke("getNextInterceptor")).append(proceed).finish();
 
     for (final Class<?> interceptor : interceptors) {
       interceptorStack = interceptorStack.elseif_(Bool.equals(

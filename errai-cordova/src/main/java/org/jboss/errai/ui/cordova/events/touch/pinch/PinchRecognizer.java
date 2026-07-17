@@ -32,7 +32,8 @@ public class PinchRecognizer extends AbstractRecognizer {
   private final HasHandlers source;
   private State state;
 
-  private Touch touchStart1;
+  private int touchStart1X;
+  private int touchStart1Y;
 
   private int touchCount;
   private double distance;
@@ -65,12 +66,13 @@ public class PinchRecognizer extends AbstractRecognizer {
     touchCount++;
     switch (state) {
       case READY:
-        touchStart1 = event.getTouches().get(0);
+        touchStart1X = event.getTouches().get(0).getPageX();
+        touchStart1Y = event.getTouches().get(0).getPageY();
         state = State.ONE_FINGER;
         break;
       case ONE_FINGER:
         Touch touchStart2 = event.getTouches().get(1);
-        distance = (int) Math.sqrt(Math.pow(touchStart1.getPageX() - touchStart2.getPageX(), 2) + Math.pow(touchStart1.getPageY() - touchStart1.getPageY(), 2));
+        distance = (int) Math.sqrt(Math.pow(touchStart1X - touchStart2.getPageX(), 2) + Math.pow(touchStart1Y - touchStart1Y, 2));
         state = State.TWO_FINGER;
         break;
 

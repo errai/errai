@@ -25,7 +25,7 @@ import java.lang.reflect.ParameterizedType;
 import java.math.BigInteger;
 import java.util.*;
 
-import javax.enterprise.util.TypeLiteral;
+import jakarta.enterprise.util.TypeLiteral;
 import javax.persistence.*;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EntityType;
@@ -170,14 +170,14 @@ public class ErraiEntityManagerGenerator extends AbstractAsyncGenerator {
     // now generate all the query factories
     for (NamedQuery namedQuery : namedQueries) {
       try {
-        cnqm._(Stmt.codeComment("**"));
-        cnqm._(Stmt.codeComment("** NamedQuery \"" + namedQuery.name() + "\""));
-        cnqm._(Stmt.codeComment("** " + namedQuery.query()));
-        cnqm._(Stmt.codeComment("**"));
+        cnqm.append(Stmt.codeComment("**"));
+        cnqm.append(Stmt.codeComment("** NamedQuery \"" + namedQuery.name() + "\""));
+        cnqm.append(Stmt.codeComment("** " + namedQuery.query()));
+        cnqm.append(Stmt.codeComment("**"));
         TypedQueryFactoryGenerator generator = new TypedQueryFactoryGenerator(em, namedQuery);
         Statement generatedFactory =
             generator.generate(classBuilder.getClassDefinition().getContext());
-        cnqm._(Stmt.loadVariable("namedQueries")
+        cnqm.append(Stmt.loadVariable("namedQueries")
             .invoke("put",
                 Stmt.loadLiteral(namedQuery.name()),
                 generatedFactory));

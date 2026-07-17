@@ -16,7 +16,7 @@
 
 package org.jboss.errai.cdi.interceptors;
 
-import javax.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 
 /**
  * @author Mike Brock

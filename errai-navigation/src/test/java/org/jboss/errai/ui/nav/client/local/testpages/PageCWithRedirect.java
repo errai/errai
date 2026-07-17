@@ -18,7 +18,7 @@ package org.jboss.errai.ui.nav.client.local.testpages;
 
 import org.jboss.errai.ui.nav.client.local.Page;
 
-import javax.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 
 /**
  * Simple test page for tracing lifecycle methods.

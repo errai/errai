@@ -16,7 +16,7 @@
 
 package org.jboss.errai.ioc.rebind.ioc.bootstrapper;
 
-import javax.inject.Provider;
+import jakarta.inject.Provider;
 
 import org.jboss.errai.codegen.builder.ContextualStatementBuilder;
 import org.jboss.errai.ioc.client.api.IOCProvider;

@@ -22,8 +22,8 @@ import com.googlecode.gwtphonegap.client.PhoneGapAvailableEvent;
 import com.googlecode.gwtphonegap.client.PhoneGapAvailableHandler;
 import org.jboss.errai.ioc.client.api.InitBallot;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 
 /**
  * Wrapper around gwtphonegap so we can inject the phonegap capabilities in a more errai way

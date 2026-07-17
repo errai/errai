@@ -18,7 +18,7 @@ package org.jboss.errai.codegen.test;
 
 import java.lang.annotation.Target;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 
 import static org.apache.commons.lang3.SystemUtils.IS_JAVA_1_8;
 import org.jboss.errai.codegen.AnnotationEncoder;
@@ -38,12 +38,20 @@ public class AnnotationEncoderTest extends AbstractCodegenTest {
     Assume.assumeFalse(IS_JAVA_1_8); // This test is not stable on JDK8 due different string representation of expected vs generate Class content string
     String enc = AnnotationEncoder.encode(PostConstruct.class.getAnnotation(Target.class)).generate(null);
 
+    // Java 17 omits the element name for single-element annotations in toString() → @Target({METHOD})
+    // Java 9-16 includes it                                                      → @Target(value={METHOD})
+    final String toStringValue = IS_JAVA_1_8
+        ? "@java.lang.annotation.Target(value={METHOD})"
+        : (Runtime.version().feature() >= 17
+            ? "@java.lang.annotation.Target({METHOD})"
+            : "@java.lang.annotation.Target(value={METHOD})");
+
     assertEquals("new java.lang.annotation.Target() { " +
             "public Class annotationType() { " +
             " return java.lang.annotation.Target.class; " +
             "} " +
             "public String toString() { " +
-            " return \"@java.lang.annotation.Target(value={METHOD})\"; " +
+            " return \"" + toStringValue + "\"; " +
             "} " +
             "public java.lang.annotation.ElementType[] value() { " +
             " return new java.lang.annotation.ElementType[] { " +

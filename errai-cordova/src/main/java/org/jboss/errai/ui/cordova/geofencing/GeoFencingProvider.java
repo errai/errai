@@ -18,10 +18,10 @@ package org.jboss.errai.ui.cordova.geofencing;
 
 import com.google.gwt.core.client.GWT;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Event;
-import javax.enterprise.inject.Produces;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Event;
+import jakarta.enterprise.inject.Produces;
+import jakarta.inject.Inject;
 
 /**
  * @author edewit@redhat.com

@@ -18,7 +18,7 @@ package org.jboss.errai.demo.grocery.client.local;
 
 import java.util.List;
 
-import javax.enterprise.context.Dependent;
+import jakarta.enterprise.context.Dependent;
 
 import org.jboss.errai.demo.grocery.client.shared.Department;
 import org.jboss.errai.ioc.client.api.LoadAsync;

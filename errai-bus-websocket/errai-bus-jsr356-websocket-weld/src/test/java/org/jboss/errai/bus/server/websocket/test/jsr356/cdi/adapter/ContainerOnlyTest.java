@@ -21,10 +21,10 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import javax.enterprise.context.Conversation;
-import javax.enterprise.inject.spi.Bean;
-import javax.inject.Inject;
-import javax.servlet.http.HttpSession;
+import jakarta.enterprise.context.Conversation;
+import jakarta.enterprise.inject.spi.Bean;
+import jakarta.inject.Inject;
+import jakarta.servlet.http.HttpSession;
 
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;

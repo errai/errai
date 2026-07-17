@@ -16,8 +16,8 @@
 
 package org.jboss.errai.databinding.client;
 
-import javax.annotation.PreDestroy;
-import javax.enterprise.context.Dependent;
+import jakarta.annotation.PreDestroy;
+import jakarta.enterprise.context.Dependent;
 
 import org.jboss.errai.common.client.api.annotations.IOCProducer;
 

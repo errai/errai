@@ -1,7 +1,7 @@
 package org.jboss.errai.ioc.support.bus.tests.client.res;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 
 import org.jboss.errai.bus.server.annotations.ShadowService;
 

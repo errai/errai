@@ -31,10 +31,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.enterprise.context.NormalScope;
-import javax.enterprise.inject.Stereotype;
-import javax.inject.Qualifier;
-import javax.inject.Scope;
+import jakarta.enterprise.context.NormalScope;
+import jakarta.enterprise.inject.Stereotype;
+import jakarta.inject.Qualifier;
+import jakarta.inject.Scope;
 
 import org.jboss.errai.codegen.meta.HasAnnotations;
 import org.jboss.errai.codegen.meta.MetaClass;

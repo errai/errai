@@ -16,7 +16,7 @@
 
 package org.jboss.errai.bus.server.websocket.test.jsr356.cdi.adapter;
 
-import javax.enterprise.context.SessionScoped;
+import jakarta.enterprise.context.SessionScoped;
 
 import java.io.Serializable;
 

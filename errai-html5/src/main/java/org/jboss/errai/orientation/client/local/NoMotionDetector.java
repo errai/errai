@@ -21,7 +21,7 @@ import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.user.client.Window;
 import org.jboss.errai.orientation.client.shared.OrientationEvent;
 
-import javax.enterprise.event.Event;
+import jakarta.enterprise.event.Event;
 
 /**
  * Just uses resize events to tell if the device has changed it's orientation.

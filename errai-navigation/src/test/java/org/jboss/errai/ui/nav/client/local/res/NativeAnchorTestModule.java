@@ -16,8 +16,8 @@
 
 package org.jboss.errai.ui.nav.client.local.res;
 
-import javax.enterprise.context.Dependent;
-import javax.inject.Inject;
+import jakarta.enterprise.context.Dependent;
+import jakarta.inject.Inject;
 
 import org.jboss.errai.common.client.dom.Anchor;
 import org.jboss.errai.ui.nav.client.local.api.TransitionTo;

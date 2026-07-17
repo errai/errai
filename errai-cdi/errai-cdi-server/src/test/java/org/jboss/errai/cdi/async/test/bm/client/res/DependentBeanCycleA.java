@@ -18,9 +18,9 @@ package org.jboss.errai.cdi.async.test.bm.client.res;
 
 import org.jboss.errai.ioc.client.api.LoadAsync;
 
-import javax.annotation.PreDestroy;
-import javax.enterprise.context.Dependent;
-import javax.inject.Inject;
+import jakarta.annotation.PreDestroy;
+import jakarta.enterprise.context.Dependent;
+import jakarta.inject.Inject;
 
 /**
  * @author Mike Brock

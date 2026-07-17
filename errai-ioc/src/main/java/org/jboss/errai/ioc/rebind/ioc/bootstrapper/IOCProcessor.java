@@ -47,17 +47,17 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import javax.annotation.PostConstruct;
-import javax.enterprise.context.Dependent;
-import javax.enterprise.context.NormalScope;
-import javax.enterprise.inject.Alternative;
-import javax.enterprise.inject.Disposes;
-import javax.enterprise.inject.Specializes;
-import javax.enterprise.inject.Stereotype;
-import javax.enterprise.inject.Typed;
-import javax.inject.Named;
-import javax.inject.Provider;
-import javax.inject.Scope;
+import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.context.NormalScope;
+import jakarta.enterprise.inject.Alternative;
+import jakarta.enterprise.inject.Disposes;
+import jakarta.enterprise.inject.Specializes;
+import jakarta.enterprise.inject.Stereotype;
+import jakarta.enterprise.inject.Typed;
+import jakarta.inject.Named;
+import jakarta.inject.Provider;
+import jakarta.inject.Scope;
 
 import org.jboss.errai.codegen.ArithmeticExpression;
 import org.jboss.errai.codegen.ArithmeticOperator;

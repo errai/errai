@@ -22,10 +22,9 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import org.jboss.errai.codegen.exception.GenerationException;
@@ -47,6 +46,7 @@ import org.jboss.errai.ui.nav.client.local.DefaultPage;
 import org.jboss.errai.ui.nav.client.local.Page;
 import org.jboss.errai.ui.nav.client.local.TransitionToRole;
 import org.jboss.errai.ui.nav.client.local.UniquePageRole;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -125,6 +125,10 @@ public class ValidationRulesTest {
     doNothing().when(injContext).registerExactTypeInjectableProvider(handleCaptor.capture(), providerCaptor.capture());
   }
 
+  @After
+  public void tearDown() {
+    restoreDenylistedClassNames();
+  }
 
   @Test
   public void shouldThrowExceptionWhenMoreThenOneDefaultPage() {
@@ -255,18 +259,26 @@ public class ValidationRulesTest {
     when(ClassScanner.getTypesAnnotatedWith(Page.class, null)).thenReturn(createMetaClassList(pages));
   }
 
-  private void overrideDenylistedClassNames(final String... names) throws SecurityException, NoSuchFieldException,
-          IllegalArgumentException, IllegalAccessException {
-    final Field denylistedField = NavigationGraphGenerator.class.getDeclaredField("DENYLISTED_PAGES");
+  private Collection<String> savedDenylistedPages;
 
-    denylistedField.setAccessible(true);
+  /**
+   * Temporarily replaces {@link NavigationGraphGenerator#DENYLISTED_PAGES} with the supplied names.
+   * The original value is saved and restored by {@link #restoreDenylistedClassNames()}.
+   * <p>
+   * The old implementation used {@code Field.class.getDeclaredField("modifiers")} to clear the
+   * {@code final} modifier — a hack that stopped working in Java 12+. Since the field is now
+   * package-private (non-final), we can assign it directly without reflection.
+   */
+  private void overrideDenylistedClassNames(final String... names) {
+    savedDenylistedPages = NavigationGraphGenerator.DENYLISTED_PAGES;
+    NavigationGraphGenerator.DENYLISTED_PAGES = Arrays.asList(names);
+  }
 
-    // Change the field to not be final so that we can overwrite it.
-    final Field fieldModifiers = Field.class.getDeclaredField("modifiers");
-    fieldModifiers.setAccessible(true);
-    fieldModifiers.setInt(denylistedField, fieldModifiers.getInt(denylistedField) & ~Modifier.FINAL);
-
-    denylistedField.set(null, Arrays.asList(names));
+  private void restoreDenylistedClassNames() {
+    if (savedDenylistedPages != null) {
+      NavigationGraphGenerator.DENYLISTED_PAGES = savedDenylistedPages;
+      savedDenylistedPages = null;
+    }
   }
 
   @Page(role = DefaultPage.class)

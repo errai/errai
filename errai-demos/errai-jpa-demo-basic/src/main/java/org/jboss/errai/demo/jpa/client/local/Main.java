@@ -18,8 +18,8 @@ package org.jboss.errai.demo.jpa.client.local;
 
 import java.sql.Date;
 
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
+import jakarta.annotation.PostConstruct;
+import jakarta.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 

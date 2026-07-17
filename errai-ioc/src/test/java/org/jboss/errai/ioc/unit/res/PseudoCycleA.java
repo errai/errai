@@ -16,8 +16,8 @@
 
 package org.jboss.errai.ioc.unit.res;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 
 /**
  *

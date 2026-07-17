@@ -16,7 +16,7 @@
 
 package org.jboss.errai.security.client.local.interceptors;
 
-import javax.ws.rs.ext.Provider;
+import jakarta.ws.rs.ext.Provider;
 
 import org.jboss.errai.enterprise.client.jaxrs.AbstractJSONClientExceptionMapper;
 import org.jboss.errai.enterprise.client.jaxrs.api.ResponseException;

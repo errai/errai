@@ -61,14 +61,14 @@
   <properties>
     <apache.stanbol.htmlextractor.version>0.10.0</apache.stanbol.htmlextractor.version>
     <appengine.version>1.7.6</appengine.version>
-    <asm.version>9.2</asm.version>
+    <asm.version>9.6</asm.version>
     <gmaven.mojo.version>1.5</gmaven.mojo.version>
     <guava.version>33.2.1-jre</guava.version>
-    <guice.version>3.0</guice.version>
+    <guice.version>7.0.0</guice.version>
     <gwt-elemental.version>2.9.0</gwt-elemental.version>
     <gwt.phonegap.version>3.5.0.1</gwt.phonegap.version>
-    <gwt.version>2.11.0</gwt.version>
-    <javaee.api.version>8.0.1</javaee.api.version>
+    <gwt.version>2.13.1</gwt.version>
+    <!-- javax:javaee-api aggregate removed; replaced by individual jakarta.* specs below -->
 
     <!-- ip-bom uses artifact with groupId org.jboss.remoting3 -->
     <jboss.remoting.version>5.0.20.Final</jboss.remoting.version>
@@ -77,33 +77,33 @@
     <jboss.web.version>7.0.16.Final</jboss.web.version>
     <jsr305.version>1.3.9</jsr305.version>
     <mojo.executor.version>2.2.0</mojo.executor.version>
-    <netty.codec.http.version>4.1.119.Final</netty.codec.http.version>
+    <netty.codec.http.version>4.1.136.Final</netty.codec.http.version>
 
     <version.com.fasterxml.jackson>2.13.4</version.com.fasterxml.jackson>
     <version.com.fasterxml.jackson.databind>2.13.4.2</version.com.fasterxml.jackson.databind>
     <version.com.google.elemental2>1.1.0</version.com.google.elemental2>
-    <version.com.google.code.gson>2.8.9</version.com.google.code.gson>
+    <version.com.google.code.gson>2.11.0</version.com.google.code.gson>
     <version.com.google.jsinterop>2.0.0</version.com.google.jsinterop>
-    <version.org.eclipse.jdt.ecj>3.18.0</version.org.eclipse.jdt.ecj>
+    <version.org.eclipse.jdt.ecj>3.33.0</version.org.eclipse.jdt.ecj>
     <version.com.google.gwt.gwtmockito>1.1.9</version.com.google.gwt.gwtmockito>
     <version.com.h2database>1.4.197</version.com.h2database>
     <version.de.benediktmeurer.gwt-slf4j>0.0.2</version.de.benediktmeurer.gwt-slf4j>
 
     <version.junit>4.13.2</version.junit>
-    <version.log4j>2.23.1</version.log4j>
+    <version.log4j>2.26.0</version.log4j>
 
     <version.org.apache.commons.lang3>3.8.1</version.org.apache.commons.lang3>
-    <version.org.apache.deltaspike.core>1.9.6</version.org.apache.deltaspike.core>
+    <version.org.apache.deltaspike.core>2.0.1</version.org.apache.deltaspike.core>
     <version.org.apache.httpcomponents.httpclient>4.5.13</version.org.apache.httpcomponents.httpclient>
     <version.org.apache.maven>3.3.9</version.org.apache.maven>
     <version.org.dom4j>2.1.3</version.org.dom4j>
-    <version.org.eclipse.jetty>9.4.44.v20210927</version.org.eclipse.jetty>
+    <version.org.eclipse.jetty>9.4.58.v20250814</version.org.eclipse.jetty>
     <version.org.glassfish.javax.el>3.0.0</version.org.glassfish.javax.el>
-    <version.org.hibernate>5.3.20.Final</version.org.hibernate>
+    <version.org.hibernate>5.6.15.Final</version.org.hibernate>
     <version.org.hibernate.validator>4.1.0.Final</version.org.hibernate.validator>
-    <version.org.hibernate.commons.annotations>5.0.5.Final</version.org.hibernate.commons.annotations>
+    <version.org.hibernate.commons.annotations>5.1.2.Final</version.org.hibernate.commons.annotations>
     <version.org.hsqldb>2.7.1</version.org.hsqldb>
-    <version.org.javassist>3.23.2-GA</version.org.javassist>
+    <version.org.javassist>3.32.0-GA</version.org.javassist>
     <version.org.jboss.arquillian>1.4.0.Final</version.org.jboss.arquillian>
     <version.org.jboss.jboss-common-core>2.5.0.Final</version.org.jboss.jboss-common-core>
     <version.org.jboss.logging.jboss-logging>3.3.2.Final</version.org.jboss.logging.jboss-logging>
@@ -111,39 +111,57 @@
     <version.org.jboss.shrinkwrap.descriptors>2.0.0</version.org.jboss.shrinkwrap.descriptors>
     <version.org.jboss.shrinkwrap.resolver>2.2.0</version.org.jboss.shrinkwrap.resolver>
 
-    <!-- <version.jakarta.validation>2.0.2</version.jakarta.validation> we can't use this due GWT hard dependency on api 1.x  -->
-    <version.javax.validation>1.0.0.GA</version.javax.validation>
-    <version.jakarta.enterprise.cdi-api>2.0.2</version.jakarta.enterprise.cdi-api>
-    <version.jakarta.inject-api>1.0.3</version.jakarta.inject-api>
-    <version.jakarta.persistence-api>2.2.3</version.jakarta.persistence-api>
-    <version.jakarta.interceptor-api>1.2.5</version.jakarta.interceptor-api>
-    <version.jakarta.ws.rs-api>2.1.6</version.jakarta.ws.rs-api>
-    <version.jakarta.annotation-api>1.3.5</version.jakarta.annotation-api>
-    <version.jakarta.resource-api>1.7.4</version.jakarta.resource-api>
-    <version.jakarta.ejb-api>3.2.6</version.jakarta.ejb-api>
-    <version.jakarta.el-api>3.0.3</version.jakarta.el-api>
-    <version.jakarta.enterprise.concurrent-api>1.1.2</version.jakarta.enterprise.concurrent-api>
-    <version.jakarta.jms-api>2.0.3</version.jakarta.jms-api>
-    <version.jakarta.security.jacc-api>1.6.1</version.jakarta.security.jacc-api>
-    <version.jakarta.servlet-api>4.0.2</version.jakarta.servlet-api>
-    <version.jakarta.servlet.jsp-api>3.0.0</version.jakarta.servlet.jsp-api>
-    <version.jakarta.servlet.jsp.jstl-api>1.2.7</version.jakarta.servlet.jsp.jstl-api>
-    <version.jakarta.transaction-api>1.3.3</version.jakarta.transaction-api>
-    <version.jakarta.ws.rs-api>2.1.6</version.jakarta.ws.rs-api>
-    <version.jakarta.xml.ws-api>2.3.3</version.jakarta.xml.ws-api>
-    <version.jakarta.xml.bind-api>2.3.3</version.jakarta.xml.bind-api>
-    <version.jakarta.websocket-api>1.1.2</version.jakarta.websocket-api>
+    <!-- ============================================================ -->
+    <!-- Jakarta EE spec versions                                      -->
+    <!-- HARD-LOCKED by GWT 2.13.1 — do NOT upgrade:                  -->
+    <!--   javax.validation:validation-api stays at 1.0.0.GA           -->
+    <!--   javax.servlet:javax.servlet-api stays at 3.1.0 (gwt-user)  -->
+    <!--   jakarta.servlet-api stays at 4.0.2 (EE8 bridge, Jetty 9)  -->
+    <!--   jakarta.enterprise.cdi-api stays at 2.0.2 (Weld 3 / CDI 2) -->
+    <!--   jakarta.persistence-api stays at 2.2.3 (Hibernate 5)       -->
+    <!--   jakarta.ws.rs-api stays at 2.1.6 (RESTEasy 3)              -->
+    <!--   jakarta.el-api stays at 3.0.3 (Weld 3 + Jetty 9 / EL 3)   -->
+    <!-- ============================================================ -->
 
-    <version.org.jboss.weld.weld>3.1.5.SP1</version.org.jboss.weld.weld>
-    <version.org.jboss.weld.weld-api>3.1.SP2</version.org.jboss.weld.weld-api>
-    <version.org.jgroups>3.6.14.Final</version.org.jgroups>
+    <!-- GWT hard lock: Bean Validation 1.0 (javax.validation namespace) -->
+    <version.javax.validation>1.0.0.GA</version.javax.validation>
+    <version.jakarta.validation>3.0.2</version.jakarta.validation>
+
+    <!-- Soft-locked (Weld 5 / CDI 4): -->
+    <version.jakarta.enterprise.cdi-api>4.0.1</version.jakarta.enterprise.cdi-api>
+    <!-- Soft-locked (Hibernate 5 / JPA 2.2): -->
+    <version.jakarta.persistence-api>2.2.3</version.jakarta.persistence-api>
+    <!-- Soft-locked (RESTEasy 3 / JAX-RS 3.1): -->
+    <version.jakarta.ws.rs-api>3.1.0</version.jakarta.ws.rs-api>
+    <!-- Jakarta Servlet 6.0 (EE10): -->
+    <version.jakarta.servlet-api>6.0.0</version.jakarta.servlet-api>
+    <!-- Jakarta EL 5.0 (EE10): -->
+    <version.jakarta.el-api>5.0.1</version.jakarta.el-api>
+
+    <version.jakarta.inject-api>2.0.1</version.jakarta.inject-api>
+    <version.jakarta.interceptor-api>2.2.0</version.jakarta.interceptor-api>
+    <version.jakarta.annotation-api>2.1.1</version.jakarta.annotation-api>
+    <version.jakarta.ejb-api>4.0.1</version.jakarta.ejb-api>
+    <version.jakarta.enterprise.concurrent-api>3.0.4</version.jakarta.enterprise.concurrent-api>
+    <version.jakarta.jms-api>3.1.0</version.jakarta.jms-api>
+    <version.jakarta.resource-api>2.1.0</version.jakarta.resource-api>
+    <version.jakarta.security.jacc-api>1.6.1</version.jakarta.security.jacc-api>
+    <version.jakarta.servlet.jsp-api>3.1.1</version.jakarta.servlet.jsp-api>
+    <version.jakarta.servlet.jsp.jstl-api>3.0.2</version.jakarta.servlet.jsp.jstl-api>
+    <version.jakarta.transaction-api>2.0.1</version.jakarta.transaction-api>
+    <version.jakarta.xml.ws-api>4.0.3</version.jakarta.xml.ws-api>
+    <version.jakarta.xml.bind-api>4.0.5</version.jakarta.xml.bind-api>
+    <version.jakarta.websocket-api>2.1.1</version.jakarta.websocket-api>
+
+    <version.org.jboss.weld.weld>5.1.7.Final</version.org.jboss.weld.weld>
+    <version.org.jboss.weld.weld-api>5.0.SP3</version.org.jboss.weld.weld-api>
+    <version.org.jgroups>3.6.20.Final</version.org.jgroups>
     <version.org.jsoup>1.15.3</version.org.jsoup>
     <!-- Keycloak 9.0.3.Final can't be upgraded due API/class changes-->
     <version.org.keycloak>1.9.4.Final</version.org.keycloak>
     <version.org.lesscss>1.7.0.1.1</version.org.lesscss>
     <version.org.mockito>3.6.0</version.org.mockito>
     <version.org.mvel>2.5.2.Final</version.org.mvel>
-    <version.org.picketlink>2.6.0.Final</version.org.picketlink>
     <version.org.powermock>2.0.7</version.org.powermock>
     <version.org.quartz-scheduler>2.3.2</version.org.quartz-scheduler>
     <version.org.slf4j>1.7.26</version.org.slf4j>
@@ -335,6 +353,18 @@
             <groupId>javax.xml.bind</groupId>
             <artifactId>jaxb-api</artifactId>
           </exclusion>
+          <exclusion>
+            <groupId>jakarta.activation</groupId>
+            <artifactId>jakarta.activation-api</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>jakarta.persistence</groupId>
+            <artifactId>jakarta.persistence-api</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>jakarta.xml.bind</groupId>
+            <artifactId>jakarta.xml.bind-api</artifactId>
+          </exclusion>
         </exclusions>
       </dependency>
       <dependency>
@@ -350,6 +380,10 @@
             <groupId>org.jboss.spec.javax.transaction</groupId>
             <artifactId>jboss-transaction-api_1.2_spec</artifactId>
           </exclusion>
+          <exclusion>
+            <groupId>jakarta.persistence</groupId>
+            <artifactId>jakarta.persistence-api</artifactId>
+          </exclusion>
         </exclusions>
       </dependency>
       <dependency>
@@ -357,7 +391,6 @@
         <artifactId>hibernate-commons-annotations</artifactId>
         <version>${version.org.hibernate.commons.annotations}</version>
       </dependency>
-      <!-- Must come before gwt-dev -->
       <dependency>
         <groupId>org.eclipse.jetty</groupId>
         <artifactId>jetty-continuation</artifactId>
@@ -415,6 +448,10 @@
           <exclusion>
             <groupId>org.eclipse.jetty.orbit</groupId>
             <artifactId>javax.servlet</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
           </exclusion>
         </exclusions>
       </dependency>
@@ -554,6 +591,14 @@
             <groupId>commons-logging</groupId>
             <artifactId>commons-logging</artifactId>
           </exclusion>
+          <exclusion>
+            <groupId>jakarta.enterprise</groupId>
+            <artifactId>jakarta.enterprise.cdi-api</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>jakarta.inject</groupId>
+            <artifactId>jakarta.inject-api</artifactId>
+          </exclusion>
         </exclusions>
       </dependency>
       <dependency>
@@ -570,11 +615,6 @@
         <groupId>io.netty</groupId>
         <artifactId>netty-handler</artifactId>
         <version>${netty.codec.http.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>javax</groupId>
-        <artifactId>javaee-api</artifactId>
-        <version>${javaee.api.version}</version>
       </dependency>
       <dependency>
         <groupId>org.wildfly.core</groupId>
@@ -644,6 +684,14 @@
             <groupId>commons-logging</groupId>
             <artifactId>commons-logging</artifactId>
           </exclusion>
+          <exclusion>
+            <groupId>jakarta.enterprise</groupId>
+            <artifactId>jakarta.enterprise.cdi-api</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>jakarta.inject</groupId>
+            <artifactId>jakarta.inject-api</artifactId>
+          </exclusion>
         </exclusions>
       </dependency>
       <dependency>
@@ -686,6 +734,14 @@
           <exclusion>
             <groupId>commons-logging</groupId>
             <artifactId>commons-logging</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>jakarta.enterprise</groupId>
+            <artifactId>jakarta.enterprise.cdi-api</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>jakarta.inject</groupId>
+            <artifactId>jakarta.inject-api</artifactId>
           </exclusion>
         </exclusions>
       </dependency>
@@ -827,6 +883,10 @@
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
           </exclusion>
+          <exclusion>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
+          </exclusion>
         </exclusions>
       </dependency>
       <dependency>
@@ -847,6 +907,14 @@
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
           </exclusion>
+          <exclusion>
+            <groupId>jakarta.annotation</groupId>
+            <artifactId>jakarta.annotation-api</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
+          </exclusion>
         </exclusions>
       </dependency>
       <dependency>
@@ -859,6 +927,7 @@
         <artifactId>jsinterop-annotations</artifactId>
         <version>${version.com.google.jsinterop}</version>
       </dependency>
+      <!-- GWT / hibernate-validator 4.x still use the javax.validation namespace -->
       <dependency>
         <groupId>javax.validation</groupId>
         <artifactId>validation-api</artifactId>
@@ -868,6 +937,18 @@
         <groupId>javax.validation</groupId>
         <artifactId>validation-api</artifactId>
         <version>${version.javax.validation}</version>
+        <classifier>sources</classifier>
+      </dependency>
+      <!-- For server-side code that can use the full jakarta.validation 3.x namespace -->
+      <dependency>
+        <groupId>jakarta.validation</groupId>
+        <artifactId>jakarta.validation-api</artifactId>
+        <version>${version.jakarta.validation}</version>
+      </dependency>
+      <dependency>
+        <groupId>jakarta.validation</groupId>
+        <artifactId>jakarta.validation-api</artifactId>
+        <version>${version.jakarta.validation}</version>
         <classifier>sources</classifier>
       </dependency>
       <dependency>
@@ -932,16 +1013,6 @@
         <version>${version.junit}</version>
       </dependency>
       <dependency>
-        <groupId>org.picketlink</groupId>
-        <artifactId>picketlink-api</artifactId>
-        <version>${version.org.picketlink}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.picketlink</groupId>
-        <artifactId>picketlink-impl</artifactId>
-        <version>${version.org.picketlink}</version>
-      </dependency>
-      <dependency>
         <groupId>org.lesscss</groupId>
         <artifactId>lesscss</artifactId>
         <version>${version.org.lesscss}</version>
@@ -967,9 +1038,9 @@
         <version>${version.com.fasterxml.jackson}</version>
       </dependency>
       <dependency>
-        <groupId>com.fasterxml.jackson.jaxrs</groupId>
-        <artifactId>jackson-jaxrs-json-provider</artifactId>
-        <version>${version.com.fasterxml.jackson}</version>
+        <groupId>com.fasterxml.jackson.jakarta.rs</groupId>
+        <artifactId>jackson-jakarta-rs-json-provider</artifactId>
+        <version>2.13.5</version>
       </dependency>
       <dependency>
         <groupId>com.fasterxml.jackson.core</groupId>
@@ -1041,6 +1112,17 @@
         <artifactId>jakarta.websocket-api</artifactId>
         <version>${version.jakarta.websocket-api}</version>
       </dependency>
+      <dependency>
+        <groupId>jakarta.websocket</groupId>
+        <artifactId>jakarta.websocket-client-api</artifactId>
+        <version>${version.jakarta.websocket-api}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.wildfly</groupId>
+        <artifactId>wildfly-dist</artifactId>
+        <version>${version.org.wildfly}</version>
+        <type>zip</type>
+      </dependency>
       <!-- This artifact is not managed in the ip-bom -->
       <dependency>
         <groupId>org.wildfly.arquillian</groupId>
@@ -1085,6 +1167,23 @@
             <phase>none</phase>
           </execution>
         </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.openrewrite.maven</groupId>
+        <artifactId>rewrite-maven-plugin</artifactId>
+        <version>6.43.0</version>
+        <configuration>
+          <activeRecipes>
+            <recipe>org.openrewrite.java.migrate.jakarta.JakartaEE10</recipe>
+          </activeRecipes>
+        </configuration>
+        <dependencies>
+          <dependency>
+            <groupId>org.openrewrite.recipe</groupId>
+            <artifactId>rewrite-migrate-java</artifactId>
+            <version>3.39.0</version>
+          </dependency>
+        </dependencies>
       </plugin>
     </plugins>
   </build>

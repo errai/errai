@@ -16,8 +16,8 @@
 
 package org.jboss.errai.cdi.async.test.producers.client.res;
 
-import javax.enterprise.context.Dependent;
-import javax.enterprise.inject.Produces;
+import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.inject.Produces;
 
 @Dependent
 public class DepBeanProducer {

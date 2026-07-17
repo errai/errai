@@ -31,8 +31,8 @@ import org.jboss.errai.cdi.stereotypes.client.Tame;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.ioc.client.container.SyncBeanDef;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.context.Dependent;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.Dependent;
 import java.lang.annotation.Annotation;
 import java.util.Collection;
 

@@ -16,8 +16,8 @@
 
 package org.jboss.errai.security.client.local.res;
 
-import javax.enterprise.context.Dependent;
-import javax.inject.Inject;
+import jakarta.enterprise.context.Dependent;
+import jakarta.inject.Inject;
 
 import org.jboss.errai.security.shared.api.identity.User;
 

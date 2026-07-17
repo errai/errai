@@ -122,7 +122,7 @@ public class QualifierEqualityFactoryGenerator extends Generator {
 
       if (methods.isEmpty()) continue;
 
-      constrBuilder._(Stmt.loadVariable(COMPARATOR_MAP_VAR)
+      constrBuilder.append(Stmt.loadVariable(COMPARATOR_MAP_VAR)
           .invoke("put", MC_annotationClass.getFullyQualifiedName(), generateComparatorFor(MC_annotationClass, methods)));
     }
 
@@ -133,36 +133,36 @@ public class QualifierEqualityFactoryGenerator extends Generator {
     builder.publicMethod(boolean.class, "isEqual",
         Parameter.of(annotationClazz, "a1"), Parameter.of(annotationClazz, "a2"))
         .body()
-        ._(If.cond(invokeStatic(QualifierUtil.class, "isSameType", Refs.get("a1"), Refs.get("a2")))
-            ._(
+        .append(If.cond(invokeStatic(QualifierUtil.class, "isSameType", Refs.get("a1"), Refs.get("a2")))
+            .append(
                 If.cond(Stmt.loadVariable(COMPARATOR_MAP_VAR).invoke("containsKey",
                     Stmt.loadVariable("a1").invoke("annotationType").invoke("getName")))
-                    ._(Stmt.castTo(AnnotationComparator.class, Stmt.loadVariable(COMPARATOR_MAP_VAR)
+                    .append(Stmt.castTo(AnnotationComparator.class, Stmt.loadVariable(COMPARATOR_MAP_VAR)
                         .invoke("get", Stmt.loadVariable("a1").invoke("annotationType").invoke("getName"))
                     ).invoke("isEqual", Refs.get("a1"), Refs.get("a2")).returnValue())
                     .finish()
                     .else_()
-                    ._(Stmt.load(true).returnValue())
+                    .append(Stmt.load(true).returnValue())
                     .finish()
             )
             .finish()
             .else_()
-            ._(Stmt.load(false).returnValue())
+            .append(Stmt.load(false).returnValue())
             .finish())
         .finish();
 
 
     builder.publicMethod(int.class, "hashCodeOf", Parameter.of(Annotation.class, "a1"))
         .body()
-        ._(
+        .append(
             If.cond(Stmt.loadVariable(COMPARATOR_MAP_VAR).invoke("containsKey",
                 Stmt.loadVariable("a1").invoke("annotationType").invoke("getName")))
-                ._(Stmt.castTo(AnnotationComparator.class, Stmt.loadVariable(COMPARATOR_MAP_VAR)
+                .append(Stmt.castTo(AnnotationComparator.class, Stmt.loadVariable(COMPARATOR_MAP_VAR)
                     .invoke("get", Stmt.loadVariable("a1").invoke("annotationType").invoke("getName"))
                 ).invoke("hashCodeOf", Refs.get("a1")).returnValue())
                 .finish()
                 .else_()
-                ._(Stmt.loadVariable("a1").invoke("annotationType").invoke("hashCode").returnValue())
+                .append(Stmt.loadVariable("a1").invoke("annotationType").invoke("hashCode").returnValue())
                 .finish()).finish();
 
 
@@ -192,45 +192,45 @@ public class QualifierEqualityFactoryGenerator extends Generator {
 
     for (final MetaMethod method : methods) {
       if (method.getReturnType().isPrimitive()) {
-        isEqualBuilder._(
+        isEqualBuilder.append(
             If.notEquals(Stmt.loadVariable("a1").invoke(method), Stmt.loadVariable("a2").invoke(method))
-                ._(Stmt.load(false).returnValue())
+                .append(Stmt.load(false).returnValue())
                 .finish()
         );
       }
       else if (method.getReturnType().isArray()) {
-        isEqualBuilder._(
+        isEqualBuilder.append(
             If.not(Stmt.invokeStatic(Arrays.class, "equals",
                 Stmt.loadVariable("a1").invoke(method),
                 Stmt.loadVariable("a2").invoke(method))
             )
-            ._(Stmt.load(false).returnValue())
+            .append(Stmt.load(false).returnValue())
             .finish()
         );
       }
       else {
-        isEqualBuilder._(
+        isEqualBuilder.append(
             If.not(Stmt.loadVariable("a1").invoke(method).invoke("equals", Stmt.loadVariable("a2").invoke(method)))
-                ._(Stmt.load(false).returnValue())
+                .append(Stmt.load(false).returnValue())
                 .finish()
         );
       }
     }
 
-    isEqualBuilder._(Stmt.load(true).returnValue());
+    isEqualBuilder.append(Stmt.load(true).returnValue());
 
     final BlockBuilder<AnonymousClassStructureBuilder> hashCodeOfBuilder
         = clsBuilder.publicOverridesMethod("hashCodeOf", Parameter.of(MC_annotationClass, "a1"));
 
-    hashCodeOfBuilder._(Stmt.declareVariable(int.class).named("hash")
+    hashCodeOfBuilder.append(Stmt.declareVariable(int.class).named("hash")
         .initializeWith(Stmt.loadVariable("a1").invoke("annotationType").invoke("hashCode")));
 
     for (final MetaMethod method : methods) {
-      hashCodeOfBuilder._(Stmt.loadVariable("hash")
+      hashCodeOfBuilder.append(Stmt.loadVariable("hash")
           .assignValue(hashArith(method)));
     }
 
-    hashCodeOfBuilder._(Stmt.loadVariable("hash").returnValue());
+    hashCodeOfBuilder.append(Stmt.loadVariable("hash").returnValue());
 
     hashCodeOfBuilder.finish();
 

@@ -18,7 +18,7 @@ package org.jboss.errai.ui.nav.client.local.testpages;
 
 import org.jboss.errai.ui.nav.client.local.*;
 
-import javax.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 
 import com.google.gwt.user.client.ui.VerticalPanel;
 

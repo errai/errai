@@ -20,7 +20,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import org.jboss.errai.orientation.client.shared.OrientationEvent;
 
-import javax.enterprise.event.Event;
+import jakarta.enterprise.event.Event;
 
 /**
  * Detects device orientation through the official HTML 5 API, periodically firing CDI

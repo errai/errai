@@ -18,7 +18,7 @@ package org.jboss.errai.enterprise.jaxrs.client.test;
 
 import java.util.Date;
 
-import javax.ws.rs.core.PathSegment;
+import jakarta.ws.rs.core.PathSegment;
 
 import org.jboss.errai.enterprise.client.jaxrs.api.PathSegmentImpl;
 import org.jboss.errai.enterprise.client.jaxrs.test.AbstractErraiJaxrsTest;

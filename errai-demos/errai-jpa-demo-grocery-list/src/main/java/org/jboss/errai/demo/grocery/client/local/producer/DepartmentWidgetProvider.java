@@ -16,8 +16,8 @@
 
 package org.jboss.errai.demo.grocery.client.local.producer;
 
-import javax.inject.Provider;
-import javax.inject.Singleton;
+import jakarta.inject.Provider;
+import jakarta.inject.Singleton;
 
 import org.jboss.errai.demo.grocery.client.local.DepartmentWidget;
 import org.jboss.errai.ioc.client.api.IOCProvider;

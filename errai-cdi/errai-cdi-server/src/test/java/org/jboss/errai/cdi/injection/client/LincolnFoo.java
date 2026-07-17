@@ -16,9 +16,9 @@
 
 package org.jboss.errai.cdi.injection.client;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.context.Dependent;
-import javax.enterprise.inject.Produces;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.inject.Produces;
 
 import org.jboss.errai.cdi.injection.client.qualifier.LincolnBar;
 

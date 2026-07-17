@@ -20,9 +20,9 @@ import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.function.Predicate;
 
-import javax.enterprise.inject.Produces;
-import javax.inject.Inject;
-import javax.inject.Scope;
+import jakarta.enterprise.inject.Produces;
+import jakarta.inject.Inject;
+import jakarta.inject.Scope;
 
 import org.jboss.errai.codegen.meta.HasAnnotations;
 import org.jboss.errai.codegen.meta.MetaClass;

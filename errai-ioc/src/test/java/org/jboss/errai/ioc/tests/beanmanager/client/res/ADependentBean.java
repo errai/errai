@@ -16,7 +16,7 @@
 
 package org.jboss.errai.ioc.tests.beanmanager.client.res;
 
-import javax.enterprise.context.Dependent;
+import jakarta.enterprise.context.Dependent;
 
 /**
  *

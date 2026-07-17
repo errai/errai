@@ -18,8 +18,8 @@ package org.jboss.errai.ioc.client.api;
 
 import java.lang.annotation.Annotation;
 
-import javax.enterprise.context.Dependent;
-import javax.inject.Provider;
+import jakarta.enterprise.context.Dependent;
+import jakarta.inject.Provider;
 
 import org.jboss.errai.ioc.client.container.ClientBeanManager;
 

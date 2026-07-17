@@ -18,8 +18,8 @@ package org.jboss.errai.security.demo.client.local;
 
 import static com.google.gwt.dom.client.Style.Visibility.*;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.RemoteCallback;

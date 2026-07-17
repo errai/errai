@@ -16,8 +16,8 @@
 
 package org.jboss.errai.ioc.tests.extensions.client.res;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 import org.jboss.errai.ioc.client.api.UncaughtExceptionHandler;
 

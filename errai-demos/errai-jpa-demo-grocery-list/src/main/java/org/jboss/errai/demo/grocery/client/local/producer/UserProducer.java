@@ -18,8 +18,8 @@ package org.jboss.errai.demo.grocery.client.local.producer;
 
 import java.util.List;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Produces;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Produces;
 import javax.persistence.EntityManager;
 
 import org.jboss.errai.demo.grocery.client.shared.User;

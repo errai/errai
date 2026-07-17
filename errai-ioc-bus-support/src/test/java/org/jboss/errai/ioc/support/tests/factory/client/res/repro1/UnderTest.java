@@ -18,7 +18,7 @@ package org.jboss.errai.ioc.support.tests.factory.client.res.repro1;
 
 import java.util.List;
 
-import javax.enterprise.context.Dependent;
+import jakarta.enterprise.context.Dependent;
 
 import org.jboss.errai.bus.server.annotations.ShadowService;
 

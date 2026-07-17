@@ -18,10 +18,10 @@ package org.jboss.errai.cdi.injection.client;
 
 import com.google.gwt.user.client.Random;
 
-import javax.annotation.PreDestroy;
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.context.Dependent;
-import javax.inject.*;
+import jakarta.annotation.PreDestroy;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.Dependent;
+import jakarta.inject.*;
 
 /**
  * @author Mike Brock

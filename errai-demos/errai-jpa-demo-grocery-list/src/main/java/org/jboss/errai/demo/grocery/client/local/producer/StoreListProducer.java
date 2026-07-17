@@ -21,11 +21,11 @@ import com.google.gwt.maps.client.geometrylib.SphericalUtils;
 import org.jboss.errai.demo.grocery.client.local.map.LocationProvider;
 import org.jboss.errai.demo.grocery.client.shared.Store;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Event;
-import javax.inject.Inject;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Event;
+import jakarta.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PostPersist;
 import javax.persistence.PostRemove;

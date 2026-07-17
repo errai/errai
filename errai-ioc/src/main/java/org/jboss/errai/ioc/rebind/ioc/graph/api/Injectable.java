@@ -20,8 +20,8 @@ import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.Optional;
 
-import javax.enterprise.context.Dependent;
-import javax.inject.Named;
+import jakarta.enterprise.context.Dependent;
+import jakarta.inject.Named;
 
 import org.jboss.errai.codegen.meta.HasAnnotations;
 import org.jboss.errai.codegen.meta.MetaClass;

@@ -27,7 +27,7 @@ import org.jboss.errai.bus.server.util.ServerLaundryList;
 import org.junit.Assert;
 import org.junit.Test;
 
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpSession;
 import java.util.*;
 
 /**

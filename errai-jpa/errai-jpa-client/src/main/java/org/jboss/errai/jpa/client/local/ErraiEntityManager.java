@@ -23,7 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.enterprise.inject.Alternative;
+import jakarta.enterprise.inject.Alternative;
 import javax.persistence.CascadeType;
 import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;

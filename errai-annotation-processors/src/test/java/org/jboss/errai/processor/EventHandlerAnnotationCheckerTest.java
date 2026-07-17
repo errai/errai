@@ -112,8 +112,8 @@ public class EventHandlerAnnotationCheckerTest extends AbstractProcessorTest {
 
   private int changeColForJava11Runtime() {
     int col = 3;
-    //hack to get different columns as correct
-    if ( JAVA_VERSION.startsWith("11") ) col = 17;
+    // Java 11+ reports annotation argument column (17) instead of annotation column (3)
+    if (!JAVA_VERSION.startsWith("1.")) col = 17;
     return col;
   }
 

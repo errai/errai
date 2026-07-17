@@ -21,7 +21,7 @@ import org.jboss.errai.bus.client.api.messaging.MessageBus;
 import org.jboss.errai.bus.client.api.messaging.RequestDispatcher;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 @EntryPoint
 public class SimpleBean extends SimpleSuperBean {

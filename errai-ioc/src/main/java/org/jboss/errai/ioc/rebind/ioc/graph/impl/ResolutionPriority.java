@@ -19,7 +19,7 @@ package org.jboss.errai.ioc.rebind.ioc.graph.impl;
 import java.util.Arrays;
 import java.util.Collection;
 
-import javax.enterprise.inject.Alternative;
+import jakarta.enterprise.inject.Alternative;
 
 import org.jboss.errai.ioc.client.api.IOCProvider;
 import org.jboss.errai.ioc.rebind.ioc.graph.api.DependencyGraphBuilder;

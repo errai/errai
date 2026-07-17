@@ -19,8 +19,8 @@ package org.jboss.errai.demo.grocery.client.local;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Produces;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Produces;
 
 import com.google.gwt.user.client.ui.ValueListBox;
 

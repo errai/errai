@@ -16,8 +16,8 @@
 
 package org.jboss.errai.ui.nav.client.local.spi;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.context.Dependent;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.Dependent;
 
 import com.google.common.collect.Multimap;
 import org.jboss.errai.common.client.util.CreationalCallback;

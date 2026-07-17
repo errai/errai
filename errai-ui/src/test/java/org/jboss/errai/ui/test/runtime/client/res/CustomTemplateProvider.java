@@ -16,7 +16,7 @@
 
 package org.jboss.errai.ui.test.runtime.client.res;
 
-import javax.enterprise.context.Dependent;
+import jakarta.enterprise.context.Dependent;
 
 import org.jboss.errai.ui.client.local.spi.TemplateProvider;
 import org.jboss.errai.ui.client.local.spi.TemplateRenderingCallback;

@@ -16,7 +16,7 @@
 
 package org.jboss.errai.jsinterop.demo.client;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 
 import org.jboss.errai.jsinterop.demo.client.IpsumGenerator;
 

@@ -16,7 +16,7 @@
 
 package org.jboss.errai.enterprise.jaxrs.client.test;
 
-import javax.ws.rs.ext.Provider;
+import jakarta.ws.rs.ext.Provider;
 
 import org.jboss.errai.enterprise.client.jaxrs.ClientExceptionMapper;
 import org.jboss.errai.enterprise.jaxrs.client.shared.ClientExceptionMappingTestService;

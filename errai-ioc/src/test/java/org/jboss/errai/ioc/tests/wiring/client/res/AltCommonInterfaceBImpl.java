@@ -16,7 +16,7 @@
 
 package org.jboss.errai.ioc.tests.wiring.client.res;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 
 /**
  * This bean should never get returned as it should be overridden by an alternative for

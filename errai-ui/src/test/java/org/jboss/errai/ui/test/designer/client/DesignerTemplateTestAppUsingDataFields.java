@@ -16,10 +16,10 @@
 
 package org.jboss.errai.ui.test.designer.client;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import javax.enterprise.context.Dependent;
-import javax.inject.Inject;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
+import jakarta.enterprise.context.Dependent;
+import jakarta.inject.Inject;
 
 import org.jboss.errai.ui.test.designer.client.res.DesignerBreadcrumbsComponentUsingDataFields;
 import org.jboss.errai.ui.test.designer.client.res.DesignerComponent;

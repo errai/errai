@@ -16,7 +16,7 @@
 
 package org.jboss.errai.ui.test.i18n.client.res;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.jboss.errai.ui.client.widget.LocaleListBox;
 import org.jboss.errai.ui.shared.api.annotations.DataField;

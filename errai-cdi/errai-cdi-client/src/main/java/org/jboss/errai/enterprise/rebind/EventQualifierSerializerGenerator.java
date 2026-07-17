@@ -21,7 +21,7 @@ import static org.jboss.errai.enterprise.client.cdi.EventQualifierSerializer.SER
 
 import java.io.File;
 
-import javax.inject.Qualifier;
+import jakarta.inject.Qualifier;
 
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.util.ClassChangeUtil;

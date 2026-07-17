@@ -18,7 +18,7 @@ package org.jboss.errai.ioc.support.bus.client;
 
 import java.lang.annotation.Annotation;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.ioc.client.api.ContextualTypeProvider;

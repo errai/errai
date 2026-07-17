@@ -43,12 +43,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Map.Entry;
 
-import javax.enterprise.context.Dependent;
-import javax.enterprise.inject.Any;
-import javax.enterprise.inject.Default;
-import javax.enterprise.inject.Typed;
-import javax.inject.Named;
-import javax.inject.Qualifier;
+import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Default;
+import jakarta.enterprise.inject.Typed;
+import jakarta.inject.Named;
+import jakarta.inject.Qualifier;
 
 import org.jboss.errai.codegen.BooleanOperator;
 import org.jboss.errai.codegen.InnerClass;
@@ -726,6 +726,20 @@ public abstract class AbstractBodyGenerator implements FactoryBodyGenerator {
     con.finish();
   }
 
+  /**
+   * Packages added in Java 9+ that are not emulated by GWT's JRE emulation layer.
+   * Types from these packages must be excluded from the generated setAssignableTypes() call
+   * or GWT compilation will fail with "No source code is available for type X".
+   * <ul>
+   *   <li>{@code java.lang.constant} — {@code Constable} / {@code ConstantDesc} added in Java 12;
+   *       {@code String} implements both but GWT does not emulate this package.</li>
+   * </ul>
+   */
+  private static final java.util.Set<String> GWT_UNEMULATED_JDK_PACKAGES =
+      new java.util.HashSet<>(java.util.Arrays.asList(
+          "java.lang.constant"
+      ));
+
   public static AbstractStatementBuilder getAssignableTypesArrayStmt(final Injectable injectable) {
     final Object[] assignableTypes =
             injectable.getAnnotatedObject()
@@ -742,7 +756,10 @@ public abstract class AbstractBodyGenerator implements FactoryBodyGenerator {
                 return (Object[]) copyWithObject;
               }
             })
-            .orElseGet(() -> getAllAssignableTypes(injectable.getInjectedType()).stream().filter(MetaClass::isPublic).toArray());
+            .orElseGet(() -> getAllAssignableTypes(injectable.getInjectedType()).stream()
+                .filter(MetaClass::isPublic)
+                .filter(t -> !GWT_UNEMULATED_JDK_PACKAGES.contains(t.getPackageName()))
+                .toArray());
 
     return newArray(Class.class).initialize(assignableTypes);
   }

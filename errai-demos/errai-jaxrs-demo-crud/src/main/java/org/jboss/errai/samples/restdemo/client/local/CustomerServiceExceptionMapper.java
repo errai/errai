@@ -16,7 +16,7 @@
 
 package org.jboss.errai.samples.restdemo.client.local;
 
-import javax.ws.rs.ext.Provider;
+import jakarta.ws.rs.ext.Provider;
 
 import org.jboss.errai.enterprise.client.jaxrs.ClientExceptionMapper;
 import org.jboss.errai.samples.restdemo.client.shared.CustomerNotFoundException;

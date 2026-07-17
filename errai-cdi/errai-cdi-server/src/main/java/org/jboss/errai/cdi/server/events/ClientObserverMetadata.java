@@ -20,8 +20,8 @@ import java.lang.annotation.Annotation;
 import java.util.Collections;
 import java.util.Set;
 
-import javax.enterprise.inject.Any;
-import javax.enterprise.inject.spi.EventMetadata;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.spi.EventMetadata;
 
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
 

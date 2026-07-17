@@ -21,10 +21,10 @@ import static com.google.gwt.dom.client.Style.Unit.PX;
 import java.util.Date;
 import java.util.Set;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import javax.enterprise.context.Dependent;
-import javax.enterprise.event.Observes;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
+import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.event.Observes;
 import javax.validation.ConstraintViolation;
 
 import org.jboss.errai.demo.grocery.client.shared.Department;

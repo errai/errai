@@ -20,9 +20,9 @@ import com.google.gwt.user.client.ui.RootPanel;
 import org.jboss.errai.ui.test.elemental2.client.res.CompositeElementFormComponent;
 import org.jboss.errai.ui.test.elemental2.client.res.ElementFormComponent;
 
-import javax.annotation.PostConstruct;
-import javax.enterprise.context.Dependent;
-import javax.inject.Inject;
+import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.context.Dependent;
+import jakarta.inject.Inject;
 
 /**
  * @author Tiago Bento <tfernand@redhat.com>

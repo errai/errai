@@ -16,7 +16,7 @@
 
 package org.jboss.errai.databinding.client;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 
 import org.jboss.errai.databinding.client.api.Bindable;
 

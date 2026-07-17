@@ -16,8 +16,8 @@
 
 package org.jboss.errai.jpa.test.client;
 
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
+import jakarta.annotation.PostConstruct;
+import jakarta.inject.Inject;
 import javax.persistence.EntityManager;
 
 import org.jboss.errai.ioc.client.api.EntryPoint;
