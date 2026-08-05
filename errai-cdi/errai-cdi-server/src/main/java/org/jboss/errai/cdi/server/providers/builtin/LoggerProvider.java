@@ -16,6 +16,7 @@
 
 package org.jboss.errai.cdi.server.providers.builtin;
 
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
 import jakarta.enterprise.inject.spi.InjectionPoint;
 
@@ -23,9 +24,8 @@ import org.jboss.errai.common.client.api.annotations.NamedLogger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@ApplicationScoped
 public class LoggerProvider {
-  
-  
 
   @Produces
   public Logger produceLogger(final InjectionPoint injectionPoint) {
