@@ -12,7 +12,7 @@
   <parent>
     <groupId>org.jboss.errai</groupId>
     <artifactId>errai-parent</artifactId>
-    <version>4.19.0-SNAPSHOT</version>
+    <version>5.0.0-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
@@ -31,7 +31,7 @@
       <plugin>
         <groupId>org.asciidoctor</groupId>
         <artifactId>asciidoctor-maven-plugin</artifactId>
-        <version>0.1.3.1</version>
+        <version>1.6.0</version>
         <executions>
           <execution>
             <id>output-xml</id>
@@ -43,10 +43,8 @@
         </executions>
         <configuration>
           <sourceDirectory>${basedir}/src/main/asciidoc</sourceDirectory>
-          <sourceDocumentName>${basedir}/src/main/asciidoc/reference.asciidoc</sourceDocumentName>
+          <sourceDocumentName>reference.asciidoc</sourceDocumentName>
           <outputDirectory>${basedir}/src/main/docbook/en</outputDirectory>
-          <templateDir>${basedir}src/main/docbook/docbook45</templateDir>
-          <templateEngine>slim</templateEngine>
           <headerFooter>true</headerFooter>
           <compact>false</compact>
           <attributes>
@@ -57,7 +55,6 @@
           <toc>true</toc>
           <backend>docbook45</backend>
           <doctype>book</doctype>
-          <goalPrefix>asciidoctor</goalPrefix>
         </configuration>
       </plugin>
       <!-- copy the asciidoc source tree for docbook xml processing -->
@@ -155,7 +152,7 @@
                       asciidoctor-maven-plugin
                     </artifactId>
                     <versionRange>
-                      [0.1.3.1,)
+                      [1.6.0,)
                     </versionRange>
                     <goals>
                       <goal>process-asciidoc</goal>
