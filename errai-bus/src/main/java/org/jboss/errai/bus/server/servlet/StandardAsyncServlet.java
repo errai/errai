@@ -72,6 +72,7 @@ public class StandardAsyncServlet extends AbstractErraiServlet {
 
     
     final AsyncContext asyncContext = request.startAsync();
+    asyncContext.getResponse().setContentType("application/json");
     asyncContext.setTimeout(60000);
     queue.setTimeout(65000);
     
@@ -161,6 +162,7 @@ public class StandardAsyncServlet extends AbstractErraiServlet {
           doGet(request, response);
         }
         else {
+          response.setContentType("application/json");
           queue.poll(new OutputStreamWriteAdapter(response.getOutputStream()));
         }
       }
