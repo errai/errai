@@ -32,7 +32,7 @@ public class NavigationControl {
 
   private final Navigation navigation;
   private final Runnable runnable;
-  private Runnable interrupt;
+  private Interrupt interrupt;
   
   private boolean hasRun;
 
@@ -41,7 +41,7 @@ public class NavigationControl {
     this.runnable = runnable;
   }
 
-  public NavigationControl(final Navigation navigation, final Runnable runnable, Runnable interrupt) {
+  public NavigationControl(final Navigation navigation, final Runnable runnable, Interrupt interrupt) {
     this(navigation, runnable);
     this.interrupt = interrupt;
   }
@@ -63,8 +63,17 @@ public class NavigationControl {
    * Interrupt the navigation process.
    */
   public void interrupt() {
+    interrupt(false);
+  }
+
+  /**
+   * Interrupt the navigation process.
+   *
+   * @param redirect was this due to a redirect action.
+   */
+  public void interrupt(boolean redirect) {
     if (!hasRun && interrupt != null) {
-      interrupt.run();
+      interrupt.interrupt(redirect);
       hasRun = true;
     }
   }
@@ -86,7 +95,7 @@ public class NavigationControl {
    */
   public <C> void redirect(final Class<C> toPage, final Multimap<String, String> state) {
     if (!hasRun) {
-      interrupt();
+      interrupt(true);
       navigation.goTo(toPage, state);
     } else {
       throw new IllegalStateException("redirect() method can only be called once.");
@@ -95,5 +104,9 @@ public class NavigationControl {
 
   public boolean hasRun() {
     return hasRun;
+  }
+
+  public interface Interrupt {
+    void interrupt(boolean redirect);
   }
 }
