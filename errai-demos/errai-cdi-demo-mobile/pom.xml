@@ -52,24 +52,27 @@
   </organization>
 
   <properties>
-    <maven.war.plugin.version>3.4.0</maven.war.plugin.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <webDescriptor>wildfly</webDescriptor>
     <skipTests>true</skipTests>
     <argLine></argLine>
-    <!-- maven plugins versions -->
-    <maven.surefire.plugin.version>2.5</maven.surefire.plugin.version>
-    <maven.clean.plugin.version>2.4.1</maven.clean.plugin.version>
-    <maven.compiler.plugin.version>2.3.2</maven.compiler.plugin.version>
-    <maven.deploy.plugin.version>2.7</maven.deploy.plugin.version>
+
+    <!-- Plugin versions -->
+    <maven.clean.plugin.version>3.5.0</maven.clean.plugin.version>
+    <maven.compiler.plugin.version>3.14.1</maven.compiler.plugin.version>
+    <maven.dependency.plugin.version>3.9.0</maven.dependency.plugin.version>
     <maven.gwt.plugin.version>2.10.0</maven.gwt.plugin.version>
+    <maven.war.plugin.version>3.4.0</maven.war.plugin.version>
+    <exec.maven.plugin.version>3.6.2</exec.maven.plugin.version>
+    <maven.deploy.plugin.version>3.1.4</maven.deploy.plugin.version>
+    <wildfly.maven.plugin.version>1.0.2.Final</wildfly.maven.plugin.version>
     <gwt.version>2.13.1</gwt.version>
-    <jetty.version>9.4.58.v20250814</jetty.version>
+
     <!-- Dev Mode config properties -->
+    <wildfly.version>35.0.1.Final</wildfly.version>
     <errai.dev.context>${project.artifactId}</errai.dev.context>
-    <as.version>23.0.2.Final</as.version>
     <!-- Add the absolute path for $JBOSS_HOME below to manage another instance -->
-    <errai.jboss.home>${project.build.directory}/wildfly-${as.version}</errai.jboss.home>
+    <errai.jboss.home>${project.build.directory}/wildfly-${wildfly.version}</errai.jboss.home>
   </properties>
 
   <repositories>
@@ -207,8 +210,7 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>${maven.compiler.plugin.version}</version>
         <configuration>
-          <source>1.8</source>
-          <target>1.8</target>
+          <release>17</release>
         </configuration>
       </plugin>
 
@@ -260,6 +262,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-dependency-plugin</artifactId>
+        <version>${maven.dependency.plugin.version}</version>
         <executions>
           <execution>
             <id>unpack</id>
@@ -272,7 +275,7 @@
                 <artifactItem>
                   <groupId>org.wildfly</groupId>
                   <artifactId>wildfly-dist</artifactId>
-                  <version>${as.version}</version>
+                  <version>${wildfly.version}</version>
                   <type>zip</type>
                   <overWrite>false</overWrite>
                   <outputDirectory>${project.build.directory}</outputDirectory>
@@ -284,8 +287,9 @@
       </plugin>
 
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-war-plugin</artifactId>
-        <version>3.4.0</version>
+        <version>${maven.war.plugin.version}</version>
         <configuration>
           <warName>${project.artifactId}</warName>
           <outputFileNameMapping>@{artifactId}@-@{baseVersion}@@{dashClassifier?}@.@{extension}@</outputFileNameMapping>
@@ -302,7 +306,7 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
-        <version>1.2.1</version>
+        <version>${exec.maven.plugin.version}</version>
         <executions>
           <execution>
             <phase>prepare-package</phase>
@@ -324,8 +328,9 @@
         </executions>
       </plugin>
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-clean-plugin</artifactId>
-        <version>2.4.1</version>
+        <version>${maven.clean.plugin.version}</version>
         <configuration>
           <filesets>
             <fileset>
@@ -415,7 +420,6 @@
         <dependency>
           <groupId>org.eclipse.jetty</groupId>
           <artifactId>jetty-server</artifactId>
-          <version>${jetty.version}</version>
         </dependency>
 
         <dependency>
@@ -475,12 +479,10 @@
         <dependency>
           <groupId>org.slf4j</groupId>
           <artifactId>slf4j-api</artifactId>
-          <version>1.7.5</version>
         </dependency>
         <dependency>
           <groupId>org.slf4j</groupId>
           <artifactId>slf4j-simple</artifactId>
-          <version>1.6.4</version>
         </dependency>
 
         <dependency>
@@ -508,7 +510,6 @@
           <groupId>jakarta.enterprise</groupId>
           <artifactId>jakarta.enterprise.cdi-api</artifactId>
           <scope>compile</scope>
-          <version>4.0.1</version>
         </dependency>
       </dependencies>
     </profile>

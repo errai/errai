@@ -37,3 +37,4 @@ class_list.txt
 .factorypath
 dependency-reduced-pom.xml
 .vscode
+**/javadoc/

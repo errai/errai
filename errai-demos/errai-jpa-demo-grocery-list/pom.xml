@@ -53,19 +53,24 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <jetty.version>6.1.26</jetty.version>
-    <slf4j.version>1.7.10</slf4j.version>
-    <cdiapi.version>1.2</cdiapi.version>
-    <servletapi.version>1.0.2.Final</servletapi.version>
-    <gwt.maven.version>2.10.0</gwt.maven.version>
-    <gwt.version>2.13.1</gwt.version>
-    <maven.compiler.plugin.version>3.2</maven.compiler.plugin.version>
-    <maven.deploy.plugin.version>2.8.2</maven.deploy.plugin.version>
-    <argLine></argLine>
     <skipTests>true</skipTests>
-    <errai.jboss.home>${project.build.directory}/wildfly-${wildfly.version}</errai.jboss.home>    
+    <argLine></argLine>
+
+    <!-- Plugin versions -->
+    <maven.clean.plugin.version>3.5.0</maven.clean.plugin.version>
+    <maven.compiler.plugin.version>3.14.1</maven.compiler.plugin.version>
+    <maven.dependency.plugin.version>3.9.0</maven.dependency.plugin.version>
+    <maven.gwt.plugin.version>2.10.0</maven.gwt.plugin.version>
+    <maven.resources.plugin.version>3.3.1</maven.resources.plugin.version>
+    <maven.war.plugin.version>3.4.0</maven.war.plugin.version>
+    <maven.surefire.plugin.version>3.5.4</maven.surefire.plugin.version>
+    <maven.deploy.plugin.version>3.1.4</maven.deploy.plugin.version>
+    <gwt.version>2.13.1</gwt.version>
+
+    <!-- Dev Mode config properties -->
+    <wildfly.version>35.0.1.Final</wildfly.version>
     <errai.dev.context>${project.artifactId}</errai.dev.context>
-    <wildfly.version>23.0.2.Final</wildfly.version>
+    <errai.jboss.home>${project.build.directory}/wildfly-${wildfly.version}</errai.jboss.home>
   </properties>
 
   <repositories>
@@ -119,7 +124,6 @@
     <dependency>
       <groupId>jakarta.persistence</groupId>
       <artifactId>jakarta.persistence-api</artifactId>
-      <version>3.1.0</version>
     </dependency>
     <dependency>
        <groupId>org.jboss.errai</groupId>
@@ -221,7 +225,6 @@
       <groupId>jakarta.validation</groupId>
       <artifactId>jakarta.validation-api</artifactId>
       <scope>compile</scope>
-      <version>3.0.2</version>
     </dependency>
 
     <dependency>
@@ -229,7 +232,6 @@
       <artifactId>jakarta.validation-api</artifactId>
       <classifier>sources</classifier>
       <scope>compile</scope>
-      <version>3.0.2</version>
     </dependency>
 
     <dependency>
@@ -422,14 +424,13 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>${maven.compiler.plugin.version}</version>
         <configuration>
-          <source>1.8</source>
-          <target>1.8</target>
+          <release>17</release>
         </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-resources-plugin</artifactId>
-        <version>2.6</version>
+        <version>${maven.resources.plugin.version}</version>
         <executions>
           <execution>
             <id>css-resources</id>
@@ -453,7 +454,7 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>gwt-maven-plugin</artifactId>
-        <version>${gwt.maven.version}</version>
+        <version>${maven.gwt.plugin.version}</version>
         <dependencies>
           <dependency>
             <groupId>org.gwtproject</groupId>
@@ -494,7 +495,7 @@
       </plugin>
       <plugin>
         <artifactId>maven-dependency-plugin</artifactId>
-        <version>2.8</version>
+        <version>${maven.dependency.plugin.version}</version>
         <executions>
           <execution>
             <id>unpack</id>
@@ -520,7 +521,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-war-plugin</artifactId>
-        <version>3.4.0</version>
+        <version>${maven.war.plugin.version}</version>
         <configuration>
           <warName>${project.artifactId}</warName>
           <outputFileNameMapping>@{artifactId}@-@{baseVersion}@@{dashClassifier?}@.@{extension}@</outputFileNameMapping>
@@ -531,7 +532,7 @@
       <!-- Tests are skipped by default because they require additional GWT dependencies. Run mvn with -Pintegration-test to enable testing. -->
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>2.5</version>
+        <version>${maven.surefire.plugin.version}</version>
         <configuration>
           <skipTests>${skipTests}</skipTests>
         </configuration>
@@ -539,7 +540,7 @@
 
       <plugin>
         <artifactId>maven-clean-plugin</artifactId>
-        <version>2.4.1</version>
+        <version>${maven.clean.plugin.version}</version>
         <configuration>
           <filesets>
             <fileset>

@@ -80,7 +80,8 @@
     <netty.codec.http.version>4.1.137.Final</netty.codec.http.version>
 
     <version.com.fasterxml.jackson>2.13.4</version.com.fasterxml.jackson>
-    <version.com.fasterxml.jackson.databind>2.13.4.2</version.com.fasterxml.jackson.databind>
+    <version.com.fasterxml.jackson.databind>2.18.9</version.com.fasterxml.jackson.databind>
+    <version.com.fasterxml.jackson.jakarta.rs>2.13.5</version.com.fasterxml.jackson.jakarta.rs>
     <version.com.google.elemental2>1.1.0</version.com.google.elemental2>
     <version.com.google.code.gson>2.11.0</version.com.google.code.gson>
     <version.com.google.jsinterop>2.0.0</version.com.google.jsinterop>
@@ -156,7 +157,7 @@
     <version.org.jboss.weld.weld>5.1.7.Final</version.org.jboss.weld.weld>
     <version.org.jboss.weld.weld-api>5.0.SP3</version.org.jboss.weld.weld-api>
     <version.org.jgroups>3.6.20.Final</version.org.jgroups>
-    <version.org.jsoup>1.15.3</version.org.jsoup>
+    <version.org.jsoup>1.23.2</version.org.jsoup>
     <!-- Keycloak 9.0.3.Final can't be upgraded due API/class changes-->
     <version.org.keycloak>1.9.4.Final</version.org.keycloak>
     <version.org.lesscss>1.7.0.1.1</version.org.lesscss>
@@ -174,6 +175,13 @@
          Removing this override breaks Errai apps that don't have the JBoss nexus repository configured. -->
     <version.xerces.xercesImpl>2.12.2</version.xerces.xercesImpl>
     <version.xml-apis>1.4.01</version.xml-apis>
+
+    <!-- Plugin versions -->
+    <version.gpg.plugin>3.2.8</version.gpg.plugin>
+    <version.javadoc.plugin>3.12.0</version.javadoc.plugin>
+    <version.rewrite.plugin>6.43.0</version.rewrite.plugin>
+    <version.rewrite-migrate-java>3.39.0</version.rewrite-migrate-java>
+    <version.source.plugin>3.3.1</version.source.plugin>
   </properties>
 
   <repositories>
@@ -1046,7 +1054,7 @@
       <dependency>
         <groupId>com.fasterxml.jackson.jakarta.rs</groupId>
         <artifactId>jackson-jakarta-rs-json-provider</artifactId>
-        <version>2.13.5</version>
+        <version>${version.com.fasterxml.jackson.jakarta.rs}</version>
       </dependency>
       <dependency>
         <groupId>com.fasterxml.jackson.core</groupId>
@@ -1172,6 +1180,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-source-plugin</artifactId>
+        <version>${version.source.plugin}</version>
         <executions>
           <execution>
             <id>attach-sources</id>
@@ -1182,7 +1191,7 @@
       <plugin>
         <groupId>org.openrewrite.maven</groupId>
         <artifactId>rewrite-maven-plugin</artifactId>
-        <version>6.43.0</version>
+        <version>${version.rewrite.plugin}</version>
         <configuration>
           <activeRecipes>
             <recipe>org.openrewrite.java.migrate.jakarta.JakartaEE10</recipe>
@@ -1192,7 +1201,7 @@
           <dependency>
             <groupId>org.openrewrite.recipe</groupId>
             <artifactId>rewrite-migrate-java</artifactId>
-            <version>3.39.0</version>
+            <version>${version.rewrite-migrate-java}</version>
           </dependency>
         </dependencies>
       </plugin>
@@ -1208,6 +1217,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-javadoc-plugin</artifactId>
+            <version>${version.javadoc.plugin}</version>
             <executions>
               <execution>
                 <id>attach-javadocs</id>
@@ -1219,7 +1229,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-gpg-plugin</artifactId>
-            <version>3.2.8</version>
+            <version>${version.gpg.plugin}</version>
             <executions>
               <execution>
                 <id>sign-artifacts</id>
