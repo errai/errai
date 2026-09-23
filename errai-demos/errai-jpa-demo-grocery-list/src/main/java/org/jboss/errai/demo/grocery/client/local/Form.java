@@ -23,7 +23,7 @@ import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
 import javax.persistence.EntityManager;
-import javax.validation.Validator;
+import jakarta.validation.Validator;
 
 import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.databinding.client.api.StateSync;

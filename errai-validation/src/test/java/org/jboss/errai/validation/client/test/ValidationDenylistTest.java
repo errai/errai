@@ -16,8 +16,8 @@
 
 package org.jboss.errai.validation.client.test;
 
-import javax.validation.Validation;
-import javax.validation.Validator;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
 
 import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.ioc.client.test.AbstractErraiIOCTest;

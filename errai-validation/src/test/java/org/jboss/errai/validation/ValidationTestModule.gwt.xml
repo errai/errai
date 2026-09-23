@@ -14,13 +14,11 @@
   ~ limitations under the License.
   -->
 
-<!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 1.6//EN"
-        "http://google-web-toolkit.googlecode.com/svn/releases/1.6/distro-source/core/src/gwt-module.dtd">
+<!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 2.13.0//EN"
+        "https://www.gwtproject.org/doctype/2.13.0/gwt-module.dtd">
 <module rename-to="TestModule">
     <inherits name="com.google.gwt.user.User"/>
     <inherits name="org.jboss.errai.ioc.Container"/>
     <inherits name="org.jboss.errai.validation.Validation"/>
     <inherits name="org.jboss.errai.databinding.DataBinding"/>
-    
-    <inherits name="org.hibernate.validator.HibernateValidator"/>
 </module>

@@ -18,14 +18,14 @@ package org.jboss.errai.validation.client;
 
 import jakarta.inject.Provider;
 import jakarta.inject.Singleton;
-import javax.validation.Validation;
-import javax.validation.Validator;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
 
 import org.jboss.errai.ioc.client.api.IOCProvider;
 
 /**
  * {@link IOCProvider} to make {@link Validator} instances injectable.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 @IOCProvider
