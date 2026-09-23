@@ -124,6 +124,7 @@
     <!-- ============================================================ -->
 
     <version.gwt.bean.validators>2.4.17</version.gwt.bean.validators>
+    <version.gwt.time.dummy>2.4.17</version.gwt.time.dummy>
     <version.jakarta.validation>3.0.2</version.jakarta.validation>
 
     <!-- Soft-locked (Weld 5 / CDI 4): -->
@@ -888,6 +889,11 @@
         <version>${version.gwt.bean.validators}</version>
       </dependency>
       <dependency>
+        <groupId>de.knightsoft-net</groupId>
+        <artifactId>gwt-time-dummy</artifactId>
+        <version>${version.gwt.time.dummy}</version>
+      </dependency>
+      <dependency>
         <groupId>org.hsqldb</groupId>
         <artifactId>hsqldb</artifactId>
         <version>${version.org.hsqldb}</version>
@@ -902,10 +908,6 @@
         <artifactId>gwt-user</artifactId>
         <version>${gwt.version}</version>
         <exclusions>
-          <exclusion>
-            <groupId>javax.validation</groupId>
-            <artifactId>validation-api</artifactId>
-          </exclusion>
           <exclusion>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>

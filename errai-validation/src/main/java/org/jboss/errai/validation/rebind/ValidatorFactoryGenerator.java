@@ -41,7 +41,7 @@ import de.knightsoftnet.validators.client.impl.AbstractGwtValidator;
 
 /**
  * Generates an implementation of {@link ValidatorFactory} which provides a generated implementation
- * of a GWT {@link javax.validation.Validator}.
+ * of a GWT {@link jakarta.validation.Validator}.
  *
  * @author Johannes Barop <jb@barop.de>
  * @author Christian Sadilek <csadilek@redhat.com>
