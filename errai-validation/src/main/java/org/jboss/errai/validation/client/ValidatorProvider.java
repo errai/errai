@@ -18,8 +18,9 @@ package org.jboss.errai.validation.client;
 
 import jakarta.inject.Provider;
 import jakarta.inject.Singleton;
-import jakarta.validation.Validation;
 import jakarta.validation.Validator;
+
+import de.knightsoftnet.validators.client.impl.Validation;
 
 import org.jboss.errai.ioc.client.api.IOCProvider;
 

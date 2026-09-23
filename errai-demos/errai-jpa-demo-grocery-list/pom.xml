@@ -318,6 +318,24 @@
       <scope>provided</scope>
     </dependency>
 
+    <dependency>
+      <groupId>de.knightsoft-net</groupId>
+      <artifactId>gwt-bean-validators-engine</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>de.knightsoft-net</groupId>
+      <artifactId>gwt-bean-validators-engine-gwt-user</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>de.knightsoft-net</groupId>
+      <artifactId>gwt-time-dummy</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
     <!-- GWT Maps API V3 -->
     <dependency>
       <groupId>com.github.branflake2267</groupId>

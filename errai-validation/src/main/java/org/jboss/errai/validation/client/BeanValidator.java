@@ -19,11 +19,12 @@ package org.jboss.errai.validation.client;
 import java.util.Set;
 
 import jakarta.validation.ConstraintViolation;
-import jakarta.validation.Validation;
 import jakarta.validation.ValidationException;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 import jakarta.validation.metadata.BeanDescriptor;
+
+import de.knightsoftnet.validators.client.impl.Validation;
 
 import org.jboss.errai.databinding.client.BindableProxy;
 import org.jboss.errai.databinding.client.api.Bindable;

@@ -1,8 +1,18 @@
-<!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 2.0//EN"
-        "http://google-web-toolkit.googlecode.com/svn/releases/2.0/distro-source/core/src/gwt-module.dtd">
+<!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 2.13.0//EN"
+        "https://www.gwtproject.org/doctype/2.13.0/gwt-module.dtd">
 <module>
     <inherits name='com.google.gwt.user.User'/>
     <inherits name='org.jboss.errai.databinding.DataBinding'/>
+    <!-- Provides jakarta.validation.* source stubs required for the deferred-binding trigger
+         and for any validator client source compiled via GWT.
+         GwtBeanValidatorsEngine transitively inherits jakarta.validation.NewValidation which
+         provides jakarta.validation.* client-side source. -->
+    <inherits name='de.knightsoftnet.validators.GwtBeanValidatorsEngine'/>
+    <inherits name='de.knightsoftnet.validators.gwtuser.GwtBeanValidatorsEngineGwtUser'/>
+
+    <!-- Override the empty java.time.Duration stub from gwt-time-dummy with a version
+         that includes the methods used by HV8's DurationMin/DurationMax validators. -->
+    <super-source path='supersource'/>
 
     <generate-with class="org.jboss.errai.validation.rebind.ValidatorFactoryGenerator">
         <when-type-assignable

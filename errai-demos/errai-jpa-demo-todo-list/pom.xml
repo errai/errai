@@ -121,7 +121,7 @@
       <groupId>jakarta.validation</groupId>
       <artifactId>jakarta.validation-api</artifactId>
       <classifier>sources</classifier>
-      <scope>provided</scope>
+      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.jboss.errai</groupId>
@@ -132,6 +132,24 @@
     <dependency>
       <groupId>org.gwtproject</groupId>
       <artifactId>gwt-user</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>de.knightsoft-net</groupId>
+      <artifactId>gwt-bean-validators-engine</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>de.knightsoft-net</groupId>
+      <artifactId>gwt-bean-validators-engine-gwt-user</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>de.knightsoft-net</groupId>
+      <artifactId>gwt-time-dummy</artifactId>
+      <scope>provided</scope>
     </dependency>
 
     <dependency>

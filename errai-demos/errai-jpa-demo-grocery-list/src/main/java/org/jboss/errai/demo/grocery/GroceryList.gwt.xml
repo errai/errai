@@ -30,7 +30,7 @@
     <inherits name="org.gwtopenmaps.openlayers.OpenLayers" />
     <inherits name="org.jboss.errai.ui.Cordova" />
     <inherits name="org.jboss.errai.validation.Validation" />
-    <inherits name="org.hibernate.validator.HibernateValidator" />
+    <inherits name="org.hibernate.validator.HibernateValidatorLight" />
 
     <set-property name="gwt.logging.logLevel" value="INFO"/>
     <set-property name="gwt.logging.enabled" value="TRUE"/>
