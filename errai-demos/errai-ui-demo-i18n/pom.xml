@@ -51,18 +51,20 @@
   </organization>
 
   <properties>
-    <maven.war.plugin.version>3.4.0</maven.war.plugin.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
     <skipTests>true</skipTests>
     <argLine></argLine>
-    <!-- maven plugins versions -->
+
+    <!-- Plugin versions -->
     <maven.clean.plugin.version>2.4.1</maven.clean.plugin.version>
-    <maven.deploy.plugin.version>2.7</maven.deploy.plugin.version>
-    <maven.resources.plugin.version>2.6</maven.resources.plugin.version>
-    <jboss-as-maven-plugin.version>7.4.Final</jboss-as-maven-plugin.version>
+    <maven.compiler.plugin.version>2.3.2</maven.compiler.plugin.version>
     <maven.gwt.plugin.version>2.10.0</maven.gwt.plugin.version>
+    <maven.resources.plugin.version>2.6</maven.resources.plugin.version>
+    <maven.war.plugin.version>3.4.0</maven.war.plugin.version>
+    <maven.deploy.plugin.version>2.7</maven.deploy.plugin.version>
+    <jboss-as-maven-plugin.version>7.4.Final</jboss-as-maven-plugin.version>
     <gwt.version>2.13.1</gwt.version>
   </properties>
 
@@ -190,6 +192,15 @@
   <build>
     <outputDirectory>src/main/webapp/WEB-INF/classes</outputDirectory>
     <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>${maven.compiler.plugin.version}</version>
+        <configuration>
+          <source>1.8</source>
+          <target>1.8</target>
+        </configuration>
+      </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>gwt-maven-plugin</artifactId>

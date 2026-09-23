@@ -51,15 +51,16 @@
   </organization>
 
   <properties>
-    <maven.war.plugin.version>3.4.0</maven.war.plugin.version>
-    <skipTests>true</skipTests>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <!-- maven plugins versions -->
-    <maven.surefire.plugin.version>2.5</maven.surefire.plugin.version>
+    <skipTests>true</skipTests>
+
+    <!-- Plugin versions -->
     <maven.clean.plugin.version>2.4.1</maven.clean.plugin.version>
     <maven.compiler.plugin.version>2.3.2</maven.compiler.plugin.version>
-    <maven.deploy.plugin.version>2.7</maven.deploy.plugin.version>
     <maven.gwt.plugin.version>2.10.0</maven.gwt.plugin.version>
+    <maven.war.plugin.version>3.4.0</maven.war.plugin.version>
+    <maven.surefire.plugin.version>2.5</maven.surefire.plugin.version>
+    <maven.deploy.plugin.version>2.7</maven.deploy.plugin.version>
     <gwt.version>2.13.1</gwt.version>
   </properties>
 

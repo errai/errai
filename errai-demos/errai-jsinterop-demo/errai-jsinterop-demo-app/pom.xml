@@ -43,11 +43,21 @@
     <url>http://www.jboss.org</url>
   </organization>
   <properties>
-    <wildfly.version>23.0.2.Final</wildfly.version>
-    <errai.jboss.home>${project.build.directory}/wildfly-${wildfly.version}</errai.jboss.home>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <errai.dev.context>${project.artifactId}</errai.dev.context>    
+
+    <!-- Plugin versions -->
+    <maven.clean.plugin.version>2.4.1</maven.clean.plugin.version>
+    <maven.compiler.plugin.version>2.3.2</maven.compiler.plugin.version>
+    <maven.dependency.plugin.version>2.8</maven.dependency.plugin.version>
+    <maven.gwt.plugin.version>2.10.0</maven.gwt.plugin.version>
+    <maven.war.plugin.version>3.4.0</maven.war.plugin.version>
+    <wildfly.maven.plugin.version>1.0.2.Final</wildfly.maven.plugin.version>
     <gwt.version>2.13.1</gwt.version>
+
+    <!-- Dev Mode config properties -->
+    <wildfly.version>35.0.1.Final</wildfly.version>
+    <errai.dev.context>${project.artifactId}</errai.dev.context>
+    <errai.jboss.home>${project.build.directory}/wildfly-${wildfly.version}</errai.jboss.home>
   </properties>
 
   <dependencies>
@@ -164,7 +174,7 @@
     <plugins>
       <plugin>
         <artifactId>maven-clean-plugin</artifactId>
-        <version>2.4.1</version>
+        <version>${maven.clean.plugin.version}</version>
         <configuration>
           <filesets>
             <fileset>
@@ -181,7 +191,7 @@
       </plugin>
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>2.3.2</version>
+        <version>${maven.compiler.plugin.version}</version>
         <configuration>
           <source>1.8</source>
           <target>1.8</target>
@@ -189,7 +199,7 @@
       </plugin>
       <plugin>
         <artifactId>maven-dependency-plugin</artifactId>
-        <version>2.8</version>
+        <version>${maven.dependency.plugin.version}</version>
         <executions>
           <execution>
             <id>unpack</id>
@@ -215,6 +225,7 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>gwt-maven-plugin</artifactId>
+        <version>${maven.gwt.plugin.version}</version>
         <dependencies>
           <dependency>
             <groupId>org.gwtproject</groupId>
@@ -260,7 +271,7 @@
         <plugins>
           <plugin>
             <artifactId>maven-war-plugin</artifactId>
-            <version>3.4.0</version>
+            <version>${maven.war.plugin.version}</version>
             <configuration>
               <archive>
                 <manifestEntries>
@@ -274,7 +285,7 @@
           <plugin>
             <groupId>org.wildfly.plugins</groupId>
             <artifactId>wildfly-maven-plugin</artifactId>
-            <version>1.0.2.Final</version>
+            <version>${wildfly.maven.plugin.version}</version>
             <extensions>false</extensions>
           </plugin>
         </plugins>

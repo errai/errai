@@ -48,20 +48,26 @@
     <url>scm:git:git@github.com:errai/errai.git</url>
   </scm>
   <properties>
-    <maven.war.plugin.version>3.4.0</maven.war.plugin.version>
-    <maven.resources.plugin.version>2.6</maven.resources.plugin.version>
-    <maven.clean.plugin.version>2.4.1</maven.clean.plugin.version>
-    <wildfly.plugin.version>1.1.0.Alpha8</wildfly.plugin.version>
-    <picketlink.version>2.6.0.Final</picketlink.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <maven.gwt.plugin.version>2.10.0</maven.gwt.plugin.version>
-    <gwt.version>2.13.1</gwt.version>
     <skipTests>true</skipTests>
-    <maven.deploy.plugin.version>2.7</maven.deploy.plugin.version>
     <argLine></argLine>
-    <wildfly.version>23.0.2.Final</wildfly.version>
+    <picketlink.version>2.6.0.Final</picketlink.version>
+
+    <!-- Plugin versions -->
+    <maven.clean.plugin.version>2.4.1</maven.clean.plugin.version>
+    <maven.compiler.plugin.version>2.3.2</maven.compiler.plugin.version>
+    <maven.dependency.plugin.version>2.8</maven.dependency.plugin.version>
+    <maven.gwt.plugin.version>2.10.0</maven.gwt.plugin.version>
+    <maven.resources.plugin.version>2.6</maven.resources.plugin.version>
+    <maven.war.plugin.version>3.4.0</maven.war.plugin.version>
+    <maven.deploy.plugin.version>2.7</maven.deploy.plugin.version>
+    <wildfly.maven.plugin.version>1.0.2.Final</wildfly.maven.plugin.version>
+    <gwt.version>2.13.1</gwt.version>
+
+    <!-- Dev Mode config properties -->
+    <wildfly.version>35.0.1.Final</wildfly.version>
     <errai.dev.context>${project.artifactId}</errai.dev.context>
-    <errai.jboss.home>${project.build.directory}/wildfly-${wildfly.version}</errai.jboss.home>    
+    <errai.jboss.home>${project.build.directory}/wildfly-${wildfly.version}</errai.jboss.home>
   </properties>
 
   <repositories>
@@ -395,7 +401,7 @@
       </plugin>
       <plugin>
         <artifactId>maven-dependency-plugin</artifactId>
-        <version>3.4.0</version>
+        <version>${maven.dependency.plugin.version}</version>
         <executions>
           <execution>
             <id>unpack</id>
@@ -421,7 +427,7 @@
       <plugin>
         <groupId>org.wildfly.plugins</groupId>
         <artifactId>wildfly-maven-plugin</artifactId>
-        <version>${wildfly.plugin.version}</version>
+        <version>${wildfly.maven.plugin.version}</version>
         <configuration>
           <filename>${project.artifactId}.${project.packaging}</filename>
         </configuration>
@@ -435,7 +441,7 @@
       </plugin>
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>2.3.2</version>
+        <version>${maven.compiler.plugin.version}</version>
         <configuration>
           <source>1.8</source>
           <target>1.8</target>
@@ -497,11 +503,11 @@
           <plugin>
             <groupId>org.wildfly.plugins</groupId>
             <artifactId>wildfly-maven-plugin</artifactId>
-            <version>${wildfly.plugin.version}</version>
+            <version>${wildfly.maven.plugin.version}</version>
           </plugin>
           <plugin>
             <artifactId>maven-war-plugin</artifactId>
-            <version>3.4.0</version>
+            <version>${maven.war.plugin.version}</version>
             <configuration>
               <packagingExcludes>**/javax/**/*.*,**/client/local/**/*.class</packagingExcludes>
               <outputFileNameMapping>@{artifactId}@-@{baseVersion}@@{dashClassifier?}@.@{extension}@</outputFileNameMapping>

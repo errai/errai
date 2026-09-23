@@ -42,11 +42,18 @@
     <url>http://www.jboss.org</url>
   </organization>
   <properties>
-    <errai.jboss.home>${project.build.directory}/wildfly-${wildfly.version}</errai.jboss.home>    
-    <slf4j.version>1.5.11</slf4j.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <errai.dev.context>${project.artifactId}</errai.dev.context>    
+
+    <!-- Plugin versions -->
+    <maven.clean.plugin.version>2.4.1</maven.clean.plugin.version>
+    <maven.compiler.plugin.version>2.3.2</maven.compiler.plugin.version>
+    <maven.gwt.plugin.version>2.10.0</maven.gwt.plugin.version>
     <gwt.version>2.13.1</gwt.version>
+
+    <!-- Dev Mode config properties -->
+    <wildfly.version>35.0.1.Final</wildfly.version>
+    <errai.dev.context>${project.artifactId}</errai.dev.context>
+    <errai.jboss.home>${project.build.directory}/wildfly-${wildfly.version}</errai.jboss.home>
   </properties>
 
   <dependencies>
@@ -138,6 +145,7 @@
     <plugins>
       <plugin>
         <artifactId>maven-clean-plugin</artifactId>
+        <version>${maven.clean.plugin.version}</version>
         <configuration>
           <filesets>
             <fileset>
@@ -154,6 +162,7 @@
       </plugin>
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
+        <version>${maven.compiler.plugin.version}</version>
         <configuration>
           <source>1.8</source>
           <target>1.8</target>
@@ -162,6 +171,7 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>gwt-maven-plugin</artifactId>
+        <version>${maven.gwt.plugin.version}</version>
         <dependencies>
           <dependency>
             <groupId>org.gwtproject</groupId>
