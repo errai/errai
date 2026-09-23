@@ -27,4 +27,4 @@ jobs:
           cache: 'maven'
 
       - name: Build and test with Maven
-        run: mvn clean install -B
+        run: mvn -B -e -Pintegration-test clean install -Derrai.codegen.details=true -Dapt-generators
