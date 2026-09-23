@@ -55,8 +55,7 @@
     <webDescriptor>wildfly</webDescriptor>
     <skipTests>true</skipTests>
     <argLine></argLine>
-    <maven.compiler.source>1.8</maven.compiler.source>
-    <maven.compiler.target>1.8</maven.compiler.target>
+    <maven.compiler.release>17</maven.compiler.release>
 
     <!-- Plugin versions -->
     <maven.clean.plugin.version>3.5.0</maven.clean.plugin.version>
