@@ -70,8 +70,7 @@
 
   <properties>
     <gwtArgs></gwtArgs>
-    <argLine>-Dgwt.args="${gwtArgs}"
-      --add-opens java.base/java.lang=ALL-UNNAMED
+    <argLine>--add-opens java.base/java.lang=ALL-UNNAMED
       --add-opens java.base/java.util=ALL-UNNAMED
       --add-opens java.base/java.io=ALL-UNNAMED</argLine>
     <illegaltransitivereportonly>false</illegaltransitivereportonly>
@@ -639,24 +638,14 @@
               <!-- Default run style for modules that do not set gwt.args in their own argLine.
                    Modules with an explicit -Dgwt.args in argLine override this automatically. -->
               <systemPropertyVariables>
+                <!-- Default run style for modules that do not set gwt.args in their own argLine. -->
                 <gwt.args>-runStyle HtmlUnit:FF</gwt.args>
-              </systemPropertyVariables>
-              <systemProperties>
                 <!-- Must disable long polling for automated tests to succeed -->
-                <property>
-                  <name>errai.hosted_mode_testing</name>
-                  <value>true</value>
-                </property>
-                <property>
-                  <name>org.jboss.errai.bus.do_long_poll</name>
-                  <value>false</value>
-                </property>
-                <!-- Do not accidently package server test marshallers when building Errai -->
-                <property>
-                  <name>errai.marshalling.server.classOutput.enabled</name>
-                  <value>false</value>
-                </property>
-              </systemProperties>
+                <errai.hosted_mode_testing>true</errai.hosted_mode_testing>
+                <org.jboss.errai.bus.do_long_poll>false</org.jboss.errai.bus.do_long_poll>
+                <!-- Do not accidentally package server test marshallers when building Errai -->
+                <errai.marshalling.server.classOutput.enabled>false</errai.marshalling.server.classOutput.enabled>
+              </systemPropertyVariables>
               <includes>
                 <include>**/*Test.java</include>
                 <include>**/*Tests.java</include>
