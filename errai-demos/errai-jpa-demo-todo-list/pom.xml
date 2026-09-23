@@ -50,7 +50,6 @@
   <properties>
     <maven.war.plugin.version>3.4.0</maven.war.plugin.version>
     <maven.resources.plugin.version>2.6</maven.resources.plugin.version>
-    <jetty.version>6.1.25</jetty.version>    
     <maven.clean.plugin.version>2.4.1</maven.clean.plugin.version>
     <wildfly.plugin.version>1.1.0.Alpha8</wildfly.plugin.version>
     <picketlink.version>2.6.0.Final</picketlink.version>
@@ -225,25 +224,21 @@
     <dependency>
       <groupId>org.eclipse.jetty</groupId>
       <artifactId>jetty-server</artifactId>
-      <version>9.4.58.v20250814</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.eclipse.jetty</groupId>
       <artifactId>jetty-http</artifactId>
-      <version>9.4.58.v20250814</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.eclipse.jetty</groupId>
       <artifactId>jetty-io</artifactId>
-      <version>9.4.58.v20250814</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.eclipse.jetty</groupId>
       <artifactId>jetty-util</artifactId>
-      <version>9.4.58.v20250814</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -302,7 +297,6 @@
     <dependency>
       <groupId>xerces</groupId>
       <artifactId>xercesImpl</artifactId>
-      <version>2.12.2</version>
     </dependency>
   </dependencies>
   <build>

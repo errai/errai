@@ -64,7 +64,6 @@
     <maven.deploy.plugin.version>2.7</maven.deploy.plugin.version>
     <maven.gwt.plugin.version>2.10.0</maven.gwt.plugin.version>
     <gwt.version>2.13.1</gwt.version>
-    <jetty.version>9.4.58.v20250814</jetty.version>
     <!-- Dev Mode config properties -->
     <errai.dev.context>${project.artifactId}</errai.dev.context>
     <as.version>23.0.2.Final</as.version>
@@ -415,7 +414,6 @@
         <dependency>
           <groupId>org.eclipse.jetty</groupId>
           <artifactId>jetty-server</artifactId>
-          <version>${jetty.version}</version>
         </dependency>
 
         <dependency>
@@ -475,12 +473,10 @@
         <dependency>
           <groupId>org.slf4j</groupId>
           <artifactId>slf4j-api</artifactId>
-          <version>1.7.5</version>
         </dependency>
         <dependency>
           <groupId>org.slf4j</groupId>
           <artifactId>slf4j-simple</artifactId>
-          <version>1.6.4</version>
         </dependency>
 
         <dependency>
@@ -508,7 +504,6 @@
           <groupId>jakarta.enterprise</groupId>
           <artifactId>jakarta.enterprise.cdi-api</artifactId>
           <scope>compile</scope>
-          <version>4.0.1</version>
         </dependency>
       </dependencies>
     </profile>

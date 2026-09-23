@@ -63,8 +63,6 @@
     <maven.deploy.plugin.version>2.7</maven.deploy.plugin.version> 
     <maven.gwt.plugin.version>2.10.0</maven.gwt.plugin.version>
     <gwt.version>2.13.1</gwt.version>
-    <weld.version>2.3.3.Final</weld.version>
-    <jetty.version>9.4.58.v20250814</jetty.version>
     <!-- Dev Mode config properties -->
     <errai.dev.context>${project.artifactId}</errai.dev.context>
     <as.version>23.0.2.Final</as.version>
@@ -418,7 +416,6 @@
           <groupId>jakarta.validation</groupId>
           <artifactId>jakarta.validation-api</artifactId>
           <scope>compile</scope>
-          <version>3.0.2</version>
         </dependency>
 
         <dependency>
@@ -426,7 +423,6 @@
           <artifactId>jakarta.validation-api</artifactId>
           <classifier>sources</classifier>
           <scope>compile</scope>
-          <version>3.0.2</version>
         </dependency>
 
         <!-- Runtime / Container dependencies -->
@@ -459,7 +455,6 @@
         <dependency>
           <groupId>org.eclipse.jetty</groupId>
           <artifactId>jetty-server</artifactId>
-          <version>${jetty.version}</version>
         </dependency>
 
         <dependency>
