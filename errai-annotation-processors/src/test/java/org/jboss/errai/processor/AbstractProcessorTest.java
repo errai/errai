@@ -62,7 +62,7 @@ public abstract class AbstractProcessorTest {
    */
   private final Set<String> ignorableWarnings = new HashSet<>(
           Arrays.asList(
-                  "bootstrap class path not set in conjunction with -source", 
+                  "bootstrap class path not set in conjunction with -source",
                   "Implicitly compiled files were not subject to annotation processing.",
                   "Recompile with",
                   "Some input files use or override a deprecated API",
@@ -93,12 +93,7 @@ public abstract class AbstractProcessorTest {
       final Iterable<? extends JavaFileObject> compilationUnits = fileManager.getJavaFileObjects(path);
 
       // Compile with provided annotation processor
-      final CompilationTask task;
-      if (compiler.isSupportedOption("--release") == -1 ) {
-        task = compiler.getTask(null, fileManager, diagnosticListener, Arrays.asList("-source", "1.8", "-target", "1.8"), null, compilationUnits);
-      } else {
-        task = compiler.getTask(null, fileManager, diagnosticListener, Arrays.asList("--release", "8"), null, compilationUnits);
-      }
+      final CompilationTask task = compiler.getTask(null, fileManager, diagnosticListener, null, null, compilationUnits);
       
       task.setProcessors(Arrays.asList(getProcessorUnderTest()));
       task.call();
