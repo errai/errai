@@ -19,9 +19,10 @@ package org.jboss.errai.validation.client.test;
 import java.util.Set;
 
 import jakarta.validation.ConstraintViolation;
-import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.groups.Default;
+
+import de.knightsoftnet.validators.client.impl.Validation;
 
 import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.ioc.client.container.IOC;
