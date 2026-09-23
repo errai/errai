@@ -29,7 +29,6 @@ import java.util.Set;
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
-import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
@@ -48,8 +47,12 @@ import javax.tools.Diagnostic.Kind;
  * the annotation is not being used correctly.
  */
 @SupportedAnnotationTypes(TypeNames.EVENT_HANDLER)
-@SupportedSourceVersion(SourceVersion.RELEASE_8)
 public class EventHandlerAnnotationChecker extends AbstractProcessor {
+
+  @Override
+  public SourceVersion getSupportedSourceVersion() {
+    return SourceVersion.latestSupported();
+  }
 
   @Override
   public boolean process(final Set<? extends TypeElement> annotations, final RoundEnvironment roundEnv) {

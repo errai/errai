@@ -51,8 +51,7 @@
 
   <properties>
     <as.version>23.0.2.Final</as.version>
-    <maven.compiler.source>1.8</maven.compiler.source>
-    <maven.compiler.target>1.8</maven.compiler.target>
+    <maven.compiler.release>17</maven.compiler.release>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
@@ -60,7 +59,7 @@
     <dependency>
       <groupId>org.wildfly.core</groupId>
       <artifactId>wildfly-server</artifactId>
-      <version>16.0.1.Final</version>
+      <version>27.0.1.Final</version>
     </dependency>
   </dependencies>
 
