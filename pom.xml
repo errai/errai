@@ -77,6 +77,15 @@
     <illegaltransitivereportonly>false</illegaltransitivereportonly>
     <!-- Selenium 2.x — last version compatible with selenium-maven-plugin:2.3 (firefox-test profile) -->
     <version.org.seleniumhq.selenium>2.53.1</version.org.seleniumhq.selenium>
+
+    <!-- Plugin versions -->
+    <version.gmaven.plugin>1.5</version.gmaven.plugin>
+    <version.gwt.plugin>2.10.0</version.gwt.plugin>
+    <version.jdocbook.plugin>2.3.5</version.jdocbook.plugin>
+    <version.rewrite.plugin>6.43.0</version.rewrite.plugin>
+    <version.rewrite-migrate-java>3.39.0</version.rewrite-migrate-java>
+    <version.selenium.plugin>2.3</version.selenium.plugin>
+    <version.shade.plugin>3.5.0</version.shade.plugin>
   </properties>
 
   <modules>
@@ -206,7 +215,7 @@
       <plugin>
         <groupId>org.openrewrite.maven</groupId>
         <artifactId>rewrite-maven-plugin</artifactId>
-        <version>6.43.0</version>
+        <version>${version.rewrite.plugin}</version>
         <configuration>
           <activeRecipes>
             <recipe>org.openrewrite.java.migrate.jakarta.JakartaEE10</recipe>
@@ -216,7 +225,7 @@
           <dependency>
             <groupId>org.openrewrite.recipe</groupId>
             <artifactId>rewrite-migrate-java</artifactId>
-            <version>3.39.0</version>
+            <version>${version.rewrite-migrate-java}</version>
           </dependency>
         </dependencies>
       </plugin>
@@ -290,22 +299,17 @@
       <plugins>
         <plugin>
           <artifactId>maven-shade-plugin</artifactId>
-          <version>3.5.0</version>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-gpg-plugin</artifactId>
-          <version>3.2.8</version>
+          <version>${version.shade.plugin}</version>
         </plugin>
         <plugin>
           <groupId>org.codehaus.gmaven</groupId>
           <artifactId>gmaven-plugin</artifactId>
-          <version>1.5</version>
+          <version>${version.gmaven.plugin}</version>
         </plugin>
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
-          <artifactId>gwt-maven-plugin</artifactId>              
-          <version>2.10.0</version>
+          <artifactId>gwt-maven-plugin</artifactId>
+          <version>${version.gwt.plugin}</version>
             <dependencies>
               <!-- Forcing gwt-maven-plugin to use GWT 2.13.1 -->
               <dependency>
@@ -348,7 +352,7 @@
         <plugin>
           <groupId>org.jboss.maven.plugins</groupId>
           <artifactId>maven-jdocbook-plugin</artifactId>
-          <version>2.3.5</version>
+          <version>${version.jdocbook.plugin}</version>
           <extensions>true</extensions>
           <dependencies>
             <dependency>
@@ -487,7 +491,7 @@
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>selenium-maven-plugin</artifactId>
-          <version>2.3</version>
+          <version>${version.selenium.plugin}</version>
         </plugin>
       </plugins>
     </pluginManagement>
@@ -500,7 +504,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
-        <version>3.12.0</version>
         <configuration>
           <aggregate>true</aggregate>
           <show>public</show>
@@ -536,12 +539,11 @@
               <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.10.1</version>
                 <configuration>
                     <source>${maven.compiler.source}</source>
                     <target>${maven.compiler.target}</target>
                     <release>${maven.compiler.release}</release>
-                </configuration>    
+                </configuration>
               </plugin>
           </plugins>
         </pluginManagement>

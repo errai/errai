@@ -45,9 +45,10 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
     <!-- Plugin versions -->
-    <maven.clean.plugin.version>2.4.1</maven.clean.plugin.version>
-    <maven.compiler.plugin.version>2.3.2</maven.compiler.plugin.version>
+    <maven.clean.plugin.version>3.5.0</maven.clean.plugin.version>
+    <maven.compiler.plugin.version>3.14.1</maven.compiler.plugin.version>
     <maven.gwt.plugin.version>2.10.0</maven.gwt.plugin.version>
+    <maven.javadoc.plugin.version>3.12.0</maven.javadoc.plugin.version>
     <gwt.version>2.13.1</gwt.version>
 
     <!-- Dev Mode config properties -->
@@ -216,7 +217,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-javadoc-plugin</artifactId>
-            <version>3.12.0</version>
+            <version>${maven.javadoc.plugin.version}</version>
             <executions>
               <execution>
                 <id>attach-javadocs</id>
