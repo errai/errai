@@ -117,6 +117,21 @@
     </dependency>
   </dependencies>
 
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <!-- ModuleAnnotationProcessor is registered in META-INF/services within this
+               same jar. Disabling annotation processing here prevents a chicken-and-egg
+               failure where the compiler tries to load the processor before it is compiled. -->
+          <compilerArgument>-proc:none</compilerArgument>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
   <profiles>
     <profile>
       <id>integration-test</id>
