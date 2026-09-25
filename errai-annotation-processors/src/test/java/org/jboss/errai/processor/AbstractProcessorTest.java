@@ -36,6 +36,7 @@ import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -91,10 +92,12 @@ public abstract class AbstractProcessorTest {
     assertNotNull("Test resource not found on classpath: " + compilationUnit, resource);
     final String path = resource.getPath();
 
-    // Diagnostics must be captured before the file manager is closed: diagnostic objects
-    // lazily read source content (e.g. for line/column numbers) through the file manager,
-    // so closing it first causes ClosedFileSystemException when callers inspect the results.
-    List<Diagnostic<? extends JavaFileObject>> diagnostics = List.of();
+    // Diagnostics must be captured before the file manager is closed. On JDK 17+, the
+    // Diagnostic wrappers lazily re-open the source file through the file manager's ZIP
+    // filesystem when getLineNumber()/getColumnNumber() are first called. Closing the
+    // file manager before those calls causes ClosedFileSystemException. We force eager
+    // resolution here by touching every position field while the file manager is still open.
+    final List<Diagnostic<? extends JavaFileObject>> diagnostics = new ArrayList<>();
 
     try (StandardJavaFileManager fileManager = compiler.getStandardFileManager(diagnosticListener, null, null)) {
 
@@ -106,11 +109,15 @@ public abstract class AbstractProcessorTest {
       task.setProcessors(List.of(getProcessorUnderTest()));
       task.call();
 
-      // Use List.copyOf to eagerly materialise the list and detach diagnostic wrappers
-      // from the file manager. On newer JDKs, getLineNumber() lazily re-opens the source
-      // file through the file manager's ZIP filesystem; if the file manager is closed first
-      // the call throws ClosedFileSystemException. Copying here forces that resolution now.
-      diagnostics = List.copyOf(diagnosticListener.getDiagnostics());
+      // Force eager resolution of lazy source positions while the file manager is open.
+      // Iterating and calling getLineNumber()/getColumnNumber() triggers the internal
+      // DiagnosticSource.findLine() which reads the source file. After this loop the
+      // positions are cached inside the diagnostic and safe to use after close().
+      for (final Diagnostic<? extends JavaFileObject> d : diagnosticListener.getDiagnostics()) {
+        d.getLineNumber();
+        d.getColumnNumber();
+        diagnostics.add(d);
+      }
 
     } catch (final IOException ioe) {
       fail(ioe.getMessage());
