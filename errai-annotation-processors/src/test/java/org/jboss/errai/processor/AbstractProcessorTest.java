@@ -35,6 +35,7 @@ package org.jboss.errai.processor;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -83,28 +84,36 @@ public abstract class AbstractProcessorTest {
 
     final DiagnosticCollector<JavaFileObject> diagnosticListener = new DiagnosticCollector<>();
 
-    try {
+    final JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
+    assertNotNull("System Java compiler not available — ensure tests run on a JDK, not a JRE", compiler);
 
-      final JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
-      final StandardJavaFileManager fileManager = compiler.getStandardFileManager(diagnosticListener, null, null);
+    final URL resource = this.getClass().getResource("/" + compilationUnit);
+    assertNotNull("Test resource not found on classpath: " + compilationUnit, resource);
+    final String path = resource.getPath();
+
+    // Diagnostics must be captured before the file manager is closed: diagnostic objects
+    // lazily read source content (e.g. for line/column numbers) through the file manager,
+    // so closing it first causes ClosedFileSystemException when callers inspect the results.
+    List<Diagnostic<? extends JavaFileObject>> diagnostics = List.of();
+
+    try (StandardJavaFileManager fileManager = compiler.getStandardFileManager(diagnosticListener, null, null)) {
 
       // Convert compilation unit to file path and add to items to compile
-      final String path = this.getClass().getResource("/" + compilationUnit).getPath();
       final Iterable<? extends JavaFileObject> compilationUnits = fileManager.getJavaFileObjects(path);
 
       // Compile with provided annotation processor
       final CompilationTask task = compiler.getTask(null, fileManager, diagnosticListener, null, null, compilationUnits);
-      
-      task.setProcessors(Arrays.asList(getProcessorUnderTest()));
+      task.setProcessors(List.of(getProcessorUnderTest()));
       task.call();
 
-      fileManager.close();
+      // Capture before file manager closes at end of try block
+      diagnostics = diagnosticListener.getDiagnostics();
 
     } catch (final IOException ioe) {
       fail(ioe.getMessage());
     }
 
-    return diagnosticListener.getDiagnostics();
+    return diagnostics;
   }
 
   /**
