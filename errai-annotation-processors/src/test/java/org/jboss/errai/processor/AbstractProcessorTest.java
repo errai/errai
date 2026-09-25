@@ -106,8 +106,11 @@ public abstract class AbstractProcessorTest {
       task.setProcessors(List.of(getProcessorUnderTest()));
       task.call();
 
-      // Capture before file manager closes at end of try block
-      diagnostics = diagnosticListener.getDiagnostics();
+      // Use List.copyOf to eagerly materialise the list and detach diagnostic wrappers
+      // from the file manager. On newer JDKs, getLineNumber() lazily re-opens the source
+      // file through the file manager's ZIP filesystem; if the file manager is closed first
+      // the call throws ClosedFileSystemException. Copying here forces that resolution now.
+      diagnostics = List.copyOf(diagnosticListener.getDiagnostics());
 
     } catch (final IOException ioe) {
       fail(ioe.getMessage());
@@ -191,9 +194,9 @@ public abstract class AbstractProcessorTest {
         .append(": ")
         .append(msg.getMessage(null))
         .append("\n");
-      if ( (kind == null || msg.getKind().equals(kind))
+      if ((kind == null || msg.getKind().equals(kind))
               && (line == Diagnostic.NOPOS || msg.getLineNumber() == line)
-              && (col == Diagnostic.NOPOS) || msg.getColumnNumber() == col
+              && (col == Diagnostic.NOPOS || msg.getColumnNumber() == col)
               && msg.getMessage(null).contains(message)) {
         return;
       }
