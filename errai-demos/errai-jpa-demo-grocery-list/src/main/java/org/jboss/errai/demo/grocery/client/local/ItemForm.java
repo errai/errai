@@ -22,7 +22,7 @@ import java.util.Date;
 import java.util.Set;
 
 import jakarta.enterprise.context.Dependent;
-import javax.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolation;
 
 import org.jboss.errai.demo.grocery.client.shared.Department;
 import org.jboss.errai.demo.grocery.client.shared.Item;

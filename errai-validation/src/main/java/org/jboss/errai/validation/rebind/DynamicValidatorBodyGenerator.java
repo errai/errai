@@ -35,9 +35,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
-import javax.validation.ConstraintViolation;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
+import jakarta.validation.ConstraintViolation;
 
 import org.jboss.errai.codegen.InnerClass;
 import org.jboss.errai.codegen.Statement;
@@ -64,8 +64,8 @@ import org.jboss.errai.validation.client.dynamic.GeneratedDynamicValidator;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.validation.client.ProviderValidationMessageResolver;
-import com.google.gwt.validation.client.ValidationMessageResolver;
-import com.google.gwt.validation.client.impl.ConstraintViolationImpl;
+import de.knightsoftnet.validators.client.ValidationMessageResolver;
+import de.knightsoftnet.validators.client.impl.ConstraintViolationImpl;
 
 /**
  * Geneate the {@link Factory} body for the factory producing the {@link DynamicValidator}. This generates a

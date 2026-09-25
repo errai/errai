@@ -17,7 +17,7 @@
 package org.jboss.errai.validation.client;
 
 import jakarta.inject.Inject;
-import javax.validation.Validator;
+import jakarta.validation.Validator;
 
 import org.jboss.errai.ioc.client.api.EntryPoint;
 import org.jboss.errai.validation.client.dynamic.DynamicValidator;

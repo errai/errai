@@ -2,7 +2,7 @@ package org.jboss.errai.validation.client.dynamic;
 
 import java.util.Map;
 
-import javax.validation.Constraint;
+import jakarta.validation.Constraint;
 
 import com.google.gwt.regexp.shared.MatchResult;
 import com.google.gwt.regexp.shared.RegExp;

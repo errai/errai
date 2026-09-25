@@ -72,21 +72,41 @@
     </dependency>
 
     <dependency>
-      <groupId>javax.validation</groupId>
-      <artifactId>validation-api</artifactId>
+      <groupId>jakarta.validation</groupId>
+      <artifactId>jakarta.validation-api</artifactId>
       <scope>provided</scope>
     </dependency>
 
     <dependency>
-      <groupId>org.hibernate</groupId>
+      <groupId>org.hibernate.validator</groupId>
       <artifactId>hibernate-validator</artifactId>
       <scope>provided</scope>
     </dependency>
 
     <dependency>
-      <groupId>javax.validation</groupId>
-      <artifactId>validation-api</artifactId>
+      <groupId>jakarta.validation</groupId>
+      <artifactId>jakarta.validation-api</artifactId>
       <classifier>sources</classifier>
+      <scope>provided</scope>
+    </dependency>
+
+    <!-- GWT compile-time only: provides GWT module XML, client source stubs,
+         and supersource replacements. Must not land in the deployed WAR. -->
+    <dependency>
+      <groupId>de.knightsoft-net</groupId>
+      <artifactId>gwt-bean-validators-engine</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>de.knightsoft-net</groupId>
+      <artifactId>gwt-bean-validators-engine-gwt-user</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>de.knightsoft-net</groupId>
+      <artifactId>gwt-time-dummy</artifactId>
       <scope>provided</scope>
     </dependency>
 
@@ -137,12 +157,12 @@
       </build>
       <dependencies>
         <dependency>
-          <groupId>org.hibernate</groupId>
+          <groupId>org.hibernate.validator</groupId>
           <artifactId>hibernate-validator</artifactId>
           <scope>provided</scope>
         </dependency>
         <dependency>
-          <groupId>org.hibernate</groupId>
+          <groupId>org.hibernate.validator</groupId>
           <artifactId>hibernate-validator</artifactId>
           <scope>provided</scope>
           <classifier>sources</classifier>
