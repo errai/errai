@@ -35,6 +35,8 @@ package org.jboss.errai.processor;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
+import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -83,28 +85,45 @@ public abstract class AbstractProcessorTest {
 
     final DiagnosticCollector<JavaFileObject> diagnosticListener = new DiagnosticCollector<>();
 
-    try {
+    final JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
+    assertNotNull("System Java compiler not available — ensure tests run on a JDK, not a JRE", compiler);
 
-      final JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
-      final StandardJavaFileManager fileManager = compiler.getStandardFileManager(diagnosticListener, null, null);
+    final URL resource = this.getClass().getResource("/" + compilationUnit);
+    assertNotNull("Test resource not found on classpath: " + compilationUnit, resource);
+    final String path = resource.getPath();
+
+    // Diagnostics must be captured before the file manager is closed. On JDK 17+, the
+    // Diagnostic wrappers lazily re-open the source file through the file manager's ZIP
+    // filesystem when getLineNumber()/getColumnNumber() are first called. Closing the
+    // file manager before those calls causes ClosedFileSystemException. We force eager
+    // resolution here by touching every position field while the file manager is still open.
+    final List<Diagnostic<? extends JavaFileObject>> diagnostics = new ArrayList<>();
+
+    try (StandardJavaFileManager fileManager = compiler.getStandardFileManager(diagnosticListener, null, null)) {
 
       // Convert compilation unit to file path and add to items to compile
-      final String path = this.getClass().getResource("/" + compilationUnit).getPath();
       final Iterable<? extends JavaFileObject> compilationUnits = fileManager.getJavaFileObjects(path);
 
       // Compile with provided annotation processor
       final CompilationTask task = compiler.getTask(null, fileManager, diagnosticListener, null, null, compilationUnits);
-      
-      task.setProcessors(Arrays.asList(getProcessorUnderTest()));
+      task.setProcessors(List.of(getProcessorUnderTest()));
       task.call();
 
-      fileManager.close();
+      // Force eager resolution of lazy source positions while the file manager is open.
+      // Iterating and calling getLineNumber()/getColumnNumber() triggers the internal
+      // DiagnosticSource.findLine() which reads the source file. After this loop the
+      // positions are cached inside the diagnostic and safe to use after close().
+      for (final Diagnostic<? extends JavaFileObject> d : diagnosticListener.getDiagnostics()) {
+        d.getLineNumber();
+        d.getColumnNumber();
+        diagnostics.add(d);
+      }
 
     } catch (final IOException ioe) {
       fail(ioe.getMessage());
     }
 
-    return diagnosticListener.getDiagnostics();
+    return diagnostics;
   }
 
   /**
@@ -182,9 +201,9 @@ public abstract class AbstractProcessorTest {
         .append(": ")
         .append(msg.getMessage(null))
         .append("\n");
-      if ( (kind == null || msg.getKind().equals(kind))
+      if ((kind == null || msg.getKind().equals(kind))
               && (line == Diagnostic.NOPOS || msg.getLineNumber() == line)
-              && (col == Diagnostic.NOPOS) || msg.getColumnNumber() == col
+              && (col == Diagnostic.NOPOS || msg.getColumnNumber() == col)
               && msg.getMessage(null).contains(message)) {
         return;
       }
