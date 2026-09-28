@@ -33,7 +33,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import javax.validation.Constraint;
+import jakarta.validation.Constraint;
 
 import org.jboss.errai.common.client.logging.util.StringFormat;
 

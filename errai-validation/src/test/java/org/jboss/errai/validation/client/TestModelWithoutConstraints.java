@@ -16,7 +16,7 @@
 
 package org.jboss.errai.validation.client;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 
 import org.junit.Ignore;
 

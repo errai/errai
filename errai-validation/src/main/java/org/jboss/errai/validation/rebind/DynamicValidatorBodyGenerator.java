@@ -35,9 +35,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
-import javax.validation.ConstraintViolation;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
+import jakarta.validation.ConstraintViolation;
 
 import org.jboss.errai.codegen.InnerClass;
 import org.jboss.errai.codegen.Statement;
@@ -63,9 +63,9 @@ import org.jboss.errai.validation.client.dynamic.DynamicValidatorUtil;
 import org.jboss.errai.validation.client.dynamic.GeneratedDynamicValidator;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.validation.client.ProviderValidationMessageResolver;
-import com.google.gwt.validation.client.ValidationMessageResolver;
-import com.google.gwt.validation.client.impl.ConstraintViolationImpl;
+import de.knightsoftnet.validators.client.HibernateValidationMessageResolver;
+import de.knightsoftnet.validators.client.ValidationMessageResolver;
+import de.knightsoftnet.validators.client.impl.ConstraintViolationImpl;
 
 /**
  * Geneate the {@link Factory} body for the factory producing the {@link DynamicValidator}. This generates a
@@ -89,10 +89,11 @@ public class DynamicValidatorBodyGenerator extends AbstractBodyGenerator {
             ObjectBuilder.newInstanceOf(DynamicValidator.class)));
 
     bodyBlockBuilder.privateField("messageResolver", ValidationMessageResolver.class)
-      .initializesWith(Stmt.invokeStatic(GWT.class, "create", Stmt.loadLiteral(ProviderValidationMessageResolver.class))).finish();
-    
+      .initializesWith(Stmt.invokeStatic(GWT.class, "create", Stmt.loadLiteral(HibernateValidationMessageResolver.class))).finish();
+
     validators
       .stream()
+      .filter(validator -> getConstraintValidatorIface(validator).getParameterizedType().getTypeParameters()[0] instanceof MetaClass)
       .map(validator -> addDynamicValidator(bodyBlockBuilder, validator))
       .collect(Collectors.toCollection(() -> statements));
 
@@ -123,8 +124,10 @@ public class DynamicValidatorBodyGenerator extends AbstractBodyGenerator {
     bodyBlockBuilder.declaresInnerClass(new InnerClass(generatedValidatorBuilder.getClassDefinition()));
 
 
+    if (Arrays.stream(validator.getDeclaredMethods()).anyMatch(m -> m.getName().equals("initialize"))) {
+      validateMethod.append(loadVariable("this").invoke("initialize", annoImpl));
+    }
     validateMethod
-      .append(loadVariable("this").invoke("initialize", annoImpl))
       .append(if_(Bool.expr(loadVariable("this").invoke("isValid", loadVariable("value"), castTo(ConstraintValidatorContext.class, loadLiteral(null)))))
                 .append(invokeStatic(Collections.class, "emptySet").returnValue())
               .finish().else_()

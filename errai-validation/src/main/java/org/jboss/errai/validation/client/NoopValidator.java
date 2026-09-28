@@ -19,16 +19,20 @@ package org.jboss.errai.validation.client;
 import java.util.Collections;
 import java.util.Set;
 
-import javax.validation.Constraint;
-import javax.validation.ConstraintViolation;
-import javax.validation.ValidationException;
-import javax.validation.Validator;
-import javax.validation.metadata.BeanDescriptor;
-import javax.validation.metadata.ConstraintDescriptor;
-import javax.validation.metadata.PropertyDescriptor;
+import jakarta.validation.Constraint;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ValidationException;
+import jakarta.validation.Validator;
+import jakarta.validation.metadata.BeanDescriptor;
+import jakarta.validation.metadata.ConstraintDescriptor;
+import jakarta.validation.metadata.ConstructorDescriptor;
+import jakarta.validation.metadata.MethodDescriptor;
+import jakarta.validation.metadata.MethodType;
+import jakarta.validation.metadata.PropertyDescriptor;
 
-import com.google.gwt.validation.client.impl.AbstractGwtValidator;
-import com.google.gwt.validation.client.impl.GwtValidationContext;
+import de.knightsoftnet.validators.client.impl.AbstractGwtSpecificValidator;
+import de.knightsoftnet.validators.client.impl.AbstractGwtValidator;
+import de.knightsoftnet.validators.client.impl.GwtValidationContext;
 
 /**
  * A {@link Validator} implementation that does nothing. We fall back to this
@@ -93,7 +97,27 @@ public class NoopValidator extends AbstractGwtValidator {
       public Set<PropertyDescriptor> getConstrainedProperties() {
         return Collections.emptySet();
       }
-      
+
+      @Override
+      public MethodDescriptor getConstraintsForMethod(final String methodName, final Class<?>... parameterTypes) {
+        return null;
+      }
+
+      @Override
+      public Set<MethodDescriptor> getConstrainedMethods(final MethodType methodType, final MethodType... methodTypes) {
+        return Collections.emptySet();
+      }
+
+      @Override
+      public ConstructorDescriptor getConstraintsForConstructor(final Class<?>... parameterTypes) {
+        return null;
+      }
+
+      @Override
+      public Set<ConstructorDescriptor> getConstrainedConstructors() {
+        return Collections.emptySet();
+      }
+
     };
   }
 
@@ -101,6 +125,11 @@ public class NoopValidator extends AbstractGwtValidator {
   public <T> Set<ConstraintViolation<T>> validate(GwtValidationContext<T> context, Object object, Class<?>... groups)
           throws ValidationException {
     return Collections.emptySet();
+  }
+
+  @Override
+  protected <T> AbstractGwtSpecificValidator<T> getValidatorForInstanceClass(final Object object) {
+    return null;
   }
 
 }

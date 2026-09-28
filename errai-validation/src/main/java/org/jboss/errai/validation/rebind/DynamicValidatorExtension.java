@@ -21,7 +21,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import jakarta.inject.Singleton;
-import javax.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidator;
 
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;

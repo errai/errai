@@ -18,18 +18,20 @@ package org.jboss.errai.validation.client;
 
 import java.util.Set;
 
-import javax.validation.ConstraintViolation;
-import javax.validation.Validation;
-import javax.validation.ValidationException;
-import javax.validation.Validator;
-import javax.validation.ValidatorFactory;
-import javax.validation.metadata.BeanDescriptor;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ValidationException;
+import jakarta.validation.Validator;
+import jakarta.validation.ValidatorFactory;
+import jakarta.validation.metadata.BeanDescriptor;
+
+import de.knightsoftnet.validators.client.impl.Validation;
 
 import org.jboss.errai.databinding.client.BindableProxy;
 import org.jboss.errai.databinding.client.api.Bindable;
 
-import com.google.gwt.validation.client.impl.AbstractGwtValidator;
-import com.google.gwt.validation.client.impl.GwtValidationContext;
+import de.knightsoftnet.validators.client.impl.AbstractGwtValidator;
+import de.knightsoftnet.validators.client.impl.AbstractGwtSpecificValidator;
+import de.knightsoftnet.validators.client.impl.GwtValidationContext;
 
 /**
  * Wrapper for the generated {@link Validator} to support validation of {@link Bindable} types.
@@ -45,9 +47,10 @@ public class BeanValidator extends AbstractGwtValidator {
 
     if (validator != null) {
       this.validator = validator;
-      this.validator.init(factory.getConstraintValidatorFactory(), 
-              factory.getMessageInterpolator(), 
-              factory.getTraversableResolver());
+      this.validator.init(factory.getConstraintValidatorFactory(),
+              factory.getMessageInterpolator(),
+              factory.getTraversableResolver(),
+              factory.getParameterNameProvider());
     }
     else {
       this.validator = new NoopValidator();
@@ -86,6 +89,11 @@ public class BeanValidator extends AbstractGwtValidator {
   @Override
   public <T> T unwrap(Class<T> type) {
     return validator.unwrap(type);
+  }
+
+  @Override
+  protected <T> AbstractGwtSpecificValidator<T> getValidatorForInstanceClass(final Object object) {
+    return null;
   }
 
   @SuppressWarnings("unchecked")

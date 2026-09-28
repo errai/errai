@@ -639,7 +639,7 @@
                    Modules with an explicit -Dgwt.args in argLine override this automatically. -->
               <systemPropertyVariables>
                 <!-- Default run style for modules that do not set gwt.args in their own argLine. -->
-                <gwt.args>-runStyle HtmlUnit:FF</gwt.args>
+                <gwt.args>-runStyle HtmlUnit:FF -sourceLevel 17</gwt.args>
                 <!-- Must disable long polling for automated tests to succeed -->
                 <errai.hosted_mode_testing>true</errai.hosted_mode_testing>
                 <org.jboss.errai.bus.do_long_poll>false</org.jboss.errai.bus.do_long_poll>

@@ -30,10 +30,10 @@ import org.jboss.errai.config.util.ClassScanner;
 import org.jboss.errai.ioc.util.PropertiesUtil;
 import org.jboss.errai.reflections.util.SimplePackageFilter;
 
-import javax.validation.Constraint;
-import javax.validation.Valid;
-import javax.validation.Validator;
-import javax.validation.groups.Default;
+import jakarta.validation.Constraint;
+import jakarta.validation.Valid;
+import jakarta.validation.Validator;
+import jakarta.validation.groups.Default;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -57,33 +57,30 @@ class GwtValidatorGenerator {
   private static final String DENYLIST_PROPERTY = "errai.validation.denylist";
 
   private static final Set<MetaClass> GLOBAL_CONSTRAINTS = Stream.of(
-          javax.validation.constraints.AssertFalse.class,
-          javax.validation.constraints.AssertTrue.class,
-          javax.validation.constraints.DecimalMax.class,
-          javax.validation.constraints.DecimalMin.class,
-          javax.validation.constraints.Digits.class,
-          // javax.validation.constraints.Email.class,
-          javax.validation.constraints.Future.class,
-          // javax.validation.constraints.FutureOrPresent.class,
-          javax.validation.constraints.Max.class,
-          javax.validation.constraints.Min.class,
-          // javax.validation.constraints.Negative.class,
-          // javax.validation.constraints.NegativeOrZero.class,
-          // javax.validation.constraints.NotBlank.class,
-          // javax.validation.constraints.NotEmpty.class,
-          javax.validation.constraints.NotNull.class,
-          javax.validation.constraints.Null.class,
-          javax.validation.constraints.Past.class,
-          // javax.validation.constraints.PastOrPresent.class,
-          javax.validation.constraints.Pattern.class,
-          // javax.validation.constraints.Positive.class,
-          // javax.validation.constraints.PositiveOrZero.class,
-          javax.validation.constraints.Size.class,
+          jakarta.validation.constraints.AssertFalse.class,
+          jakarta.validation.constraints.AssertTrue.class,
+          jakarta.validation.constraints.DecimalMax.class,
+          jakarta.validation.constraints.DecimalMin.class,
+          jakarta.validation.constraints.Digits.class,
+          jakarta.validation.constraints.Email.class,
+          jakarta.validation.constraints.Future.class,
+          jakarta.validation.constraints.FutureOrPresent.class,
+          jakarta.validation.constraints.Max.class,
+          jakarta.validation.constraints.Min.class,
+          jakarta.validation.constraints.Negative.class,
+          jakarta.validation.constraints.NegativeOrZero.class,
+          jakarta.validation.constraints.NotBlank.class,
+          jakarta.validation.constraints.NotEmpty.class,
+          jakarta.validation.constraints.NotNull.class,
+          jakarta.validation.constraints.Null.class,
+          jakarta.validation.constraints.Past.class,
+          jakarta.validation.constraints.PastOrPresent.class,
+          jakarta.validation.constraints.Pattern.class,
+          jakarta.validation.constraints.Positive.class,
+          jakarta.validation.constraints.PositiveOrZero.class,
+          jakarta.validation.constraints.Size.class,
           org.hibernate.validator.constraints.CreditCardNumber.class,
-          org.hibernate.validator.constraints.Email.class,
           org.hibernate.validator.constraints.Length.class,
-          org.hibernate.validator.constraints.NotBlank.class,
-          org.hibernate.validator.constraints.NotEmpty.class,
           org.hibernate.validator.constraints.Range.class,
           org.hibernate.validator.constraints.ScriptAssert.class,
           org.hibernate.validator.constraints.URL.class)

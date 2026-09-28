@@ -19,9 +19,9 @@ package org.jboss.errai.validation.client.dynamic;
 import java.util.Map;
 import java.util.Set;
 
-import javax.validation.Constraint;
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintViolation;
+import jakarta.validation.Constraint;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintViolation;
 
 /**
  * Implemented by generated validators that validate for a single {@link ConstraintValidator}.

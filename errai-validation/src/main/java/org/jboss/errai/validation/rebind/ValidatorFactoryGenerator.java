@@ -18,7 +18,7 @@ package org.jboss.errai.validation.rebind;
 
 import java.io.PrintWriter;
 
-import javax.validation.ValidatorFactory;
+import jakarta.validation.ValidatorFactory;
 
 import org.jboss.errai.codegen.Cast;
 import org.jboss.errai.codegen.InnerClass;
@@ -36,12 +36,12 @@ import com.google.gwt.core.ext.Generator;
 import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.UnableToCompleteException;
-import com.google.gwt.validation.client.AbstractGwtValidatorFactory;
-import com.google.gwt.validation.client.impl.AbstractGwtValidator;
+import de.knightsoftnet.validators.client.AbstractGwtValidatorFactory;
+import de.knightsoftnet.validators.client.impl.AbstractGwtValidator;
 
 /**
  * Generates an implementation of {@link ValidatorFactory} which provides a generated implementation
- * of a GWT {@link javax.validation.Validator}.
+ * of a GWT {@link jakarta.validation.Validator}.
  *
  * @author Johannes Barop <jb@barop.de>
  * @author Christian Sadilek <csadilek@redhat.com>
