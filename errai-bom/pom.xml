@@ -63,7 +63,7 @@
     <appengine.version>1.7.6</appengine.version>
     <asm.version>9.6</asm.version>
     <gmaven.mojo.version>1.5</gmaven.mojo.version>
-    <guava.version>33.2.1-jre</guava.version>
+    <guava.version>33.7.1-jre</guava.version>
     <guice.version>7.0.0</guice.version>
     <gwt-elemental.version>2.9.0</gwt-elemental.version>
     <gwt.phonegap.version>3.5.0.1</gwt.phonegap.version>
